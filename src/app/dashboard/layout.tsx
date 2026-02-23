@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getPlan } from "@/lib/plans";
 import { selectWorkspace } from "@/lib/workspace-select";
+import { DashboardMobileNav } from "./dashboard-mobile-nav";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
 export const dynamic = "force-dynamic";
@@ -106,33 +107,18 @@ export default async function DashboardLayout({
       <div className="flex flex-1 flex-col lg:pl-[240px]">
         {/* Top header */}
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-6 backdrop-blur-lg">
-          {/* Mobile menu button */}
-          <div className="flex items-center gap-4 lg:hidden">
+          {/* Mobile: logo left, burger right */}
+          <div className="flex flex-1 items-center justify-between lg:hidden">
             <Link href="/" className="text-lg font-bold tracking-tight text-slate-900">
               qr-s.ru
             </Link>
+            <DashboardMobileNav
+              isAdmin={!!user.isAdmin}
+              email={user.email}
+              workspaces={user.memberships.map((m) => m.workspace)}
+              currentWorkspaceId={workspace.id}
+            />
           </div>
-
-          {/* Mobile nav links */}
-          <nav className="flex items-center gap-1 lg:hidden">
-            {navItems.map((item) => {
-              const paths = Array.isArray(item.icon) ? item.icon : [item.icon];
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                  title={item.label}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    {paths.map((d, i) => (
-                      <path key={i} strokeLinecap="round" strokeLinejoin="round" d={d} />
-                    ))}
-                  </svg>
-                </Link>
-              );
-            })}
-          </nav>
 
           {/* Desktop left: workspace badge */}
           <div className="hidden items-center gap-3 lg:flex">
@@ -141,8 +127,8 @@ export default async function DashboardLayout({
             </span>
           </div>
 
-          {/* Right: user + logout */}
-          <div className="flex items-center gap-4">
+          {/* Right: user + logout (desktop only; mobile uses burger) */}
+          <div className="hidden items-center gap-4 lg:flex">
             {user.isAdmin && (
               <Link href="/admin" className="text-sm font-medium text-slate-600 hover:text-slate-900">
                 Админ
