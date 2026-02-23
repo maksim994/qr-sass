@@ -3,6 +3,18 @@
 # При обновлении приложения тома НЕ удаляются — данные сохраняются.
 
 services:
+  init-db:
+    build:
+      context: .
+      target: builder
+    entrypoint: ["npx", "prisma", "db", "push", "--accept-data-loss=false", "--skip-generate"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   app:
     build: .
     ports:
@@ -24,6 +36,8 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
     depends_on:
+      init-db:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:

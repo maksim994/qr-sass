@@ -43,5 +43,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Startup: sync schema (idempotent, preserves data), then run app
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss=false --skip-generate && node server.js"]
+# Startup: run app (prisma db push выполняется отдельным init-контейнером)
+CMD ["node", "server.js"]
