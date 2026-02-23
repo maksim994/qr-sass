@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum QrKind {
+  STATIC
+  DYNAMIC
+}
+
+enum QrContentType {
+  URL
+  TEXT
+  EMAIL
+  PHONE
+  SMS
+  WIFI
+  VCARD
+  LOCATION
+  PDF
+  IMAGE
+  VIDEO
+  MP3
+  MENU
+  BUSINESS
+  LINK_LIST
+  COUPON
+  APP_STORE
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  SOCIAL_LINKS
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String?
+  isAdmin      Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  memberships  Membership[]
+  qrCodes      QrCode[]     @relation("CreatedByQrCodes")
+  blogPosts    BlogPost[]   @relation("CreatedBlogPosts")
+}
+
+model BlogPost {
+  id                String    @id @default(cuid())
+  slug              String    @unique
+  title             String
+  metaTitle         String?   // SEO title (если не задан — используется title)
+  metaDescription   String?   // SEO description (если не задан — используется excerpt)
+  excerpt           String?
+  content           String    @db.Text
+  coverImageUrl     String?
+  views             Int       @default(0)
+  likes             Int       @default(0)
+  readingTimeMinutes Int?     // авто: словоcount / 200
+  publishedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdById       String?
+  createdBy         User?     @relation("CreatedBlogPosts", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([publishedAt])
+  @@index([slug])
+}
+
+enum WorkspacePlan {
+  FREE
+  PRO
+  BUSINESS
+}
+
+model Workspace {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  plan          WorkspacePlan  @default(FREE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  apiKeys       ApiKey[]
+  memberships   Membership[]
+  projects      Project[]
+  qrCodes       QrCode[]
+  uploadedFiles UploadedFile[]
+}
+
+model Membership {
+  id          String         @id @default(cuid())
+  role        MembershipRole @default(MEMBER)
+  userId      String
+  workspaceId String
+  createdAt   DateTime       @default(now())
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId, role])
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  qrCodes     QrCode[]
+}
+
+model UploadedFile {
+  id          String    @id @default(cuid())
+  workspaceId String
+  key         String    @unique
+  filename    String
+  mimeType    String
+  sizeBytes   Int
+  url         String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model QrCode {
+  id               String        @id @default(cuid())
+  workspaceId      String
+  projectId        String?
+  createdById      String
+  kind             QrKind
+  contentType      QrContentType
+  name             String
+  shortCode        String?       @unique
+  encodedContent   String
+  currentTargetUrl String?
+  payload          Json?
+  styleConfig      Json?
+  isArchived       Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  workspace        Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project          Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy        User          @relation("CreatedByQrCodes", fields: [createdById], references: [id], onDelete: Restrict)
+  revisions        QrRevision[]
+  scanEvents       ScanEvent[]
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, kind, contentType])
+}
+
+model QrRevision {
+  id             String   @id @default(cuid())
+  qrCodeId       String
+  destinationUrl String?
+  encodedContent String
+  changedById    String
+  createdAt      DateTime @default(now())
+  qrCode         QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+
+  @@index([qrCodeId, createdAt])
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  keyPrefix   String    // first 8 chars for display
+  keyHash     String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@index([keyPrefix])
+}
+
+model PlanOverride {
+  id            String       @id @default(cuid())
+  planId       WorkspacePlan @unique
+  maxQrCodes   Int?
+  maxUsers     Int?
+  priceRub     Int?          // Цена за месяц в рублях (null = из дефолтов)
+  allowsDynamic Boolean?
+  allowsAnalytics Boolean?
+  exportFormats String?       // JSON array: ["PNG","SVG"]
+  updatedAt    DateTime     @default(now())
+}
+
+model ScanEvent {
+  id           String   @id @default(cuid())
+  qrCodeId     String
+  scannedAt    DateTime @default(now())
+  country      String?
+  city         String?
+  deviceType   String?
+  os           String?
+  browser      String?
+  referer      String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmTerm      String?
+  utmContent   String?
+  ipHash       String?
+  userAgentRaw String?
+  qrCode       QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+
+  @@index([qrCodeId, scannedAt])
+}
