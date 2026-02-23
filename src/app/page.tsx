@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getPlan } from "@/lib/plans";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "qr-s.ru — Генератор QR-кодов для бизнеса",
   description:

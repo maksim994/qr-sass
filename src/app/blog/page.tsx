@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getDb } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Блог — qr-s.ru",
   description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",

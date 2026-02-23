@@ -5,6 +5,8 @@ import { getPlan } from "@/lib/plans";
 import { selectWorkspace } from "@/lib/workspace-select";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
+export const dynamic = "force-dynamic";
+
 const navItems: Array<{ label: string; href: string; icon: string | string[] }> = [
   {
     label: "Обзор",

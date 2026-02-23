@@ -8,6 +8,8 @@ import { BlogViewTracker } from "@/components/blog/blog-view-tracker";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamic = "force-dynamic";
+
 function formatViews(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}К`;
   return String(n);
