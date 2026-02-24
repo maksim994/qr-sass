@@ -1,6 +1,19 @@
 import { QrContentType, QrKind } from "@prisma/client";
 import { z } from "zod";
 
+function isSafeUrlProtocol(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return ["https:", "http:"].includes(u.protocol);
+  } catch {
+    return false;
+  }
+}
+
+export const safeUrlSchema = z.string().refine(isSafeUrlProtocol, {
+  message: "Only https and http URLs are allowed",
+});
+
 export const registerSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
@@ -49,18 +62,79 @@ export const styleSchema = z.object({
   errorCorrectionLevel: z.enum(["L", "M", "Q", "H"]).default("M"),
 });
 
-export const createQrSchema = z.object({
-  workspaceId: z.string().min(1),
-  projectId: z.string().optional(),
-  name: z.string().min(1).max(120),
-  kind: z.enum(QrKind),
-  contentType: z.enum(QrContentType),
-  payload: z.record(z.string(), z.unknown()).default({}),
-  style: styleSchema,
-});
+function validatePayloadUrls(payload: Record<string, unknown>, contentType: string): boolean {
+  const check = (url: unknown) =>
+    typeof url === "string" && isSafeUrlProtocol(url);
+
+  if (["PDF", "IMAGE", "MP3"].includes(contentType)) {
+    const fileUrl = payload.fileUrl;
+    if (fileUrl !== undefined && fileUrl !== null && !check(fileUrl)) return false;
+  }
+  if (contentType === "VIDEO") {
+    const videoUrl = payload.videoUrl ?? payload.fileUrl;
+    if (videoUrl !== undefined && videoUrl !== null && !check(videoUrl)) return false;
+  }
+  if (contentType === "URL") {
+    const url = payload.url;
+    if (url !== undefined && url !== null && !check(url)) return false;
+  }
+  if (contentType === "LINK_LIST") {
+    const links = payload.links;
+    if (Array.isArray(links)) {
+      for (const l of links) {
+        if (l && typeof l === "object" && "url" in l && l.url != null && !check(l.url))
+          return false;
+      }
+    }
+  }
+  if (["BUSINESS", "SOCIAL_LINKS"].includes(contentType)) {
+    const website = payload.website;
+    if (website !== undefined && website !== null) {
+      const href = typeof website === "string" && website.startsWith("http")
+        ? website
+        : `https://${website}`;
+      if (!check(href)) return false;
+    }
+    const logoUrl = payload.logo ?? payload.logoUrl;
+    if (logoUrl !== undefined && logoUrl !== null && !check(logoUrl)) return false;
+    const socialLinks = payload.socialLinks;
+    if (Array.isArray(socialLinks)) {
+      for (const l of socialLinks) {
+        if (l && typeof l === "object" && "url" in l && l.url != null) {
+          const href =
+            typeof l.url === "string" && l.url.startsWith("http")
+              ? l.url
+              : `https://${l.url}`;
+          if (!check(href)) return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+export const createQrSchema = z
+  .object({
+    workspaceId: z.string().min(1),
+    projectId: z.string().optional(),
+    name: z.string().min(1).max(120),
+    kind: z.enum(QrKind),
+    contentType: z.enum(QrContentType),
+    payload: z.record(z.string(), z.unknown()).default({}),
+    style: styleSchema,
+    expireAt: z.string().datetime().optional(),
+    maxScans: z.number().int().min(1).optional(),
+    password: z.string().min(1).optional(),
+  })
+  .refine(
+    (d) => validatePayloadUrls(d.payload, d.contentType),
+    { message: "Payload contains invalid URL (only https and http allowed)", path: ["payload"] }
+  );
 
 export const updateDynamicTargetSchema = z.object({
-  targetUrl: z.url(),
+  targetUrl: z.string().url().refine(isSafeUrlProtocol, {
+    message: "Only https and http URLs are allowed",
+  }),
 });
 
 export const updateQrSchema = z.object({
@@ -68,3 +142,5 @@ export const updateQrSchema = z.object({
   payload: z.record(z.string(), z.unknown()).optional(),
   style: styleSchema.optional(),
 });
+
+export { validatePayloadUrls };

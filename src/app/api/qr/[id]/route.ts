@@ -3,7 +3,7 @@ import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-resp
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { updateQrSchema } from "@/lib/validation";
+import { updateQrSchema, validatePayloadUrls } from "@/lib/validation";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -82,6 +82,19 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (!isMember) return unauthorized();
 
     const data = parsed.data;
+    if (
+      data.payload != null &&
+      !validatePayloadUrls(data.payload as Record<string, unknown>, qr.contentType)
+    ) {
+      return apiError(
+        "Payload contains invalid URL (only https and http allowed).",
+        "VALIDATION_ERROR",
+        400,
+        undefined,
+        requestId
+      );
+    }
+
     const updateData: Record<string, unknown> = {};
     if (data.name != null) updateData.name = data.name;
     if (data.payload != null) updateData.payload = data.payload as object;

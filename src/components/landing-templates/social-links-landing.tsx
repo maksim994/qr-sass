@@ -1,3 +1,4 @@
+import { isSafeUrl } from "@/lib/url";
 import { QreateFooter } from "./qreate-footer";
 
 type SocialLink = { platform?: string; url?: string };
@@ -27,21 +28,22 @@ function getColorClass(platform?: string): string {
 export function SocialLinksLanding({ payload }: Props) {
   const title = (payload.title as string) || "Социальные сети";
   const links = (payload.links as SocialLink[] | undefined) ?? [];
+  const safeLinks = links.filter((l) => l.url && isSafeUrl(l.url));
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
         <h1 className="text-center text-2xl font-bold text-gray-900">{title}</h1>
 
-        {links.length === 0 && (
+        {safeLinks.length === 0 && (
           <p className="mt-4 text-center text-gray-500">Нет ссылок</p>
         )}
 
         <div className="mt-6 grid grid-cols-2 gap-3">
-          {links.map((link, i) => (
+          {safeLinks.map((link, i) => (
             <a
               key={i}
-              href={link.url ?? "#"}
+              href={link.url!}
               target="_blank"
               rel="noopener noreferrer"
               className={`flex items-center justify-center rounded-xl px-4 py-3.5 text-sm font-semibold text-white transition-colors ${getColorClass(link.platform)}`}

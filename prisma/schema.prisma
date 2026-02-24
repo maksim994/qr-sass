@@ -147,6 +147,9 @@ model QrCode {
   currentTargetUrl String?
   payload          Json?
   styleConfig      Json?
+  expireAt         DateTime?
+  maxScans         Int?
+  passwordHash     String?
   isArchived       Boolean       @default(false)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
@@ -214,6 +217,7 @@ model ScanEvent {
   utmContent   String?
   ipHash       String?
   userAgentRaw String?
+  abVariant    String?  // "A" | "B" for A/B tests
   qrCode       QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
 
   @@index([qrCodeId, scannedAt])

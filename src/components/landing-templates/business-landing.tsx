@@ -1,3 +1,4 @@
+import { isSafeUrl } from "@/lib/url";
 import { QreateFooter } from "./qreate-footer";
 
 type Props = { payload: Record<string, unknown> };
@@ -21,7 +22,11 @@ function ensurePhones(p: Record<string, unknown>): string[] {
 function ensureSocialLinks(p: Record<string, unknown>): { platform: string; url: string }[] {
   const raw = p.socialLinks;
   if (!Array.isArray(raw)) return [];
-  return raw.filter((l): l is { platform: string; url: string } => l?.url && typeof l.url === "string");
+  return raw.filter((l): l is { platform: string; url: string } => {
+    if (!l?.url || typeof l.url !== "string") return false;
+    const href = l.url.startsWith("http") ? l.url : `https://${l.url}`;
+    return isSafeUrl(href);
+  });
 }
 
 export function BusinessLanding({ payload }: Props) {
@@ -30,9 +35,14 @@ export function BusinessLanding({ payload }: Props) {
   const address = payload.address as string | undefined;
   const phones = ensurePhones(payload);
   const email = payload.email as string | undefined;
-  const website = payload.website as string | undefined;
+  const rawWebsite = payload.website as string | undefined;
   const hours = payload.hours as string | undefined;
-  const logoUrl = (payload.logo as string) || (payload.logoUrl as string) || "";
+  const rawLogoUrl = (payload.logo as string) || (payload.logoUrl as string) || "";
+  const logoUrl = rawLogoUrl && isSafeUrl(rawLogoUrl) ? rawLogoUrl : "";
+  const websiteHref = rawWebsite?.trim()
+    ? (rawWebsite.startsWith("http") ? rawWebsite : `https://${rawWebsite}`)
+    : "";
+  const website = websiteHref && isSafeUrl(websiteHref) ? rawWebsite : undefined;
   const socialLinks = ensureSocialLinks(payload);
 
   return (

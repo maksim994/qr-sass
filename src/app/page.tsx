@@ -1,7 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
+import { getDb } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export const dynamic = "force-dynamic";
 
@@ -9,14 +13,19 @@ export const metadata: Metadata = {
   title: "qr-s.ru — Генератор QR-кодов для бизнеса",
   description:
     "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией дизайна и мгновенным скачиванием. Бесплатный старт.",
+  openGraph: {
+    title: "qr-s.ru — Генератор QR-кодов для бизнеса",
+    description:
+      "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией дизайна и мгновенным скачиванием. Бесплатный старт.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "qr-s.ru — Генератор QR-кодов для бизнеса",
+    description:
+      "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией дизайна и мгновенным скачиванием. Бесплатный старт.",
+  },
 };
-
-const navLinks = [
-  { label: "Возможности", href: "#features" },
-  { label: "Тарифы", href: "#pricing" },
-  { label: "Блог", href: "/blog" },
-  { label: "FAQ", href: "#faq" },
-];
 
 const features = [
   {
@@ -26,8 +35,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
       </svg>
     ),
-    title: "Статические QR-коды",
-    description: "Мгновенная генерация кодов для ссылок, Wi-Fi, визиток, email и телефона. Скачивайте в PNG или SVG.",
+    title: "20+ типов QR-кодов",
+    description: "Ссылки, Wi-Fi, визитки, меню, PDF, видео, геолокация, соцсети — всё в одном сервисе. Статические и динамические.",
   },
   {
     icon: (
@@ -35,8 +44,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.182" />
       </svg>
     ),
-    title: "Динамические QR-коды",
-    description: "Меняйте URL назначения в любой момент без перепечатки. Сохраняйте историю всех изменений.",
+    title: "Динамика и аналитика",
+    description: "Меняйте URL назначения в любой момент без перепечатки. История изменений, сканирования в реальном времени, география, устройства и UTM.",
   },
   {
     icon: (
@@ -45,7 +54,7 @@ const features = [
       </svg>
     ),
     title: "Кастомизация дизайна",
-    description: "Настраивайте форму модулей, цвета и стиль углов. Встроенная проверка scannability защищает от ошибок.",
+    description: "Форма модулей, цвета, углы, логотип. Встроенная проверка scannability защищает от нечитаемых кодов.",
   },
   {
     icon: (
@@ -53,8 +62,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
       </svg>
     ),
-    title: "Аналитика сканирований",
-    description: "Отслеживайте количество сканирований, устройства, географию и UTM-параметры в реальном времени.",
+    title: "Retargeting и A/B-тесты",
+    description: "Meta Pixel, Google Analytics, Яндекс Метрика, VK Пиксель на странице редиректа. A/B-тестирование двух вариантов URL с метриками конверсии.",
   },
   {
     icon: (
@@ -62,17 +71,17 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
       </svg>
     ),
-    title: "Экспорт PNG и SVG",
-    description: "Скачивайте QR-коды в высоком разрешении для цифровых каналов или полиграфической печати.",
+    title: "Экспорт для любых задач",
+    description: "PNG, SVG, JPG, EPS, PDF — для цифровых каналов, полиграфии и типографии. Высокое качество под любые носители.",
   },
   {
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
       </svg>
     ),
-    title: "Командная работа",
-    description: "Рабочие пространства и проекты для совместного управления QR-кампаниями внутри команды.",
+    title: "Защита и ограничения",
+    description: "Пароль на просмотр контента, срок действия по дате или количеству сканов, экран согласия GDPR для EU.",
   },
 ];
 
@@ -133,14 +142,14 @@ const faqs = [
       "Динамический QR-код перенаправляет на промежуточный URL, который вы можете изменить в любой момент. Это позволяет обновлять ссылку назначения без перепечатки материалов.",
   },
   {
-    question: "Можно ли отслеживать сканирования?",
+    question: "Можно ли подключить аналитику и ретаргетинг?",
     answer:
-      "Да, для динамических QR-кодов доступна полная аналитика: количество сканирований, география, тип устройства и UTM-параметры.",
+      "Да. На странице редиректа поддерживаются Meta Pixel, Google Analytics, Яндекс Метрика и VK Пиксель. Также доступно A/B-тестирование двух вариантов URL.",
   },
   {
     question: "Какие форматы скачивания поддерживаются?",
     answer:
-      "QR-коды можно скачать в форматах PNG (растр, идеален для цифровых каналов) и SVG (вектор, идеален для печати любого размера).",
+      "На платных тарифах доступны PNG, SVG, JPG, EPS и PDF. PNG и JPG подходят для цифровых каналов, SVG и EPS — для типографии, PDF — для полиграфии.",
   },
   {
     question: "Есть ли ограничения на бесплатном тарифе?",
@@ -187,9 +196,27 @@ const testimonials = [
   },
 ];
 
+const LATEST_POSTS_COUNT = 6;
+
 export default async function HomePage() {
-  const [session, ...planInfos] = await Promise.all([
+  const db = getDb();
+  const [session, latestPosts, ...planInfos] = await Promise.all([
     getSession(),
+    db.blogPost.findMany({
+      where: { publishedAt: { not: null } },
+      orderBy: { publishedAt: "desc" },
+      take: LATEST_POSTS_COUNT,
+      select: {
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImageUrl: true,
+        publishedAt: true,
+        views: true,
+        likes: true,
+        readingTimeMinutes: true,
+      },
+    }),
     getPlan("FREE"),
     getPlan("PRO"),
     getPlan("BUSINESS"),
@@ -229,52 +256,22 @@ export default async function HomePage() {
     },
   };
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+
   return (
     <>
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="text-xl font-bold tracking-tight text-slate-900">
-            qr-s.ru
-          </Link>
-          <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-                {link.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
-            {session ? (
-              <>
-                {isAdmin && (
-                  <Link href="/admin" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-                    Админ
-                  </Link>
-                )}
-                <Link href="/dashboard" className="btn btn-primary btn-sm">
-                  В кабинет
-                </Link>
-                <form action="/api/auth/logout" method="post">
-                  <button type="submit" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-                    Выйти
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-                  Войти
-                </Link>
-                <Link href="/register" className="btn btn-primary btn-sm">
-                  Начать бесплатно
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
+      <SiteHeader session={session} isAdmin={isAdmin} />
       <main>
         {/* ── Hero ── */}
         <section className="relative overflow-hidden bg-white">
@@ -445,6 +442,82 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ── Latest Blog Posts ── */}
+        <section id="blog" className="bg-slate-50 py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-sm font-semibold text-blue-600">Блог</p>
+                <h2 className="heading-lg mt-2">Последние статьи</h2>
+                <p className="text-body mt-2">
+                  Полезные материалы о QR-кодах, маркетинге и аналитике.
+                </p>
+              </div>
+              <Link href="/blog" className="text-sm font-semibold text-blue-600 transition hover:text-blue-700">
+                Все статьи →
+              </Link>
+            </div>
+            {latestPosts.length === 0 ? (
+              <div className="mt-12 rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500">
+                Пока нет опубликованных статей. Следите за обновлениями!
+              </div>
+            ) : (
+              <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {latestPosts.map((post, index) => (
+                  <article
+                    key={post.slug}
+                    className="card overflow-hidden transition hover:shadow-lg"
+                  >
+                    <Link href={`/blog/${post.slug}`} className="block">
+                      {post.coverImageUrl ? (
+                        <div className="relative aspect-video w-full overflow-hidden rounded-t-2xl bg-slate-100">
+                          <Image
+                            src={post.coverImageUrl}
+                            alt={post.title}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            className="object-cover"
+                            priority={index < 3}
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-video w-full rounded-t-2xl bg-slate-200" />
+                      )}
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold text-slate-900">{post.title}</h3>
+                        {post.excerpt && (
+                          <p className="mt-2 line-clamp-2 text-slate-600">{post.excerpt}</p>
+                        )}
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                          <time dateTime={post.publishedAt!.toISOString()}>
+                            {new Date(post.publishedAt!).toLocaleDateString("ru", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </time>
+                          {post.readingTimeMinutes != null && (
+                            <span>· {post.readingTimeMinutes} мин</span>
+                          )}
+                          <span>· {post.views} просмотров</span>
+                          {post.likes > 0 && (
+                            <span className="inline-flex items-center gap-1">
+                              · {post.likes}{" "}
+                              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* ── CTA ── */}
         <section className="bg-blue-600 py-20">
           <div className="mx-auto max-w-3xl px-6 text-center">
@@ -460,62 +533,9 @@ export default async function HomePage() {
           </div>
         </section>
       </main>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <p className="text-lg font-bold text-slate-900">qr-s.ru</p>
-              <p className="mt-2 text-sm text-slate-500">
-                Генератор QR-кодов для бизнеса. Создавайте, кастомизируйте и отслеживайте.
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Продукт</p>
-              <ul className="mt-3 space-y-2">
-                <li><a href="#features" className="text-sm text-slate-500 hover:text-slate-900">Возможности</a></li>
-                <li><a href="#pricing" className="text-sm text-slate-500 hover:text-slate-900">Тарифы</a></li>
-                <li><a href="#faq" className="text-sm text-slate-500 hover:text-slate-900">FAQ</a></li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Решения</p>
-              <ul className="mt-3 space-y-2">
-                <li><Link href="/blog" className="text-sm text-slate-500 hover:text-slate-900">Блог</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Аккаунт</p>
-              <ul className="mt-3 space-y-2">
-                {session ? (
-                  <>
-                    <li><Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-900">Панель управления</Link></li>
-                    <li>
-                      <form action="/api/auth/logout" method="post" className="inline">
-                        <button type="submit" className="text-sm text-slate-500 hover:text-slate-900">
-                          Выйти
-                        </button>
-                      </form>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li><Link href="/login" className="text-sm text-slate-500 hover:text-slate-900">Войти</Link></li>
-                    <li><Link href="/register" className="text-sm text-slate-500 hover:text-slate-900">Регистрация</Link></li>
-                    <li><Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-900">Панель управления</Link></li>
-                  </>
-                )}
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
-            &copy; {new Date().getFullYear()} qr-s.ru. Все права защищены.
-          </div>
-        </div>
-      </footer>
-
+      <SiteFooter session={session} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
     </>
   );
 }

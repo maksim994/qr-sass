@@ -1,3 +1,4 @@
+import { isSafeUrl } from "@/lib/url";
 import { QreateFooter } from "./qreate-footer";
 
 type LinkItem = { label?: string; url?: string };
@@ -7,21 +8,22 @@ type Props = { payload: Record<string, unknown> };
 export function LinkListLanding({ payload }: Props) {
   const title = (payload.title as string) || "Ссылки";
   const links = (payload.links as LinkItem[] | undefined) ?? [];
+  const safeLinks = links.filter((l) => l.url && isSafeUrl(l.url));
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
         <h1 className="text-center text-2xl font-bold text-gray-900">{title}</h1>
 
-        {links.length === 0 && (
+        {safeLinks.length === 0 && (
           <p className="mt-4 text-center text-gray-500">Нет ссылок</p>
         )}
 
         <div className="mt-6 space-y-3">
-          {links.map((link, i) => (
+          {safeLinks.map((link, i) => (
             <a
               key={i}
-              href={link.url ?? "#"}
+              href={link.url!}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between rounded-xl border border-gray-200 px-5 py-4 text-sm font-medium text-gray-800 transition-all hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"

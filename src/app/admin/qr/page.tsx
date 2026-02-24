@@ -22,11 +22,13 @@ export default async function AdminQrPage() {
   });
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-slate-900">QR-коды</h1>
-      <p className="mt-1 text-slate-600">Все созданные QR-коды в системе</p>
-
-      <div className="mt-8 overflow-x-auto">
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">QR-коды</h1>
+        <p className="mt-1 text-sm text-slate-500">Все созданные QR-коды в системе</p>
+      </div>
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto px-6 py-4">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200">
@@ -59,6 +61,7 @@ export default async function AdminQrPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

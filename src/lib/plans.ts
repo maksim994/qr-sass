@@ -8,7 +8,7 @@ export type PlanLimits = {
   maxUsers: number | null;
   allowsDynamic: boolean;
   allowsAnalytics: boolean;
-  exportFormats: ("PNG" | "SVG")[];
+  exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
 };
 
 export type PlanInfo = {
@@ -40,9 +40,9 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       maxUsers: 5,
       allowsDynamic: true,
       allowsAnalytics: true,
-      exportFormats: ["PNG", "SVG"],
+      exportFormats: ["PNG", "SVG", "JPG", "EPS", "PDF"],
     },
-    limitLabels: ["Неограниченные QR-коды", "Динамические QR с аналитикой", "Экспорт PNG и SVG", "До 5 пользователей"],
+    limitLabels: ["Неограниченные QR-коды", "Динамические QR с аналитикой", "Экспорт PNG, SVG, JPG, EPS, PDF", "До 5 пользователей"],
   },
   BUSINESS: {
     name: "Бизнес",
@@ -52,7 +52,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       maxUsers: null,
       allowsDynamic: true,
       allowsAnalytics: true,
-      exportFormats: ["PNG", "SVG"],
+      exportFormats: ["PNG", "SVG", "JPG", "EPS", "PDF"],
     },
     limitLabels: ["Неограниченные QR-коды", "Неограниченные пользователи", "API-доступ", "Белая метка"],
   },
@@ -63,7 +63,13 @@ function buildLimitLabels(limits: PlanLimits, planId: PlanId): string[] {
   if (limits.maxQrCodes != null) parts.push(`До ${limits.maxQrCodes} QR-кодов`);
   else parts.push("Неограниченные QR-коды");
   parts.push(limits.allowsDynamic ? "Динамические QR с аналитикой" : "Только статические");
-  parts.push(limits.exportFormats.length > 1 ? "Экспорт PNG и SVG" : "Экспорт PNG");
+  if (limits.exportFormats.includes("PDF")) {
+    parts.push("Экспорт PNG, SVG, JPG, EPS, PDF");
+  } else if (limits.exportFormats.length > 1) {
+    parts.push("Экспорт PNG и SVG");
+  } else {
+    parts.push("Экспорт PNG");
+  }
   if (limits.maxUsers != null) {
     parts.push(limits.maxUsers === 1 ? "1 пользователь" : `До ${limits.maxUsers} пользователей`);
   } else {
@@ -99,7 +105,7 @@ export async function getPlan(planId: PlanId | string | null | undefined): Promi
     if (override.exportFormats) {
       try {
         const parsed = JSON.parse(override.exportFormats);
-        exportFormats = Array.isArray(parsed) ? parsed.filter((f: string) => ["PNG", "SVG"].includes(f)) : exportFormats;
+        exportFormats = Array.isArray(parsed) ? parsed.filter((f: string) => ["PNG", "SVG", "JPG", "EPS", "PDF"].includes(f)) : exportFormats;
       } catch {
         /* keep default */
       }

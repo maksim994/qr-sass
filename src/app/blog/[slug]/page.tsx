@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -197,11 +198,13 @@ export default async function BlogPostPage({ params }: Props) {
 
             <div className="shrink-0 w-full lg:w-80">
               {post.coverImageUrl ? (
-                <div className="aspect-video w-full overflow-hidden rounded-2xl bg-slate-100">
-                  <img
+                <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-100">
+                  <Image
                     src={post.coverImageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
+                    alt={post.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 320px"
+                    className="object-cover"
                   />
                 </div>
               ) : (

@@ -29,6 +29,9 @@ export async function POST(req: Request) {
   cookieStore.set(WORKSPACE_COOKIE, workspaceId, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
   });
 
   return NextResponse.json({ ok: true });

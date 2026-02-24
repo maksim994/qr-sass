@@ -20,17 +20,17 @@ export default async function AdminBlogPage() {
   });
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Блог</h1>
-          <p className="mt-1 text-slate-600">Статьи для SEO-продвижения. Черновики не отображаются на сайте.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Блог</h1>
+          <p className="mt-1 text-sm text-slate-500">Статьи для SEO-продвижения. Черновики не отображаются на сайте.</p>
         </div>
-        <Link href="/admin/blog/new" className="btn btn-primary">
+        <Link href="/admin/blog/new" className="btn btn-primary btn-sm shrink-0">
           Новая статья
         </Link>
       </div>
-      <div className="card mt-6 overflow-hidden">
+      <div className="card overflow-hidden">
         <BlogList posts={posts} />
       </div>
     </div>

@@ -3,9 +3,13 @@ import { getDb } from "@/lib/db";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { contentTypeLabels } from "@/lib/qr-types";
+import { getPlan } from "@/lib/plans";
 import { renderQrSvg, defaultStyle, needsHostedPage } from "@/lib/qr";
 import { selectWorkspace } from "@/lib/workspace-select";
 import UpdateTarget from "@/components/update-target";
+import TrackingPixelsForm from "@/components/tracking-pixels-form";
+import AbTestForm from "@/components/ab-test-form";
+import QrExpirySettings from "@/components/qr-expiry-settings";
 import DeleteQrButton from "@/components/delete-qr-button";
 
 type Props = {
@@ -20,14 +24,19 @@ export default async function QrDetailPage({ params }: Props) {
 
   const db = getDb();
 
-  const qr = await db.qrCode.findUnique({
-    where: { id },
-    include: {
-      revisions: { orderBy: { createdAt: "desc" }, take: 10 },
-      scanEvents: { orderBy: { scannedAt: "desc" }, take: 50 },
-      _count: { select: { scanEvents: true } },
-    },
-  });
+  const [qr, scanCountA, scanCountB] = await Promise.all([
+    db.qrCode.findUnique({
+      where: { id },
+      include: {
+        workspace: { select: { plan: true } },
+        revisions: { orderBy: { createdAt: "desc" }, take: 10 },
+        scanEvents: { orderBy: { scannedAt: "desc" }, take: 50 },
+        _count: { select: { scanEvents: true } },
+      },
+    }),
+    db.scanEvent.count({ where: { qrCodeId: id, abVariant: "A" } }),
+    db.scanEvent.count({ where: { qrCodeId: id, abVariant: "B" } }),
+  ]);
 
   if (!qr || qr.workspaceId !== workspace.id) {
     notFound();
@@ -48,6 +57,8 @@ export default async function QrDetailPage({ params }: Props) {
   } as const;
 
   const svgString = await renderQrSvg(qr.encodedContent, style);
+  const plan = await getPlan(qr.workspace?.plan);
+  const exportFormats = plan.limits.exportFormats;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -93,21 +104,32 @@ export default async function QrDetailPage({ params }: Props) {
           />
 
           {/* Download buttons */}
-          <div className="mb-6 flex gap-2">
-            <a
-              href={`/api/qr/${qr.id}/download?format=png`}
-              className="btn btn-primary btn-sm flex-1"
-              download
-            >
-              Скачать PNG
-            </a>
-            <a
-              href={`/api/qr/${qr.id}/download?format=svg`}
-              className="btn btn-secondary btn-sm flex-1"
-              download
-            >
-              Скачать SVG
-            </a>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {exportFormats.includes("PNG") && (
+              <a href={`/api/qr/${qr.id}/download?format=png`} className="btn btn-primary btn-sm" download>
+                PNG
+              </a>
+            )}
+            {exportFormats.includes("SVG") && (
+              <a href={`/api/qr/${qr.id}/download?format=svg`} className="btn btn-secondary btn-sm" download>
+                SVG
+              </a>
+            )}
+            {exportFormats.includes("JPG") && (
+              <a href={`/api/qr/${qr.id}/download?format=jpg`} className="btn btn-secondary btn-sm" download>
+                JPG
+              </a>
+            )}
+            {exportFormats.includes("EPS") && (
+              <a href={`/api/qr/${qr.id}/download?format=eps`} className="btn btn-secondary btn-sm" download>
+                EPS
+              </a>
+            )}
+            {exportFormats.includes("PDF") && (
+              <a href={`/api/qr/${qr.id}/download?format=pdf`} className="btn btn-secondary btn-sm" download>
+                PDF
+              </a>
+            )}
           </div>
 
           {/* Short link - /p/ for hosted (Menu, PDF, etc.), /r/ for redirect */}
@@ -139,8 +161,64 @@ export default async function QrDetailPage({ params }: Props) {
                     <p className="mt-1 text-sm text-slate-400">Не задан</p>
                   )}
                   <UpdateTarget qrId={qr.id} currentUrl={qr.currentTargetUrl} />
+                  {qr.contentType === "URL" && (
+                    <>
+                      {/* Smart redirect скрыт на данный момент */}
+                      <details className="group mt-4 border-t border-slate-200 pt-4">
+                        <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                          <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          Retargeting
+                        </summary>
+                        <div className="mt-4">
+                          <TrackingPixelsForm
+                            qrId={qr.id}
+                            trackingPixels={(qr.payload as Record<string, unknown>)?.trackingPixels as { metaPixelId?: string; ga4Id?: string; gtmId?: string; ymCounterId?: string; vkPixelId?: string } ?? null}
+                          />
+                        </div>
+                      </details>
+                      <details className="group mt-4 border-t border-slate-200 pt-4">
+                        <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                          <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          A/B-тестирование
+                        </summary>
+                        <div className="mt-4">
+                          <AbTestForm
+                            qrId={qr.id}
+                            abTest={(qr.payload as Record<string, unknown>)?.abTest as { urlA?: string; urlB?: string } ?? null}
+                            scanCountA={scanCountA}
+                            scanCountB={scanCountB}
+                          />
+                        </div>
+                      </details>
+                    </>
+                  )}
                 </>
               )}
+
+              {/* Expiry settings for all dynamic QR */}
+              <details className="group mt-4 border-t border-slate-200 pt-4">
+                <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                  <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  Срок действия
+                </summary>
+                <div className="mt-4">
+                  <QrExpirySettings
+                  qrId={qr.id}
+                  expireAt={qr.expireAt}
+                  maxScans={qr.maxScans}
+                  passwordRequired={!!qr.passwordHash}
+                  gdprRequired={((qr.payload as Record<string, unknown>)?.gdprRequired as boolean) ?? false}
+                  gdprPolicyUrl={((qr.payload as Record<string, unknown>)?.gdprPolicyUrl as string) ?? null}
+                  scanCount={qr._count.scanEvents}
+                />
+                </div>
+              </details>
             </div>
           )}
 

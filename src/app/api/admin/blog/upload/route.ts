@@ -1,5 +1,6 @@
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
+import { validateFileType } from "@/lib/file-validation";
 import { uploadFile, getBlogCoverKey } from "@/lib/s3";
 import { optimizeImageForBlog } from "@/lib/image-optimize";
 import { nanoid } from "nanoid";
@@ -25,6 +26,11 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const validated = await validateFileType(buffer);
+    if (!validated || !ALLOWED_TYPES.has(validated.mime)) {
+      return apiError("Содержимое файла не совпадает с заявленным типом.", "VALIDATION_ERROR", 400, undefined, requestId);
+    }
+
     const optimized = await optimizeImageForBlog(buffer);
     const fileId = nanoid(12);
     const key = getBlogCoverKey(fileId);

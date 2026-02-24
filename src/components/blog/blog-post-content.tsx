@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "isomorphic-dompurify";
 import { useEffect, useRef, useState } from "react";
 
 function slugify(text: string): string {
@@ -180,7 +181,17 @@ export function BlogPostContent({ content }: Props) {
       <div
         ref={containerRef}
         className="min-w-0 flex-1 prose prose-slate max-w-none prose-headings:font-semibold prose-h2:mt-10 prose-h2:text-xl prose-h2:text-slate-900 prose-h2:scroll-mt-24 prose-p:text-slate-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-blue-600 prose-blockquote:bg-slate-50 prose-blockquote:py-2 prose-blockquote:font-normal prose-blockquote:italic prose-blockquote:text-slate-700 prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-ul:text-slate-700"
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(content, {
+            ALLOWED_TAGS: [
+              "h1", "h2", "h3", "h4", "h5", "h6", "p", "br", "hr",
+              "strong", "b", "em", "i", "u", "s", "code", "pre",
+              "ul", "ol", "li", "blockquote", "a", "img",
+              "table", "thead", "tbody", "tr", "th", "td",
+            ],
+            ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel"],
+          }),
+        }}
       />
     </div>
   );

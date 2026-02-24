@@ -18,7 +18,11 @@ function parseUtm(urlString?: string | null) {
   }
 }
 
-export async function trackScan(qrCodeId: string, destinationUrl?: string | null) {
+export async function trackScan(
+  qrCodeId: string,
+  destinationUrl?: string | null,
+  abVariant?: "A" | "B" | null
+) {
   const db = getDb();
   const h = await headers();
   const forwardedFor = h.get("x-forwarded-for") ?? "";
@@ -44,6 +48,7 @@ export async function trackScan(qrCodeId: string, destinationUrl?: string | null
       browser: ua.slice(0, 120),
       userAgentRaw: ua.slice(0, 512),
       ipHash,
+      abVariant: abVariant ?? null,
       ...parseUtm(destinationUrl),
     },
   });

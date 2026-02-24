@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getDb } from "@/lib/db";
@@ -7,6 +8,16 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Блог — qr-s.ru",
   description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
+  openGraph: {
+    title: "Блог — qr-s.ru",
+    description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
+    url: "/blog",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Блог — qr-s.ru",
+    description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
+  },
 };
 
 export default async function BlogListPage() {
@@ -48,18 +59,21 @@ export default async function BlogListPage() {
                 Пока нет опубликованных статей.
               </div>
             ) : (
-              posts.map((post) => (
+              posts.map((post, index) => (
                 <article
                   key={post.slug}
                   className="card overflow-hidden transition hover:shadow-lg"
                 >
                 <Link href={`/blog/${post.slug}`} className="block">
                   {post.coverImageUrl && (
-                    <div className="aspect-video w-full overflow-hidden rounded-t-2xl bg-slate-100">
-                      <img
+                    <div className="relative aspect-video w-full overflow-hidden rounded-t-2xl bg-slate-100">
+                      <Image
                         src={post.coverImageUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                        priority={index === 0}
                       />
                     </div>
                   )}

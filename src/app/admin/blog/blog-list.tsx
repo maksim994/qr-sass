@@ -25,7 +25,6 @@ export function BlogList({ posts }: Props) {
         <thead>
           <tr>
             <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Заголовок</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Slug</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Просмотры</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Время чтения</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Статус</th>
@@ -44,7 +43,6 @@ export function BlogList({ posts }: Props) {
             posts.map((post) => (
               <tr key={post.id} className="bg-white hover:bg-slate-50">
                 <td className="px-4 py-3 text-sm text-slate-900">{post.title}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-600">{post.slug}</td>
                 <td className="px-4 py-3 text-sm text-slate-600">{post.views}</td>
                 <td className="px-4 py-3 text-sm text-slate-600">
                   {post.readingTimeMinutes ? `${post.readingTimeMinutes} мин` : "—"}

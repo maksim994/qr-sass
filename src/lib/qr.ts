@@ -1,4 +1,6 @@
 import QRCode from "qrcode";
+import { PDFDocument } from "pdf-lib";
+import sharp from "sharp";
 import { QrContentType } from "@prisma/client";
 
 export type QrPayload = Record<string, unknown>;
@@ -115,4 +117,67 @@ export async function renderQrPng(content: string, style: QrStyleConfig = defaul
 
   const base64 = dataUrl.replace(/^data:image\/png;base64,/, "");
   return Buffer.from(base64, "base64");
+}
+
+export async function renderQrJpg(content: string, style: QrStyleConfig = defaultStyle) {
+  const png = await renderQrPng(content, style);
+  return sharp(png)
+    .flatten({ background: style.background || "#ffffff" })
+    .jpeg({ quality: 95 })
+    .toBuffer();
+}
+
+export async function renderQrEps(content: string, style: QrStyleConfig = defaultStyle) {
+  const png = await renderQrPng(content, style);
+  const metadata = await sharp(png).metadata();
+  const w = metadata.width ?? 300;
+  const h = metadata.height ?? 300;
+  const jpeg = await sharp(png)
+    .flatten({ background: style.background || "#ffffff" })
+    .jpeg({ quality: 95 })
+    .toBuffer();
+  const hex = jpeg.toString("hex");
+  const hexLines: string[] = [];
+  for (let i = 0; i < hex.length; i += 76) {
+    hexLines.push(hex.slice(i, i + 76));
+  }
+  const sizePt = 72;
+  const eps = `%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 ${sizePt} ${sizePt}
+%%Creator: qr-s.ru
+%%Title: QR Code
+gsave
+0 0 moveto ${sizePt} 0 lineto ${sizePt} ${sizePt} lineto 0 ${sizePt} lineto closepath clip
+<<
+  /ImageType 1
+  /Width ${w}
+  /Height ${h}
+  /ImageMatrix [${sizePt} 0 0 -${sizePt} 0 ${sizePt}]
+  /DataSource currentfile /HexDecode filter /DCTDecode filter
+  /BitsPerComponent 8
+  /Decode [0 1 0 1 0 1]
+  /ColorSpace /DeviceRGB
+>> image
+${hexLines.join("\n")}
+grestore
+showpage
+%%EOF`;
+  return Buffer.from(eps, "utf-8");
+}
+
+export async function renderQrPdf(content: string, style: QrStyleConfig = defaultStyle) {
+  const png = await renderQrPng(content, style);
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([300, 300]);
+  const img = await doc.embedPng(png);
+  const scale = Math.min(300 / img.width, 300 / img.height);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  page.drawImage(img, {
+    x: (300 - w) / 2,
+    y: (300 - h) / 2,
+    width: w,
+    height: h,
+  });
+  return Buffer.from(await doc.save());
 }

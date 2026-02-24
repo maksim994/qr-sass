@@ -15,6 +15,8 @@ export async function generateStaticParams() {
   return params;
 }
 
+const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const page = getSeoPage(slug);
@@ -23,12 +25,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: "Страница не найдена",
     };
   }
+  const url = `${baseUrl}/${slug}`;
   return {
     title: page.title,
     description: page.description,
     keywords: page.keywords,
-    alternates: {
-      canonical: `/${slug}`,
+    alternates: { canonical: url },
+    openGraph: {
+      title: page.title,
+      description: page.description,
+      url,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.title,
+      description: page.description,
     },
   };
 }
@@ -37,21 +48,6 @@ export default async function SeoLandingPage({ params }: PageProps) {
   const { slug } = await params;
   const page = getSeoPage(slug);
   if (!page) notFound();
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Можно ли менять ссылку в QR?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Да, динамические QR можно обновлять без перепечатки.",
-        },
-      },
-    ],
-  };
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -83,7 +79,6 @@ export default async function SeoLandingPage({ params }: PageProps) {
           </div>
         </nav>
       </article>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </main>
   );
 }

@@ -48,7 +48,7 @@ export function UsersTable({ users }: Props) {
   }
 
   return (
-    <div className="mt-8 overflow-x-auto">
+    <div className="overflow-x-auto px-6 py-4">
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-slate-200">

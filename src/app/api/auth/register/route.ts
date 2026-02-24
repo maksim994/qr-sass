@@ -4,12 +4,25 @@ import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-resp
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { consumeRateLimit, getClientIp, registerRateLimiter } from "@/lib/rate-limit";
 import { registerSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
   const route = "/api/auth/register";
   try {
+    const ip = getClientIp(request);
+    const limit = await consumeRateLimit(registerRateLimiter, ip);
+    if (!limit.success) {
+      return apiError(
+        "Too many registration attempts. Try again later.",
+        "VALIDATION_ERROR",
+        429,
+        limit.retryAfterMs ? { retryAfterMs: limit.retryAfterMs } : undefined,
+        requestId
+      );
+    }
+
     const raw = await readJsonBody(request);
     if (!raw) {
       return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);

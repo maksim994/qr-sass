@@ -14,11 +14,14 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-slate-900">Пользователи</h1>
-      <p className="mt-1 text-slate-600">Список всех пользователей, тариф можно изменить</p>
-
-      <UsersTable users={users} />
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Пользователи</h1>
+        <p className="mt-1 text-sm text-slate-500">Список всех пользователей. Тариф можно изменить для каждого workspace.</p>
+      </div>
+      <div className="card overflow-hidden">
+        <UsersTable users={users} />
+      </div>
     </div>
   );
 }

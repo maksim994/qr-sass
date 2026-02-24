@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
@@ -117,6 +118,23 @@ export async function POST(request: Request) {
       qrData = encodedContent;
     }
 
+    const expireAt =
+      data.expireAt && typeof data.expireAt === "string"
+        ? (() => {
+            const d = new Date(data.expireAt);
+            return isNaN(d.getTime()) || d <= new Date() ? undefined : d;
+          })()
+        : undefined;
+    const maxScans =
+      typeof data.maxScans === "number" && Number.isInteger(data.maxScans) && data.maxScans >= 1
+        ? data.maxScans
+        : undefined;
+
+    const passwordHash =
+      isDynamic && data.password && typeof data.password === "string" && data.password.length >= 1
+        ? await bcrypt.hash(data.password, 10)
+        : undefined;
+
     const qr = await db.qrCode.create({
       data: {
         workspaceId: data.workspaceId,
@@ -130,6 +148,9 @@ export async function POST(request: Request) {
         currentTargetUrl: isDynamic && !isHosted ? (data.payload.url as string | undefined) : null,
         payload: data.payload as object,
         styleConfig: data.style as object,
+        expireAt: isDynamic ? expireAt : undefined,
+        maxScans: isDynamic ? maxScans : undefined,
+        passwordHash: isDynamic ? (passwordHash ?? null) : null,
         revisions: {
           create: {
             changedById: user.id,

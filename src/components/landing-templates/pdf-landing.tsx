@@ -1,10 +1,12 @@
+import { isSafeUrl } from "@/lib/url";
 import { QreateFooter } from "./qreate-footer";
 
 type Props = { payload: Record<string, unknown> };
 
 export function PdfLanding({ payload }: Props) {
   const title = (payload.title as string) || "Документ PDF";
-  const fileUrl = payload.fileUrl as string | undefined;
+  const rawUrl = payload.fileUrl as string | undefined;
+  const fileUrl = rawUrl && isSafeUrl(rawUrl) ? rawUrl : undefined;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8">

@@ -1,6 +1,7 @@
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
+import { validateFileType } from "@/lib/file-validation";
 import { logger } from "@/lib/logger";
 import { uploadFile, getS3Key } from "@/lib/s3";
 import { nanoid } from "nanoid";
@@ -12,29 +13,12 @@ const ALLOWED_TYPES = new Set([
   "image/png",
   "image/gif",
   "image/webp",
-  "image/svg+xml",
   "application/pdf",
   "audio/mpeg",
   "audio/mp3",
   "video/mp4",
   "video/webm",
 ]);
-
-function extFromMime(mime: string): string {
-  const map: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/gif": "gif",
-    "image/webp": "webp",
-    "image/svg+xml": "svg",
-    "application/pdf": "pdf",
-    "audio/mpeg": "mp3",
-    "audio/mp3": "mp3",
-    "video/mp4": "mp4",
-    "video/webm": "webm",
-  };
-  return map[mime] || "bin";
-}
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -62,12 +46,16 @@ export async function POST(request: Request) {
       return apiError("Неподдерживаемый формат файла.", "VALIDATION_ERROR", 400, undefined, requestId);
     }
 
-    const fileId = nanoid(12);
-    const ext = extFromMime(file.type);
-    const key = getS3Key(workspaceId, fileId, ext);
     const buffer = Buffer.from(await file.arrayBuffer());
+    const validated = await validateFileType(buffer);
+    if (!validated || validated.mime !== file.type) {
+      return apiError("Содержимое файла не совпадает с заявленным типом.", "VALIDATION_ERROR", 400, undefined, requestId);
+    }
 
-    const url = await uploadFile(buffer, key, file.type);
+    const fileId = nanoid(12);
+    const ext = validated.ext;
+    const key = getS3Key(workspaceId, fileId, ext);
+    const url = await uploadFile(buffer, key, validated.mime);
 
     const db = getDb();
     const record = await db.uploadedFile.create({
@@ -75,7 +63,7 @@ export async function POST(request: Request) {
         workspaceId,
         key,
         filename: file.name,
-        mimeType: file.type,
+        mimeType: validated.mime,
         sizeBytes: file.size,
         url,
       },
@@ -87,7 +75,7 @@ export async function POST(request: Request) {
       requestId,
       message: "File uploaded",
       status: 200,
-      details: { fileId: record.id, key, mimeType: file.type, sizeBytes: file.size },
+      details: { fileId: record.id, key, mimeType: validated.mime, sizeBytes: file.size },
     });
 
     return apiSuccess({ fileId: record.id, url, key, filename: file.name }, 200, requestId);

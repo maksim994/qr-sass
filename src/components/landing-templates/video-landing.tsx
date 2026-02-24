@@ -1,3 +1,4 @@
+import { isSafeUrl } from "@/lib/url";
 import { QreateFooter } from "./qreate-footer";
 
 type Props = { payload: Record<string, unknown> };
@@ -13,9 +14,11 @@ function getYouTubeId(url: string): string | null {
 
 export function VideoLanding({ payload }: Props) {
   const title = (payload.title as string) || "Видео";
-  const videoUrl = payload.videoUrl as string | undefined;
-  const fileUrl = payload.fileUrl as string | undefined;
-  const src = videoUrl || fileUrl;
+  const rawVideoUrl = payload.videoUrl as string | undefined;
+  const rawFileUrl = payload.fileUrl as string | undefined;
+  const safeVideoUrl = rawVideoUrl && isSafeUrl(rawVideoUrl) ? rawVideoUrl : undefined;
+  const safeFileUrl = rawFileUrl && isSafeUrl(rawFileUrl) ? rawFileUrl : undefined;
+  const src = safeVideoUrl || safeFileUrl;
 
   const youtubeId = src ? getYouTubeId(src) : null;
 

@@ -4,7 +4,8 @@ import { apiError, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { defaultStyle, renderQrPng, renderQrSvg } from "@/lib/qr";
+import { getPlan } from "@/lib/plans";
+import { defaultStyle, renderQrEps, renderQrJpg, renderQrPdf, renderQrPng, renderQrSvg } from "@/lib/qr";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -32,6 +33,22 @@ export async function GET(request: Request, context: RouteContext) {
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
 
+    const workspace = await db.workspace.findUnique({
+      where: { id: qr.workspaceId },
+      select: { plan: true },
+    });
+    const plan = await getPlan(workspace?.plan);
+    const allowedFormats = new Set(plan.limits.exportFormats.map((f) => f.toLowerCase()));
+    if (!allowedFormats.has(format.toLowerCase())) {
+      return apiError(
+        `Format ${format} not available on your plan. Allowed: ${plan.limits.exportFormats.join(", ")}`,
+        "FORBIDDEN",
+        403,
+        undefined,
+        requestId
+      );
+    }
+
     const style = (qr.styleConfig as Record<string, unknown> | null) ?? defaultStyle;
     const renderStyle = {
       foreground: typeof style.foreground === "string" ? style.foreground : defaultStyle.foreground,
@@ -55,6 +72,36 @@ export async function GET(request: Request, context: RouteContext) {
         headers: {
           "Content-Type": "image/svg+xml; charset=utf-8",
           "Content-Disposition": `attachment; filename="${safeFilename}.svg"; filename*=UTF-8''${utf8Filename}.svg`,
+        },
+      });
+    }
+
+    if (format === "jpg" || format === "jpeg") {
+      const jpg = await renderQrJpg(qr.encodedContent, renderStyle);
+      return new NextResponse(new Uint8Array(jpg), {
+        headers: {
+          "Content-Type": "image/jpeg",
+          "Content-Disposition": `attachment; filename="${safeFilename}.jpg"; filename*=UTF-8''${utf8Filename}.jpg`,
+        },
+      });
+    }
+
+    if (format === "eps") {
+      const eps = await renderQrEps(qr.encodedContent, renderStyle);
+      return new NextResponse(new Uint8Array(eps), {
+        headers: {
+          "Content-Type": "application/postscript",
+          "Content-Disposition": `attachment; filename="${safeFilename}.eps"; filename*=UTF-8''${utf8Filename}.eps`,
+        },
+      });
+    }
+
+    if (format === "pdf") {
+      const pdf = await renderQrPdf(qr.encodedContent, renderStyle);
+      return new NextResponse(new Uint8Array(pdf), {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${safeFilename}.pdf"; filename*=UTF-8''${utf8Filename}.pdf`,
         },
       });
     }

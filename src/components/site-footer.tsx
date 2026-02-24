@@ -33,6 +33,16 @@ export function SiteFooter({ session }: Props) {
                   FAQ
                 </Link>
               </li>
+
+              <li>
+                <Link href="/changelog" className="text-sm text-slate-500 hover:text-slate-900">
+                  Истоиия изменения
+                </Link>
+              </li>
+
+
+
+              
             </ul>
           </div>
           <div>
@@ -43,7 +53,11 @@ export function SiteFooter({ session }: Props) {
                   Блог
                 </Link>
               </li>
-
+              <li>
+                <Link href="/changelog" className="text-sm text-slate-500 hover:text-slate-900">
+                  История изменений
+                </Link>
+              </li>
             </ul>
           </div>
           <div>

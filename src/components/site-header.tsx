@@ -4,6 +4,7 @@ const navLinks = [
   { label: "Возможности", href: "/#features" },
   { label: "Тарифы", href: "/#pricing" },
   { label: "Блог", href: "/blog" },
+  { label: "История изменений", href: "/changelog" },
   { label: "FAQ", href: "/#faq" },
 ];
 
