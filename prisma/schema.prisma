@@ -222,3 +222,10 @@ model ScanEvent {
 
   @@index([qrCodeId, scannedAt])
 }
+
+model SiteSettings {
+  id              String   @id @default("default")
+  yandexMetrikaId String?
+  customHeadCode  String?  @db.Text
+  updatedAt       DateTime @updatedAt
+}

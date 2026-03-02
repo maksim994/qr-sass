@@ -23,6 +23,7 @@
     "bullmq": "^5.70.1",
     "ckeditor5": "^47.5.0",
     "file-type": "^21.3.0",
+    "html-react-parser": "^5.2.17",
     "ioredis": "^5.9.3",
     "isomorphic-dompurify": "^3.0.0",
     "jose": "^6.1.3",

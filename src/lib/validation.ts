@@ -26,6 +26,18 @@ export const loginSchema = z.object({
   password: z.string().min(8).max(128),
 });
 
+export const profileUpdateSchema = z
+  .object({
+    name: z.string().min(2).max(120).optional(),
+    email: z.string().email().optional(),
+    currentPassword: z.string().optional(),
+    newPassword: z.string().min(8).max(128).optional(),
+  })
+  .refine(
+    (d) => !d.newPassword || (d.currentPassword != null && d.currentPassword.length > 0),
+    { message: "Текущий пароль обязателен для смены", path: ["currentPassword"] }
+  );
+
 export const styleSchema = z.object({
   dotType: z.enum(["square", "dots", "rounded", "classy", "classy-rounded", "extra-rounded"]).default("square"),
   dotColor: z.string().default("#111111"),
