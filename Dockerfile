@@ -12,10 +12,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Больше памяти для Next.js build (часто падает в Docker из‑за лимитов)
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Фиктивные env для build (страницы с БД помечены dynamic, эти значения не используются в runtime)
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public"
 ENV JWT_SECRET="build-time-secret-min-16-chars"
 ENV APP_URL="http://localhost:3000"
+ENV REDIS_URL="redis://localhost:6379"
 RUN node scripts/copy-ckeditor-css.mjs
 RUN npx prisma generate
 RUN npm run build
