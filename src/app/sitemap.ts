@@ -19,6 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/register",
     "/blog",
     "/changelog",
+    "/expired",
+    "/mini",
     ...getSeoPages().map((p) => `/${p.slug}`),
   ];
 

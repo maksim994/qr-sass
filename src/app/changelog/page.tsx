@@ -21,6 +21,18 @@ const changelog: {
   items: { type: "feature" | "improvement" | "fix"; text: string }[];
 }[] = [
   {
+    date: "2026-02-23",
+    version: "1.3",
+    items: [
+      { type: "feature", text: "Редактируемый robots.txt в админке — полный контроль над индексацией" },
+      { type: "feature", text: "Загрузка favicon в админке — иконка сайта настраивается через S3" },
+      { type: "improvement", text: "Sitemap: добавлены страницы /expired и /mini" },
+      { type: "improvement", text: "SEO: WebSite и Organization schema на главной, keywords, canonical URL" },
+      { type: "fix", text: "Главная страница работает при недоступности БД — fallback для разработки" },
+      { type: "fix", text: "Предупреждение React о unique key в layout headContent" },
+    ],
+  },
+  {
     date: "2025-02-23",
     version: "1.2",
     items: [

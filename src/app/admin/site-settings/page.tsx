@@ -19,6 +19,8 @@ export default async function AdminSiteSettingsPage() {
         <SiteSettingsForm
           initialYandexMetrikaId={row?.yandexMetrikaId ?? ""}
           initialCustomHeadCode={row?.customHeadCode ?? ""}
+          initialRobotsTxtContent={row?.robotsTxtContent ?? ""}
+          initialFaviconUrl={row?.faviconUrl ?? ""}
         />
       </div>
     </div>

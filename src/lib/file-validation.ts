@@ -5,6 +5,8 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/png": "png",
   "image/gif": "gif",
   "image/webp": "webp",
+  "image/x-icon": "ico",
+  "image/vnd.microsoft.icon": "ico",
   "application/pdf": "pdf",
   "audio/mpeg": "mp3",
   "video/mp4": "mp4",

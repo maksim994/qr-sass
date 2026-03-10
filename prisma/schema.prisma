@@ -224,8 +224,10 @@ model ScanEvent {
 }
 
 model SiteSettings {
-  id              String   @id @default("default")
-  yandexMetrikaId String?
-  customHeadCode  String?  @db.Text
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default("default")
+  yandexMetrikaId   String?
+  customHeadCode    String?  @db.Text
+  robotsTxtContent  String?  @db.Text
+  faviconUrl        String?
+  updatedAt         DateTime @updatedAt
 }

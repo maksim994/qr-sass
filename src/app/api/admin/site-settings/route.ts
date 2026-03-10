@@ -10,6 +10,8 @@ export async function GET() {
   return apiSuccess({
     yandexMetrikaId: row?.yandexMetrikaId ?? null,
     customHeadCode: row?.customHeadCode ?? null,
+    robotsTxtContent: row?.robotsTxtContent ?? null,
+    faviconUrl: row?.faviconUrl ?? null,
   });
 }
 
@@ -21,6 +23,8 @@ export async function PATCH(req: Request) {
   const data = await readJsonBody<{
     yandexMetrikaId?: string | null;
     customHeadCode?: string | null;
+    robotsTxtContent?: string | null;
+    faviconUrl?: string | null;
   }>(req);
   if (!data) return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
 
@@ -41,15 +45,21 @@ export async function PATCH(req: Request) {
       id: "default",
       yandexMetrikaId: data.yandexMetrikaId || null,
       customHeadCode: data.customHeadCode || null,
+      robotsTxtContent: data.robotsTxtContent ?? null,
+      faviconUrl: data.faviconUrl ?? null,
     },
     update: {
       ...(data.yandexMetrikaId !== undefined && { yandexMetrikaId: data.yandexMetrikaId || null }),
       ...(data.customHeadCode !== undefined && { customHeadCode: data.customHeadCode || null }),
+      ...(data.robotsTxtContent !== undefined && { robotsTxtContent: data.robotsTxtContent ?? null }),
+      ...(data.faviconUrl !== undefined && { faviconUrl: data.faviconUrl ?? null }),
     },
   });
 
   return apiSuccess({
     yandexMetrikaId: row.yandexMetrikaId,
     customHeadCode: row.customHeadCode,
+    robotsTxtContent: row.robotsTxtContent,
+    faviconUrl: row.faviconUrl,
   });
 }

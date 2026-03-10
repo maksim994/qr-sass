@@ -54,6 +54,12 @@ export default async function RootLayout({
   const settings = await getSiteSettings();
 
   const headContent = [
+    settings.faviconUrl && (
+      <React.Fragment key="favicon">
+        <link rel="icon" href={settings.faviconUrl} />
+        <link rel="apple-touch-icon" href={settings.faviconUrl} />
+      </React.Fragment>
+    ),
     settings.yandexMetrikaId && (
       <YandexMetrikaScript key="ym" id={settings.yandexMetrikaId} />
     ),

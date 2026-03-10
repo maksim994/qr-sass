@@ -29,6 +29,10 @@ export function getBlogCoverKey(fileId: string) {
   return `${prefix}/blog/covers/${fileId}.webp`;
 }
 
+export function getFaviconKey(fileId: string, ext: string) {
+  return `${prefix}/site/favicon_${fileId}.${ext}`;
+}
+
 export function getPublicFileUrl(key: string) {
   if (omitBucketInUrl) {
     return `${publicUrl}/${key}`;

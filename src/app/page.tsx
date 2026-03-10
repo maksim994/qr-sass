@@ -3,21 +3,32 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { getPlan } from "@/lib/plans";
+import { getPlan, getPlanSync } from "@/lib/plans";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const dynamic = "force-dynamic";
 
+const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
+
 export const metadata: Metadata = {
   title: "qr-s.ru — Генератор QR-кодов для бизнеса",
   description:
     "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией дизайна и мгновенным скачиванием. Бесплатный старт.",
+  keywords: [
+    "генератор qr кодов",
+    "создать qr код",
+    "динамический qr код",
+    "qr код онлайн",
+    "qr аналитика",
+    "красивый qr код",
+  ],
+  alternates: { canonical: baseUrl },
   openGraph: {
     title: "qr-s.ru — Генератор QR-кодов для бизнеса",
     description:
       "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией дизайна и мгновенным скачиванием. Бесплатный старт.",
-    url: "/",
+    url: baseUrl,
   },
   twitter: {
     card: "summary_large_image",
@@ -199,28 +210,46 @@ const testimonials = [
 const LATEST_POSTS_COUNT = 6;
 
 export default async function HomePage() {
-  const db = getDb();
-  const [session, latestPosts, ...planInfos] = await Promise.all([
-    getSession(),
-    db.blogPost.findMany({
-      where: { publishedAt: { not: null } },
-      orderBy: { publishedAt: "desc" },
-      take: LATEST_POSTS_COUNT,
-      select: {
-        slug: true,
-        title: true,
-        excerpt: true,
-        coverImageUrl: true,
-        publishedAt: true,
-        views: true,
-        likes: true,
-        readingTimeMinutes: true,
-      },
-    }),
-    getPlan("FREE"),
-    getPlan("PRO"),
-    getPlan("BUSINESS"),
-  ]);
+  const session = await getSession();
+
+  let latestPosts: Array<{
+    slug: string;
+    title: string;
+    excerpt: string | null;
+    coverImageUrl: string | null;
+    publishedAt: Date | null;
+    views: number;
+    likes: number;
+    readingTimeMinutes: number | null;
+  }> = [];
+  let planInfos: Awaited<ReturnType<typeof getPlan>>[] = [];
+
+  try {
+    const db = getDb();
+    [latestPosts, ...planInfos] = await Promise.all([
+      db.blogPost.findMany({
+        where: { publishedAt: { not: null } },
+        orderBy: { publishedAt: "desc" },
+        take: LATEST_POSTS_COUNT,
+        select: {
+          slug: true,
+          title: true,
+          excerpt: true,
+          coverImageUrl: true,
+          publishedAt: true,
+          views: true,
+          likes: true,
+          readingTimeMinutes: true,
+        },
+      }),
+      getPlan("FREE"),
+      getPlan("PRO"),
+      getPlan("BUSINESS"),
+    ]);
+  } catch {
+    planInfos = [getPlanSync("FREE"), getPlanSync("PRO"), getPlanSync("BUSINESS")];
+  }
+
   const plans = PLAN_CONFIG.map((cfg, i) => ({
     name: planInfos[i].name,
     price: formatPrice(planInfos[i].priceRub),
@@ -242,12 +271,28 @@ export default async function HomePage() {
       isAdmin = false;
     }
   }
-  const jsonLd = {
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${baseUrl}/#website`,
+    url: baseUrl,
+    name: "qr-s.ru — Генератор QR-кодов",
+    description:
+      "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией дизайна и мгновенным скачиванием.",
+    publisher: {
+      "@type": "Organization",
+      name: "qr-s.ru",
+      url: baseUrl,
+    },
+  };
+
+  const softwareJsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "qr-s.ru",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
+    url: baseUrl,
     offers: {
       "@type": "Offer",
       price: "0",
@@ -534,7 +579,8 @@ export default async function HomePage() {
         </section>
       </main>
       <SiteFooter session={session} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
     </>
   );

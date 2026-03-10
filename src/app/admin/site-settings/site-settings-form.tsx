@@ -2,17 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FaviconUpload } from "@/components/admin/favicon-upload";
 
 type Props = {
   initialYandexMetrikaId: string;
   initialCustomHeadCode: string;
+  initialRobotsTxtContent: string;
+  initialFaviconUrl: string;
 };
 
-export function SiteSettingsForm({ initialYandexMetrikaId, initialCustomHeadCode }: Props) {
+export function SiteSettingsForm({
+  initialYandexMetrikaId,
+  initialCustomHeadCode,
+  initialRobotsTxtContent,
+  initialFaviconUrl,
+}: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [yandexMetrikaId, setYandexMetrikaId] = useState(initialYandexMetrikaId);
   const [customHeadCode, setCustomHeadCode] = useState(initialCustomHeadCode);
+  const [robotsTxtContent, setRobotsTxtContent] = useState(initialRobotsTxtContent);
+  const [faviconUrl, setFaviconUrl] = useState(initialFaviconUrl);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,6 +35,8 @@ export function SiteSettingsForm({ initialYandexMetrikaId, initialCustomHeadCode
         body: JSON.stringify({
           yandexMetrikaId: yandexMetrikaId.trim() || null,
           customHeadCode: customHeadCode.trim() || null,
+          robotsTxtContent: robotsTxtContent.trim() || null,
+          faviconUrl: faviconUrl.trim() || null,
         }),
       });
       if (!res.ok) {
@@ -61,6 +73,23 @@ export function SiteSettingsForm({ initialYandexMetrikaId, initialCustomHeadCode
       </div>
 
       <div>
+        <label className="label" htmlFor="robotsTxtContent">
+          robots.txt
+        </label>
+        <textarea
+          id="robotsTxtContent"
+          rows={10}
+          className="input font-mono text-sm"
+          placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /dashboard&#10;Disallow: /admin&#10;&#10;Sitemap: https://example.com/sitemap.xml"
+          value={robotsTxtContent}
+          onChange={(e) => setRobotsTxtContent(e.target.value)}
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          Полный текст robots.txt. Оставьте пустым — будет использован дефолт (disallow для /dashboard, /admin, ссылка на sitemap).
+        </p>
+      </div>
+
+      <div>
         <label className="label" htmlFor="customHeadCode">
           Дополнительный код в &lt;head&gt;
         </label>
@@ -74,6 +103,19 @@ export function SiteSettingsForm({ initialYandexMetrikaId, initialCustomHeadCode
         />
         <p className="mt-1 text-xs text-slate-500">
           HTML-код, который будет вставлен в &lt;head&gt; на всех страницах. Например, скрипты счётчиков или мета-теги.
+        </p>
+      </div>
+
+      <div>
+        <label className="label">Favicon</label>
+        <FaviconUpload
+          currentUrl={faviconUrl || undefined}
+          onUploaded={(url) => {
+            setFaviconUrl(url);
+          }}
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          Иконка сайта (favicon). Отображается во вкладке браузера. ICO, PNG, WebP.
         </p>
       </div>
 
