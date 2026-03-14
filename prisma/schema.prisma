@@ -229,5 +229,6 @@ model SiteSettings {
   customHeadCode    String?  @db.Text
   robotsTxtContent  String?  @db.Text
   faviconUrl        String?
+  indexNowKey       String?  // IndexNow: 8–128 символов, a-z A-Z 0-9 -
   updatedAt         DateTime @updatedAt
 }

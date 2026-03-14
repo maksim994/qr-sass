@@ -21,6 +21,7 @@ export default async function AdminSiteSettingsPage() {
           initialCustomHeadCode={row?.customHeadCode ?? ""}
           initialRobotsTxtContent={row?.robotsTxtContent ?? ""}
           initialFaviconUrl={row?.faviconUrl ?? ""}
+          initialIndexNowKey={row?.indexNowKey ?? ""}
         />
       </div>
     </div>

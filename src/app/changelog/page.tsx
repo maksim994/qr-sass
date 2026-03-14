@@ -22,6 +22,13 @@ const changelog: {
 }[] = [
   {
     date: "2026-03-10",
+    version: "1.3",
+    items: [
+      { type: "feature", text: "IndexNow — уведомление Яндекса и Bing об изменениях при публикации и обновлении постов блога" },
+    ],
+  },
+  {
+    date: "2026-03-10",
     version: "1.2.1",
     items: [
       { type: "feature", text: "Редактируемый robots.txt в админке — полный контроль над индексацией" },

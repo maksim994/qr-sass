@@ -4,11 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaviconUpload } from "@/components/admin/favicon-upload";
 
+function generateIndexNowKey(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
+  let key = "";
+  for (let i = 0; i < 32; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return key;
+}
+
 type Props = {
   initialYandexMetrikaId: string;
   initialCustomHeadCode: string;
   initialRobotsTxtContent: string;
   initialFaviconUrl: string;
+  initialIndexNowKey: string;
 };
 
 export function SiteSettingsForm({
@@ -16,6 +26,7 @@ export function SiteSettingsForm({
   initialCustomHeadCode,
   initialRobotsTxtContent,
   initialFaviconUrl,
+  initialIndexNowKey,
 }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -23,6 +34,7 @@ export function SiteSettingsForm({
   const [customHeadCode, setCustomHeadCode] = useState(initialCustomHeadCode);
   const [robotsTxtContent, setRobotsTxtContent] = useState(initialRobotsTxtContent);
   const [faviconUrl, setFaviconUrl] = useState(initialFaviconUrl);
+  const [indexNowKey, setIndexNowKey] = useState(initialIndexNowKey);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,6 +49,7 @@ export function SiteSettingsForm({
           customHeadCode: customHeadCode.trim() || null,
           robotsTxtContent: robotsTxtContent.trim() || null,
           faviconUrl: faviconUrl.trim() || null,
+          indexNowKey: indexNowKey.trim() || null,
         }),
       });
       if (!res.ok) {
@@ -103,6 +116,35 @@ export function SiteSettingsForm({
         />
         <p className="mt-1 text-xs text-slate-500">
           HTML-код, который будет вставлен в &lt;head&gt; на всех страницах. Например, скрипты счётчиков или мета-теги.
+        </p>
+      </div>
+
+      <div>
+        <label className="label" htmlFor="indexNowKey">
+          IndexNow (Яндекс, Bing)
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="indexNowKey"
+            type="text"
+            className="input flex-1 font-mono text-sm"
+            placeholder="Ключ 8–128 символов (a-z, A-Z, 0-9, -)"
+            value={indexNowKey}
+            onChange={(e) => setIndexNowKey(e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn btn-secondary shrink-0"
+            onClick={() => setIndexNowKey(generateIndexNowKey())}
+          >
+            Сгенерировать
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          Уведомление Яндекс и Bing об изменениях (новые/обновлённые посты блога). Файл ключа: site.ru/{indexNowKey || "ключ"}.txt.{" "}
+          <a href="https://yandex.ru/support/webmaster/ru/indexing-options/index-now" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+            Документация
+          </a>
         </p>
       </div>
 

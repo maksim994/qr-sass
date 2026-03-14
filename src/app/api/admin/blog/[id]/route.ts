@@ -1,5 +1,5 @@
 import { getDb } from "@/lib/db";
-import { getAdminOrNull } from "@/lib/admin-auth";
+import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
 
@@ -8,7 +8,7 @@ type RouteParams = { params: Promise<{ id: string }> };
 export async function PATCH(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = getRequestId(req);
-  const admin = await getAdminOrNull();
+  const admin = await getAdminOrNullFromSessionOrApiKey();
   if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{
@@ -51,13 +51,24 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     where: { id },
     data: update,
   });
+
+  if (post.publishedAt) {
+    const base = (process.env.APP_URL ?? "https://qr-s.ru").replace(/\/$/, "");
+    const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+    if (settings?.indexNowKey) {
+      const { notifyIndexNow } = await import("@/lib/indexnow");
+      const url = `${base}/blog/${post.slug}`;
+      await notifyIndexNow([url], settings.indexNowKey);
+    }
+  }
+
   return apiSuccess(post);
 }
 
 export async function DELETE(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = getRequestId(req);
-  const admin = await getAdminOrNull();
+  const admin = await getAdminOrNullFromSessionOrApiKey();
   if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
 
   const db = getDb();

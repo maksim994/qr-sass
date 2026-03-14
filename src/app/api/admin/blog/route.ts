@@ -1,11 +1,11 @@
 import { getDb } from "@/lib/db";
-import { getAdminOrNull } from "@/lib/admin-auth";
+import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
 
 export async function GET(req: Request) {
   const requestId = getRequestId(req);
-  const admin = await getAdminOrNull();
+  const admin = await getAdminOrNullFromSessionOrApiKey();
   if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
 
   const db = getDb();
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const requestId = getRequestId(req);
-  const admin = await getAdminOrNull();
+  const admin = await getAdminOrNullFromSessionOrApiKey();
   if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{
@@ -68,5 +68,16 @@ export async function POST(req: Request) {
       createdById: admin.id,
     },
   });
+
+  if (publishedAt) {
+    const base = (process.env.APP_URL ?? "https://qr-s.ru").replace(/\/$/, "");
+    const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+    if (settings?.indexNowKey) {
+      const { notifyIndexNow } = await import("@/lib/indexnow");
+      const url = `${base}/blog/${slug}`;
+      await notifyIndexNow([url], settings.indexNowKey);
+    }
+  }
+
   return apiSuccess(post);
 }

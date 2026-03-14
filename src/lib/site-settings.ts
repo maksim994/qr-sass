@@ -5,6 +5,7 @@ export type SiteSettingsData = {
   customHeadCode: string | null;
   robotsTxtContent: string | null;
   faviconUrl: string | null;
+  indexNowKey: string | null;
 };
 
 const defaults: SiteSettingsData = {
@@ -12,6 +13,7 @@ const defaults: SiteSettingsData = {
   customHeadCode: null,
   robotsTxtContent: null,
   faviconUrl: null,
+  indexNowKey: null,
 };
 
 export function getDefaultRobotsTxt(): string {
@@ -38,6 +40,7 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
       customHeadCode: row?.customHeadCode ?? null,
       robotsTxtContent: row?.robotsTxtContent ?? null,
       faviconUrl: row?.faviconUrl ?? null,
+      indexNowKey: row?.indexNowKey ?? null,
     };
   } catch {
     return defaults;
