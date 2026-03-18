@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useState } from "react";
 
@@ -28,7 +30,7 @@ export default function AbTestForm({ qrId, abTest, scanCountA, scanCountB, onSav
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch(`/api/qr/${qrId}/ab-test`, {
+      const res = await fetchApi(`/api/qr/${qrId}/ab-test`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

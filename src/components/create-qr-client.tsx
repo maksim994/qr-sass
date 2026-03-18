@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -182,7 +184,7 @@ export function CreateQrClient({ workspaceId }: { workspaceId: string }) {
       if (password.trim()) body.password = password;
     }
 
-    const response = await fetch("/api/qr", {
+    const response = await fetchApi("/api/qr", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

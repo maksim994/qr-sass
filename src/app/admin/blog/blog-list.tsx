@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { fetchApi } from "@/lib/client-api";
 
 type Post = {
   id: string;
@@ -86,7 +87,7 @@ function DeleteButton({ postId, postTitle }: { postId: string; postTitle: string
   async function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (!confirm(`Удалить статью «${postTitle}»?`)) return;
-    const res = await fetch(`/api/admin/blog/${postId}`, { method: "DELETE", credentials: "include" });
+    const res = await fetchApi(`/api/admin/blog/${postId}`, { method: "DELETE", credentials: "include" });
     if (!res.ok) {
       const json = await res.json().catch(() => ({}));
       alert(json.error ?? "Ошибка удаления");

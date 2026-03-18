@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { CoverImageUpload } from "@/components/admin/cover-image-upload";
 
@@ -81,7 +82,7 @@ export function BlogPostForm({ post, mode }: Props) {
         publishedAt: state.published ? new Date().toISOString() : null,
       };
       if (mode === "create") {
-        const res = await fetch("/api/admin/blog", {
+        const res = await fetchApi("/api/admin/blog", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -92,7 +93,7 @@ export function BlogPostForm({ post, mode }: Props) {
         router.push("/admin/blog");
         router.refresh();
       } else if (post?.id) {
-        const res = await fetch(`/api/admin/blog/${post.id}`, {
+        const res = await fetchApi(`/api/admin/blog/${post.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

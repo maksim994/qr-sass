@@ -3,6 +3,7 @@ import React from "react";
 import parse from "html-react-parser";
 import "./globals.css";
 import { getSiteSettings } from "@/lib/site-settings";
+import { CookieBanner } from "@/components/cookie-banner";
 
 const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
 
@@ -28,24 +29,6 @@ export const metadata: Metadata = {
   },
 };
 
-function YandexMetrikaScript({ id }: { id: string }) {
-  const code = `(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r)return;}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");ym(${id},"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:true});`;
-  return (
-    <>
-      <script type="text/javascript" dangerouslySetInnerHTML={{ __html: code }} />
-      <noscript>
-        <div>
-          <img
-            src={`https://mc.yandex.ru/watch/${id}`}
-            style={{ position: "absolute", left: "-9999px" }}
-            alt=""
-          />
-        </div>
-      </noscript>
-    </>
-  );
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -60,9 +43,6 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href={settings.faviconUrl} />
       </React.Fragment>
     ),
-    settings.yandexMetrikaId && (
-      <YandexMetrikaScript key="ym" id={settings.yandexMetrikaId} />
-    ),
     settings.customHeadCode && (
       <React.Fragment key="custom">
         {parse(
@@ -75,7 +55,10 @@ export default async function RootLayout({
   return (
     <html lang="ru">
       <head>{headContent}</head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
+      </body>
     </html>
   );
 }

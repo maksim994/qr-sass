@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 
 type Member = {
   id: string;
@@ -30,7 +31,7 @@ export function TeamPageClient({ workspaceId, members, canInvite, isAdmin }: Pro
     if (!email.trim() || !canInvite) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/members`, {
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -52,7 +53,7 @@ export function TeamPageClient({ workspaceId, members, canInvite, isAdmin }: Pro
     if (!confirm("Исключить участника из команды?")) return;
     setRemoving(userId);
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/members/${userId}`, {
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/members/${userId}`, {
         method: "DELETE",
         credentials: "include",
       });

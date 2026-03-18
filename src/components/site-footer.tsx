@@ -100,8 +100,18 @@ export function SiteFooter({ session }: Props) {
             </ul>
           </div>
         </div>
-        <div className="mt-12 border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
-          &copy; {new Date().getFullYear()} qr-s.ru. Все права защищены.
+        <div className="mt-12 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 pt-8 text-sm text-slate-400">
+          <div className="flex gap-4 mb-4 md:mb-0">
+            <Link href="/privacy-policy" className="hover:text-slate-900">
+              Политика конфиденциальности
+            </Link>
+            <Link href="/terms-of-service" className="hover:text-slate-900">
+              Пользовательское соглашение
+            </Link>
+          </div>
+          <div>
+            &copy; {new Date().getFullYear()} qr-s.ru. Все права защищены.
+          </div>
         </div>
       </div>
     </footer>

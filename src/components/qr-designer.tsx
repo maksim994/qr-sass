@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useCallback, useMemo, useRef, useState } from "react";
 
@@ -391,7 +393,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("workspaceId", workspaceId);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const res = await fetchApi("/api/upload", { method: "POST", body: formData });
       if (!res.ok) return;
       const data = await res.json();
       patch({ logoUrl: data.url ?? "", logoFileId: data.fileId ?? "" });

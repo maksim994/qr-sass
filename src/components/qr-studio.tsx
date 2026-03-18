@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { QrContentType, QrKind } from "@prisma/client";
 import QRCodeStyling from "qr-code-styling";
@@ -140,7 +142,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
   }, [background, cornerStyle, dotStyle, ecc, foreground, margin, previewData]);
 
   async function reloadItems() {
-    const response = await fetch(`/api/qr?workspaceId=${workspace.id}`);
+    const response = await fetchApi(`/api/qr?workspaceId=${workspace.id}`);
     const parsed = await parseApiResponse<{ items?: QrItem[] }>(response);
     if (!parsed.ok) {
       logger.warn({
@@ -159,7 +161,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
   async function createQr() {
     setSaving(true);
     setError("");
-    const response = await fetch("/api/qr", {
+    const response = await fetchApi("/api/qr", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -200,7 +202,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
     const targetUrl = dynamicTarget[id];
     if (!targetUrl) return;
 
-    const response = await fetch(`/api/qr/${id}/target`, {
+    const response = await fetchApi(`/api/qr/${id}/target`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ targetUrl }),

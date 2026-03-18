@@ -95,6 +95,8 @@ model Workspace {
   projects      Project[]
   qrCodes       QrCode[]
   uploadedFiles UploadedFile[]
+  subscription  Subscription?
+  payments      Payment[]
 }
 
 model Membership {
@@ -231,4 +233,41 @@ model SiteSettings {
   faviconUrl        String?
   indexNowKey       String?  // IndexNow: 8–128 символов, a-z A-Z 0-9 -
   updatedAt         DateTime @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  CANCELED
+  REFUNDED
+}
+
+model Subscription {
+  id              String        @id @default(cuid())
+  workspaceId     String        @unique
+  plan            WorkspacePlan
+  status          String        @default("active") // active, past_due, canceled
+  currentPeriodEnd DateTime
+  cancelAtPeriodEnd Boolean     @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  workspaceId     String
+  subscriptionId  String?
+  providerPaymentId String      @unique // YooKassa payment ID
+  amount          Int           // в рублях
+  currency        String        @default("RUB")
+  status          PaymentStatus @default(PENDING)
+  description     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
 }

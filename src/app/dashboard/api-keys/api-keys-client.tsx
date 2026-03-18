@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { fetchApi } from "@/lib/client-api";
 
 type KeyItem = { id: string; name: string; prefix: string; createdAt: string };
 
@@ -20,7 +21,7 @@ export function ApiKeysClient({ workspaceId }: Props) {
   async function loadKeys() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/api-keys`, { credentials: "include" });
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/api-keys`, { credentials: "include" });
       if (!res.ok) return;
       const data = await res.json();
       if (data.ok && data.data?.items) setKeys(data.data.items);
@@ -33,7 +34,7 @@ export function ApiKeysClient({ workspaceId }: Props) {
     if (!name.trim()) return;
     setCreating(true);
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/api-keys`, {
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/api-keys`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -58,7 +59,7 @@ export function ApiKeysClient({ workspaceId }: Props) {
     if (!confirm("Отозвать ключ? Он перестанет работать.")) return;
     setRevoking(keyId);
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/api-keys/${keyId}`, {
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/api-keys/${keyId}`, {
         method: "DELETE",
         credentials: "include",
       });

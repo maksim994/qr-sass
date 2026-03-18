@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 
 type Props = {
   initialName: string;
@@ -65,7 +66,7 @@ export function ProfileForm({
         body.newPassword = newPassword;
       }
 
-      const res = await fetch("/api/user/profile", {
+      const res = await fetchApi("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

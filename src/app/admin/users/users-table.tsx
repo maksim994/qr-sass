@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 
 const PLAN_IDS = ["FREE", "PRO", "BUSINESS"] as const;
 const PLAN_LABELS: Record<string, string> = {
@@ -29,7 +30,7 @@ export function UsersTable({ users }: Props) {
   async function changePlan(workspaceId: string, plan: string) {
     setUpdating(workspaceId);
     try {
-      const res = await fetch(`/api/admin/workspaces/${workspaceId}/plan`, {
+      const res = await fetchApi(`/api/admin/workspaces/${workspaceId}/plan`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),

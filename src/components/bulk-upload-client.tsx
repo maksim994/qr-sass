@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +29,7 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("workspaceId", workspaceId);
-      const res = await fetch("/api/qr/bulk", {
+      const res = await fetchApi("/api/qr/bulk", {
         method: "POST",
         body: fd,
       });

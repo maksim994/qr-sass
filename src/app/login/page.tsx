@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { parseApiResponse } from "@/lib/client-api";
+import { parseApiResponse, fetchApi } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,10 +19,10 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const response = await fetch("/api/auth/login", {
+    const response = await fetchApi("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, consent }),
     });
     const parsed = await parseApiResponse<{ userId?: string }>(response);
     setLoading(false);
@@ -78,6 +79,27 @@ export default function LoginPage() {
               placeholder="••••••••"
               required
             />
+          </div>
+
+          <div className="flex items-start gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="consent"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+              required
+            />
+            <label htmlFor="consent" className="text-sm text-slate-500">
+              Я согласен на{" "}
+              <Link href="/privacy-policy" className="text-blue-600 hover:underline" target="_blank">
+                обработку персональных данных
+              </Link>{" "}
+              и принимаю условия{" "}
+              <Link href="/terms-of-service" className="text-blue-600 hover:underline" target="_blank">
+                Пользовательского соглашения
+              </Link>
+            </label>
           </div>
 
           {error && <p className="text-danger text-sm">{error}</p>}

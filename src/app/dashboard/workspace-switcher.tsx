@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchApi } from "@/lib/client-api";
 
 type Workspace = { id: string; name: string; plan: string };
 type Props = {
@@ -25,7 +26,7 @@ export function WorkspaceSwitcher({ workspaces, currentId }: Props) {
     if (id === currentId) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/workspace/select", {
+      const res = await fetchApi("/api/workspace/select", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

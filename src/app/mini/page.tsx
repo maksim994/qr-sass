@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { parseApiResponse } from "@/lib/client-api";
+import { parseApiResponse, fetchApi } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
 
 declare global {
@@ -25,7 +25,7 @@ export default function MiniAppPage() {
       return;
     }
 
-    const response = await fetch("/api/telegram/auth", {
+    const response = await fetchApi("/api/telegram/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ initDataRaw }),

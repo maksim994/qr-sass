@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useState } from "react";
 
@@ -18,7 +20,7 @@ export default function UpdateTarget({ qrId, currentUrl }: Props) {
     setMessage(null);
 
     try {
-      const res = await fetch(`/api/qr/${qrId}/target`, {
+      const res = await fetchApi(`/api/qr/${qrId}/target`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetUrl: url }),

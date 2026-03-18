@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 
 type User = { id: string; email: string; name: string | null; isAdmin: boolean };
 
@@ -14,7 +15,7 @@ export function AdminsList({ initialUsers }: Props) {
   async function toggleAdmin(user: User) {
     setUpdating(user.id);
     try {
-      const res = await fetch(`/api/admin/users/${user.id}/admin`, {
+      const res = await fetchApi(`/api/admin/users/${user.id}/admin`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isAdmin: !user.isAdmin }),

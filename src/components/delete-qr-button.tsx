@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,7 +18,7 @@ export default function DeleteQrButton({ qrId, qrName }: Props) {
 
   async function handleDelete() {
     setDeleting(true);
-    const response = await fetch(`/api/qr/${qrId}`, { method: "DELETE" });
+    const response = await fetchApi(`/api/qr/${qrId}`, { method: "DELETE" });
     const parsed = await parseApiResponse<{ deleted?: boolean }>(response);
     setDeleting(false);
 

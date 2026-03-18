@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -152,7 +154,7 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
     setSaving(true);
     setError("");
 
-    const response = await fetch(`/api/qr/${initialQr.id}`, {
+    const response = await fetchApi(`/api/qr/${initialQr.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, payload, style }),

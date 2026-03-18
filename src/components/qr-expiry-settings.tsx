@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useState } from "react";
 
@@ -42,7 +44,7 @@ export default function QrExpirySettings({ qrId, expireAt, maxScans, passwordReq
       }
       body.gdprRequired = gdprRequiredVal;
       body.gdprPolicyUrl = gdprPolicyUrlVal || null;
-      const res = await fetch(`/api/qr/${qrId}/settings`, {
+      const res = await fetchApi(`/api/qr/${qrId}/settings`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

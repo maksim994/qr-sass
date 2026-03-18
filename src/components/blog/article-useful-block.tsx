@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useEffect, useState } from "react";
 
@@ -28,7 +30,7 @@ export function ArticleUsefulBlock({ slug, initialLikes }: Props) {
     if (voted || loading) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/blog/${slug}/like`, { method: "POST" });
+      const res = await fetchApi(`/api/blog/${slug}/like`, { method: "POST" });
       if (res.ok) {
         const { likes: newLikes } = await res.json();
         setLikes(newLikes);

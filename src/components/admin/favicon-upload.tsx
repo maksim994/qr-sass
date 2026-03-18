@@ -1,4 +1,6 @@
 "use client";
+import { fetchApi } from "@/lib/client-api";
+
 
 import { useCallback, useRef, useState } from "react";
 
@@ -20,7 +22,7 @@ export function FaviconUpload({ onUploaded, currentUrl }: Props) {
       formData.append("file", file);
 
       try {
-        const res = await fetch("/api/admin/site-settings/upload-favicon", {
+        const res = await fetchApi("/api/admin/site-settings/upload-favicon", {
           method: "POST",
           credentials: "include",
           body: formData,

@@ -19,11 +19,17 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
   workspaceName: z.string().min(2).max(120),
+  consent: z.boolean().refine(val => val === true, {
+    message: "Необходимо согласие на обработку персональных данных",
+  }),
 });
 
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
+  consent: z.boolean().refine(val => val === true, {
+    message: "Необходимо согласие на обработку персональных данных",
+  }).optional(), // Optional for backward compatibility with API, but required on frontend
 });
 
 export const profileUpdateSchema = z

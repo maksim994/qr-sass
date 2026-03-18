@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 import { PLAN_IDS, PLAN_DEFAULTS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
@@ -45,7 +46,7 @@ export function PlansForm({ initialOverrides }: Props) {
     setSaving(planId);
     try {
       const row = state[planId];
-      const res = await fetch(`/api/admin/plans/${planId}`, {
+      const res = await fetchApi(`/api/admin/plans/${planId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

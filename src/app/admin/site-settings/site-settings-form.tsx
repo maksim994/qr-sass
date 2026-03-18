@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchApi } from "@/lib/client-api";
 import { FaviconUpload } from "@/components/admin/favicon-upload";
 
 function generateIndexNowKey(): string {
@@ -40,7 +41,7 @@ export function SiteSettingsForm({
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/site-settings", {
+      const res = await fetchApi("/api/admin/site-settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
