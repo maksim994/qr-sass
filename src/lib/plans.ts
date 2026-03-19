@@ -14,6 +14,7 @@ export type PlanLimits = {
 export type PlanInfo = {
   id: PlanId;
   name: string;
+  description: string;
   priceRub: number;
   limits: PlanLimits;
   limitLabels: string[];
@@ -22,6 +23,7 @@ export type PlanInfo = {
 export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   FREE: {
     name: "Бесплатный",
+    description: "Базовый тариф для личного использования",
     priceRub: 0,
     limits: {
       maxQrCodes: 10,
@@ -34,6 +36,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   },
   PRO: {
     name: "Про",
+    description: "Для малого бизнеса и команд",
     priceRub: 990,
     limits: {
       maxQrCodes: null,
@@ -46,6 +49,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   },
   BUSINESS: {
     name: "Бизнес",
+    description: "Для агентств и корпоративных клиентов",
     priceRub: 2990,
     limits: {
       maxQrCodes: null,
@@ -122,6 +126,7 @@ export async function getPlan(planId: PlanId | string | null | undefined): Promi
     return {
       id,
       name: base.name,
+      description: base.description,
       priceRub,
       limits,
       limitLabels: buildLimitLabels(limits, id),
