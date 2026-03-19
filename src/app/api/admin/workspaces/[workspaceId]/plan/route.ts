@@ -21,10 +21,32 @@ export async function PATCH(
 
   try {
     const db = getDb();
+    const newPlan = data.plan as WorkspacePlan;
+
     const workspace = await db.workspace.update({
       where: { id: workspaceId },
-      data: { plan: data.plan as WorkspacePlan },
+      data: { plan: newPlan },
     });
+
+    if (newPlan === "PRO" || newPlan === "BUSINESS") {
+      const periodEnd = new Date();
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      await db.subscription.upsert({
+        where: { workspaceId },
+        create: {
+          workspaceId,
+          plan: newPlan,
+          status: "active",
+          currentPeriodEnd: periodEnd,
+        },
+        update: {
+          plan: newPlan,
+          status: "active",
+          currentPeriodEnd: periodEnd,
+        },
+      });
+    }
+
     return apiSuccess(workspace);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Database error";

@@ -18,14 +18,46 @@ type UserRow = {
   isAdmin: boolean;
   createdAt: Date;
   _count: { qrCodes: number };
-  memberships: Array<{ workspace: { id: string; name: string; plan: string } }>;
+  memberships: Array<{
+    workspace: {
+      id: string;
+      name: string;
+      plan: string;
+      subscription: { currentPeriodEnd: Date; status: string } | null;
+    };
+  }>;
 };
 
 type Props = { users: UserRow[] };
 
+function toDateInputValue(d: Date): string {
+  return new Date(d).toISOString().slice(0, 10);
+}
+
 export function UsersTable({ users }: Props) {
   const router = useRouter();
   const [updating, setUpdating] = useState<string | null>(null);
+
+  async function changePeriodEnd(workspaceId: string, dateStr: string) {
+    setUpdating(workspaceId);
+    try {
+      const res = await fetchApi(`/api/admin/workspaces/${workspaceId}/subscription`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPeriodEnd: dateStr }),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as { error?: string })?.error ?? "Ошибка");
+      }
+      router.refresh();
+    } catch (e) {
+      alert((e instanceof Error ? e.message : "Не удалось изменить дату") || "Не удалось изменить дату");
+    } finally {
+      setUpdating(null);
+    }
+  }
 
   async function changePlan(workspaceId: string, plan: string) {
     setUpdating(workspaceId);
@@ -56,6 +88,7 @@ export function UsersTable({ users }: Props) {
             <th className="py-3 font-semibold text-slate-900">Email</th>
             <th className="py-3 font-semibold text-slate-900">Имя</th>
             <th className="py-3 font-semibold text-slate-900">Тариф</th>
+            <th className="py-3 font-semibold text-slate-900">Оплачено до</th>
             <th className="py-3 font-semibold text-slate-900">Workspace</th>
             <th className="py-3 font-semibold text-slate-900">QR</th>
             <th className="py-3 font-semibold text-slate-900">Регистрация</th>
@@ -82,6 +115,31 @@ export function UsersTable({ users }: Props) {
                         <option key={id} value={id}>{PLAN_LABELS[id]}</option>
                       ))}
                     </select>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="py-3">
+                  {workspace && (plan === "PRO" || plan === "BUSINESS") ? (
+                    workspace.subscription ? (
+                      <input
+                        type="date"
+                        defaultValue={toDateInputValue(workspace.subscription.currentPeriodEnd)}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          if (v && v !== toDateInputValue(workspace.subscription!.currentPeriodEnd)) {
+                            changePeriodEnd(workspace.id, v);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                        }}
+                        disabled={updating === workspace.id}
+                        className="rounded border border-slate-200 px-2 py-1 text-xs w-36"
+                      />
+                    ) : (
+                      <span className="text-slate-400 text-xs">— нет подписки</span>
+                    )
                   ) : (
                     "—"
                   )}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApiUser } from "@/lib/api-auth";
 import { getDb } from "@/lib/db";
+import { getPlan } from "@/lib/plans";
 import { createYookassaPayment } from "@/lib/yookassa";
 
 export async function POST(req: NextRequest) {
@@ -24,11 +25,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // В реальном проекте цена должна браться из БД или конфига
-    let amount = 0;
-    if (planId === "PRO") amount = 990;
-    else if (planId === "BUSINESS") amount = 2990;
-    else return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    const plan = await getPlan(planId);
+    if (plan.id === "FREE") {
+      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    }
+    const amount = plan.priceRub;
 
     const paymentData = await createYookassaPayment(
       amount,

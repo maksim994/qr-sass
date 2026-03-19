@@ -3,10 +3,38 @@
 import { useState } from "react";
 import { fetchApi } from "@/lib/client-api";
 import { YookassaWidget } from "@/components/yookassa-widget";
+import type { PlanInfo } from "@/lib/plans";
 
-export function BillingClient({ workspaceId, currentPlanId }: { workspaceId: string, currentPlanId: string }) {
+type Props = {
+  workspaceId: string;
+  currentPlanId: string;
+  plans: PlanInfo[]; // [PRO, BUSINESS]
+  trialUsedAt: boolean;
+};
+
+export function BillingClient({ workspaceId, currentPlanId, plans, trialUsedAt }: Props) {
   const [loading, setLoading] = useState(false);
+  const [trialLoading, setTrialLoading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+
+  const planPro = plans.find((p) => p.id === "PRO");
+  const planBusiness = plans.find((p) => p.id === "BUSINESS");
+
+  async function handleStartTrial() {
+    setTrialLoading(true);
+    try {
+      const res = await fetchApi("/api/billing/trial", { method: "POST", body: JSON.stringify({ workspaceId }) });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Ошибка при запуске пробного периода");
+      }
+      window.location.href = "/dashboard";
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Ошибка");
+    } finally {
+      setTrialLoading(false);
+    }
+  }
 
   async function handleCheckout(planId: string) {
     setLoading(true);
@@ -64,14 +92,37 @@ export function BillingClient({ workspaceId, currentPlanId }: { workspaceId: str
         <p className="mt-2 text-sm text-slate-500 flex-1">
           Для бизнеса и маркетинговых команд. Неограниченные QR-коды и аналитика.
         </p>
-        <p className="mt-4 text-2xl font-bold text-slate-900 mb-6">990 ₽ <span className="text-sm font-normal text-slate-500">/ мес</span></p>
-        <button 
-          onClick={() => handleCheckout("PRO")}
-          disabled={loading || currentPlanId === "PRO"}
-          className="btn btn-primary w-full"
-        >
-          {currentPlanId === "PRO" ? "Текущий тариф" : "Выбрать PRO"}
-        </button>
+        <p className="mt-4 text-2xl font-bold text-slate-900 mb-6">
+          {planPro ? `${planPro.priceRub.toLocaleString("ru-RU")} ₽` : "—"} <span className="text-sm font-normal text-slate-500">/ мес</span>
+        </p>
+        {currentPlanId === "PRO" ? (
+          <button disabled className="btn btn-primary w-full">Текущий тариф</button>
+        ) : !trialUsedAt ? (
+          <div className="space-y-3">
+            <button
+              onClick={handleStartTrial}
+              disabled={trialLoading}
+              className="btn btn-primary w-full"
+            >
+              {trialLoading ? "Запуск…" : "Начать пробный период"}
+            </button>
+            <button
+              onClick={() => handleCheckout("PRO")}
+              disabled={loading}
+              className="btn btn-secondary w-full"
+            >
+              {loading ? "…" : `Оплатить ${planPro?.priceRub?.toLocaleString("ru-RU") ?? "—"} ₽`}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => handleCheckout("PRO")}
+            disabled={loading}
+            className="btn btn-primary w-full"
+          >
+            {loading ? "…" : `Выбрать PRO — ${planPro?.priceRub?.toLocaleString("ru-RU") ?? "—"} ₽`}
+          </button>
+        )}
       </div>
 
       <div className={`card p-6 flex flex-col ${currentPlanId === "BUSINESS" ? "ring-2 ring-blue-600" : ""}`}>
@@ -79,7 +130,9 @@ export function BillingClient({ workspaceId, currentPlanId }: { workspaceId: str
         <p className="mt-2 text-sm text-slate-500 flex-1">
           Для крупных проектов. Командная работа, API, кастомные домены.
         </p>
-        <p className="mt-4 text-2xl font-bold text-slate-900 mb-6">2990 ₽ <span className="text-sm font-normal text-slate-500">/ мес</span></p>
+        <p className="mt-4 text-2xl font-bold text-slate-900 mb-6">
+          {planBusiness ? `${planBusiness.priceRub.toLocaleString("ru-RU")} ₽` : "—"} <span className="text-sm font-normal text-slate-500">/ мес</span>
+        </p>
         <button 
           onClick={() => handleCheckout("BUSINESS")}
           disabled={loading || currentPlanId === "BUSINESS"}

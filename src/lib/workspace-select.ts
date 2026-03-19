@@ -7,7 +7,7 @@ export type MembershipWithWorkspace = {
   role: string;
   workspaceId: string;
   createdAt?: Date;
-  workspace: { id: string; name: string; plan: string };
+  workspace: { id: string; name: string; plan: string; trialUsedAt?: Date | null };
 };
 
 /** Returns workspace from cookie if valid for user, else most recently joined (prioritizes invited workspaces) */

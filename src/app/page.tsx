@@ -136,7 +136,7 @@ const PLAN_CONFIG = [
       "Расширенная аналитика",
       "SLA и персональный менеджер",
     ],
-    cta: "Связаться с нами",
+    cta: "Перейти к оплате",
     href: "/register",
     highlighted: false,
   },

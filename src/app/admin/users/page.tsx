@@ -6,7 +6,11 @@ export default async function AdminUsersPage() {
   const users = await db.user.findMany({
     include: {
       memberships: {
-        include: { workspace: true },
+        include: {
+          workspace: {
+            include: { subscription: true },
+          },
+        },
       },
       _count: { select: { qrCodes: true } },
     },
