@@ -20,6 +20,10 @@ type Props = {
   initialRobotsTxtContent: string;
   initialFaviconUrl: string;
   initialIndexNowKey: string;
+  initialContactEmail: string;
+  initialContactPhone: string;
+  initialRequisitesInn: string;
+  initialRequisitesName: string;
 };
 
 export function SiteSettingsForm({
@@ -28,6 +32,10 @@ export function SiteSettingsForm({
   initialRobotsTxtContent,
   initialFaviconUrl,
   initialIndexNowKey,
+  initialContactEmail,
+  initialContactPhone,
+  initialRequisitesInn,
+  initialRequisitesName,
 }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -36,6 +44,10 @@ export function SiteSettingsForm({
   const [robotsTxtContent, setRobotsTxtContent] = useState(initialRobotsTxtContent);
   const [faviconUrl, setFaviconUrl] = useState(initialFaviconUrl);
   const [indexNowKey, setIndexNowKey] = useState(initialIndexNowKey);
+  const [contactEmail, setContactEmail] = useState(initialContactEmail);
+  const [contactPhone, setContactPhone] = useState(initialContactPhone);
+  const [requisitesInn, setRequisitesInn] = useState(initialRequisitesInn);
+  const [requisitesName, setRequisitesName] = useState(initialRequisitesName);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +63,10 @@ export function SiteSettingsForm({
           robotsTxtContent: robotsTxtContent.trim() || null,
           faviconUrl: faviconUrl.trim() || null,
           indexNowKey: indexNowKey.trim() || null,
+          contactEmail: contactEmail.trim() || null,
+          contactPhone: contactPhone.trim() || null,
+          requisitesInn: requisitesInn.trim() || null,
+          requisitesName: requisitesName.trim() || null,
         }),
       });
       if (!res.ok) {
@@ -160,6 +176,69 @@ export function SiteSettingsForm({
         <p className="mt-1 text-xs text-slate-500">
           Иконка сайта (favicon). Отображается во вкладке браузера. ICO, PNG, WebP.
         </p>
+      </div>
+
+      <div className="pt-6 border-t border-slate-200">
+        <h3 className="text-lg font-medium text-slate-900 mb-4">Реквизиты и контакты</h3>
+        <p className="text-sm text-slate-500 mb-4">Эти данные будут отображаться в подвале сайта и юридических документах для прохождения модерации платежных систем.</p>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="label" htmlFor="requisitesName">
+              ФИО / Название организации
+            </label>
+            <input
+              id="requisitesName"
+              type="text"
+              className="input"
+              placeholder="Например: Иванов Иван Иванович"
+              value={requisitesName}
+              onChange={(e) => setRequisitesName(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="requisitesInn">
+              ИНН
+            </label>
+            <input
+              id="requisitesInn"
+              type="text"
+              className="input"
+              placeholder="Например: 123456789012"
+              value={requisitesInn}
+              onChange={(e) => setRequisitesInn(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="contactEmail">
+              Контактный Email
+            </label>
+            <input
+              id="contactEmail"
+              type="email"
+              className="input"
+              placeholder="Например: contact@example.com"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="contactPhone">
+              Контактный телефон
+            </label>
+            <input
+              id="contactPhone"
+              type="text"
+              className="input"
+              placeholder="Например: +7 999 123-45-67"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
 
       <button type="submit" disabled={saving} className="btn btn-primary">

@@ -53,13 +53,13 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
         <div className="flex shrink-0 gap-3">
           <button
             onClick={handleDecline}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-md border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 btn btn-secondary"
           >
             Отклонить
           </button>
           <button
             onClick={handleAccept}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 btn btn-primary"
           >
             Принять
           </button>

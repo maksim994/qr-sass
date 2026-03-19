@@ -30,12 +30,9 @@ export async function POST(req: NextRequest) {
     else if (planId === "BUSINESS") amount = 2990;
     else return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
-    const returnUrl = `${process.env.APP_URL || "https://qr-s.ru"}/dashboard/settings/billing`;
-
     const paymentData = await createYookassaPayment(
       amount,
       `Оплата тарифа ${planId} для ${workspaceId}`,
-      returnUrl,
       { workspaceId, planId, userId: user.id }
     );
 
@@ -49,7 +46,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ url: paymentData.confirmation.confirmation_url });
+    return NextResponse.json({ token: paymentData.confirmation.confirmation_token });
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -22,6 +22,10 @@ export default async function AdminSiteSettingsPage() {
           initialRobotsTxtContent={row?.robotsTxtContent ?? ""}
           initialFaviconUrl={row?.faviconUrl ?? ""}
           initialIndexNowKey={row?.indexNowKey ?? ""}
+          initialContactEmail={row?.contactEmail ?? ""}
+          initialContactPhone={row?.contactPhone ?? ""}
+          initialRequisitesInn={row?.requisitesInn ?? ""}
+          initialRequisitesName={row?.requisitesName ?? ""}
         />
       </div>
     </div>

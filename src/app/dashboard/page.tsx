@@ -101,7 +101,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         {planInfo.id === "FREE" && (
-          <Link href="/#pricing" className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-700">
+          <Link href="/dashboard/billing" className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-700">
             Перейти на Про или Бизнес →
           </Link>
         )}

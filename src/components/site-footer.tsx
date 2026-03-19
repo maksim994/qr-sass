@@ -1,14 +1,20 @@
 import Link from "next/link";
+import { getDb } from "@/lib/db";
 
 type Props = {
   session: { sub: string } | null;
 };
 
-export function SiteFooter({ session }: Props) {
+export async function SiteFooter({ session }: Props) {
+  const db = getDb();
+  const settings = await db.siteSettings.findUnique({
+    where: { id: "default" },
+  });
+
   return (
     <footer className="border-t border-slate-200 bg-white">
       <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <p className="text-lg font-bold text-slate-900">qr-s.ru</p>
             <p className="mt-2 text-sm text-slate-500">
@@ -96,6 +102,31 @@ export function SiteFooter({ session }: Props) {
                     </Link>
                   </li>
                 </>
+              )}
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Контакты</p>
+            <ul className="mt-3 space-y-2 text-sm text-slate-500">
+              {settings?.requisitesName && (
+                <li>{settings.requisitesName}</li>
+              )}
+              {settings?.requisitesInn && (
+                <li>ИНН: {settings.requisitesInn}</li>
+              )}
+              {settings?.contactEmail && (
+                <li>
+                  <a href={`mailto:${settings.contactEmail}`} className="hover:text-slate-900">
+                    {settings.contactEmail}
+                  </a>
+                </li>
+              )}
+              {settings?.contactPhone && (
+                <li>
+                  <a href={`tel:${settings.contactPhone}`} className="hover:text-slate-900">
+                    {settings.contactPhone}
+                  </a>
+                </li>
               )}
             </ul>
           </div>

@@ -1,7 +1,7 @@
 export const YOOKASSA_SHOP_ID = process.env.YOOKASSA_SHOP_ID || "";
 export const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY || "";
 
-export async function createYookassaPayment(amount: number, description: string, returnUrl: string, metadata: Record<string, string>) {
+export async function createYookassaPayment(amount: number, description: string, metadata: Record<string, string>) {
   const idempotencyKey = crypto.randomUUID();
   
   const auth = Buffer.from(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`).toString("base64");
@@ -20,8 +20,7 @@ export async function createYookassaPayment(amount: number, description: string,
       },
       capture: true,
       confirmation: {
-        type: "redirect",
-        return_url: returnUrl,
+        type: "embedded",
       },
       description,
       metadata,

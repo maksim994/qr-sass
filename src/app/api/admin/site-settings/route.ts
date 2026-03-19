@@ -13,6 +13,10 @@ export async function GET() {
     robotsTxtContent: row?.robotsTxtContent ?? null,
     faviconUrl: row?.faviconUrl ?? null,
     indexNowKey: row?.indexNowKey ?? null,
+    contactEmail: row?.contactEmail ?? null,
+    contactPhone: row?.contactPhone ?? null,
+    requisitesInn: row?.requisitesInn ?? null,
+    requisitesName: row?.requisitesName ?? null,
   });
 }
 
@@ -27,6 +31,10 @@ export async function PATCH(req: Request) {
     robotsTxtContent?: string | null;
     faviconUrl?: string | null;
     indexNowKey?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    requisitesInn?: string | null;
+    requisitesName?: string | null;
   }>(req);
   if (!data) return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
 
@@ -66,6 +74,10 @@ export async function PATCH(req: Request) {
       robotsTxtContent: data.robotsTxtContent ?? null,
       faviconUrl: data.faviconUrl ?? null,
       indexNowKey: data.indexNowKey?.trim() || null,
+      contactEmail: data.contactEmail?.trim() || null,
+      contactPhone: data.contactPhone?.trim() || null,
+      requisitesInn: data.requisitesInn?.trim() || null,
+      requisitesName: data.requisitesName?.trim() || null,
     },
     update: {
       ...(data.yandexMetrikaId !== undefined && { yandexMetrikaId: data.yandexMetrikaId || null }),
@@ -73,6 +85,10 @@ export async function PATCH(req: Request) {
       ...(data.robotsTxtContent !== undefined && { robotsTxtContent: data.robotsTxtContent ?? null }),
       ...(data.faviconUrl !== undefined && { faviconUrl: data.faviconUrl ?? null }),
       ...(data.indexNowKey !== undefined && { indexNowKey: data.indexNowKey?.trim() || null }),
+      ...(data.contactEmail !== undefined && { contactEmail: data.contactEmail?.trim() || null }),
+      ...(data.contactPhone !== undefined && { contactPhone: data.contactPhone?.trim() || null }),
+      ...(data.requisitesInn !== undefined && { requisitesInn: data.requisitesInn?.trim() || null }),
+      ...(data.requisitesName !== undefined && { requisitesName: data.requisitesName?.trim() || null }),
     },
   });
 
@@ -82,5 +98,9 @@ export async function PATCH(req: Request) {
     robotsTxtContent: row.robotsTxtContent,
     faviconUrl: row.faviconUrl,
     indexNowKey: row.indexNowKey,
+    contactEmail: row.contactEmail,
+    contactPhone: row.contactPhone,
+    requisitesInn: row.requisitesInn,
+    requisitesName: row.requisitesName,
   });
 }

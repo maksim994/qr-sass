@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
@@ -6,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { getPlan, getPlanSync } from "@/lib/plans";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { BlogPostsSlider } from "@/components/blog/blog-posts-slider";
 
 export const dynamic = "force-dynamic";
 
@@ -207,7 +207,7 @@ const testimonials = [
   },
 ];
 
-const LATEST_POSTS_COUNT = 6;
+const LATEST_POSTS_COUNT = 20;
 
 export default async function HomePage() {
   const session = await getSession();
@@ -454,7 +454,7 @@ export default async function HomePage() {
                     </ul>
                   </div>
                   <Link
-                    href={plan.href}
+                    href={session ? "/dashboard/billing" : plan.href}
                     className={`mt-8 shrink-0 block w-full rounded-full py-3 text-center text-sm font-semibold transition ${
                       plan.highlighted
                         ? "bg-white !text-blue-600 hover:bg-blue-50"
@@ -507,58 +507,18 @@ export default async function HomePage() {
                 Пока нет опубликованных статей. Следите за обновлениями!
               </div>
             ) : (
-              <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {latestPosts.map((post, index) => (
-                  <article
-                    key={post.slug}
-                    className="card overflow-hidden transition hover:shadow-lg"
-                  >
-                    <Link href={`/blog/${post.slug}`} className="block">
-                      {post.coverImageUrl ? (
-                        <div className="relative aspect-video w-full overflow-hidden rounded-t-2xl bg-slate-100">
-                          <Image
-                            src={post.coverImageUrl}
-                            alt={post.title}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            className="object-cover"
-                            priority={index < 3}
-                          />
-                        </div>
-                      ) : (
-                        <div className="aspect-video w-full rounded-t-2xl bg-slate-200" />
-                      )}
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold text-slate-900">{post.title}</h3>
-                        {post.excerpt && (
-                          <p className="mt-2 line-clamp-2 text-slate-600">{post.excerpt}</p>
-                        )}
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                          <time dateTime={post.publishedAt!.toISOString()}>
-                            {new Date(post.publishedAt!).toLocaleDateString("ru", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </time>
-                          {post.readingTimeMinutes != null && (
-                            <span>· {post.readingTimeMinutes} мин</span>
-                          )}
-                          <span>· {post.views} просмотров</span>
-                          {post.likes > 0 && (
-                            <span className="inline-flex items-center gap-1">
-                              · {post.likes}{" "}
-                              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                              </svg>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </article>
-                ))}
-              </div>
+              <BlogPostsSlider
+                posts={latestPosts.map((p) => ({
+                  slug: p.slug,
+                  title: p.title,
+                  excerpt: p.excerpt,
+                  coverImageUrl: p.coverImageUrl,
+                  publishedAt: p.publishedAt!.toISOString(),
+                  views: p.views,
+                  likes: p.likes,
+                  readingTimeMinutes: p.readingTimeMinutes,
+                }))}
+              />
             )}
           </div>
         </section>

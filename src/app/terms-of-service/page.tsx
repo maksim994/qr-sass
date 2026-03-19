@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { getDb } from "@/lib/db";
 
 import { getSession } from "@/lib/auth";
 
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
 
 export default async function TermsOfServicePage() {
   const session = await getSession();
+  const db = getDb();
+  const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader session={session} />
@@ -68,6 +72,17 @@ export default async function TermsOfServicePage() {
             <h2>6. Нарушение условий пользовательского соглашения</h2>
             <p>
               6.1. Администрация сайта вправе раскрыть любую собранную о Пользователе данного Сайта информацию, если раскрытие необходимо в связи с расследованием или жалобой в отношении неправомерного использования Сайта либо для установления (идентификации) Пользователя, который может нарушать или вмешиваться в права Администрации сайта или в права других Пользователей Сайта.
+            </p>
+
+            <h2>7. Реквизиты оператора</h2>
+            <p>
+              {settings?.requisitesName ? settings.requisitesName : "ИП/ООО/Самозанятый"}
+              <br />
+              ИНН: {settings?.requisitesInn ? settings.requisitesInn : "—"}
+              <br />
+              Email: {settings?.contactEmail ? <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a> : "—"}
+              <br />
+              Телефон: {settings?.contactPhone ? <a href={`tel:${settings.contactPhone}`}>{settings.contactPhone}</a> : "—"}
             </p>
           </div>
         </div>
