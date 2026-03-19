@@ -45,6 +45,8 @@
 | `S3_ACCESS_KEY_ID` | Ключ доступа S3 | Да |
 | `S3_SECRET_ACCESS_KEY` | Секретный ключ S3 | Да |
 | `S3_PUBLIC_URL` | Публичный URL для файлов | Да |
+| `YOOKASSA_SHOP_ID` | shop_id из личного кабинета ЮKassa | Да (для оплаты) |
+| `YOOKASSA_SECRET_KEY` | Секретный ключ из личного кабинета ЮKassa | Да (для оплаты) |
 
 `DATABASE_URL` и `REDIS_URL` задаются в `docker-compose.yml` и не требуют ручной настройки.
 
