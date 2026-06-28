@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import { getDb } from "@/lib/db";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
@@ -10,16 +11,16 @@ export async function PATCH(
   const { workspaceId } = await params;
   const requestId = getRequestId(req);
   const admin = await getAdminOrNull();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{ currentPeriodEnd: string }>(req);
   if (!data?.currentPeriodEnd || typeof data.currentPeriodEnd !== "string") {
-    return apiError("currentPeriodEnd (ISO date) required.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.PERIOD_END_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   const parsed = new Date(data.currentPeriodEnd);
   if (Number.isNaN(parsed.getTime())) {
-    return apiError("Invalid date format. Use ISO 8601 (e.g. 2026-04-15).", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.INVALID_DATE_FORMAT, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   try {
@@ -29,10 +30,10 @@ export async function PATCH(
       select: { plan: true },
     });
     if (!workspace) {
-      return apiError("Workspace not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.WORKSPACE_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
     if (workspace.plan === "FREE") {
-      return apiError("Workspace is on FREE plan. Change plan first.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.FREE_PLAN_CHANGE_FIRST, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const subscription = await db.subscription.upsert({

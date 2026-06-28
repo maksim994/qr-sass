@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { MSG } from "@/lib/user-messages";
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { consumeRateLimit, getClientIp, blogLikeRateLimiter } from "@/lib/rate-limit";
@@ -18,7 +19,7 @@ export async function POST(
   const limit = await consumeRateLimit(blogLikeRateLimiter, ip);
   if (!limit.success) {
     return NextResponse.json(
-      { error: "Too many requests" },
+      { error: MSG.TOO_MANY_REQUESTS },
       { status: 429, headers: limit.retryAfterMs ? { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } : undefined }
     );
   }
@@ -30,7 +31,7 @@ export async function POST(
     select: { id: true, likes: true },
   });
   if (!post) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: MSG.NOT_FOUND }, { status: 404 });
   }
 
   const cookieName = getCookieName(slug);

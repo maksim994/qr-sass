@@ -18,7 +18,7 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Пользователи</h1>
         <p className="mt-1 text-sm text-slate-500">Список всех пользователей. Тариф можно изменить для каждого workspace.</p>

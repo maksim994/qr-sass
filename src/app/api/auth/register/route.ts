@@ -1,11 +1,12 @@
 import { nanoid } from "nanoid";
+import { MSG } from "@/lib/user-messages";
 import { createSessionToken, hashPassword, setAuthCookie } from "@/lib/auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { consumeRateLimit, getClientIp, registerRateLimiter } from "@/lib/rate-limit";
-import { registerSchema } from "@/lib/validation";
+import { registerSchema, getValidationErrorMessage } from "@/lib/validation";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
     const limit = await consumeRateLimit(registerRateLimiter, ip);
     if (!limit.success) {
       return apiError(
-        "Too many registration attempts. Try again later.",
+        MSG.TOO_MANY_REGISTER_ATTEMPTS,
         "VALIDATION_ERROR",
         429,
         limit.retryAfterMs ? { retryAfterMs: limit.retryAfterMs } : undefined,
@@ -25,19 +26,20 @@ export async function POST(request: Request) {
 
     const raw = await readJsonBody(request);
     if (!raw) {
-      return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const parsed = registerSchema.safeParse(raw);
     if (!parsed.success) {
-      return apiError("Invalid payload.", "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      const message = getValidationErrorMessage(parsed.error) ?? MSG.INVALID_PAYLOAD;
+      return apiError(message, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
     }
 
     const db = getDb();
     const { email, name, password, workspaceName } = parsed.data;
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
-      return apiError("User already exists.", "CONFLICT", 409, undefined, requestId);
+      return apiError(MSG.USER_ALREADY_EXISTS, "CONFLICT", 409, undefined, requestId);
     }
 
     const passwordHash = await hashPassword(password);
@@ -90,6 +92,6 @@ export async function POST(request: Request) {
           ? { name: error.name, message: error.message, stack: error.stack }
           : error,
     });
-    return apiError("Could not create account.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_CREATE_ACCOUNT, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

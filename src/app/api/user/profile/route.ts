@@ -5,6 +5,7 @@ import {
   setAuthCookie,
   verifyPassword,
 } from "@/lib/auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { profileUpdateSchema } from "@/lib/validation";
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   const requestId = getRequestId(req);
   const session = await getSession();
   if (!session?.sub) {
-    return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+    return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
   }
 
   const db = getDb();
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
   });
 
   if (!user) {
-    return apiError("User not found.", "NOT_FOUND", 404, undefined, requestId);
+    return apiError(MSG.USER_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
   }
 
   return apiSuccess({ user }, 200, requestId);
@@ -33,18 +34,18 @@ export async function PATCH(req: Request) {
   const requestId = getRequestId(req);
   const session = await getSession();
   if (!session?.sub) {
-    return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+    return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
   }
 
   const raw = await readJsonBody(req);
   if (!raw) {
-    return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   const parsed = profileUpdateSchema.safeParse(raw);
   if (!parsed.success) {
     return apiError(
-      "Invalid payload.",
+      MSG.INVALID_PAYLOAD,
       "VALIDATION_ERROR",
       400,
       parsed.error.flatten(),
@@ -60,7 +61,7 @@ export async function PATCH(req: Request) {
   });
 
   if (!existing) {
-    return apiError("User not found.", "NOT_FOUND", 404, undefined, requestId);
+    return apiError(MSG.USER_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
   }
 
   const updates: { name?: string; email?: string; passwordHash?: string } = {};

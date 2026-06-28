@@ -1,4 +1,5 @@
 import { getApiUser, unauthorized } from "@/lib/api-auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
@@ -23,29 +24,29 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
     const raw = await readJsonBody<Record<string, unknown>>(request);
     if (!raw || typeof raw !== "object") {
-      return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const urlA = raw.urlA === "" || raw.urlA === null ? null : isValidUrl(raw.urlA) ? (raw.urlA as string) : undefined;
     const urlB = raw.urlB === "" || raw.urlB === null ? null : isValidUrl(raw.urlB) ? (raw.urlB as string) : undefined;
 
     if (urlA === undefined && raw.urlA !== undefined) {
-      return apiError("urlA must be a valid https/http URL.", "VALIDATION_ERROR", 400, undefined, requestId);
+      return apiError(MSG.URL_A_INVALID, "VALIDATION_ERROR", 400, undefined, requestId);
     }
     if (urlB === undefined && raw.urlB !== undefined) {
-      return apiError("urlB must be a valid https/http URL.", "VALIDATION_ERROR", 400, undefined, requestId);
+      return apiError(MSG.URL_B_INVALID, "VALIDATION_ERROR", 400, undefined, requestId);
     }
     if ((urlA && !urlB) || (!urlA && urlB)) {
-      return apiError("Both urlA and urlB must be set or both cleared.", "VALIDATION_ERROR", 400, undefined, requestId);
+      return apiError(MSG.AB_URLS_BOTH_OR_NONE, "VALIDATION_ERROR", 400, undefined, requestId);
     }
 
     const db = getDb();
     const qr = await db.qrCode.findUnique({ where: { id } });
     if (!qr) {
-      return apiError("Not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
     if (qr.kind !== "DYNAMIC" || qr.contentType !== "URL") {
-      return apiError("A/B test only for dynamic URL QR.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.AB_TEST_DYNAMIC_ONLY, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
@@ -87,6 +88,6 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not update A/B test.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_UPDATE_AB_TEST, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

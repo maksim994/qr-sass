@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { MSG } from "@/lib/user-messages";
 import { nanoid } from "nanoid";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
@@ -8,6 +9,8 @@ import { logger } from "@/lib/logger";
 import { encodeQrContent, needsHostedPage } from "@/lib/qr";
 import { evaluateScannability } from "@/lib/scannability";
 import { createQrSchema } from "@/lib/validation";
+import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
+import { supportsDynamicKind } from "@/lib/qr-types";
 
 export async function GET(request: Request) {
   const requestId = getRequestId(request);
@@ -19,7 +22,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const workspaceId = searchParams.get("workspaceId");
     if (!workspaceId) {
-      return apiError("workspaceId is required.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.WORKSPACE_ID_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const isMember = user.memberships.some((m) => m.workspaceId === workspaceId);
@@ -57,7 +60,7 @@ export async function GET(request: Request) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not load QR list.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_LOAD_QR_LIST, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }
 
@@ -70,11 +73,11 @@ export async function POST(request: Request) {
 
     const raw = await readJsonBody(request);
     if (!raw) {
-      return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
     const parsed = createQrSchema.safeParse(raw);
     if (!parsed.success) {
-      return apiError("Invalid payload.", "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
     }
 
     const db = getDb();
@@ -82,16 +85,25 @@ export async function POST(request: Request) {
     const membership = user.memberships.find((m) => m.workspaceId === data.workspaceId);
     if (!membership) return unauthorized();
 
+    const disabledTypes = await getDisabledQrTypes();
+    if (isQrTypeDisabled(data.contentType, disabledTypes)) {
+      return apiError(MSG.QR_TYPE_DISABLED, "FORBIDDEN", 403, undefined, requestId);
+    }
+
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const isHosted = needsHostedPage(data.contentType);
+    const usesVcardDownload = data.contentType === "VCARD";
+    if (data.kind === "DYNAMIC" && !isHosted && !supportsDynamicKind(data.contentType)) {
+      return apiError(MSG.QR_KIND_NOT_SUPPORTED, "BAD_REQUEST", 400, undefined, requestId);
+    }
     const isDynamic = data.kind === "DYNAMIC" || isHosted;
-    const shortCode = isDynamic ? nanoid(8) : null;
+    const shortCode = isDynamic || usesVcardDownload ? nanoid(8) : null;
 
     let encodedContent = "";
-    if (!isHosted) {
+    if (!isHosted && !usesVcardDownload) {
       encodedContent = encodeQrContent(data.contentType, data.payload);
       if (!encodedContent) {
-        return apiError("Could not encode payload.", "VALIDATION_ERROR", 400, undefined, requestId);
+        return apiError(MSG.COULD_NOT_ENCODE_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
       }
     }
 
@@ -103,14 +115,16 @@ export async function POST(request: Request) {
     });
 
     if (!score.safeToUse) {
-      return apiError("Scannability score too low.", "VALIDATION_ERROR", 400, { score }, requestId);
+      return apiError(MSG.SCANNABILITY_TOO_LOW, "VALIDATION_ERROR", 400, { score }, requestId);
     }
 
     // For hosted types, the QR points to /p/[shortCode]
     // For dynamic types, the QR points to /r/[shortCode]
     // For static, QR encodes content directly
     let qrData: string;
-    if (isHosted) {
+    if (usesVcardDownload) {
+      qrData = `${appUrl}/v/${shortCode}`;
+    } else if (isHosted) {
       qrData = `${appUrl}/p/${shortCode}`;
     } else if (isDynamic) {
       qrData = `${appUrl}/r/${shortCode}`;
@@ -155,7 +169,7 @@ export async function POST(request: Request) {
           create: {
             changedById: user.id,
             destinationUrl: isDynamic ? (data.payload.url as string | undefined) : null,
-            encodedContent: isHosted ? qrData : encodedContent,
+            encodedContent: isHosted || usesVcardDownload ? qrData : encodedContent,
           },
         },
       },
@@ -184,6 +198,6 @@ export async function POST(request: Request) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not create QR.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_CREATE_QR, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

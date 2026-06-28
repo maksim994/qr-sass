@@ -47,7 +47,7 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
       if (!res.ok) {
         throw new Error(data?.error ?? "Не удалось сохранить.");
       }
-      setMessage({ type: "ok", text: "Retargeting pixels сохранены." });
+      setMessage({ type: "ok", text: "Пиксели ретаргетинга сохранены." });
       onSaved?.();
     } catch (err) {
       setMessage({

@@ -237,6 +237,7 @@ model SiteSettings {
   contactPhone      String?
   requisitesInn     String?
   requisitesName    String?
+  disabledQrTypes   String?  @db.Text // JSON array: ["TEXT","EMAIL"]
   updatedAt         DateTime @updatedAt
 }
 

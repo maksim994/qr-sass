@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 
@@ -6,14 +7,14 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session?.sub) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: MSG.UNAUTHORIZED }, { status: 401 });
     }
 
     const body = await req.json();
     const { workspaceId } = body;
 
     if (!workspaceId) {
-      return NextResponse.json({ error: "Missing workspaceId" }, { status: 400 });
+      return NextResponse.json({ error: MSG.WORKSPACE_ID_REQUIRED }, { status: 400 });
     }
 
     const db = getDb();
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!membership) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: MSG.FORBIDDEN }, { status: 403 });
     }
 
     const { workspace } = membership;
@@ -73,6 +74,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, redirect: "/dashboard" });
   } catch (error) {
     console.error("Trial error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: MSG.INTERNAL_ERROR }, { status: 500 });
   }
 }

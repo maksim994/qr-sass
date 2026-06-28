@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { MSG } from "@/lib/user-messages";
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
@@ -7,13 +8,13 @@ import { WORKSPACE_COOKIE } from "@/lib/workspace-select";
 export async function POST(req: Request) {
   const session = await getSession();
   if (!session?.sub) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ ok: false, error: MSG.UNAUTHORIZED }, { status: 401 });
   }
 
   const body = await req.json().catch(() => ({}));
   const workspaceId = typeof body?.workspaceId === "string" ? body.workspaceId.trim() : null;
   if (!workspaceId) {
-    return NextResponse.json({ ok: false, error: "workspaceId required" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: MSG.WORKSPACE_ID_REQUIRED }, { status: 400 });
   }
 
   const db = getDb();
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     include: { workspace: true },
   });
   if (!membership) {
-    return NextResponse.json({ ok: false, error: "Workspace not found" }, { status: 404 });
+    return NextResponse.json({ ok: false, error: MSG.WORKSPACE_NOT_FOUND }, { status: 404 });
   }
 
   const cookieStore = await cookies();

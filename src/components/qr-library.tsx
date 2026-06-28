@@ -15,6 +15,7 @@ type QrItem = {
 type Props = {
   items: QrItem[];
   contentTypeLabels: Record<string, string>;
+  exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
 };
 
 type FilterTab = "ALL" | "STATIC" | "DYNAMIC";
@@ -25,7 +26,7 @@ const tabs: { key: FilterTab; label: string }[] = [
   { key: "DYNAMIC", label: "Динамические" },
 ];
 
-export default function QrLibrary({ items, contentTypeLabels }: Props) {
+export default function QrLibrary({ items, contentTypeLabels, exportFormats }: Props) {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
 
@@ -83,7 +84,9 @@ export default function QrLibrary({ items, contentTypeLabels }: Props) {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((qr) => (
+          {filtered.map((qr) => {
+            const tracksScans = qr.kind === "DYNAMIC" || qr.contentType === "VCARD";
+            return (
             <div key={qr.id} className="card flex flex-col justify-between p-5">
               <div>
                 <div className="mb-2 flex items-center gap-2">
@@ -100,7 +103,9 @@ export default function QrLibrary({ items, contentTypeLabels }: Props) {
                   </h3>
                 </Link>
                 <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
-                  <span>{qr._count.scanEvents} скан.</span>
+                  {tracksScans && (
+                    <span>{qr._count.scanEvents} {qr.contentType === "VCARD" ? "скач." : "скан."}</span>
+                  )}
                   <span>
                     {new Date(qr.createdAt).toLocaleDateString("ru-RU", {
                       day: "numeric",
@@ -112,20 +117,24 @@ export default function QrLibrary({ items, contentTypeLabels }: Props) {
               </div>
 
               <div className="mt-4 flex items-center gap-2">
-                <a
-                  href={`/api/qr/${qr.id}/download?format=png`}
-                  className="btn btn-secondary btn-sm"
-                  download
-                >
-                  PNG
-                </a>
-                <a
-                  href={`/api/qr/${qr.id}/download?format=svg`}
-                  className="btn btn-secondary btn-sm"
-                  download
-                >
-                  SVG
-                </a>
+                {exportFormats.includes("PNG") && (
+                  <a
+                    href={`/api/qr/${qr.id}/download?format=png`}
+                    className="btn btn-secondary btn-sm"
+                    download
+                  >
+                    PNG
+                  </a>
+                )}
+                {exportFormats.includes("SVG") && (
+                  <a
+                    href={`/api/qr/${qr.id}/download?format=svg`}
+                    className="btn btn-secondary btn-sm"
+                    download
+                  >
+                    SVG
+                  </a>
+                )}
                 <Link
                   href={`/dashboard/qr/${qr.id}`}
                   className="btn btn-sm btn-primary ml-auto"
@@ -134,7 +143,8 @@ export default function QrLibrary({ items, contentTypeLabels }: Props) {
                 </Link>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

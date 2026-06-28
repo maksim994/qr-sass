@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { getPlan, formatUsage } from "@/lib/plans";
+import { contentTypeLabels } from "@/lib/qr-types";
+import { QrTypeIcon } from "@/components/qr-type-icon";
 import { redirect } from "next/navigation";
 import { selectWorkspace } from "@/lib/workspace-select";
 
@@ -46,17 +48,8 @@ export default async function DashboardPage() {
     { label: "Динамических QR", value: dynamicCount, icon: "M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.182" },
   ];
 
-  const contentTypeLabels: Record<string, string> = {
-    URL: "Ссылка", TEXT: "Текст", EMAIL: "Email", PHONE: "Телефон", SMS: "SMS",
-    WIFI: "Wi-Fi", VCARD: "Визитка", LOCATION: "Геолокация", PDF: "PDF",
-    IMAGE: "Изображение", VIDEO: "Видео", MP3: "MP3", MENU: "Меню",
-    BUSINESS: "Бизнес", LINK_LIST: "Список ссылок", COUPON: "Купон",
-    APP_STORE: "Приложение", INSTAGRAM: "Instagram", FACEBOOK: "Facebook",
-    WHATSAPP: "WhatsApp", SOCIAL_LINKS: "Соцсети",
-  };
-
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Обзор</h1>
@@ -146,14 +139,12 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentQrs.map((qr) => (
+            {recentQrs.map((qr) => {
+              const tracksScans = qr.kind === "DYNAMIC" || qr.contentType === "VCARD";
+              return (
               <Link key={qr.id} href={`/dashboard/qr/${qr.id}`} className="card flex items-center justify-between p-4 transition hover:shadow-lg">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
-                    <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5z" />
-                    </svg>
-                  </div>
+                  <QrTypeIcon contentType={qr.contentType} />
                   <div>
                     <p className="font-semibold text-slate-900">{qr.name}</p>
                     <div className="mt-0.5 flex items-center gap-2">
@@ -163,11 +154,24 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-slate-900">{qr._count.scanEvents}</p>
-                  <p className="text-xs text-slate-400">скан.</p>
+                  {tracksScans ? (
+                    <>
+                      <p className="text-lg font-bold text-slate-900">{qr._count.scanEvents}</p>
+                      <p className="text-xs text-slate-400">{qr.contentType === "VCARD" ? "скач." : "скан."}</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-slate-400">
+                      {qr.createdAt.toLocaleDateString("ru-RU", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  )}
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

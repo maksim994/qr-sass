@@ -1,4 +1,5 @@
 import { getSession } from "@/lib/auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
@@ -53,6 +54,6 @@ export async function GET(request: Request) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not read session.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_READ_SESSION, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

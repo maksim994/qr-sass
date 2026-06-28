@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { MSG } from "@/lib/user-messages";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { apiError } from "@/lib/api-response";
@@ -40,5 +41,5 @@ export async function getApiUser() {
 }
 
 export function unauthorized() {
-  return apiError("Unauthorized.", "UNAUTHORIZED", 401);
+  return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401);
 }

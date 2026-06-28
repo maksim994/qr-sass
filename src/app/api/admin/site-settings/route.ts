@@ -1,6 +1,12 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
+import {
+  parseDisabledQrTypes,
+  serializeDisabledQrTypes,
+  validateDisabledQrTypesInput,
+} from "@/lib/disabled-qr-types";
 
 export async function GET() {
   const db = getDb();
@@ -17,13 +23,14 @@ export async function GET() {
     contactPhone: row?.contactPhone ?? null,
     requisitesInn: row?.requisitesInn ?? null,
     requisitesName: row?.requisitesName ?? null,
+    disabledQrTypes: parseDisabledQrTypes(row?.disabledQrTypes),
   });
 }
 
 export async function PATCH(req: Request) {
   const requestId = getRequestId(req);
   const admin = await getAdminOrNull();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{
     yandexMetrikaId?: string | null;
@@ -35,8 +42,18 @@ export async function PATCH(req: Request) {
     contactPhone?: string | null;
     requisitesInn?: string | null;
     requisitesName?: string | null;
+    disabledQrTypes?: string[];
   }>(req);
-  if (!data) return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+  if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
+
+  let disabledQrTypesJson: string | undefined;
+  if (data.disabledQrTypes !== undefined) {
+    const validated = validateDisabledQrTypesInput(data.disabledQrTypes);
+    if (validated === null) {
+      return apiError(MSG.INVALID_DISABLED_QR_TYPES, "BAD_REQUEST", 400, undefined, requestId);
+    }
+    disabledQrTypesJson = serializeDisabledQrTypes(validated);
+  }
 
   // IndexNow key: 8–128 chars, a-z A-Z 0-9 -
   if (
@@ -61,7 +78,7 @@ export async function PATCH(req: Request) {
     data.yandexMetrikaId !== "" &&
     !/^\d+$/.test(data.yandexMetrikaId)
   ) {
-    return apiError("Yandex Metrika ID must be numeric.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.YANDEX_METRIKA_NUMERIC, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   const db = getDb();
@@ -78,6 +95,7 @@ export async function PATCH(req: Request) {
       contactPhone: data.contactPhone?.trim() || null,
       requisitesInn: data.requisitesInn?.trim() || null,
       requisitesName: data.requisitesName?.trim() || null,
+      disabledQrTypes: disabledQrTypesJson ?? null,
     },
     update: {
       ...(data.yandexMetrikaId !== undefined && { yandexMetrikaId: data.yandexMetrikaId || null }),
@@ -89,6 +107,7 @@ export async function PATCH(req: Request) {
       ...(data.contactPhone !== undefined && { contactPhone: data.contactPhone?.trim() || null }),
       ...(data.requisitesInn !== undefined && { requisitesInn: data.requisitesInn?.trim() || null }),
       ...(data.requisitesName !== undefined && { requisitesName: data.requisitesName?.trim() || null }),
+      ...(disabledQrTypesJson !== undefined && { disabledQrTypes: disabledQrTypesJson }),
     },
   });
 
@@ -102,5 +121,6 @@ export async function PATCH(req: Request) {
     contactPhone: row.contactPhone,
     requisitesInn: row.requisitesInn,
     requisitesName: row.requisitesName,
+    disabledQrTypes: parseDisabledQrTypes(row.disabledQrTypes),
   });
 }

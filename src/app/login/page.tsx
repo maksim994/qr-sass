@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Logo } from "@/components/logo";
 import { parseApiResponse, fetchApi } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
 
@@ -46,9 +47,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen">
       {/* Left — Form */}
       <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-[480px] lg:px-16">
-        <Link href="/" className="text-xl font-bold tracking-tight text-slate-900">
-          qr-s.ru
-        </Link>
+        <Logo href="/" size="md" />
 
         <div className="mt-12">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Вход в аккаунт</h1>

@@ -6,6 +6,7 @@ import { getPlan } from "@/lib/plans";
 import { selectWorkspace } from "@/lib/workspace-select";
 import { DashboardMobileNav } from "./dashboard-mobile-nav";
 import { WorkspaceSwitcher } from "./workspace-switcher";
+import { Logo } from "@/components/logo";
 
 export const dynamic = "force-dynamic";
 
@@ -42,17 +43,12 @@ const navItems: Array<{ label: string; href: string; icon: string | string[] }> 
   {
     label: "Команда",
     href: "/dashboard/team",
-    icon: [
-      "M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0z",
-      "M14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0z",
-      "M1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122z",
-      "M17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z",
-    ],
+    icon: "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
   },
   {
     label: "API-ключи",
     href: "/dashboard/api-keys",
-    icon: "M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.874-.029-1.575-1.039-1.575-2.019V5.25m0 0h-3v3h3v-3zm0 0h-6v3h6v-3z",
+    icon: "M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z",
   },
   {
     label: "API Docs",
@@ -62,7 +58,7 @@ const navItems: Array<{ label: string; href: string; icon: string | string[] }> 
   {
     label: "Оплата и тарифы",
     href: "/dashboard/billing",
-    icon: "M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V4.245c0-.754-.726-1.294-1.453-1.096a60.07 60.07 0 01-15.797 2.101c-.727-.198-1.453.342-1.453 1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z",
+    icon: "M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z",
   },
   {
     label: "Профиль",
@@ -89,10 +85,8 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[240px] flex-col border-r border-slate-200 bg-white lg:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-6">
-          <Link href="/" className="text-lg font-bold tracking-tight text-slate-900">
-            qr-s.ru
-          </Link>
+        <div className="flex h-16 items-center border-b border-slate-200 px-4">
+          <Logo href="/" size="sm" />
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
           {navItems.map((item) => {
@@ -129,9 +123,7 @@ export default async function DashboardLayout({
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-6 backdrop-blur-lg">
           {/* Mobile: logo left, burger right */}
           <div className="flex flex-1 items-center justify-between lg:hidden">
-            <Link href="/" className="text-lg font-bold tracking-tight text-slate-900">
-              qr-s.ru
-            </Link>
+            <Logo href="/" size="sm" />
             <DashboardMobileNav
               isAdmin={!!user.isAdmin}
               email={user.email}

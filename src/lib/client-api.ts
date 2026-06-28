@@ -1,3 +1,4 @@
+import { MSG } from "@/lib/user-messages";
 export function getCsrfToken(): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(/(^|;)\s*csrf_token\s*=\s*([^;]+)/);
@@ -54,7 +55,7 @@ export async function parseApiResponse<T>(response: Response): Promise<ParsedApi
       ? objectBody.error
       : response.ok
         ? null
-        : "Unexpected server response.";
+        : MSG.UNEXPECTED_RESPONSE;
 
   const code =
     objectBody && typeof objectBody.code === "string"

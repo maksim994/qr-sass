@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getWorkspaceAdminOrNull } from "@/lib/workspace-auth";
 import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 
@@ -10,7 +11,7 @@ export async function DELETE(
   const requestId = getRequestId(req);
 
   const membership = await getWorkspaceAdminOrNull(workspaceId);
-  if (!membership) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!membership) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   if (userId === membership.userId) {
     return apiError("Нельзя исключить себя.", "BAD_REQUEST", 400, undefined, requestId);

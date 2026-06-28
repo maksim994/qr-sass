@@ -4,13 +4,13 @@ import { fetchApi } from "@/lib/client-api";
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import QRCodeStyling from "qr-code-styling";
+import { useMemo, useState } from "react";
 import { QrContentForm } from "@/components/qr-forms";
 import { QrDesigner, type QrStyle } from "@/components/qr-designer";
 import { BusinessLanding } from "@/components/landing-templates/business-landing";
-import { getQrTypeInfo } from "@/lib/qr-types";
+import { getQrTypeInfo, supportsDynamicKind } from "@/lib/qr-types";
 import { parseApiResponse } from "@/lib/client-api";
+import { useQrStylingPreview } from "@/hooks/use-qr-styling-preview";
 import { QrContentType } from "@prisma/client";
 
 const defaultStyle: QrStyle = {
@@ -38,6 +38,7 @@ export function CreateQrClient({ workspaceId }: { workspaceId: string }) {
   const router = useRouter();
   const typeParam = (params.type as string).toUpperCase();
   const typeInfo = getQrTypeInfo(typeParam);
+  const canChooseKind = supportsDynamicKind(typeParam);
 
   const [name, setName] = useState(typeInfo?.label ? `${typeInfo.label} QR` : "Новый QR");
   const [kind, setKind] = useState<"STATIC" | "DYNAMIC">("STATIC");
@@ -69,78 +70,14 @@ export function CreateQrClient({ workspaceId }: { workspaceId: string }) {
     return "https://example.com";
   }, [typeParam, payload]);
 
-  const qrRef = useRef<HTMLDivElement>(null);
-  const qrInstance = useRef<QRCodeStyling | null>(null);
-
-  useEffect(() => {
-    const opts = {
-      width: 280,
-      height: 280,
-      data: previewData || "https://example.com",
-      margin: style.margin,
-      dotsOptions: {
-        type: style.dotType as never,
-        color: style.dotColor,
-        ...(style.dotGradient ? {
-          gradient: {
-            type: style.dotGradient.type,
-            colorStops: [
-              { offset: 0, color: style.dotGradient.colors[0] },
-              { offset: 1, color: style.dotGradient.colors[1] },
-            ],
-            rotation: style.dotGradient.rotation || 0,
-          },
-        } : {}),
-      },
-      cornersSquareOptions: {
-        type: style.cornerSquareType as never,
-        color: style.cornerSquareColor,
-      },
-      cornersDotOptions: {
-        type: style.cornerDotType as never,
-        color: style.cornerDotColor,
-      },
-      backgroundOptions: {
-        color: style.bgTransparent ? "transparent" : style.bgColor,
-        ...(style.bgGradient && !style.bgTransparent ? {
-          gradient: {
-            type: style.bgGradient.type,
-            colorStops: [
-              { offset: 0, color: style.bgGradient.colors[0] },
-              { offset: 1, color: style.bgGradient.colors[1] },
-            ],
-            rotation: style.bgGradient.rotation || 0,
-          },
-        } : {}),
-      },
-      qrOptions: { errorCorrectionLevel: style.errorCorrectionLevel },
-      ...(style.logoUrl ? {
-        image: style.logoUrl,
-        imageOptions: {
-          crossOrigin: "anonymous" as const,
-          margin: style.logoMargin,
-          imageSize: style.logoScale || 0.2,
-        },
-      } : {}),
-    };
-
-    if (!qrInstance.current) {
-      qrInstance.current = new QRCodeStyling(opts);
-      if (qrRef.current) {
-        qrRef.current.innerHTML = "";
-        qrInstance.current.append(qrRef.current);
-      }
-    } else {
-      qrInstance.current.update(opts);
-    }
-  }, [previewData, style]);
+  const qrRef = useQrStylingPreview(previewData, style);
 
   async function handleSave() {
     setSaving(true);
     setError("");
 
     const isHosted = typeInfo?.needsHostedPage;
-    const actualKind = isHosted ? "DYNAMIC" : kind;
+    const actualKind = isHosted ? "DYNAMIC" : canChooseKind ? kind : "STATIC";
 
     const mergedPayload = { ...payload };
     if (actualKind === "DYNAMIC") {
@@ -222,7 +159,7 @@ export function CreateQrClient({ workspaceId }: { workspaceId: string }) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm text-slate-500">{typeInfo.description}</p>
         </div>
-        {!typeInfo.needsHostedPage && (
+        {!typeInfo.needsHostedPage && canChooseKind && (
           <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
             <button
               type="button"
@@ -239,6 +176,11 @@ export function CreateQrClient({ workspaceId }: { workspaceId: string }) {
               Динамический
             </button>
           </div>
+        )}
+        {!typeInfo.needsHostedPage && !canChooseKind && (
+          <span className="shrink-0 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
+            Статический
+          </span>
         )}
       </div>
 
@@ -290,8 +232,8 @@ export function CreateQrClient({ workspaceId }: { workspaceId: string }) {
             <QrDesigner style={style} onChange={setStyle} workspaceId={workspaceId} />
           )}
 
-          {/* Advanced options — only for dynamic */}
-          {(kind === "DYNAMIC" || typeInfo?.needsHostedPage) && (
+          {/* Advanced options — only for dynamic URL or hosted pages */}
+          {((kind === "DYNAMIC" && canChooseKind) || typeInfo?.needsHostedPage) && (
             <div className="mt-4 space-y-4">
               <h3 className="text-sm font-semibold text-slate-700">Дополнительные настройки</h3>
 

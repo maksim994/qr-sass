@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 
@@ -9,11 +10,11 @@ export async function PATCH(
   const { userId } = await params;
   const requestId = getRequestId(req);
   const admin = await getAdminOrNull();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{ isAdmin: boolean }>(req);
   if (!data || typeof data.isAdmin !== "boolean") {
-    return apiError("isAdmin boolean required.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.IS_ADMIN_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   try {
@@ -26,7 +27,7 @@ export async function PATCH(
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Database error";
     if (msg.includes("Record to update not found") || msg.includes("record to update not found")) {
-      return apiError("User not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.USER_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
     return apiError(msg, "INTERNAL_ERROR", 500, undefined, requestId);
   }

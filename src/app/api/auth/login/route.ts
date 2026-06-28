@@ -1,4 +1,5 @@
 import { createSessionToken, setAuthCookie, verifyPassword } from "@/lib/auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     const limit = await consumeRateLimit(loginRateLimiter, ip);
     if (!limit.success) {
       return apiError(
-        "Too many login attempts. Try again later.",
+        MSG.TOO_MANY_LOGIN_ATTEMPTS,
         "VALIDATION_ERROR",
         429,
         limit.retryAfterMs ? { retryAfterMs: limit.retryAfterMs } : undefined,
@@ -24,12 +25,12 @@ export async function POST(request: Request) {
 
     const raw = await readJsonBody(request);
     if (!raw) {
-      return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const parsed = loginSchema.safeParse(raw);
     if (!parsed.success) {
-      return apiError("Invalid payload.", "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
     }
 
     const db = getDb();
@@ -37,12 +38,12 @@ export async function POST(request: Request) {
       where: { email: parsed.data.email },
     });
     if (!user) {
-      return apiError("Invalid credentials.", "UNAUTHORIZED", 401, undefined, requestId);
+      return apiError(MSG.INVALID_CREDENTIALS, "UNAUTHORIZED", 401, undefined, requestId);
     }
 
     const isValid = await verifyPassword(parsed.data.password, user.passwordHash);
     if (!isValid) {
-      return apiError("Invalid credentials.", "UNAUTHORIZED", 401, undefined, requestId);
+      return apiError(MSG.INVALID_CREDENTIALS, "UNAUTHORIZED", 401, undefined, requestId);
     }
 
     const token = await createSessionToken({ sub: user.id, email: user.email });
@@ -73,6 +74,6 @@ export async function POST(request: Request) {
           ? { name: error.name, message: error.message, stack: error.stack }
           : error,
     });
-    return apiError("Could not sign in.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_SIGN_IN, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

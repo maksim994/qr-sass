@@ -1,4 +1,5 @@
 import { getAdminOrNull } from "@/lib/admin-auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 import { validateFileType } from "@/lib/file-validation";
 import { uploadFile, getFaviconKey } from "@/lib/s3";
@@ -22,12 +23,12 @@ const EXT_MAP: Record<string, string> = {
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
   const admin = await getAdminOrNull();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    if (!file) return apiError("file is required.", "BAD_REQUEST", 400, undefined, requestId);
+    if (!file) return apiError(MSG.FILE_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
 
     if (file.size > MAX_SIZE) {
       return apiError("Файл слишком большой. Максимум 512 КБ.", "VALIDATION_ERROR", 400, undefined, requestId);

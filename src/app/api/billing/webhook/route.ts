@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import { getDb } from "@/lib/db";
 
 // YooKassa IPs for webhook verification
@@ -77,6 +78,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Webhook error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: MSG.INTERNAL_ERROR }, { status: 500 });
   }
 }

@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { MSG } from "@/lib/user-messages";
 import { ConfigError } from "@/lib/errors";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 export function getDb() {
   if (!process.env.DATABASE_URL) {
-    throw new ConfigError("DATABASE_URL is required. Create .env from .env.example and set DATABASE_URL.");
+    throw new ConfigError(MSG.DATABASE_URL_REQUIRED);
   }
 
   if (!globalForPrisma.prisma || typeof (globalForPrisma.prisma as { apiKey?: unknown }).apiKey === "undefined") {

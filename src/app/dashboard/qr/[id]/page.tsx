@@ -4,13 +4,15 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { contentTypeLabels } from "@/lib/qr-types";
 import { getPlan } from "@/lib/plans";
-import { renderQrSvg, defaultStyle, needsHostedPage } from "@/lib/qr";
+import { renderStyledQrSvg } from "@/lib/qr-styled-render";
+import { needsHostedPage } from "@/lib/qr";
 import { selectWorkspace } from "@/lib/workspace-select";
 import UpdateTarget from "@/components/update-target";
 import TrackingPixelsForm from "@/components/tracking-pixels-form";
 import AbTestForm from "@/components/ab-test-form";
 import QrExpirySettings from "@/components/qr-expiry-settings";
 import DeleteQrButton from "@/components/delete-qr-button";
+import { nanoid } from "nanoid";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -24,7 +26,7 @@ export default async function QrDetailPage({ params }: Props) {
 
   const db = getDb();
 
-  const [qr, scanCountA, scanCountB] = await Promise.all([
+  const [qrRow, scanCountA, scanCountB] = await Promise.all([
     db.qrCode.findUnique({
       where: { id },
       include: {
@@ -38,30 +40,37 @@ export default async function QrDetailPage({ params }: Props) {
     db.scanEvent.count({ where: { qrCodeId: id, abVariant: "B" } }),
   ]);
 
-  if (!qr || qr.workspaceId !== workspace.id) {
+  if (!qrRow || qrRow.workspaceId !== workspace.id) {
     notFound();
   }
 
-  const styleRaw = (qr.styleConfig as Record<string, unknown> | null) ?? {};
-  const style = {
-    foreground: typeof styleRaw.foreground === "string" ? styleRaw.foreground : defaultStyle.foreground,
-    background: typeof styleRaw.background === "string" ? styleRaw.background : defaultStyle.background,
-    margin: typeof styleRaw.margin === "number" ? styleRaw.margin : defaultStyle.margin,
-    errorCorrectionLevel:
-      styleRaw.errorCorrectionLevel === "L" ||
-      styleRaw.errorCorrectionLevel === "M" ||
-      styleRaw.errorCorrectionLevel === "Q" ||
-      styleRaw.errorCorrectionLevel === "H"
-        ? styleRaw.errorCorrectionLevel
-        : defaultStyle.errorCorrectionLevel,
-  } as const;
+  let qr = qrRow;
+  if (qr.contentType === "VCARD" && !qr.shortCode) {
+    const shortCode = nanoid(8);
+    const encodedContent = `${process.env.APP_URL ?? "http://localhost:3000"}/v/${shortCode}`;
+    qr = await db.qrCode.update({
+      where: { id: qr.id },
+      data: { shortCode, encodedContent },
+      include: {
+        workspace: { select: { plan: true } },
+        revisions: { orderBy: { createdAt: "desc" }, take: 10 },
+        scanEvents: { orderBy: { scannedAt: "desc" }, take: 50 },
+        _count: { select: { scanEvents: true } },
+      },
+    });
+  }
 
-  const svgString = await renderQrSvg(qr.encodedContent, style);
+  const styleRaw = (qr.styleConfig as Record<string, unknown> | null) ?? {};
+  const svgString = await renderStyledQrSvg(qr.encodedContent, styleRaw, 280);
   const plan = await getPlan(qr.workspace?.plan);
   const exportFormats = plan.limits.exportFormats;
+  const isVcard = qr.contentType === "VCARD";
+  const tracksScans = qr.kind === "DYNAMIC" || isVcard;
+  const hasShortLink = (qr.kind === "DYNAMIC" || isVcard) && !!qr.shortCode;
+  const shortLinkPrefix = isVcard ? "v" : needsHostedPage(qr.contentType) ? "p" : "r";
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       {/* Back link */}
       <Link
         href="/dashboard/library"
@@ -85,11 +94,9 @@ export default async function QrDetailPage({ params }: Props) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {needsHostedPage(qr.contentType) && (
-            <Link href={`/dashboard/qr/${qr.id}/edit`} className="btn btn-primary btn-sm">
-              Редактировать
-            </Link>
-          )}
+          <Link href={`/dashboard/qr/${qr.id}/edit`} className="btn btn-primary btn-sm">
+            Редактировать
+          </Link>
           <DeleteQrButton qrId={qr.id} qrName={qr.name} />
         </div>
       </div>
@@ -132,25 +139,32 @@ export default async function QrDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Short link - /p/ for hosted (Menu, PDF, etc.), /r/ for redirect */}
-          {qr.kind === "DYNAMIC" && qr.shortCode && (
+          {/* Short link - /v/ for vCard downloads, /p/ for hosted, /r/ for redirect */}
+          {hasShortLink && qr.shortCode && (
             <div className="mb-6 rounded-lg border border-slate-100 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {needsHostedPage(qr.contentType)
+                {isVcard
+                  ? "Ссылка на файл визитки"
+                  : needsHostedPage(qr.contentType)
                   ? "Ссылка на страницу"
                   : "Короткая ссылка"}
               </p>
               <a
-                href={`/${needsHostedPage(qr.contentType) ? "p" : "r"}/${qr.shortCode}`}
+                href={`/${shortLinkPrefix}/${qr.shortCode}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 block font-mono text-sm text-blue-600 hover:underline"
               >
-                /{needsHostedPage(qr.contentType) ? "p" : "r"}/{qr.shortCode}
+                /{shortLinkPrefix}/{qr.shortCode}
               </a>
+              {isVcard && (
+                <p className="mt-2 text-xs text-slate-500">
+                  При переходе по этой ссылке скачивается актуальный файл .vcf. Можно менять данные визитки без замены QR-кода.
+                </p>
+              )}
 
               {/* Only for redirect types (not hosted) */}
-              {!needsHostedPage(qr.contentType) && (
+              {!needsHostedPage(qr.contentType) && !isVcard && (
                 <>
                   <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Текущий URL назначения
@@ -200,25 +214,27 @@ export default async function QrDetailPage({ params }: Props) {
               )}
 
               {/* Expiry settings for all dynamic QR */}
-              <details className="group mt-4 border-t border-slate-200 pt-4">
-                <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
-                  <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                  Срок действия
-                </summary>
-                <div className="mt-4">
-                  <QrExpirySettings
-                  qrId={qr.id}
-                  expireAt={qr.expireAt}
-                  maxScans={qr.maxScans}
-                  passwordRequired={!!qr.passwordHash}
-                  gdprRequired={((qr.payload as Record<string, unknown>)?.gdprRequired as boolean) ?? false}
-                  gdprPolicyUrl={((qr.payload as Record<string, unknown>)?.gdprPolicyUrl as string) ?? null}
-                  scanCount={qr._count.scanEvents}
-                />
-                </div>
-              </details>
+              {qr.kind === "DYNAMIC" && (
+                <details className="group mt-4 border-t border-slate-200 pt-4">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                    <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    Срок действия
+                  </summary>
+                  <div className="mt-4">
+                    <QrExpirySettings
+                    qrId={qr.id}
+                    expireAt={qr.expireAt}
+                    maxScans={qr.maxScans}
+                    passwordRequired={!!qr.passwordHash}
+                    gdprRequired={((qr.payload as Record<string, unknown>)?.gdprRequired as boolean) ?? false}
+                    gdprPolicyUrl={((qr.payload as Record<string, unknown>)?.gdprPolicyUrl as string) ?? null}
+                    scanCount={qr._count.scanEvents}
+                  />
+                  </div>
+                </details>
+              )}
             </div>
           )}
 
@@ -234,25 +250,64 @@ export default async function QrDetailPage({ params }: Props) {
                 })}
               </dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-slate-400">Всего сканирований</dt>
-              <dd className="font-medium text-slate-700">{qr._count.scanEvents}</dd>
-            </div>
+            {tracksScans && (
+              <div className="flex justify-between">
+                <dt className="text-slate-400">{isVcard ? "Всего скачиваний" : "Всего сканирований"}</dt>
+                <dd className="font-medium text-slate-700">{qr._count.scanEvents}</dd>
+              </div>
+            )}
           </dl>
         </div>
 
         {/* Right column — Recent scans */}
         <div className="card p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-900">
-            Последние сканирования
+            {tracksScans ? (isVcard ? "Скачивания визитки" : "Последние сканирования") : "Статистика"}
           </h2>
 
-          {qr.scanEvents.length === 0 ? (
+          {isVcard && (
+            <div className="mb-6 space-y-4 rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <p className="text-sm text-slate-600">
+                Этот QR-код ведёт на постоянную короткую ссылку. При сканировании скачивается свежий файл контакта
+                в формате .vcf, собранный из текущих данных визитки.
+              </p>
+              {qr.shortCode && (
+                <a href={`/v/${qr.shortCode}`} className="btn btn-primary btn-sm">
+                  Скачать текущий .vcf
+                </a>
+              )}
+              <p className="text-xs text-slate-500">
+                После редактирования имени, телефона, email или других полей QR-код менять не нужно.
+              </p>
+            </div>
+          )}
+
+          {!tracksScans ? (
             <div className="py-12 text-center">
               <svg className="mx-auto h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
               </svg>
-              <p className="mt-3 text-sm text-slate-500">Сканирований пока нет.</p>
+              <p className="mt-3 text-sm text-slate-500">
+                Статистика сканирований доступна только для динамических QR-кодов.
+              </p>
+              <p className="mt-1 text-sm text-slate-400">
+                При создании выберите тип «Динамический», чтобы отслеживать сканирования.
+              </p>
+              <Link
+                href="/dashboard/create"
+                className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-700"
+              >
+                Создать динамический QR-код
+              </Link>
+            </div>
+          ) : qr.scanEvents.length === 0 ? (
+            <div className="py-12 text-center">
+              <svg className="mx-auto h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+              </svg>
+              <p className="mt-3 text-sm text-slate-500">
+                {isVcard ? "Скачиваний пока нет." : "Сканирований пока нет."}
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">

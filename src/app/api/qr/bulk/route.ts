@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { MSG } from "@/lib/user-messages";
 import archiver from "archiver";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     const projectId = (formData.get("projectId") as string) || undefined;
 
     if (!file || !workspaceId) {
-      return apiError("file and workspaceId are required.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.FILE_AND_WORKSPACE_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const membership = user.memberships.find((m) => m.workspaceId === workspaceId);
@@ -57,11 +58,11 @@ export async function POST(request: Request) {
       const wb = XLSX.read(buffer, { type: "buffer" });
       const firstSheet = wb.Sheets[wb.SheetNames[0]];
       if (!firstSheet) {
-        return apiError("Empty spreadsheet.", "VALIDATION_ERROR", 400, undefined, requestId);
+        return apiError(MSG.EMPTY_SPREADSHEET, "VALIDATION_ERROR", 400, undefined, requestId);
       }
       rows = XLSX.utils.sheet_to_json<Record<string, string>>(firstSheet);
     } else {
-      return apiError("Unsupported format. Use CSV or Excel.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.UNSUPPORTED_BULK_FORMAT, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const normalizeKey = (key: string) => key.trim().toLowerCase().replace(/\s+/g, "_");
@@ -106,11 +107,11 @@ export async function POST(request: Request) {
     }
 
     if (items.length === 0) {
-      return apiError("No valid rows with url column.", "VALIDATION_ERROR", 400, undefined, requestId);
+      return apiError(MSG.NO_VALID_BULK_ROWS, "VALIDATION_ERROR", 400, undefined, requestId);
     }
     if (items.length > bulkLimit) {
       return apiError(
-        `Maximum ${bulkLimit} items per request on ${plan.id} plan. You have ${items.length}.`,
+        MSG.BULK_LIMIT(bulkLimit, plan.id, items.length),
         "FORBIDDEN",
         403,
         undefined,
@@ -196,6 +197,6 @@ export async function POST(request: Request) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not create bulk QR codes.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_CREATE_BULK, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

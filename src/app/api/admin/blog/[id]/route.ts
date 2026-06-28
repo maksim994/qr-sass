@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
@@ -9,7 +10,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = getRequestId(req);
   const admin = await getAdminOrNullFromSessionOrApiKey();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{
     title?: string;
@@ -21,11 +22,11 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     coverImageUrl?: string | null;
     publishedAt?: string | null;
   }>(req);
-  if (!data) return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+  if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
 
   const db = getDb();
   const existing = await db.blogPost.findUnique({ where: { id } });
-  if (!existing) return apiError("Post not found.", "NOT_FOUND", 404, undefined, requestId);
+  if (!existing) return apiError(MSG.POST_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
 
   const update: Record<string, unknown> = {};
   if (data.title !== undefined) update.title = data.title.trim();
@@ -41,9 +42,9 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 
   if (data.slug !== undefined) {
     const slug = data.slug.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    if (!slug) return apiError("Invalid slug.", "VALIDATION_ERROR", 400, undefined, requestId);
+    if (!slug) return apiError(MSG.INVALID_SLUG, "VALIDATION_ERROR", 400, undefined, requestId);
     const conflict = await db.blogPost.findFirst({ where: { slug, id: { not: id } } });
-    if (conflict) return apiError("Post with this slug already exists.", "CONFLICT", 409, undefined, requestId);
+    if (conflict) return apiError(MSG.POST_SLUG_EXISTS, "CONFLICT", 409, undefined, requestId);
     update.slug = slug;
   }
 
@@ -69,11 +70,11 @@ export async function DELETE(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = getRequestId(req);
   const admin = await getAdminOrNullFromSessionOrApiKey();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const db = getDb();
   const existing = await db.blogPost.findUnique({ where: { id } });
-  if (!existing) return apiError("Post not found.", "NOT_FOUND", 404, undefined, requestId);
+  if (!existing) return apiError(MSG.POST_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
 
   await db.blogPost.delete({ where: { id } });
   return apiSuccess({ deleted: true });

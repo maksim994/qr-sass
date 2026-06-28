@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { getPlan } from "@/lib/plans";
-import { defaultStyle, renderQrEps, renderQrJpg, renderQrPdf, renderQrPng, renderQrSvg } from "@/lib/qr";
+import {
+  renderStyledQrEps,
+  renderStyledQrJpg,
+  renderStyledQrPdf,
+  renderStyledQrPng,
+  renderStyledQrSvg,
+} from "@/lib/qr-styled-render";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -27,7 +34,7 @@ export async function GET(request: Request, context: RouteContext) {
       where: { id },
     });
     if (!qr) {
-      return apiError("Not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
 
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
@@ -49,25 +56,12 @@ export async function GET(request: Request, context: RouteContext) {
       );
     }
 
-    const style = (qr.styleConfig as Record<string, unknown> | null) ?? defaultStyle;
-    const renderStyle = {
-      foreground: typeof style.foreground === "string" ? style.foreground : defaultStyle.foreground,
-      background: typeof style.background === "string" ? style.background : defaultStyle.background,
-      margin: typeof style.margin === "number" ? style.margin : defaultStyle.margin,
-      errorCorrectionLevel:
-        style.errorCorrectionLevel === "L" ||
-        style.errorCorrectionLevel === "M" ||
-        style.errorCorrectionLevel === "Q" ||
-        style.errorCorrectionLevel === "H"
-          ? style.errorCorrectionLevel
-          : defaultStyle.errorCorrectionLevel,
-    } as const;
-
+    const style = (qr.styleConfig as Record<string, unknown> | null) ?? {};
     const safeFilename = qr.name.replace(/[^\w.-]/g, "_");
     const utf8Filename = encodeURIComponent(qr.name);
 
     if (format === "svg") {
-      const svg = await renderQrSvg(qr.encodedContent, renderStyle);
+      const svg = await renderStyledQrSvg(qr.encodedContent, style);
       return new NextResponse(svg, {
         headers: {
           "Content-Type": "image/svg+xml; charset=utf-8",
@@ -77,7 +71,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     if (format === "jpg" || format === "jpeg") {
-      const jpg = await renderQrJpg(qr.encodedContent, renderStyle);
+      const jpg = await renderStyledQrJpg(qr.encodedContent, style);
       return new NextResponse(new Uint8Array(jpg), {
         headers: {
           "Content-Type": "image/jpeg",
@@ -87,7 +81,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     if (format === "eps") {
-      const eps = await renderQrEps(qr.encodedContent, renderStyle);
+      const eps = await renderStyledQrEps(qr.encodedContent, style);
       return new NextResponse(new Uint8Array(eps), {
         headers: {
           "Content-Type": "application/postscript",
@@ -97,7 +91,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     if (format === "pdf") {
-      const pdf = await renderQrPdf(qr.encodedContent, renderStyle);
+      const pdf = await renderStyledQrPdf(qr.encodedContent, style);
       return new NextResponse(new Uint8Array(pdf), {
         headers: {
           "Content-Type": "application/pdf",
@@ -106,8 +100,8 @@ export async function GET(request: Request, context: RouteContext) {
       });
     }
 
-    const png = await renderQrPng(qr.encodedContent, renderStyle);
-    return new NextResponse(png, {
+    const png = await renderStyledQrPng(qr.encodedContent, style);
+    return new NextResponse(new Uint8Array(png), {
       headers: {
         "Content-Type": "image/png",
         "Content-Disposition": `attachment; filename="${safeFilename}.png"; filename*=UTF-8''${utf8Filename}.png`,
@@ -127,6 +121,6 @@ export async function GET(request: Request, context: RouteContext) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not generate download.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_DOWNLOAD, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

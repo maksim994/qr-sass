@@ -30,9 +30,9 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       maxUsers: 1,
       allowsDynamic: false,
       allowsAnalytics: false,
-      exportFormats: ["PNG"],
+      exportFormats: ["PNG", "SVG"],
     },
-    limitLabels: ["До 10 QR-кодов", "Только статические", "Экспорт PNG", "1 пользователь"],
+    limitLabels: ["До 10 QR-кодов", "Только статические", "Экспорт PNG и SVG", "1 пользователь"],
   },
   PRO: {
     name: "Про",

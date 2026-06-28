@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getWorkspaceAdminOrNull } from "@/lib/workspace-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getPlan } from "@/lib/plans";
@@ -11,11 +12,11 @@ export async function POST(
   const requestId = getRequestId(req);
 
   const membership = await getWorkspaceAdminOrNull(workspaceId);
-  if (!membership) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!membership) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{ email: string }>(req);
   if (!data?.email?.trim()) {
-    return apiError("email required.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.EMAIL_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
   }
   const email = data.email.trim().toLowerCase();
 

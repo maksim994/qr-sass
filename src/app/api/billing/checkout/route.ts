@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import { getApiUser } from "@/lib/api-auth";
 import { getDb } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getApiUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: MSG.UNAUTHORIZED }, { status: 401 });
     }
     const workspaces = user.memberships;
 
@@ -17,17 +18,17 @@ export async function POST(req: NextRequest) {
     const { workspaceId, planId } = body;
 
     if (!workspaceId || !planId) {
-      return NextResponse.json({ error: "Missing workspaceId or planId" }, { status: 400 });
+      return NextResponse.json({ error: MSG.WORKSPACE_ID_OR_PLAN_REQUIRED }, { status: 400 });
     }
 
     const membership = workspaces.find((w) => w.workspaceId === workspaceId);
     if (!membership || (membership.role !== "OWNER" && membership.role !== "ADMIN")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ error: MSG.FORBIDDEN }, { status: 403 });
     }
 
     const plan = await getPlan(planId);
     if (plan.id === "FREE") {
-      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+      return NextResponse.json({ error: MSG.INVALID_PLAN }, { status: 400 });
     }
     const amount = plan.priceRub;
 
@@ -50,6 +51,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ token: paymentData.confirmation.confirmation_token });
   } catch (error) {
     console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: MSG.INTERNAL_ERROR }, { status: 500 });
   }
 }

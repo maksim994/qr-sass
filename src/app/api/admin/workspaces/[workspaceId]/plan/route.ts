@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { WorkspacePlan } from "@prisma/client";
@@ -12,11 +13,11 @@ export async function PATCH(
   const { workspaceId } = await params;
   const requestId = getRequestId(req);
   const admin = await getAdminOrNull();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{ plan: string }>(req);
   if (!data?.plan || !PLAN_IDS.includes(data.plan as (typeof PLAN_IDS)[number])) {
-    return apiError("Valid plan (FREE/PRO/BUSINESS) required.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.VALID_PLAN_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   try {
@@ -51,7 +52,7 @@ export async function PATCH(
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Database error";
     if (msg.includes("Record to update not found") || msg.includes("record to update not found")) {
-      return apiError("Workspace not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.WORKSPACE_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
     return apiError(msg, "INTERNAL_ERROR", 500, undefined, requestId);
   }

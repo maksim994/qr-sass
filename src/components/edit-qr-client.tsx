@@ -1,163 +1,150 @@
 "use client";
-import { fetchApi } from "@/lib/client-api";
 
-
-import { useParams, useRouter } from "next/navigation";
+import { fetchApi, parseApiResponse } from "@/lib/client-api";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import QRCodeStyling from "qr-code-styling";
+import { useMemo, useState } from "react";
 import { QrContentForm } from "@/components/qr-forms";
 import { QrDesigner, type QrStyle } from "@/components/qr-designer";
 import { BusinessLanding } from "@/components/landing-templates/business-landing";
 import { getQrTypeInfo } from "@/lib/qr-types";
-import { parseApiResponse } from "@/lib/client-api";
+import { useQrStylingPreview } from "@/hooks/use-qr-styling-preview";
+import { getQrPreviewData } from "@/lib/qr-preview-data";
 import { QrContentType } from "@prisma/client";
 
-const defaultStyle: QrStyle = {
-  dotType: "square",
-  dotColor: "#111111",
-  bgColor: "#ffffff",
-  bgTransparent: false,
-  cornerSquareType: "square",
-  cornerSquareColor: "#111111",
-  cornerDotType: "square",
-  cornerDotColor: "#111111",
-  frameStyle: "none",
-  frameColor: "#111111",
-  frameText: "",
-  logoUrl: "",
-  logoFileId: "",
-  logoScale: 0,
-  logoMargin: 0,
-  margin: 2,
-  errorCorrectionLevel: "M",
-};
+import { parseStyleConfig } from "@/lib/qr-style-config";
 
-function styleFromConfig(raw: Record<string, unknown>): QrStyle {
-  return {
-    dotType: (raw.dotType as QrStyle["dotType"]) ?? defaultStyle.dotType,
-    dotColor: (raw.dotColor as string) ?? defaultStyle.dotColor,
-    dotGradient: raw.dotGradient as QrStyle["dotGradient"],
-    bgColor: (raw.bgColor as string) ?? defaultStyle.bgColor,
-    bgTransparent: (raw.bgTransparent as boolean) ?? defaultStyle.bgTransparent,
-    bgGradient: raw.bgGradient as QrStyle["bgGradient"],
-    cornerSquareType: (raw.cornerSquareType as QrStyle["cornerSquareType"]) ?? defaultStyle.cornerSquareType,
-    cornerSquareColor: (raw.cornerSquareColor as string) ?? defaultStyle.cornerSquareColor,
-    cornerDotType: (raw.cornerDotType as QrStyle["cornerDotType"]) ?? defaultStyle.cornerDotType,
-    cornerDotColor: (raw.cornerDotColor as string) ?? defaultStyle.cornerDotColor,
-    frameStyle: (raw.frameStyle as string) ?? defaultStyle.frameStyle,
-    frameColor: (raw.frameColor as string) ?? defaultStyle.frameColor,
-    frameText: (raw.frameText as string) ?? defaultStyle.frameText,
-    logoUrl: (raw.logoUrl as string) ?? defaultStyle.logoUrl,
-    logoFileId: (raw.logoFileId as string) ?? defaultStyle.logoFileId,
-    logoScale: typeof raw.logoScale === "number" ? raw.logoScale : defaultStyle.logoScale,
-    logoMargin: typeof raw.logoMargin === "number" ? raw.logoMargin : defaultStyle.logoMargin,
-    margin: typeof raw.margin === "number" ? raw.margin : defaultStyle.margin,
-    errorCorrectionLevel: (raw.errorCorrectionLevel as QrStyle["errorCorrectionLevel"]) ?? defaultStyle.errorCorrectionLevel,
-  };
+function toDateTimeLocalValue(iso: string | null) {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 type QrData = {
   id: string;
   name: string;
+  kind: "STATIC" | "DYNAMIC";
   contentType: QrContentType;
-  payload: Record<string, unknown> | null;
-  styleConfig: Record<string, unknown> | null;
+  payload: Record<string, unknown>;
+  styleConfig: Record<string, unknown>;
   shortCode: string | null;
+  expireAt: string | null;
+  maxScans: number | null;
+  hasPassword: boolean;
 };
 
 export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; initialQr: QrData }) {
-  const params = useParams();
   const router = useRouter();
   const typeInfo = getQrTypeInfo(initialQr.contentType);
+  const initialPayload = initialQr.payload;
 
   const [name, setName] = useState(initialQr.name);
-  const [payload, setPayload] = useState<Record<string, unknown>>((initialQr.payload as Record<string, unknown>) ?? {});
-  const [style, setStyle] = useState<QrStyle>(() =>
-    styleFromConfig((initialQr.styleConfig as Record<string, unknown>) ?? {}),
-  );
+  const [payload, setPayload] = useState<Record<string, unknown>>(initialPayload);
+  const [style, setStyle] = useState<QrStyle>(() => parseStyleConfig(initialQr.styleConfig));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"content" | "design">("content");
 
+  const [expireAt, setExpireAt] = useState(toDateTimeLocalValue(initialQr.expireAt));
+  const [maxScans, setMaxScans] = useState(initialQr.maxScans != null ? String(initialQr.maxScans) : "");
+  const [password, setPassword] = useState("");
+  const [hasPassword, setHasPassword] = useState(initialQr.hasPassword);
+  const [gdprRequired, setGdprRequired] = useState(initialPayload.gdprRequired === true);
+  const [gdprPolicyUrl, setGdprPolicyUrl] = useState(String(initialPayload.gdprPolicyUrl ?? ""));
+  const [smartRedirect, setSmartRedirect] = useState<{
+    default?: string;
+    ios?: string;
+    android?: string;
+    desktop?: string;
+  }>(() => (initialPayload.smartRedirect as {
+    default?: string;
+    ios?: string;
+    android?: string;
+    desktop?: string;
+  }) ?? {});
+  const [trackingPixels, setTrackingPixels] = useState<{
+    metaPixelId?: string;
+    ga4Id?: string;
+    gtmId?: string;
+    ymCounterId?: string;
+    vkPixelId?: string;
+  }>(() => (initialPayload.trackingPixels as {
+    metaPixelId?: string;
+    ga4Id?: string;
+    gtmId?: string;
+    ymCounterId?: string;
+    vkPixelId?: string;
+  }) ?? {});
+  const [abTest, setAbTest] = useState<{ urlA?: string; urlB?: string }>(
+    () => (initialPayload.abTest as { urlA?: string; urlB?: string }) ?? {},
+  );
+
   const previewData = useMemo(() => {
-    const appUrl = typeof window !== "undefined" ? window.location.origin : "";
-    if (initialQr.shortCode) {
-      return `${appUrl}/p/${initialQr.shortCode}`;
-    }
-    return "https://example.com";
-  }, [initialQr.shortCode]);
+    const appUrl = typeof window !== "undefined" ? window.location.origin : "https://example.com";
+    return getQrPreviewData(initialQr.contentType, payload, {
+      appUrl,
+      shortCode: initialQr.shortCode,
+      kind: initialQr.kind,
+    });
+  }, [initialQr.contentType, initialQr.kind, initialQr.shortCode, payload]);
 
-  const qrRef = useRef<HTMLDivElement>(null);
-  const qrInstance = useRef<QRCodeStyling | null>(null);
-
-  const initQr = useCallback(() => {
-    if (!qrRef.current) return;
-    const opts = {
-      width: 280,
-      height: 280,
-      data: previewData,
-      margin: style.margin,
-      dotsOptions: {
-        type: style.dotType as never,
-        color: style.dotColor,
-        ...(style.dotGradient ? {
-          gradient: {
-            type: style.dotGradient.type,
-            colorStops: [
-              { offset: 0, color: style.dotGradient.colors[0] },
-              { offset: 1, color: style.dotGradient.colors[1] },
-            ],
-            rotation: style.dotGradient.rotation || 0,
-          },
-        } : {}),
-      },
-      cornersSquareOptions: { type: style.cornerSquareType as never, color: style.cornerSquareColor },
-      cornersDotOptions: { type: style.cornerDotType as never, color: style.cornerDotColor },
-      backgroundOptions: {
-        color: style.bgTransparent ? "transparent" : style.bgColor,
-        ...(style.bgGradient && !style.bgTransparent ? {
-          gradient: {
-            type: style.bgGradient.type,
-            colorStops: [
-              { offset: 0, color: style.bgGradient.colors[0] },
-              { offset: 1, color: style.bgGradient.colors[1] },
-            ],
-            rotation: style.bgGradient.rotation || 0,
-          },
-        } : {}),
-      },
-      qrOptions: { errorCorrectionLevel: style.errorCorrectionLevel },
-      ...(style.logoUrl ? {
-        image: style.logoUrl,
-        imageOptions: {
-          crossOrigin: "anonymous" as const,
-          margin: style.logoMargin,
-          imageSize: style.logoScale || 0.2,
-        },
-      } : {}),
-    };
-    if (!qrInstance.current) {
-      qrInstance.current = new QRCodeStyling(opts);
-      qrRef.current.innerHTML = "";
-      qrInstance.current.append(qrRef.current);
-    } else {
-      qrInstance.current.update(opts);
-    }
-  }, [previewData, style]);
-
-  useEffect(() => {
-    initQr();
-  }, [initQr]);
+  const qrRef = useQrStylingPreview(previewData, style);
+  const isDynamic = initialQr.kind === "DYNAMIC" || !!typeInfo?.needsHostedPage;
 
   async function handleSave() {
     setSaving(true);
     setError("");
 
+    const mergedPayload = { ...payload };
+    if (isDynamic) {
+      mergedPayload.gdprRequired = gdprRequired;
+      if (gdprPolicyUrl.trim()) mergedPayload.gdprPolicyUrl = gdprPolicyUrl.trim();
+      else delete mergedPayload.gdprPolicyUrl;
+
+      if (initialQr.contentType === "URL" && !typeInfo?.needsHostedPage) {
+        const sr: Record<string, string> = {};
+        if (smartRedirect.default?.trim()) sr.default = smartRedirect.default.trim();
+        if (smartRedirect.ios?.trim()) sr.ios = smartRedirect.ios.trim();
+        if (smartRedirect.android?.trim()) sr.android = smartRedirect.android.trim();
+        if (smartRedirect.desktop?.trim()) sr.desktop = smartRedirect.desktop.trim();
+        if (Object.keys(sr).length) mergedPayload.smartRedirect = sr;
+        else delete mergedPayload.smartRedirect;
+
+        const tp: Record<string, string> = {};
+        if (trackingPixels.metaPixelId?.trim()) tp.metaPixelId = trackingPixels.metaPixelId.trim();
+        if (trackingPixels.ga4Id?.trim()) tp.ga4Id = trackingPixels.ga4Id.trim();
+        if (trackingPixels.gtmId?.trim()) tp.gtmId = trackingPixels.gtmId.trim();
+        if (trackingPixels.ymCounterId?.trim()) tp.ymCounterId = trackingPixels.ymCounterId.trim();
+        if (trackingPixels.vkPixelId?.trim()) tp.vkPixelId = trackingPixels.vkPixelId.trim();
+        if (Object.keys(tp).length) mergedPayload.trackingPixels = tp;
+        else delete mergedPayload.trackingPixels;
+
+        const ab: Record<string, string> = {};
+        if (abTest.urlA?.trim()) ab.urlA = abTest.urlA.trim();
+        if (abTest.urlB?.trim()) ab.urlB = abTest.urlB.trim();
+        if (Object.keys(ab).length === 2) mergedPayload.abTest = ab;
+        else delete mergedPayload.abTest;
+      }
+    }
+
+    const body: Record<string, unknown> = { name, payload: mergedPayload, style };
+    if (initialQr.kind === "DYNAMIC") {
+      body.expireAt = expireAt.trim() ? new Date(expireAt).toISOString() : null;
+      if (maxScans.trim()) {
+        const n = parseInt(maxScans, 10);
+        body.maxScans = Number.isInteger(n) && n >= 1 ? n : null;
+      } else {
+        body.maxScans = null;
+      }
+      if (password.trim()) body.password = password.trim();
+    }
+
     const response = await fetchApi(`/api/qr/${initialQr.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, payload, style }),
+      body: JSON.stringify(body),
     });
 
     const parsed = await parseApiResponse<{ updated?: boolean }>(response);
@@ -168,6 +155,11 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
       return;
     }
 
+    if (password.trim()) {
+      setHasPassword(true);
+      setPassword("");
+    }
+
     router.push(`/dashboard/qr/${initialQr.id}`);
     router.refresh();
   }
@@ -175,15 +167,16 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
   if (!typeInfo) {
     return (
       <div className="mx-auto max-w-lg py-20 text-center">
-        <p className="text-lg font-semibold text-slate-900">Тип QR-кода не поддерживается для редактирования</p>
-        <Link href={`/dashboard/qr/${initialQr.id}`} className="btn btn-primary mt-4">Назад</Link>
+        <p className="text-lg font-semibold text-slate-900">Тип QR-кода не поддерживается</p>
+        <Link href={`/dashboard/qr/${initialQr.id}`} className="btn btn-primary mt-4">
+          Назад
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-7xl">
-      {/* Header */}
       <div className="mb-6 flex items-center gap-3">
         <Link
           href={`/dashboard/qr/${initialQr.id}`}
@@ -194,8 +187,10 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
           </svg>
         </Link>
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-bold text-slate-900">Редактирование</p>
-          <p className="truncate text-sm text-slate-500">{typeInfo.label} — {initialQr.name}</p>
+          <p className="text-lg font-bold text-slate-900">Редактирование QR-кода</p>
+          <p className="truncate text-sm text-slate-500">
+            {typeInfo.label} · {initialQr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
+          </p>
         </div>
       </div>
 
@@ -211,20 +206,24 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
               placeholder="Например: Меню ресторана"
             />
           </div>
+
           <div className="mb-4 flex gap-1 rounded-lg bg-slate-100 p-1">
             <button
+              type="button"
               className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition ${activeTab === "content" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
               onClick={() => setActiveTab("content")}
             >
               Контент
             </button>
             <button
+              type="button"
               className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition ${activeTab === "design" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
               onClick={() => setActiveTab("design")}
             >
               Дизайн
             </button>
           </div>
+
           {activeTab === "content" && (
             <div className="card p-6">
               <QrContentForm
@@ -235,8 +234,133 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
               />
             </div>
           )}
+
           {activeTab === "design" && (
             <QrDesigner style={style} onChange={setStyle} workspaceId={workspaceId} />
+          )}
+
+          {isDynamic && (
+            <div className="mt-4 space-y-4">
+              <h3 className="text-sm font-semibold text-slate-700">Дополнительные настройки</h3>
+
+              <details className="group rounded-lg border border-slate-200 bg-white">
+                <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                  <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  Срок действия
+                </summary>
+                <div className="space-y-3 border-t border-slate-100 p-4">
+                  <div>
+                    <label className="label">Действует до</label>
+                    <input
+                      type="datetime-local"
+                      value={expireAt}
+                      onChange={(e) => setExpireAt(e.target.value)}
+                      className="input"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Максимум сканов</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={maxScans}
+                      onChange={(e) => setMaxScans(e.target.value)}
+                      placeholder="Без лимита"
+                      className="input"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Пароль на QR</label>
+                    {hasPassword ? (
+                      <p className="mb-2 text-xs text-slate-500">Пароль уже установлен. Введите новый, чтобы заменить.</p>
+                    ) : null}
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={hasPassword ? "Новый пароль" : "Оставьте пустым, если пароль не нужен"}
+                      className="input"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={gdprRequired}
+                        onChange={(e) => setGdprRequired(e.target.checked)}
+                      />
+                      <span className="label mb-0">Требуется согласие GDPR</span>
+                    </label>
+                    {gdprRequired && (
+                      <input
+                        type="url"
+                        value={gdprPolicyUrl}
+                        onChange={(e) => setGdprPolicyUrl(e.target.value)}
+                        placeholder="https://example.com/privacy"
+                        className="input"
+                      />
+                    )}
+                  </div>
+                </div>
+              </details>
+
+              {initialQr.contentType === "URL" && !typeInfo.needsHostedPage && (
+                <>
+                  <details className="group rounded-lg border border-slate-200 bg-white">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                      <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      Retargeting
+                    </summary>
+                    <div className="space-y-3 border-t border-slate-100 p-4">
+                      <div>
+                        <label className="label">Meta Pixel ID</label>
+                        <input type="text" value={trackingPixels.metaPixelId ?? ""} onChange={(e) => setTrackingPixels((t) => ({ ...t, metaPixelId: e.target.value }))} className="input" />
+                      </div>
+                      <div>
+                        <label className="label">GA4 Measurement ID</label>
+                        <input type="text" value={trackingPixels.ga4Id ?? ""} onChange={(e) => setTrackingPixels((t) => ({ ...t, ga4Id: e.target.value }))} className="input" />
+                      </div>
+                      <div>
+                        <label className="label">Google Tag Manager ID</label>
+                        <input type="text" value={trackingPixels.gtmId ?? ""} onChange={(e) => setTrackingPixels((t) => ({ ...t, gtmId: e.target.value }))} className="input" />
+                      </div>
+                      <div>
+                        <label className="label">Яндекс Метрика (ID счётчика)</label>
+                        <input type="text" value={trackingPixels.ymCounterId ?? ""} onChange={(e) => setTrackingPixels((t) => ({ ...t, ymCounterId: e.target.value }))} className="input" />
+                      </div>
+                      <div>
+                        <label className="label">VK Пиксель (ID)</label>
+                        <input type="text" value={trackingPixels.vkPixelId ?? ""} onChange={(e) => setTrackingPixels((t) => ({ ...t, vkPixelId: e.target.value }))} className="input" />
+                      </div>
+                    </div>
+                  </details>
+
+                  <details className="group rounded-lg border border-slate-200 bg-white">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 [&::-webkit-details-marker]:hidden">
+                      <svg className="h-4 w-4 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      A/B-тестирование
+                    </summary>
+                    <div className="space-y-3 border-t border-slate-100 p-4">
+                      <div>
+                        <label className="label">URL вариант A</label>
+                        <input type="url" value={abTest.urlA ?? ""} onChange={(e) => setAbTest((a) => ({ ...a, urlA: e.target.value }))} className="input" />
+                      </div>
+                      <div>
+                        <label className="label">URL вариант B</label>
+                        <input type="url" value={abTest.urlB ?? ""} onChange={(e) => setAbTest((a) => ({ ...a, urlB: e.target.value }))} className="input" />
+                      </div>
+                    </div>
+                  </details>
+                </>
+              )}
+            </div>
           )}
         </div>
 
@@ -258,7 +382,11 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
               </div>
             )}
             {initialQr.shortCode && (
-              <p className="mt-3 text-center text-xs text-slate-500">/p/{initialQr.shortCode}</p>
+              <p className="mt-3 text-center text-xs text-slate-500">
+                {initialQr.kind === "DYNAMIC" && !typeInfo.needsHostedPage
+                  ? `/r/${initialQr.shortCode}`
+                  : `/p/${initialQr.shortCode}`}
+              </p>
             )}
             {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
             <button className="btn btn-primary mt-4 w-full" disabled={saving} onClick={handleSave}>

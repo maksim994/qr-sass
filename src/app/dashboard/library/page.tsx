@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { contentTypeLabels } from "@/lib/qr-types";
 import QrLibrary from "@/components/qr-library";
+import { getPlan } from "@/lib/plans";
 import { selectWorkspace } from "@/lib/workspace-select";
 
 export default async function LibraryPage() {
@@ -12,6 +13,7 @@ export default async function LibraryPage() {
   if (!workspace) redirect("/register");
 
   const db = getDb();
+  const plan = await getPlan(workspace.plan);
 
   const qrCodes = await db.qrCode.findMany({
     where: { workspaceId: workspace.id, isArchived: false },
@@ -30,7 +32,7 @@ export default async function LibraryPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
@@ -45,7 +47,11 @@ export default async function LibraryPage() {
         </Link>
       </div>
 
-      <QrLibrary items={items} contentTypeLabels={contentTypeLabels} />
+      <QrLibrary
+        items={items}
+        contentTypeLabels={contentTypeLabels}
+        exportFormats={plan.limits.exportFormats}
+      />
     </div>
   );
 }

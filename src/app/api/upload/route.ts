@@ -1,4 +1,5 @@
 import { getApiUser, unauthorized } from "@/lib/api-auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { validateFileType } from "@/lib/file-validation";
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     const workspaceId = formData.get("workspaceId") as string | null;
 
     if (!file || !workspaceId) {
-      return apiError("file and workspaceId are required.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.FILE_AND_WORKSPACE_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const isMember = user.memberships.some((m) => m.workspaceId === workspaceId);

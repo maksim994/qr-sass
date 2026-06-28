@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { MSG } from "@/lib/user-messages";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
@@ -19,7 +20,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
     const raw = await readJsonBody<Record<string, unknown>>(request);
     if (!raw || typeof raw !== "object") {
-      return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     let expireAt: Date | null | undefined = undefined;
@@ -29,10 +30,10 @@ export async function PATCH(request: Request, context: RouteContext) {
       } else if (typeof raw.expireAt === "string") {
         const d = new Date(raw.expireAt);
         if (isNaN(d.getTime())) {
-          return apiError("expireAt must be a valid ISO date string.", "VALIDATION_ERROR", 400, undefined, requestId);
+          return apiError(MSG.EXPIRE_AT_INVALID, "VALIDATION_ERROR", 400, undefined, requestId);
         }
         if (d <= new Date()) {
-          return apiError("expireAt must be in the future.", "VALIDATION_ERROR", 400, undefined, requestId);
+          return apiError(MSG.EXPIRE_AT_FUTURE, "VALIDATION_ERROR", 400, undefined, requestId);
         }
         expireAt = d;
       }
@@ -45,7 +46,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       } else {
         const n = Number(raw.maxScans);
         if (!Number.isInteger(n) || n < 1) {
-          return apiError("maxScans must be a positive integer.", "VALIDATION_ERROR", 400, undefined, requestId);
+          return apiError(MSG.MAX_SCANS_POSITIVE, "VALIDATION_ERROR", 400, undefined, requestId);
         }
         maxScans = n;
       }
@@ -63,10 +64,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     const db = getDb();
     const qr = await db.qrCode.findUnique({ where: { id } });
     if (!qr) {
-      return apiError("Not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
     if (qr.kind !== "DYNAMIC") {
-      return apiError("Only dynamic QR can have expiry settings.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.ONLY_DYNAMIC_EXPIRY, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
@@ -119,6 +120,6 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not update settings.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_UPDATE_SETTINGS, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

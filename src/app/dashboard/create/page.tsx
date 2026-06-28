@@ -1,18 +1,22 @@
 import Link from "next/link";
+import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
 import { qrTypes, groupLabels } from "@/lib/qr-types";
 
 const groups = ["basic", "files", "business", "social"] as const;
 
-export default function CreatePage() {
+export default async function CreatePage() {
+  const disabled = await getDisabledQrTypes();
+  const enabledTypes = qrTypes.filter((t) => !isQrTypeDisabled(t.type, disabled));
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Создать QR-код</h1>
         <p className="mt-1 text-sm text-slate-500">Выберите тип QR-кода, который хотите создать.</p>
       </div>
 
       {groups.map((group) => {
-        const items = qrTypes.filter((t) => t.group === group);
+        const items = enabledTypes.filter((t) => t.group === group);
+        if (items.length === 0) return null;
         return (
           <div key={group} className="mb-8">
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
@@ -40,6 +44,12 @@ export default function CreatePage() {
           </div>
         );
       })}
+
+      {enabledTypes.length === 0 && (
+        <p className="text-sm text-slate-500">
+          Создание QR-кодов временно недоступно. Обратитесь к администратору.
+        </p>
+      )}
     </div>
   );
 }

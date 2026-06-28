@@ -22,7 +22,7 @@ export default async function AnalyticsPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Аналитика</h1>
         <p className="mt-1 text-sm text-slate-500">Общая статистика сканирований ваших QR-кодов.</p>

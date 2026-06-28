@@ -1,4 +1,5 @@
 import { QrContentType, QrKind } from "@prisma/client";
+import { MSG } from "@/lib/user-messages";
 import { z } from "zod";
 
 function isSafeUrlProtocol(url: string): boolean {
@@ -11,14 +12,39 @@ function isSafeUrlProtocol(url: string): boolean {
 }
 
 export const safeUrlSchema = z.string().refine(isSafeUrlProtocol, {
-  message: "Only https and http URLs are allowed",
+  message: MSG.ONLY_HTTPS_HTTP_URL,
 });
 
+export const DEFAULT_WORKSPACE_NAME = "Моя команда";
+
+export function getValidationErrorMessage(error: z.ZodError): string | null {
+  const flattened = error.flatten();
+  const fieldMessages = Object.values(flattened.fieldErrors)
+    .flat()
+    .filter((msg): msg is string => typeof msg === "string" && msg.length > 0);
+  if (fieldMessages.length > 0) return fieldMessages[0];
+  if (flattened.formErrors.length > 0) return flattened.formErrors[0];
+  return null;
+}
+
 export const registerSchema = z.object({
-  name: z.string().min(2).max(120),
-  email: z.string().email(),
-  password: z.string().min(8).max(128),
-  workspaceName: z.string().min(2).max(120),
+  name: z
+    .string()
+    .min(2, "Имя должно содержать минимум 2 символа")
+    .max(120, "Имя не должно превышать 120 символов"),
+  email: z.string().email("Укажите корректный email"),
+  password: z
+    .string()
+    .min(8, "Пароль должен содержать минимум 8 символов")
+    .max(128, "Пароль не должен превышать 128 символов"),
+  workspaceName: z
+    .string()
+    .max(120)
+    .optional()
+    .transform((val) => {
+      const trimmed = (val ?? "").trim();
+      return trimmed || DEFAULT_WORKSPACE_NAME;
+    }),
   consent: z.boolean().refine(val => val === true, {
     message: "Необходимо согласие на обработку персональных данных",
   }),
@@ -146,12 +172,12 @@ export const createQrSchema = z
   })
   .refine(
     (d) => validatePayloadUrls(d.payload, d.contentType),
-    { message: "Payload contains invalid URL (only https and http allowed)", path: ["payload"] }
+    { message: MSG.INVALID_PAYLOAD_URL, path: ["payload"] }
   );
 
 export const updateDynamicTargetSchema = z.object({
   targetUrl: z.string().url().refine(isSafeUrlProtocol, {
-    message: "Only https and http URLs are allowed",
+    message: MSG.ONLY_HTTPS_HTTP_URL,
   }),
 });
 
@@ -159,6 +185,9 @@ export const updateQrSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
   style: styleSchema.optional(),
+  expireAt: z.string().datetime().nullable().optional(),
+  maxScans: z.number().int().min(1).nullable().optional(),
+  password: z.string().optional(),
 });
 
 export { validatePayloadUrls };

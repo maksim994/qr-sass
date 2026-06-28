@@ -37,7 +37,7 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Обзор</h1>
         <p className="mt-1 text-sm text-slate-500">Статистика системы. Нажмите на карточку для перехода в раздел.</p>

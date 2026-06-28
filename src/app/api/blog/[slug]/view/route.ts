@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import { getDb } from "@/lib/db";
 
 const COOKIE_PREFIX = "bv_";
@@ -19,7 +20,7 @@ export async function POST(
     select: { id: true, views: true },
   });
   if (!post) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: MSG.NOT_FOUND }, { status: 404 });
   }
 
   const cookieName = getCookieName(slug);

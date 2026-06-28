@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { WorkspacePlan } from "@prisma/client";
@@ -12,10 +13,10 @@ export async function PATCH(
   const { planId } = await params;
   const requestId = getRequestId(req);
   const admin = await getAdminOrNull();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   if (!PLAN_IDS.includes(planId as (typeof PLAN_IDS)[number])) {
-    return apiError("Invalid plan.", "BAD_REQUEST", 400, undefined, requestId);
+    return apiError(MSG.INVALID_PLAN, "BAD_REQUEST", 400, undefined, requestId);
   }
 
   const data = await readJsonBody<{
@@ -26,7 +27,7 @@ export async function PATCH(
     allowsAnalytics?: boolean | null;
     exportFormats?: string | null;
   }>(req);
-  if (!data) return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+  if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
   const db = getDb();
 
   const exportFormatsJson = data.exportFormats != null

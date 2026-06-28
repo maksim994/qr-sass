@@ -44,7 +44,7 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
       if (!res.ok) {
         throw new Error(data?.error ?? "Не удалось сохранить.");
       }
-      setMessage({ type: "ok", text: "Smart redirect сохранён." });
+      setMessage({ type: "ok", text: "Умный редирект сохранён." });
       onSaved?.();
     } catch (err) {
       setMessage({

@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
@@ -6,7 +7,7 @@ import { calculateReadingTimeMinutes } from "@/lib/reading-time";
 export async function GET(req: Request) {
   const requestId = getRequestId(req);
   const admin = await getAdminOrNullFromSessionOrApiKey();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const db = getDb();
   const posts = await db.blogPost.findMany({
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const requestId = getRequestId(req);
   const admin = await getAdminOrNullFromSessionOrApiKey();
-  if (!admin) return apiError("Unauthorized.", "UNAUTHORIZED", 401, undefined, requestId);
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
   const data = await readJsonBody<{
     title: string;
@@ -39,17 +40,17 @@ export async function POST(req: Request) {
     coverImageUrl?: string | null;
     publishedAt?: string | null;
   }>(req);
-  if (!data) return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
-  if (!data.title?.trim()) return apiError("Title is required.", "VALIDATION_ERROR", 400, undefined, requestId);
-  if (!data.slug?.trim()) return apiError("Slug is required.", "VALIDATION_ERROR", 400, undefined, requestId);
-  if (data.content == null) return apiError("Content is required.", "VALIDATION_ERROR", 400, undefined, requestId);
+  if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
+  if (!data.title?.trim()) return apiError(MSG.TITLE_REQUIRED, "VALIDATION_ERROR", 400, undefined, requestId);
+  if (!data.slug?.trim()) return apiError(MSG.SLUG_REQUIRED, "VALIDATION_ERROR", 400, undefined, requestId);
+  if (data.content == null) return apiError(MSG.CONTENT_REQUIRED, "VALIDATION_ERROR", 400, undefined, requestId);
 
   const db = getDb();
   const slug = data.slug.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-  if (!slug) return apiError("Invalid slug.", "VALIDATION_ERROR", 400, undefined, requestId);
+  if (!slug) return apiError(MSG.INVALID_SLUG, "VALIDATION_ERROR", 400, undefined, requestId);
 
   const existing = await db.blogPost.findUnique({ where: { slug } });
-  if (existing) return apiError("Post with this slug already exists.", "CONFLICT", 409, undefined, requestId);
+  if (existing) return apiError(MSG.POST_SLUG_EXISTS, "CONFLICT", 409, undefined, requestId);
 
   const publishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
 

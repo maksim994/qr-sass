@@ -4,7 +4,7 @@ export default function ApiDocsPage() {
   const baseUrl = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Документация API</h1>
         <p className="mt-1 text-sm text-slate-500">

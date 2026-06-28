@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getDb } from "@/lib/db";
+import { Logo } from "@/components/logo";
 
 type Props = {
   session: { sub: string } | null;
@@ -16,9 +17,9 @@ export async function SiteFooter({ session }: Props) {
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <p className="text-lg font-bold text-slate-900">qr-s.ru</p>
+            <Logo href="/" size="md" />
             <p className="mt-2 text-sm text-slate-500">
-              Генератор QR-кодов для бизнеса. Создавайте, кастомизируйте и отслеживайте.
+              Создавайте, кастомизируйте и отслеживайте QR-коды в одном месте.
             </p>
           </div>
           <div>

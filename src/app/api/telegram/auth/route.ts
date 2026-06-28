@@ -1,4 +1,5 @@
 import { createSessionToken, setAuthCookie } from "@/lib/auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -12,17 +13,17 @@ export async function POST(request: Request) {
   const body = (await readJsonBody(request)) as { initDataRaw?: string } | null;
   try {
     if (!env.TELEGRAM_BOT_TOKEN) {
-      return apiError("TELEGRAM_BOT_TOKEN is not configured.", "CONFIG_ERROR", 500, undefined, requestId);
+      return apiError(MSG.TELEGRAM_NOT_CONFIGURED, "CONFIG_ERROR", 500, undefined, requestId);
     }
 
     if (!body?.initDataRaw) {
-      return apiError("initDataRaw is required.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.TELEGRAM_INIT_DATA_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const parsed = verifyTelegramInitData(body.initDataRaw, env.TELEGRAM_BOT_TOKEN);
     const tgUser = parsed.user;
     if (!tgUser) {
-      return apiError("User data is missing.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.TELEGRAM_USER_MISSING, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const db = getDb();
@@ -60,10 +61,10 @@ export async function POST(request: Request) {
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);
     }
     if (!body?.initDataRaw || !env.TELEGRAM_BOT_TOKEN) {
-      return apiError("Telegram auth failed.", "INTERNAL_ERROR", 500, undefined, requestId);
+      return apiError(MSG.TELEGRAM_AUTH_FAILED, "INTERNAL_ERROR", 500, undefined, requestId);
     }
     if (!verifyTelegramInitDataFallback(body.initDataRaw, env.TELEGRAM_BOT_TOKEN)) {
-      return apiError("Invalid init data signature.", "UNAUTHORIZED", 401, undefined, requestId);
+      return apiError(MSG.TELEGRAM_INVALID_SIGNATURE, "UNAUTHORIZED", 401, undefined, requestId);
     }
     logger.warn({
       area: "api",

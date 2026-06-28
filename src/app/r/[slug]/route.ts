@@ -75,6 +75,10 @@ export async function GET(request: Request, context: RouteContext) {
       }
     }
 
+    if (!targetUrl && typeof payload.url === "string" && payload.url.trim()) {
+      targetUrl = payload.url.trim();
+    }
+
     if (!qr || !targetUrl) {
       logger.warn({
         area: "api",
@@ -136,7 +140,16 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.redirect(new URL("/", process.env.APP_URL ?? "http://localhost:3000"));
     }
 
-    await trackScan(qr.id, targetUrl, abVariant);
+    await trackScan(qr.id, targetUrl, abVariant).catch((error) => {
+      logger.error({
+        area: "api",
+        route: "/r/[slug]",
+        message: "Failed to record scan event",
+        code: "INTERNAL_ERROR",
+        status: 500,
+        details: error instanceof Error ? { message: error.message } : error,
+      });
+    });
 
     const trackingPixels = payload.trackingPixels as { metaPixelId?: string; ga4Id?: string; gtmId?: string; ymCounterId?: string; vkPixelId?: string } | undefined;
     const hasPixels = trackingPixels && typeof trackingPixels === "object" && (trackingPixels.metaPixelId || trackingPixels.ga4Id || trackingPixels.gtmId || trackingPixels.ymCounterId || trackingPixels.vkPixelId);

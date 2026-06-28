@@ -1,4 +1,5 @@
 import { getApiUser, unauthorized } from "@/lib/api-auth";
+import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
@@ -19,11 +20,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
     const raw = await readJsonBody(request);
     if (!raw) {
-      return apiError("Invalid JSON body.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
     const parsed = updateDynamicTargetSchema.safeParse(raw);
     if (!parsed.success) {
-      return apiError("Invalid payload.", "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
     }
 
     const db = getDb();
@@ -31,10 +32,10 @@ export async function PATCH(request: Request, context: RouteContext) {
       where: { id },
     });
     if (!qr) {
-      return apiError("Not found.", "NOT_FOUND", 404, undefined, requestId);
+      return apiError(MSG.NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
     }
     if (qr.kind !== "DYNAMIC") {
-      return apiError("Only dynamic QR can be updated.", "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(MSG.ONLY_DYNAMIC_QR_UPDATE, "BAD_REQUEST", 400, undefined, requestId);
     }
 
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
@@ -77,6 +78,6 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: 500,
       details: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    return apiError("Could not update target URL.", "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(MSG.COULD_NOT_UPDATE_TARGET, "INTERNAL_ERROR", 500, undefined, requestId);
   }
 }

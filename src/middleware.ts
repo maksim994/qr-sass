@@ -1,13 +1,26 @@
 import { NextResponse } from "next/server";
+import { MSG } from "@/lib/user-messages";
 import type { NextRequest } from "next/server";
+
+const CSRF_SKIP_PREFIXES = [
+  "/api/billing/webhook",
+  "/api/qr/verify-password",
+  "/api/gdpr/consent",
+];
+
+function csrfBlockedResponse() {
+  return new NextResponse(JSON.stringify({ error: MSG.INVALID_CSRF }), {
+    status: 403,
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+  });
+}
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // CSRF Protection for API routes
   if (request.nextUrl.pathname.startsWith("/api/")) {
-    // Skip CSRF for webhooks and public endpoints if needed
-    if (request.nextUrl.pathname.startsWith("/api/billing/webhook")) {
+    if (CSRF_SKIP_PREFIXES.some((prefix) => request.nextUrl.pathname.startsWith(prefix))) {
       return response;
     }
 
@@ -25,10 +38,7 @@ export function middleware(request: NextRequest) {
         const isBrowserRequest = origin || referer;
 
         if (isBrowserRequest) {
-          return new NextResponse(JSON.stringify({ error: "Invalid CSRF token" }), {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          });
+          return csrfBlockedResponse();
         }
       }
     }
