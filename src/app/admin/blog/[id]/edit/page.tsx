@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getDb } from "@/lib/db";
-import { BlogPostForm } from "../../blog-post-form";
+import { BlogPostForm, formatStructuredDataForEdit } from "../../blog-post-form";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -34,6 +34,9 @@ export default async function EditBlogPostPage({ params }: Props) {
             excerpt: post.excerpt ?? "",
             content: post.content,
             coverImageUrl: post.coverImageUrl ?? "",
+            authorName: post.authorName ?? "",
+            readingTimeMinutes: post.readingTimeMinutes != null ? String(post.readingTimeMinutes) : "",
+            structuredData: formatStructuredDataForEdit(post.structuredData),
             published: !!post.publishedAt,
           }}
         />

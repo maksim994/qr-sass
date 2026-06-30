@@ -8,5 +8,5 @@ export async function POST(request: Request) {
   const admin = await getAdminOrNullFromSessionOrApiKey();
   if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
 
-  return handleBlogImageUpload(request, "cover");
+  return handleBlogImageUpload(request, "content");
 }

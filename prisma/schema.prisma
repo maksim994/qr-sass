@@ -64,9 +64,11 @@ model BlogPost {
   excerpt           String?
   content           String    @db.Text
   coverImageUrl     String?
+  authorName        String?   // отображаемое имя автора
+  structuredData    String?   @db.Text // JSON-LD микроразметка (если не задана — генерируется автоматически)
   views             Int       @default(0)
   likes             Int       @default(0)
-  readingTimeMinutes Int?     // авто: словоcount / 200
+  readingTimeMinutes Int?     // вручную или авто: словоcount / 200
   publishedAt       DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt

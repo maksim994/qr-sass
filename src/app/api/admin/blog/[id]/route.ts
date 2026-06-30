@@ -3,6 +3,7 @@ import { MSG } from "@/lib/user-messages";
 import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
+import { normalizeStructuredDataInput } from "@/lib/blog-structured-data";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -20,9 +21,24 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     excerpt?: string | null;
     content?: string;
     coverImageUrl?: string | null;
+    authorName?: string | null;
+    structuredData?: unknown;
+    readingTimeMinutes?: number | null;
     publishedAt?: string | null;
   }>(req);
   if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
+
+  if (data.structuredData !== undefined) {
+    const structured = normalizeStructuredDataInput(data.structuredData);
+    if (!structured.ok) return apiError(structured.error, "VALIDATION_ERROR", 400, undefined, requestId);
+  }
+
+  if (data.readingTimeMinutes != null) {
+    const rt = Number(data.readingTimeMinutes);
+    if (!Number.isFinite(rt) || rt < 1 || rt > 999) {
+      return apiError("readingTimeMinutes должен быть числом от 1 до 999", "VALIDATION_ERROR", 400, undefined, requestId);
+    }
+  }
 
   const db = getDb();
   const existing = await db.blogPost.findUnique({ where: { id } });
@@ -35,9 +51,24 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   if (data.excerpt !== undefined) update.excerpt = data.excerpt?.trim() ?? null;
   if (data.content !== undefined) {
     update.content = String(data.content);
-    update.readingTimeMinutes = calculateReadingTimeMinutes(String(data.content));
+    if (data.readingTimeMinutes === undefined) {
+      update.readingTimeMinutes = calculateReadingTimeMinutes(String(data.content));
+    }
   }
   if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl?.trim() || null;
+  if (data.authorName !== undefined) update.authorName = data.authorName?.trim() || null;
+  if (data.structuredData !== undefined) {
+    const structured = normalizeStructuredDataInput(data.structuredData);
+    update.structuredData = structured.ok && structured.data ? structured.data : null;
+  }
+  if (data.readingTimeMinutes !== undefined) {
+    if (data.readingTimeMinutes != null) {
+      update.readingTimeMinutes = Math.round(Number(data.readingTimeMinutes));
+    } else {
+      const contentForCalc = data.content !== undefined ? String(data.content) : existing.content;
+      update.readingTimeMinutes = calculateReadingTimeMinutes(contentForCalc);
+    }
+  }
   if (data.publishedAt !== undefined) update.publishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
 
   if (data.slug !== undefined) {

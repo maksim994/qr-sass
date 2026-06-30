@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { BlogPostContent } from "@/components/blog/blog-post-content";
 import { ArticleUsefulBlock } from "@/components/blog/article-useful-block";
 import { BlogViewTracker } from "@/components/blog/blog-view-tracker";
+import { buildDefaultArticleJsonLd, parseStructuredDataForPage } from "@/lib/blog-structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -57,6 +58,8 @@ export default async function BlogPostPage({ params }: Props) {
       excerpt: true,
       content: true,
       coverImageUrl: true,
+      authorName: true,
+      structuredData: true,
       views: true,
       likes: true,
       readingTimeMinutes: true,
@@ -68,52 +71,24 @@ export default async function BlogPostPage({ params }: Props) {
 
   const base = process.env.APP_URL ?? "http://localhost:3000";
   const articleUrl = `${base}/blog/${post.slug}`;
+  const seoTitle = post.metaTitle?.trim() || `${post.title} — Блог qr-s.ru`;
   const seoDescription = post.metaDescription?.trim() || (post.excerpt ?? post.title);
 
-  const articleId = `${articleUrl}#article`;
-  const webpageId = `${articleUrl}#webpage`;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebPage",
-        "@id": webpageId,
-        url: articleUrl,
-        name: post.metaTitle?.trim() || `${post.title} — Блог qr-s.ru`,
-        description: seoDescription,
-        mainEntity: { "@id": articleId },
-        breadcrumb: {
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Главная", item: base },
-            { "@type": "ListItem", position: 2, name: "Блог", item: `${base}/blog` },
-            { "@type": "ListItem", position: 3, name: post.title, item: articleUrl },
-          ],
-        },
-      },
-      {
-        "@type": "Article",
-        "@id": articleId,
-        headline: post.title,
-        description: seoDescription,
-        image: post.coverImageUrl ?? undefined,
-        datePublished: post.publishedAt!.toISOString(),
-        dateModified: post.updatedAt.toISOString(),
-        url: articleUrl,
-        mainEntityOfPage: { "@id": webpageId },
-        author: { "@type": "Organization", name: "qr-s.ru", url: base },
-        publisher: { "@type": "Organization", name: "qr-s.ru", url: base },
-        ...(post.likes > 0 && {
-          interactionStatistic: {
-            "@type": "InteractionCounter",
-            interactionType: "https://schema.org/LikeAction",
-            userInteractionCount: post.likes,
-          },
-        }),
-      },
-    ],
-  };
+  const customJsonLd = parseStructuredDataForPage(post.structuredData);
+  const jsonLd =
+    customJsonLd ??
+    buildDefaultArticleJsonLd({
+      base,
+      articleUrl,
+      title: post.title,
+      seoTitle,
+      seoDescription,
+      coverImageUrl: post.coverImageUrl,
+      publishedAt: post.publishedAt!,
+      updatedAt: post.updatedAt,
+      likes: post.likes,
+      authorName: post.authorName,
+    });
 
   const publishedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("ru", {
@@ -142,6 +117,24 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.title}
               </h1>
               <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                {post.authorName && (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="h-4 w-4 text-slate-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                      />
+                    </svg>
+                    {post.authorName}
+                  </span>
+                )}
                 <span className="flex items-center gap-2">
                   <svg
                     className="h-4 w-4 text-slate-400"

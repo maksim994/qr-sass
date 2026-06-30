@@ -7,9 +7,14 @@ import { useCallback, useRef, useState } from "react";
 type Props = {
   onUploaded: (url: string) => void;
   currentUrl?: string;
+  uploadEndpoint?: string;
 };
 
-export function CoverImageUpload({ onUploaded, currentUrl }: Props) {
+export function CoverImageUpload({
+  onUploaded,
+  currentUrl,
+  uploadEndpoint = "/api/admin/blog/upload",
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -22,7 +27,7 @@ export function CoverImageUpload({ onUploaded, currentUrl }: Props) {
       formData.append("file", file);
 
       try {
-        const res = await fetchApi("/api/admin/blog/upload", {
+        const res = await fetchApi(uploadEndpoint, {
           method: "POST",
           credentials: "include",
           body: formData,
@@ -36,7 +41,7 @@ export function CoverImageUpload({ onUploaded, currentUrl }: Props) {
         setUploading(false);
       }
     },
-    [onUploaded],
+    [onUploaded, uploadEndpoint],
   );
 
   return (
