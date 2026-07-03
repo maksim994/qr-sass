@@ -1,5 +1,6 @@
 "use client";
 
+import { getCsrfToken } from "@/lib/client-api";
 import { useCallback, useRef, useState } from "react";
 
 type Props = {
@@ -60,6 +61,10 @@ export function FileUploadField({ accept, workspaceId, onUploaded, currentFilena
             xhr.addEventListener("error", () => reject(new Error("Сетевая ошибка")));
             xhr.addEventListener("abort", () => reject(new Error("Загрузка отменена")));
             xhr.open("POST", "/api/upload");
+            const csrfToken = getCsrfToken();
+            if (csrfToken) {
+              xhr.setRequestHeader("X-CSRF-Token", csrfToken);
+            }
             xhr.send(formData);
           },
         );
