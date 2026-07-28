@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Alert } from "@/components/ui";
+import { TrackedDownloadLink } from "@/components/dashboard/tracked-download-link";
+import { QrLibraryCardMenu } from "@/components/dashboard/qr-library-card-menu";
 
 type QrItem = {
   id: string;
@@ -41,68 +44,68 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats }: P
 
   return (
     <>
-      {/* Search */}
-      <div className="mb-4">
+      <div className="qrs-lib-search">
+        <svg className="qrs-lib-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
         <input
           type="text"
           placeholder="Поиск по названию…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="input"
+          className="qrs-lib-search-input"
         />
       </div>
 
-      {/* Filter tabs */}
-      <div className="mb-6 flex gap-2">
+      <div className="qrs-lib-filters">
         {tabs.map((tab) => (
           <button
             key={tab.key}
+            type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`btn btn-sm ${activeTab === tab.key ? "btn-primary" : "btn-secondary"}`}
+            className={`qrs-lib-filter${activeTab === tab.key ? " active" : ""}`}
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="card p-12 text-center">
-          <svg className="mx-auto h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-          <p className="mt-3 text-sm text-slate-500">
-            {search || activeTab !== "ALL"
-              ? "Ничего не найдено. Попробуйте изменить фильтры."
-              : "QR-коды ещё не созданы."}
-          </p>
-          {!search && activeTab === "ALL" && (
-            <Link href="/dashboard/create" className="btn btn-primary btn-sm mt-4">
-              Создать первый QR
+        search || activeTab !== "ALL" ? (
+          <Alert variant="info" title="Ничего не найдено">
+            Попробуйте изменить фильтры или поисковый запрос.
+          </Alert>
+        ) : (
+          <Alert variant="info" title="Пока нет QR-кодов">
+            <Link href="/dashboard/create" className="qrs-navlink">
+              Добавьте свой первый QR-код
             </Link>
-          )}
-        </div>
+          </Alert>
+        )
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="qrs-lib-grid">
           {filtered.map((qr) => {
             const tracksScans = qr.kind === "DYNAMIC" || qr.contentType === "VCARD";
             return (
-            <div key={qr.id} className="card flex flex-col justify-between p-5">
-              <div>
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="badge">
-                    {contentTypeLabels[qr.contentType] || qr.contentType}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {qr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
-                  </span>
+              <article key={qr.id} className="qrs-lib-card qrs-row-lift">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                    <span className="qrs-lib-card-tag">
+                      {contentTypeLabels[qr.contentType] || qr.contentType}
+                    </span>
+                    <span style={{ font: "var(--fw-medium) 12px/1 var(--font-sans)", color: "var(--text-muted)" }}>
+                      {qr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
+                    </span>
+                  </div>
+                  <QrLibraryCardMenu qrId={qr.id} exportFormats={exportFormats} />
                 </div>
+
                 <Link href={`/dashboard/qr/${qr.id}`} className="block">
-                  <h3 className="font-semibold text-slate-900 hover:text-blue-600 transition-colors">
-                    {qr.name}
-                  </h3>
+                  <h3 className="qrs-lib-card-title">{qr.name}</h3>
                 </Link>
-                <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
+
+                <div className="qrs-lib-card-meta tnum">
                   {tracksScans && (
                     <span>{qr._count.scanEvents} {qr.contentType === "VCARD" ? "скач." : "скан."}</span>
                   )}
@@ -114,35 +117,33 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats }: P
                     })}
                   </span>
                 </div>
-              </div>
 
-              <div className="mt-4 flex items-center gap-2">
-                {exportFormats.includes("PNG") && (
-                  <a
-                    href={`/api/qr/${qr.id}/download?format=png`}
-                    className="btn btn-secondary btn-sm"
-                    download
-                  >
-                    PNG
-                  </a>
-                )}
-                {exportFormats.includes("SVG") && (
-                  <a
-                    href={`/api/qr/${qr.id}/download?format=svg`}
-                    className="btn btn-secondary btn-sm"
-                    download
-                  >
-                    SVG
-                  </a>
-                )}
-                <Link
-                  href={`/dashboard/qr/${qr.id}`}
-                  className="btn btn-sm btn-primary ml-auto"
-                >
-                  Открыть
-                </Link>
-              </div>
-            </div>
+                <div className="qrs-lib-card-actions">
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {exportFormats.includes("PNG") && (
+                      <TrackedDownloadLink
+                        href={`/api/qr/${qr.id}/download?format=png`}
+                        className="qrs-lib-card-export"
+                        download
+                      >
+                        PNG
+                      </TrackedDownloadLink>
+                    )}
+                    {exportFormats.includes("SVG") && (
+                      <TrackedDownloadLink
+                        href={`/api/qr/${qr.id}/download?format=svg`}
+                        className="qrs-lib-card-export"
+                        download
+                      >
+                        SVG
+                      </TrackedDownloadLink>
+                    )}
+                  </div>
+                  <Link href={`/dashboard/qr/${qr.id}`} className="fk-button fk-button--sm fk-button--primary">
+                    Открыть
+                  </Link>
+                </div>
+              </article>
             );
           })}
         </div>

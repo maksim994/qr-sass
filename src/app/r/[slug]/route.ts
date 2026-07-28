@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { cookies } from "next/headers";
 import { trackScan } from "@/lib/analytics";
 import { getDb } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { consumeRateLimit, getClientIp, redirectRateLimiter } from "@/lib/rate-limit";
 import { isSafeUrl } from "@/lib/url";
 
 type RouteContext = {
@@ -16,6 +17,18 @@ function passwordGateHtml(slug: string, error?: string) {
 
 export async function GET(request: Request, context: RouteContext) {
   try {
+    const ip = getClientIp(request);
+    const limited = await consumeRateLimit(redirectRateLimiter, ip);
+    if (!limited.success) {
+      return new NextResponse("Слишком много запросов. Попробуйте позже.", {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((limited.retryAfterMs ?? 60000) / 1000)),
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      });
+    }
+
     const { slug } = await context.params;
     const db = getDb();
     const qr = await db.qrCode.findFirst({
@@ -140,16 +153,18 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.redirect(new URL("/", process.env.APP_URL ?? "http://localhost:3000"));
     }
 
-    await trackScan(qr.id, targetUrl, abVariant).catch((error) => {
-      logger.error({
-        area: "api",
-        route: "/r/[slug]",
-        message: "Failed to record scan event",
-        code: "INTERNAL_ERROR",
-        status: 500,
-        details: error instanceof Error ? { message: error.message } : error,
-      });
-    });
+    after(() =>
+      trackScan(qr.id, targetUrl, abVariant).catch((error) => {
+        logger.error({
+          area: "api",
+          route: "/r/[slug]",
+          message: "Failed to record scan event",
+          code: "INTERNAL_ERROR",
+          status: 500,
+          details: error instanceof Error ? { message: error.message } : error,
+        });
+      })
+    );
 
     const trackingPixels = payload.trackingPixels as { metaPixelId?: string; ga4Id?: string; gtmId?: string; ymCounterId?: string; vkPixelId?: string } | undefined;
     const hasPixels = trackingPixels && typeof trackingPixels === "object" && (trackingPixels.metaPixelId || trackingPixels.ga4Id || trackingPixels.gtmId || trackingPixels.ymCounterId || trackingPixels.vkPixelId);

@@ -17,25 +17,37 @@ export function QrTypeIcon({
   className = "",
 }: Props) {
   const icon = getQrTypeInfo(contentType)?.icon ?? FALLBACK_ICON;
-  const box = size === "sm" ? "h-9 w-9" : "h-10 w-10";
-  const svgSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
-  const bg = variant === "blue" ? "bg-blue-50" : "bg-slate-100";
-  const color = variant === "blue" ? "text-blue-600" : "text-slate-600";
+  const box = size === "sm" ? 36 : 40;
+  const svgSize = size === "sm" ? 16 : 20;
 
   return (
-    <div
-      className={`flex ${box} shrink-0 items-center justify-center rounded-lg ${bg} ${className}`}
+    <span
+      className={className}
+      style={{
+        width: box,
+        height: box,
+        borderRadius: 10,
+        background: variant === "blue" ? "var(--color-primary-subtle)" : "var(--surface-sunken)",
+        color: variant === "blue" ? "var(--color-primary)" : "var(--text-muted)",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flex: "none",
+      }}
     >
       <svg
-        className={`${svgSize} ${color}`}
+        width={svgSize}
+        height={svgSize}
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
+        strokeWidth={1.75}
         stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         aria-hidden
       >
-        <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
+        <path d={icon} />
       </svg>
-    </div>
+    </span>
   );
 }

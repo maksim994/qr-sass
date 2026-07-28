@@ -1,28 +1,33 @@
 import { isSafeUrl } from "@/lib/url";
-import { QreateFooter } from "./qreate-footer";
+import {
+  HostedLandingCard,
+  HostedLandingEmpty,
+  HostedLandingShell,
+  HostedLandingTitle,
+} from "./hosted-landing-shell";
 
 type SocialLink = { platform?: string; url?: string };
 
 type Props = { payload: Record<string, unknown> };
 
-const platformColors: Record<string, string> = {
-  instagram: "bg-pink-500 hover:bg-pink-600",
-  facebook: "bg-blue-600 hover:bg-blue-700",
-  twitter: "bg-sky-500 hover:bg-sky-600",
-  x: "bg-gray-900 hover:bg-black",
-  youtube: "bg-red-600 hover:bg-red-700",
-  tiktok: "bg-gray-900 hover:bg-black",
-  telegram: "bg-sky-500 hover:bg-sky-600",
-  vk: "bg-blue-500 hover:bg-blue-600",
-  linkedin: "bg-blue-700 hover:bg-blue-800",
-  whatsapp: "bg-green-500 hover:bg-green-600",
-  pinterest: "bg-red-500 hover:bg-red-600",
-  github: "bg-gray-800 hover:bg-gray-900",
+const platformClass: Record<string, string> = {
+  instagram: "qrs-hosted-social__btn--instagram",
+  facebook: "qrs-hosted-social__btn--facebook",
+  twitter: "qrs-hosted-social__btn--twitter",
+  x: "qrs-hosted-social__btn--x",
+  youtube: "qrs-hosted-social__btn--youtube",
+  tiktok: "qrs-hosted-social__btn--tiktok",
+  telegram: "qrs-hosted-social__btn--telegram",
+  vk: "qrs-hosted-social__btn--vk",
+  linkedin: "qrs-hosted-social__btn--linkedin",
+  whatsapp: "qrs-hosted-social__btn--whatsapp",
+  pinterest: "qrs-hosted-social__btn--pinterest",
+  github: "qrs-hosted-social__btn--github",
 };
 
-function getColorClass(platform?: string): string {
-  if (!platform) return "bg-blue-600 hover:bg-blue-700";
-  return platformColors[platform.toLowerCase()] ?? "bg-blue-600 hover:bg-blue-700";
+function getPlatformClass(platform?: string): string {
+  if (!platform) return "";
+  return platformClass[platform.toLowerCase()] ?? "";
 }
 
 export function SocialLinksLanding({ payload }: Props) {
@@ -31,30 +36,28 @@ export function SocialLinksLanding({ payload }: Props) {
   const safeLinks = links.filter((l) => l.url && isSafeUrl(l.url));
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
-        <h1 className="text-center text-2xl font-bold text-gray-900">{title}</h1>
+    <HostedLandingShell>
+      <HostedLandingCard>
+        <HostedLandingTitle center>{title}</HostedLandingTitle>
 
-        {safeLinks.length === 0 && (
-          <p className="mt-4 text-center text-gray-500">Нет ссылок</p>
+        {safeLinks.length === 0 ? (
+          <HostedLandingEmpty>Нет ссылок</HostedLandingEmpty>
+        ) : (
+          <div className="qrs-hosted-social">
+            {safeLinks.map((link, i) => (
+              <a
+                key={i}
+                href={link.url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`qrs-hosted-social__btn ${getPlatformClass(link.platform)}`.trim()}
+              >
+                {link.platform || "Ссылка"}
+              </a>
+            ))}
+          </div>
         )}
-
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          {safeLinks.map((link, i) => (
-            <a
-              key={i}
-              href={link.url!}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex items-center justify-center rounded-xl px-4 py-3.5 text-sm font-semibold text-white transition-colors ${getColorClass(link.platform)}`}
-            >
-              {link.platform || "Ссылка"}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <QreateFooter />
-    </div>
+      </HostedLandingCard>
+    </HostedLandingShell>
   );
 }

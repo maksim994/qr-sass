@@ -1,11 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Logo } from "@/components/logo";
+import { useId, useState } from "react";
+import {
+  AuthDivider,
+  AuthShell,
+  AuthSwitchLink,
+  YandexAuthButton,
+} from "@/components/auth/auth-shell";
+import { ConsentField } from "@/components/auth/consent-field";
+import { PasswordField } from "@/components/auth/password-field";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { parseApiResponse, fetchApi } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
+import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 
 type Props = {
   planName: string;
@@ -14,6 +25,9 @@ type Props = {
 
 export function RegisterPageClient({ planName, features }: Props) {
   const router = useRouter();
+  const nameId = useId();
+  const workspaceId = useId();
+  const emailId = useId();
   const [name, setName] = useState("");
   const [workspaceName, setWorkspaceName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,142 +60,99 @@ export function RegisterPageClient({ planName, features }: Props) {
       return;
     }
 
+    trackGoal(PRODUCT_GOALS.registration_completed);
     router.push("/dashboard");
     router.refresh();
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left — Decorative */}
-      <div className="relative hidden lg:block lg:w-1/2">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-700 via-blue-600 to-blue-500">
-          <div className="absolute inset-0 opacity-20">
-            <svg className="h-full w-full" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <radialGradient id="reg-glow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="white" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="white" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              <circle cx="300" cy="400" r="350" fill="url(#reg-glow)" />
-              <circle cx="650" cy="200" r="200" fill="url(#reg-glow)" />
-            </svg>
-          </div>
-          <div className="relative flex h-full flex-col items-center justify-center px-12 text-center text-white">
-            <Logo href="/" size="lg" inverted />
-            <h2 className="mt-6 text-2xl font-bold">Тариф «{planName}»</h2>
-            <p className="mt-3 max-w-sm text-white/90">
-              Создайте аккаунт за 30 секунд и начните генерировать QR-коды прямо сейчас. Без кредитной карты.
-            </p>
-            <div className="mt-8 grid grid-cols-2 gap-4 text-left text-sm text-white">
-              {features.map((feature) => (
-                <div key={feature} className="flex items-center gap-2 text-white/90">
-                  <svg className="h-4 w-4 shrink-0 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                  {feature}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+    <AuthShell
+      mode="register"
+      title="Создать аккаунт"
+      subtitle={`Начните с тарифа «${planName}» за пару секунд.`}
+      planName={planName}
+      planFeatures={features}
+    >
+      <form onSubmit={onSubmit} className="qrs-auth-form">
+        {error ? (
+          <Alert variant="danger" size="sm" onClose={() => setError("")}>
+            {error}
+          </Alert>
+        ) : null}
 
-      {/* Right — Form */}
-      <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-16">
-        <Logo href="/" size="md" />
+        <Field label="Имя" htmlFor={nameId} required>
+          <Input
+            id={nameId}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Иван Петров"
+            autoComplete="name"
+            required
+          />
+        </Field>
 
-        <div className="mt-12">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Создать аккаунт</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Начните с тарифа «{planName}» за пару секунд.
-          </p>
-        </div>
+        <Field
+          label={
+            <>
+              Рабочее пространство{" "}
+              <span className="qrs-auth-optional">(необязательно)</span>
+            </>
+          }
+          htmlFor={workspaceId}
+        >
+          <Input
+            id={workspaceId}
+            value={workspaceName}
+            onChange={(event) => setWorkspaceName(event.target.value)}
+            placeholder="Моя команда"
+            autoComplete="organization"
+          />
+        </Field>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
-            <div>
-              <label className="label">Имя</label>
-              <input
-                className="input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Иван Петров"
-                required
-              />
-            </div>
-            <div>
-              <label className="label leading-snug">
-                Рабочее пространство{" "}
-                <span className="font-normal text-slate-400">(необязательно)</span>
-              </label>
-              <input
-                className="input"
-                value={workspaceName}
-                onChange={(e) => setWorkspaceName(e.target.value)}
-                placeholder="Моя команда"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="label">Email</label>
-            <input
-              className="input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              required
-            />
-          </div>
-          <div>
-            <label className="label">Пароль</label>
-            <input
-              className="input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Минимум 8 символов"
-              minLength={8}
-              required
-            />
-          </div>
+        <Field label="Email" htmlFor={emailId} required>
+          <Input
+            id={emailId}
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="email@example.com"
+            autoComplete="email"
+            required
+          />
+        </Field>
 
-          <div className="flex items-start gap-2 mt-4">
-            <input
-              type="checkbox"
-              id="consent"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
-              required
-            />
-            <label htmlFor="consent" className="text-sm text-slate-500">
-              Я согласен на{" "}
-              <Link href="/privacy-policy" className="text-blue-600 hover:underline" target="_blank">
-                обработку персональных данных
-              </Link>{" "}
-              и принимаю условия{" "}
-              <Link href="/terms-of-service" className="text-blue-600 hover:underline" target="_blank">
-                Пользовательского соглашения
-              </Link>
-            </label>
-          </div>
+        <PasswordField
+          value={password}
+          onChange={setPassword}
+          minLength={8}
+          autoComplete="new-password"
+        />
 
-          {error && <p className="text-danger text-sm">{error}</p>}
+        <ConsentField checked={consent} onChange={setConsent} />
 
-          <button className="btn btn-primary w-full" disabled={loading}>
-            {loading ? "Создание..." : "Создать аккаунт"}
-          </button>
-        </form>
+        <Button
+          type="submit"
+          variant="accent"
+          size="lg"
+          block
+          disabled={loading}
+          className={loading ? "fk-button--loading" : ""}
+          aria-busy={loading}
+        >
+          Создать аккаунт
+        </Button>
+      </form>
 
-        <p className="mt-6 text-sm text-slate-500">
-          Уже есть аккаунт?{" "}
-          <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
-            Войти
-          </Link>
+      <AuthDivider />
+
+      <div className="qrs-auth-social">
+        <YandexAuthButton mode="register" />
+        <p className="qrs-auth-social-note">
+          Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
         </p>
       </div>
-    </div>
+
+      <AuthSwitchLink mode="register" />
+    </AuthShell>
   );
 }

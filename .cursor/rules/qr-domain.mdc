@@ -1,0 +1,31 @@
+---
+description: "QR domain: types, encode, forms, dynamic features, /r|/p|/g|/v"
+globs: src/lib/qr*.ts,src/lib/scannability.ts,src/lib/vcard.ts,src/lib/disabled-qr-types.ts,src/components/qr*/**/*,src/components/qr-forms/**/*,src/components/*qr*,src/app/api/qr/**/*,src/app/r/**/*,src/app/p/**/*,src/app/g/**/*,src/app/v/**/*,src/app/dashboard/create/**/*,src/app/dashboard/library/**/*,src/app/dashboard/bulk/**/*
+alwaysApply: false
+---
+
+# QR domain
+
+## Prefer
+- Новый тип QR — атомарно: Prisma/enum + @src/lib/qr-types.ts + form в `qr-forms` + encode в @src/lib/qr-content.ts.
+- Dynamic-only фичи (пароль, expiry, пиксели, smart redirect, A/B) — не на STATIC payload.
+- Публичные поверхности: `/p`, `/r`, `/g`, `/v` (и связанные API) — сохранять контракты slug/code.
+- Перед стилизацией — @src/lib/scannability.ts; лимиты плана учитывать в create/library/bulk.
+- Disabled types — @src/lib/disabled-qr-types.ts; vCard — @src/lib/vcard.ts.
+
+## Never
+- Частичное добавление типа (только UI без encode / только enum без form).
+- Вешать dynamic-only поведение на static QR «как будто dynamic».
+- Обходить `qr-types` / `qr-content` самодельным encode в компоненте.
+- Ломать scannability ради декора (слишком мало контраста / quiet zone).
+
+## Anti-patterns
+- Копипаст form-логики между типами без shared field helpers.
+- Хардкод списка типов в dashboard в обход `qr-types`.
+- Генерация PNG/SVG мимо существующих styling helpers (`qr-styled-render` / options).
+
+## Gold
+- @src/lib/qr-types.ts
+- @src/lib/qr-content.ts
+- @src/lib/scannability.ts
+- @src/components/qr-forms/

@@ -44,6 +44,7 @@ export async function POST(req: Request) {
     authorName?: string | null;
     structuredData?: unknown;
     readingTimeMinutes?: number | null;
+    categoryId?: string | null;
     publishedAt?: string | null;
   }>(req);
   if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
@@ -87,6 +88,7 @@ export async function POST(req: Request) {
       authorName: data.authorName?.trim() || null,
       structuredData: structured.data || null,
       readingTimeMinutes,
+      categoryId: data.categoryId?.trim() || null,
       publishedAt,
       createdById: admin.id,
     },

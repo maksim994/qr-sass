@@ -9,15 +9,9 @@ import { apiError, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { getPlan } from "@/lib/plans";
+import { getPlan, getBulkBatchLimit, assertCanCreateQrCodes } from "@/lib/plans";
 import { defaultStyle, renderQrPng } from "@/lib/qr";
 import { isSafeUrl } from "@/lib/url";
-
-const BULK_LIMITS: Record<string, number> = {
-  FREE: 50,
-  PRO: 1000,
-  BUSINESS: 5000,
-};
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -44,7 +38,7 @@ export async function POST(request: Request) {
       select: { plan: true },
     });
     const plan = await getPlan(workspace?.plan);
-    const bulkLimit = BULK_LIMITS[plan.id] ?? 50;
+    const bulkLimit = getBulkBatchLimit(plan.id);
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const ext = (file.name || "").toLowerCase().slice(-4);
@@ -117,6 +111,16 @@ export async function POST(request: Request) {
         undefined,
         requestId
       );
+    }
+
+    const quota = await assertCanCreateQrCodes({
+      workspaceId,
+      planId: workspace?.plan,
+      count: items.length,
+      needsDynamic: true,
+    });
+    if (!quota.ok) {
+      return apiError(quota.message, "FORBIDDEN", 403, { code: quota.code }, requestId);
     }
 
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";

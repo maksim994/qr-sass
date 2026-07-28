@@ -1,0 +1,166 @@
+/* ============================================================
+   COLORS — Финкуратор
+   Two layers:
+   1) PRIMITIVES — raw palette ramps. Never reference these
+      directly in components; use the semantic aliases below.
+   2) SEMANTIC — role-based tokens that flip in dark mode.
+
+   Brand idea: trustworthy blue (the "curator" that guides) +
+   a money/approval green accent for conversion & positive data.
+   ============================================================ */
+
+:root {
+  /* ---------- PRIMITIVES ---------- */
+
+  /* Blue — primary brand / trust / navigation */
+  --blue-50:  #EDF2FE;
+  --blue-100: #D8E2FD;
+  --blue-200: #B4C7FB;
+  --blue-300: #88A4F6;
+  --blue-400: #5B7FEF;
+  --blue-500: #2F5FE6;
+  --blue-600: #1E4FD1;   /* default primary action */
+  --blue-700: #1840AB;
+  --blue-800: #173885;
+  --blue-900: #15306A;
+
+  /* Green — accent / money / approval / conversion CTA */
+  --green-50:  #E7F8F0;
+  --green-100: #C6EFDC;
+  --green-200: #92E1BF;
+  --green-300: #59CF9E;
+  --green-400: #2BB983;
+  --green-500: #12A06C;
+  --green-600: #0C8659;   /* default accent action */
+  --green-700: #0A6B48;
+  --green-800: #0A5439;
+  --green-900: #09452F;
+
+  /* Neutral — slate, faintly cool to sit beside the blue */
+  --neutral-0:   #FFFFFF;
+  --neutral-25:  #FBFCFE;
+  --neutral-50:  #F5F7FA;
+  --neutral-100: #ECEFF4;
+  --neutral-200: #DEE3EB;
+  --neutral-300: #C7CEDA;
+  --neutral-400: #9AA4B5;
+  --neutral-500: #6B7689;
+  --neutral-600: #4D5667;
+  --neutral-700: #353D4C;
+  --neutral-800: #222834;
+  --neutral-900: #131720;
+
+  /* Status ramps */
+  --amber-50:  #FEF4E2;  --amber-500: #E2960F;  --amber-600: #C27D08;  --amber-700: #8F5C06;
+  --red-50:    #FDECEC;  --red-500:   #E14444;  --red-600:   #D32B2B;  --red-700:   #A81F1F;
+  --cyan-50:   #E5F6FB;  --cyan-500:  #149FC4;  --cyan-600:  #0E809F;
+
+  /* ---------- SEMANTIC (light, default) ---------- */
+
+  /* Brand */
+  --color-primary:          var(--blue-600);
+  --color-primary-hover:    var(--blue-700);
+  --color-primary-active:   var(--blue-800);
+  --color-primary-subtle:   var(--blue-50);
+  --color-primary-on:       #FFFFFF;
+  --color-accent:           var(--green-600);
+  --color-accent-hover:     var(--green-700);
+  --color-accent-active:    var(--green-800);
+  --color-accent-subtle:    var(--green-50);
+  --color-accent-on:        #FFFFFF;
+
+  /* Text */
+  --text-strong:   var(--neutral-900);
+  --text-default:  var(--neutral-800);
+  --text-muted:    var(--neutral-500);
+  --text-subtle:   var(--neutral-400);
+  --text-on-fill:  #FFFFFF;
+  --text-link:     var(--blue-600);
+  --text-link-hover: var(--blue-700);
+
+  /* Surfaces */
+  --surface-page:    var(--neutral-0);
+  --surface-subtle:  var(--neutral-50);   /* alternating sections */
+  --surface-sunken:  var(--neutral-100);  /* wells, track backgrounds */
+  --surface-card:    var(--neutral-0);
+  --surface-raised:  var(--neutral-0);
+  --surface-inverse: var(--neutral-900);
+  --surface-brand:   var(--blue-600);
+  --surface-brand-soft: var(--blue-50);
+
+  /* Borders */
+  --border-subtle:  var(--neutral-100);
+  --border-default: var(--neutral-200);
+  --border-strong:  var(--neutral-300);
+  --border-brand:   var(--blue-600);
+  --border-focus:   var(--blue-500);
+
+  /* Status (semantic) */
+  --color-success:        var(--green-600);
+  --color-success-subtle: var(--green-50);
+  --color-warning:        var(--amber-600);
+  --color-warning-subtle: var(--amber-50);
+  --color-danger:         var(--red-600);
+  --color-danger-subtle:  var(--red-50);
+  --color-info:           var(--blue-600);
+  --color-info-subtle:    var(--blue-50);
+
+  /* RGB triplets for rgba() overlays/glows. */
+  --focus-ring: 47, 95, 230; /* @kind other */
+  --brand-rgb: 30, 79, 209; /* @kind other */
+  --ink-rgb: 19, 23, 32; /* @kind other */
+
+  color-scheme: light;
+}
+
+/* ---------- SEMANTIC (dark) ---------- */
+[data-theme="dark"] {
+  --color-primary:          var(--blue-400);
+  --color-primary-hover:    var(--blue-300);
+  --color-primary-active:   var(--blue-200);
+  --color-primary-subtle:   rgba(91, 127, 239, 0.16);
+  --color-primary-on:       #0B1020;
+  --color-accent:           var(--green-400);
+  --color-accent-hover:     var(--green-300);
+  --color-accent-active:    var(--green-200);
+  --color-accent-subtle:    rgba(43, 185, 131, 0.16);
+  --color-accent-on:        #06140D;
+
+  --text-strong:   #F3F6FB;
+  --text-default:  #DCE3EE;
+  --text-muted:    #97A3B6;
+  --text-subtle:   #6C7689;
+  --text-on-fill:  #0B1020;
+  --text-link:     var(--blue-300);
+  --text-link-hover: var(--blue-200);
+
+  --surface-page:    #0D1220;
+  --surface-subtle:  #121828;
+  --surface-sunken:  #0A0F1A;
+  --surface-card:    #161D2E;
+  --surface-raised:  #1B2335;
+  --surface-inverse: #F3F6FB;
+  --surface-brand:   var(--blue-500);
+  --surface-brand-soft: rgba(91, 127, 239, 0.14);
+
+  --border-subtle:  #1E2738;
+  --border-default: #283143;
+  --border-strong:  #3A475E;
+  --border-brand:   var(--blue-400);
+  --border-focus:   var(--blue-400);
+
+  --color-success:        var(--green-400);
+  --color-success-subtle: rgba(43, 185, 131, 0.16);
+  --color-warning:        var(--amber-500);
+  --color-warning-subtle: rgba(226, 150, 15, 0.16);
+  --color-danger:         var(--red-500);
+  --color-danger-subtle:  rgba(225, 68, 68, 0.16);
+  --color-info:           var(--blue-400);
+  --color-info-subtle:    rgba(91, 127, 239, 0.16);
+
+  --focus-ring: 91, 127, 239; /* @kind other */
+  --brand-rgb: 91, 127, 239; /* @kind other */
+  --ink-rgb: 0, 0, 0; /* @kind other */
+
+  color-scheme: dark;
+}

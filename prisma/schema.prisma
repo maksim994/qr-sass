@@ -45,6 +45,8 @@ enum QrContentType {
 model User {
   id           String       @id @default(cuid())
   email        String       @unique
+  yandexId     String?      @unique
+  avatarUrl    String?
   passwordHash String
   name         String?
   isAdmin      Boolean      @default(false)
@@ -55,28 +57,43 @@ model User {
   blogPosts    BlogPost[]   @relation("CreatedBlogPosts")
 }
 
+model BlogCategory {
+  id        String     @id @default(cuid())
+  slug      String     @unique
+  name      String
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     BlogPost[]
+
+  @@index([sortOrder])
+}
+
 model BlogPost {
-  id                String    @id @default(cuid())
-  slug              String    @unique
+  id                String         @id @default(cuid())
+  slug              String         @unique
   title             String
-  metaTitle         String?   // SEO title (если не задан — используется title)
-  metaDescription   String?   // SEO description (если не задан — используется excerpt)
+  metaTitle         String?        // SEO title (если не задан — используется title)
+  metaDescription   String?        // SEO description (если не задан — используется excerpt)
   excerpt           String?
-  content           String    @db.Text
+  content           String         @db.Text
   coverImageUrl     String?
-  authorName        String?   // отображаемое имя автора
-  structuredData    String?   @db.Text // JSON-LD микроразметка (если не задана — генерируется автоматически)
-  views             Int       @default(0)
-  likes             Int       @default(0)
-  readingTimeMinutes Int?     // вручную или авто: словоcount / 200
+  authorName        String?        // отображаемое имя автора
+  structuredData    String?        @db.Text // JSON-LD микроразметка (если не задана — генерируется автоматически)
+  views             Int            @default(0)
+  likes             Int            @default(0)
+  readingTimeMinutes Int?          // вручную или авто: словоcount / 200
   publishedAt       DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   createdById       String?
-  createdBy         User?     @relation("CreatedBlogPosts", fields: [createdById], references: [id], onDelete: SetNull)
+  categoryId        String?
+  createdBy         User?          @relation("CreatedBlogPosts", fields: [createdById], references: [id], onDelete: SetNull)
+  category          BlogCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([publishedAt])
   @@index([slug])
+  @@index([categoryId])
 }
 
 enum WorkspacePlan {

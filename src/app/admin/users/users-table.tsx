@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
+import { Alert, Badge, Input, Select } from "@/components/ui";
 
 const PLAN_IDS = ["FREE", "PRO", "BUSINESS"] as const;
 const PLAN_LABELS: Record<string, string> = {
@@ -37,9 +38,11 @@ function toDateInputValue(d: Date): string {
 export function UsersTable({ users }: Props) {
   const router = useRouter();
   const [updating, setUpdating] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function changePeriodEnd(workspaceId: string, dateStr: string) {
     setUpdating(workspaceId);
+    setError(null);
     try {
       const res = await fetchApi(`/api/admin/workspaces/${workspaceId}/subscription`, {
         method: "PATCH",
@@ -53,7 +56,7 @@ export function UsersTable({ users }: Props) {
       }
       router.refresh();
     } catch (e) {
-      alert((e instanceof Error ? e.message : "Не удалось изменить дату") || "Не удалось изменить дату");
+      setError(e instanceof Error ? e.message : "Не удалось изменить дату");
     } finally {
       setUpdating(null);
     }
@@ -61,6 +64,7 @@ export function UsersTable({ users }: Props) {
 
   async function changePlan(workspaceId: string, plan: string) {
     setUpdating(workspaceId);
+    setError(null);
     try {
       const res = await fetchApi(`/api/admin/workspaces/${workspaceId}/plan`, {
         method: "PATCH",
@@ -74,87 +78,108 @@ export function UsersTable({ users }: Props) {
       }
       router.refresh();
     } catch (e) {
-      alert((e instanceof Error ? e.message : "Не удалось изменить тариф") || "Не удалось изменить тариф");
+      setError(e instanceof Error ? e.message : "Не удалось изменить тариф");
     } finally {
       setUpdating(null);
     }
   }
 
+  if (users.length === 0) {
+    return <p className="qrs-data-empty">Пользователей пока нет.</p>;
+  }
+
   return (
-    <div className="overflow-x-auto px-6 py-4">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-slate-200">
-            <th className="py-3 font-semibold text-slate-900">Email</th>
-            <th className="py-3 font-semibold text-slate-900">Имя</th>
-            <th className="py-3 font-semibold text-slate-900">Тариф</th>
-            <th className="py-3 font-semibold text-slate-900">Оплачено до</th>
-            <th className="py-3 font-semibold text-slate-900">Workspace</th>
-            <th className="py-3 font-semibold text-slate-900">QR</th>
-            <th className="py-3 font-semibold text-slate-900">Регистрация</th>
-            <th className="py-3 font-semibold text-slate-900">Админ</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => {
-            const workspace = u.memberships[0]?.workspace;
-            const plan = workspace?.plan ?? "FREE";
-            return (
-              <tr key={u.id} className="border-b border-slate-100">
-                <td className="py-3">{u.email}</td>
-                <td className="py-3">{u.name ?? "—"}</td>
-                <td className="py-3">
-                  {workspace ? (
-                    <select
-                      value={plan}
-                      onChange={(e) => changePlan(workspace.id, e.target.value)}
-                      disabled={updating === workspace.id}
-                      className="rounded border border-slate-200 px-2 py-1 text-xs"
-                    >
-                      {PLAN_IDS.map((id) => (
-                        <option key={id} value={id}>{PLAN_LABELS[id]}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="py-3">
-                  {workspace && (plan === "PRO" || plan === "BUSINESS") ? (
-                    workspace.subscription ? (
-                      <input
-                        type="date"
-                        defaultValue={toDateInputValue(workspace.subscription.currentPeriodEnd)}
-                        onBlur={(e) => {
-                          const v = e.target.value;
-                          if (v && v !== toDateInputValue(workspace.subscription!.currentPeriodEnd)) {
-                            changePeriodEnd(workspace.id, v);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                        }}
+    <div>
+      {error ? (
+        <div style={{ padding: "16px 24px 0" }}>
+          <Alert variant="danger" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </div>
+      ) : null}
+      <div className="qrs-scroll qrs-data-table-wrap">
+        <table className="qrs-data-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Имя</th>
+              <th>Тариф</th>
+              <th>Оплачено до</th>
+              <th>Workspace</th>
+              <th>QR</th>
+              <th>Регистрация</th>
+              <th>Админ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => {
+              const workspace = u.memberships[0]?.workspace;
+              const plan = workspace?.plan ?? "FREE";
+              return (
+                <tr key={u.id}>
+                  <td>{u.email}</td>
+                  <td style={{ color: "var(--text-default)", fontWeight: "var(--fw-medium)" }}>{u.name ?? "—"}</td>
+                  <td>
+                    {workspace ? (
+                      <Select
+                        value={plan}
+                        onChange={(e) => changePlan(workspace.id, e.target.value)}
                         disabled={updating === workspace.id}
-                        className="rounded border border-slate-200 px-2 py-1 text-xs w-36"
-                      />
+                        className="fk-select__control--sm"
+                        style={{ minWidth: 120 }}
+                      >
+                        {PLAN_IDS.map((id) => (
+                          <option key={id} value={id}>
+                            {PLAN_LABELS[id]}
+                          </option>
+                        ))}
+                      </Select>
                     ) : (
-                      <span className="text-slate-400 text-xs">— нет подписки</span>
-                    )
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="py-3">{workspace?.name ?? "—"}</td>
-                <td className="py-3">{u._count.qrCodes}</td>
-                <td className="py-3 text-slate-500">
-                  {u.createdAt.toLocaleDateString("ru-RU")}
-                </td>
-                <td className="py-3">{u.isAdmin ? "✓" : "—"}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                      "—"
+                    )}
+                  </td>
+                  <td>
+                    {workspace && (plan === "PRO" || plan === "BUSINESS") ? (
+                      workspace.subscription ? (
+                        <Input
+                          type="date"
+                          inputSize="sm"
+                          defaultValue={toDateInputValue(workspace.subscription.currentPeriodEnd)}
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            if (v && v !== toDateInputValue(workspace.subscription!.currentPeriodEnd)) {
+                              changePeriodEnd(workspace.id, v);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                          }}
+                          disabled={updating === workspace.id}
+                          style={{ width: 144 }}
+                        />
+                      ) : (
+                        <span style={{ font: "var(--fw-medium) 12px/1 var(--font-sans)", color: "var(--text-muted)" }}>
+                          — нет подписки
+                        </span>
+                      )
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>{workspace?.name ?? "—"}</td>
+                  <td className="tnum">{u._count.qrCodes}</td>
+                  <td style={{ color: "var(--text-muted)", fontWeight: "var(--fw-medium)" }}>
+                    {u.createdAt.toLocaleDateString("ru-RU")}
+                  </td>
+                  <td>
+                    {u.isAdmin ? <Badge variant="success">✓</Badge> : "—"}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

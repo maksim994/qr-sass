@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { SiteSettingsForm } from "./site-settings-form";
+import { AdminPageHeader, AdminCard } from "@/components/admin/admin-page";
 
 export default async function AdminSiteSettingsPage() {
   const db = getDb();
@@ -8,14 +9,12 @@ export default async function AdminSiteSettingsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Настройки сайта</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Яндекс Метрика и произвольный код в &lt;head&gt;. Применяется на всём сайте.
-        </p>
-      </div>
-      <div className="card p-6">
+    <div className="max-w-3xl">
+      <AdminPageHeader
+        title="Настройки сайта"
+        description="Яндекс Метрика и произвольный код в <head>. Применяется на всём сайте."
+      />
+      <AdminCard>
         <SiteSettingsForm
           initialYandexMetrikaId={row?.yandexMetrikaId ?? ""}
           initialCustomHeadCode={row?.customHeadCode ?? ""}
@@ -27,7 +26,7 @@ export default async function AdminSiteSettingsPage() {
           initialRequisitesInn={row?.requisitesInn ?? ""}
           initialRequisitesName={row?.requisitesName ?? ""}
         />
-      </div>
+      </AdminCard>
     </div>
   );
 }

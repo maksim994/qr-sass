@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
 import { FaviconUpload } from "@/components/admin/favicon-upload";
+import { Alert, Button, Field, Input } from "@/components/ui";
 
 function generateIndexNowKey(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
@@ -39,6 +40,7 @@ export function SiteSettingsForm({
 }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [yandexMetrikaId, setYandexMetrikaId] = useState(initialYandexMetrikaId);
   const [customHeadCode, setCustomHeadCode] = useState(initialCustomHeadCode);
   const [robotsTxtContent, setRobotsTxtContent] = useState(initialRobotsTxtContent);
@@ -52,11 +54,11 @@ export function SiteSettingsForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError(null);
     try {
       const res = await fetchApi("/api/admin/site-settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           yandexMetrikaId: yandexMetrikaId.trim() || null,
           customHeadCode: customHeadCode.trim() || null,
@@ -75,7 +77,7 @@ export function SiteSettingsForm({
       }
       router.refresh();
     } catch (e) {
-      alert((e instanceof Error ? e.message : "Не удалось сохранить") || "Не удалось сохранить");
+      setError(e instanceof Error ? e.message : "Не удалось сохранить");
     } finally {
       setSaving(false);
     }
@@ -83,167 +85,137 @@ export function SiteSettingsForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="label" htmlFor="yandexMetrikaId">
-          ID счётчика Яндекс Метрики
-        </label>
-        <input
+      {error ? (
+        <Alert variant="danger" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
+
+      <Field label="ID счётчика Яндекс Метрики" htmlFor="yandexMetrikaId" hint="Числовой ID из личного кабинета. Оставьте пустым, чтобы отключить.">
+        <Input
           id="yandexMetrikaId"
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          className="input max-w-xs"
+          className="max-w-xs"
           placeholder="Например: 12345678"
           value={yandexMetrikaId}
           onChange={(e) => setYandexMetrikaId(e.target.value)}
         />
-        <p className="mt-1 text-xs text-slate-500">
-          Числовой ID из личного кабинета Яндекс Метрики. Оставьте пустым, чтобы отключить.
-        </p>
-      </div>
+      </Field>
 
-      <div>
-        <label className="label" htmlFor="robotsTxtContent">
-          robots.txt
-        </label>
+      <Field label="robots.txt" htmlFor="robotsTxtContent" hint="Полный текст robots.txt. Пусто — дефолт (disallow /dashboard, /admin, sitemap).">
         <textarea
           id="robotsTxtContent"
           rows={10}
-          className="input font-mono text-sm"
-          placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /dashboard&#10;Disallow: /admin&#10;&#10;Sitemap: https://example.com/sitemap.xml"
+          className="fk-input font-mono text-sm"
+          placeholder={"User-agent: *\nAllow: /\nDisallow: /dashboard\nDisallow: /admin\n\nSitemap: https://example.com/sitemap.xml"}
           value={robotsTxtContent}
           onChange={(e) => setRobotsTxtContent(e.target.value)}
         />
-        <p className="mt-1 text-xs text-slate-500">
-          Полный текст robots.txt. Оставьте пустым — будет использован дефолт (disallow для /dashboard, /admin, ссылка на sitemap).
-        </p>
-      </div>
+      </Field>
 
-      <div>
-        <label className="label" htmlFor="customHeadCode">
-          Дополнительный код в &lt;head&gt;
-        </label>
+      <Field label="Дополнительный код в <head>" htmlFor="customHeadCode" hint="HTML-код для вставки в <head> на всех страницах.">
         <textarea
           id="customHeadCode"
           rows={8}
-          className="input font-mono text-sm"
+          className="fk-input font-mono text-sm"
           placeholder={'<meta name="custom" content="value" />\n<script src="..."></script>'}
           value={customHeadCode}
           onChange={(e) => setCustomHeadCode(e.target.value)}
         />
-        <p className="mt-1 text-xs text-slate-500">
-          HTML-код, который будет вставлен в &lt;head&gt; на всех страницах. Например, скрипты счётчиков или мета-теги.
-        </p>
-      </div>
+      </Field>
 
-      <div>
-        <label className="label" htmlFor="indexNowKey">
-          IndexNow (Яндекс, Bing)
-        </label>
+      <Field
+        label="IndexNow (Яндекс, Bing)"
+        htmlFor="indexNowKey"
+        hint={
+          <>
+            Файл ключа: site.ru/{indexNowKey || "ключ"}.txt.{" "}
+            <a href="https://yandex.ru/support/webmaster/ru/indexing-options/index-now" target="_blank" rel="noopener noreferrer" className="qrs-navlink">
+              Документация
+            </a>
+          </>
+        }
+      >
         <div className="flex gap-2">
-          <input
+          <Input
             id="indexNowKey"
             type="text"
-            className="input flex-1 font-mono text-sm"
+            className="flex-1 font-mono text-sm"
             placeholder="Ключ 8–128 символов (a-z, A-Z, 0-9, -)"
             value={indexNowKey}
             onChange={(e) => setIndexNowKey(e.target.value)}
           />
-          <button
-            type="button"
-            className="btn btn-secondary shrink-0"
-            onClick={() => setIndexNowKey(generateIndexNowKey())}
-          >
+          <Button type="button" variant="secondary" className="shrink-0" onClick={() => setIndexNowKey(generateIndexNowKey())}>
             Сгенерировать
-          </button>
+          </Button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">
-          Уведомление Яндекс и Bing об изменениях (новые/обновлённые посты блога). Файл ключа: site.ru/{indexNowKey || "ключ"}.txt.{" "}
-          <a href="https://yandex.ru/support/webmaster/ru/indexing-options/index-now" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-            Документация
-          </a>
-        </p>
-      </div>
+      </Field>
 
-      <div>
-        <label className="label">Favicon</label>
+      <Field label="Favicon" hint="Иконка сайта (ICO, PNG, WebP). До 512 КБ.">
         <FaviconUpload
           currentUrl={faviconUrl || undefined}
           onUploaded={(url) => {
             setFaviconUrl(url);
           }}
         />
-        <p className="mt-1 text-xs text-slate-500">
-          Иконка сайта (favicon). Отображается во вкладке браузера. ICO, PNG, WebP.
-        </p>
-      </div>
+      </Field>
 
-      <div className="pt-6 border-t border-slate-200">
-        <h3 className="text-lg font-medium text-slate-900 mb-4">Реквизиты и контакты</h3>
-        <p className="text-sm text-slate-500 mb-4">Эти данные будут отображаться в подвале сайта и юридических документах для прохождения модерации платежных систем.</p>
-        
+      <div className="qrs-admin-form-section" style={{ marginTop: 8 }}>
+        <h3 style={{ font: "var(--fw-bold) 1.1rem/1.2 var(--font-display)", color: "var(--text-strong)", marginBottom: 8 }}>
+          Реквизиты и контакты
+        </h3>
+        <p style={{ marginBottom: 16, font: "var(--fw-regular) 14px/1.55 var(--font-sans)", color: "var(--text-muted)" }}>
+          Эти данные отображаются в подвале сайта и юридических документах для модерации платежных систем.
+        </p>
+
         <div className="space-y-4">
-          <div>
-            <label className="label" htmlFor="requisitesName">
-              ФИО / Название организации
-            </label>
-            <input
+          <Field label="ФИО / Название организации" htmlFor="requisitesName">
+            <Input
               id="requisitesName"
               type="text"
-              className="input"
               placeholder="Например: Иванов Иван Иванович"
               value={requisitesName}
               onChange={(e) => setRequisitesName(e.target.value)}
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="label" htmlFor="requisitesInn">
-              ИНН
-            </label>
-            <input
+          <Field label="ИНН" htmlFor="requisitesInn">
+            <Input
               id="requisitesInn"
               type="text"
-              className="input"
               placeholder="Например: 123456789012"
               value={requisitesInn}
               onChange={(e) => setRequisitesInn(e.target.value)}
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="label" htmlFor="contactEmail">
-              Контактный Email
-            </label>
-            <input
+          <Field label="Контактный Email" htmlFor="contactEmail">
+            <Input
               id="contactEmail"
               type="email"
-              className="input"
               placeholder="Например: contact@example.com"
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="label" htmlFor="contactPhone">
-              Контактный телефон
-            </label>
-            <input
+          <Field label="Контактный телефон" htmlFor="contactPhone">
+            <Input
               id="contactPhone"
               type="text"
-              className="input"
               placeholder="Например: +7 999 123-45-67"
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
             />
-          </div>
+          </Field>
         </div>
       </div>
 
-      <button type="submit" disabled={saving} className="btn btn-primary">
+      <Button type="submit" disabled={saving}>
         {saving ? "Сохранение…" : "Сохранить"}
-      </button>
+      </Button>
     </form>
   );
 }

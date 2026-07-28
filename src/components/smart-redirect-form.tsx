@@ -58,7 +58,7 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs qrs-text-muted">
         Разные URL для iOS, Android и Desktop. Оставьте пустым для использования основного URL.
       </p>
       <div>

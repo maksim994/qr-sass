@@ -1,0 +1,123 @@
+/* ============================================================
+   CORE — Logo, Icon, Button, IconButton, Badge, Tag
+   ============================================================ */
+
+/* ---------------- Logo ---------------- */
+.fk-logo { display: inline-flex; align-items: center; gap: var(--space-3); text-decoration: none; }
+.fk-logo__mark { flex: none; display: block; }
+.fk-logo__word { font: var(--fw-extra) var(--fs-xl)/1 var(--font-display); letter-spacing: -0.03em; color: var(--text-strong); }
+.fk-logo--on-brand .fk-logo__word, .fk-logo--light .fk-logo__word { color: #fff; }
+
+/* ---------------- Icon ---------------- */
+.fk-icon { display: inline-block; flex: none; vertical-align: middle; color: currentColor; }
+
+/* ---------------- Button ---------------- */
+.fk-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: var(--control-h-md); padding: 0 var(--space-5);
+  font: var(--fw-bold) var(--fs-sm)/1 var(--font-sans);
+  border-radius: var(--radius-md);
+  border: var(--border-width-strong) solid transparent;
+  background: transparent; color: var(--text-default);
+  cursor: pointer; white-space: nowrap; text-decoration: none; user-select: none;
+  transition: var(--transition-colors), transform var(--dur-base) var(--ease-spring);
+}
+.fk-button:not(:disabled):not([aria-disabled="true"]):hover { transform: translateY(-1px); }
+.fk-button:not(:disabled):not([aria-disabled="true"]):active { transform: scale(0.98); }
+.fk-button:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.fk-button:disabled, .fk-button[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+.fk-button__icon { display: inline-flex; flex: none; }
+
+/* sizes */
+.fk-button--sm { height: var(--control-h-sm); padding: 0 var(--space-4); font-size: var(--fs-xs); }
+.fk-button--lg { height: var(--control-h-lg); padding: 0 var(--space-7); font-size: var(--fs-base); }
+.fk-button--block { display: flex; width: 100%; }
+
+/* variants */
+.fk-button--primary { background: var(--color-primary); color: var(--color-primary-on); }
+.fk-button--primary:not(:disabled):hover { background: var(--color-primary-hover); box-shadow: var(--shadow-md); }
+.fk-button--primary:not(:disabled):active { background: var(--color-primary-active); }
+
+.fk-button--accent { background: var(--color-accent); color: var(--color-accent-on); }
+.fk-button--accent:not(:disabled):hover { background: var(--color-accent-hover); box-shadow: var(--shadow-accent); }
+.fk-button--accent:not(:disabled):active { background: var(--color-accent-active); }
+
+.fk-button--secondary { background: var(--surface-card); color: var(--text-strong); border-color: var(--border-strong); }
+.fk-button--secondary:not(:disabled):hover { background: var(--surface-subtle); border-color: var(--text-subtle); box-shadow: var(--shadow-sm); }
+
+.fk-button--ghost { background: transparent; color: var(--color-primary); }
+.fk-button--ghost:not(:disabled):hover { background: var(--color-primary-subtle); }
+
+.fk-button--danger { background: var(--color-danger); color: #fff; }
+.fk-button--danger:not(:disabled):hover { background: var(--red-700); box-shadow: var(--shadow-md); }
+
+.fk-button--text { height: auto; padding: 0; color: var(--text-link); border: 0; }
+.fk-button--text:not(:disabled):hover { color: var(--text-link-hover); transform: none; text-decoration: underline; text-underline-offset: 3px; }
+
+/* loading */
+.fk-button--loading { color: transparent !important; pointer-events: none; position: relative; }
+.fk-button--loading::after {
+  content: ""; position: absolute; width: 1.1em; height: 1.1em;
+  border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%;
+  color: inherit; animation: fk-spin 0.7s linear infinite;
+}
+.fk-button--primary.fk-button--loading::after, .fk-button--accent.fk-button--loading::after, .fk-button--danger.fk-button--loading::after { color: #fff; }
+@keyframes fk-spin { to { transform: rotate(360deg); } }
+
+/* ---------------- IconButton ---------------- */
+.fk-icon-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: var(--control-h-md); height: var(--control-h-md); padding: 0;
+  border-radius: var(--radius-md); border: var(--border-width-strong) solid transparent;
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  transition: var(--transition-colors), transform var(--dur-base) var(--ease-spring);
+}
+.fk-icon-button:not(:disabled):hover { background: var(--surface-subtle); color: var(--text-strong); }
+.fk-icon-button:not(:disabled):active { transform: scale(0.94); }
+.fk-icon-button:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.fk-icon-button--sm { width: var(--control-h-sm); height: var(--control-h-sm); }
+.fk-icon-button--lg { width: var(--control-h-lg); height: var(--control-h-lg); }
+.fk-icon-button--primary { background: var(--color-primary); color: #fff; }
+.fk-icon-button--primary:not(:disabled):hover { background: var(--color-primary-hover); color: #fff; }
+.fk-icon-button--outline { border-color: var(--border-default); color: var(--text-default); }
+.fk-icon-button--outline:not(:disabled):hover { border-color: var(--text-subtle); background: var(--surface-subtle); }
+
+/* ---------------- Badge ---------------- */
+.fk-badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  height: 22px; padding: 0 var(--space-2);
+  font: var(--fw-bold) var(--fs-2xs)/1 var(--font-sans);
+  border-radius: var(--radius-pill); white-space: nowrap;
+  background: var(--surface-sunken); color: var(--text-default);
+}
+.fk-badge__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.fk-badge--lg { height: 26px; padding: 0 var(--space-3); font-size: var(--fs-xs); }
+.fk-badge--primary { background: var(--color-primary-subtle); color: var(--color-primary); }
+.fk-badge--accent  { background: var(--color-accent-subtle);  color: var(--color-accent); }
+.fk-badge--success { background: var(--color-success-subtle); color: var(--color-success); }
+.fk-badge--warning { background: var(--color-warning-subtle); color: var(--color-warning); }
+.fk-badge--danger  { background: var(--color-danger-subtle);  color: var(--color-danger); }
+.fk-badge--info    { background: var(--color-info-subtle);    color: var(--color-info); }
+/* solid emphasis (e.g. "0%" hero badge) */
+.fk-badge--solid.fk-badge--accent  { background: var(--color-accent);  color: #fff; }
+.fk-badge--solid.fk-badge--primary { background: var(--color-primary); color: #fff; }
+.fk-badge--solid.fk-badge--danger  { background: var(--color-danger);  color: #fff; }
+
+/* ---------------- Tag / filter chip ---------------- */
+.fk-tag {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  height: 34px; padding: 0 var(--space-3);
+  font: var(--fw-semibold) var(--fs-sm)/1 var(--font-sans);
+  color: var(--text-default); background: var(--surface-card);
+  border: var(--border-width) solid var(--border-default); border-radius: var(--radius-md);
+  cursor: pointer; transition: var(--transition-colors); white-space: nowrap;
+}
+.fk-tag:hover { border-color: var(--text-subtle); background: var(--surface-subtle); }
+.fk-tag:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.fk-tag--selected { background: var(--color-primary-subtle); border-color: var(--color-primary); color: var(--color-primary); }
+.fk-tag__remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; margin-right: -2px; border: 0; background: transparent;
+  color: currentColor; opacity: 0.7; cursor: pointer; border-radius: 50%;
+}
+.fk-tag__remove:hover { opacity: 1; background: rgba(var(--ink-rgb), 0.08); }

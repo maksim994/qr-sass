@@ -10,7 +10,8 @@
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "admin:set": "node scripts/set-admin.mjs"
+    "admin:set": "node scripts/set-admin.mjs",
+    "verify:qr": "node scripts/verify-qr-health.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.995.0",

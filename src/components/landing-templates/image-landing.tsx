@@ -1,5 +1,10 @@
 import { isSafeUrl } from "@/lib/url";
-import { QreateFooter } from "./qreate-footer";
+import {
+  HostedLandingCard,
+  HostedLandingEmpty,
+  HostedLandingShell,
+  HostedLandingTitle,
+} from "./hosted-landing-shell";
 
 type Props = { payload: Record<string, unknown> };
 
@@ -9,25 +14,19 @@ export function ImageLanding({ payload }: Props) {
   const fileUrl = rawUrl && isSafeUrl(rawUrl) ? rawUrl : undefined;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+    <HostedLandingShell>
+      <HostedLandingCard>
+        <HostedLandingTitle center>{title}</HostedLandingTitle>
 
         {fileUrl ? (
-          <div className="mt-6 flex justify-center">
+          <div className="qrs-hosted-media qrs-hosted-media--image">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fileUrl}
-              alt={title}
-              className="max-h-[70vh] rounded-xl object-contain"
-            />
+            <img src={fileUrl} alt={title} className="qrs-hosted-media__image" />
           </div>
         ) : (
-          <p className="mt-4 text-gray-500">Изображение не найдено</p>
+          <HostedLandingEmpty>Изображение не найдено</HostedLandingEmpty>
         )}
-      </div>
-
-      <QreateFooter />
-    </div>
+      </HostedLandingCard>
+    </HostedLandingShell>
   );
 }

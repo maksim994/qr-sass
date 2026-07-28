@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getDb } from "@/lib/db";
 import { trackScan } from "@/lib/analytics";
 import { PasswordGateForm } from "@/components/password-gate-form";
+import { UtilityPage } from "@/components/utility/utility-page";
 import { PdfLanding } from "@/components/landing-templates/pdf-landing";
 import { ImageLanding } from "@/components/landing-templates/image-landing";
 import { VideoLanding } from "@/components/landing-templates/video-landing";
@@ -62,17 +63,11 @@ export default async function HostedPage({ params, searchParams }: Props) {
 
   if (qr.expireAt && new Date() > qr.expireAt) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
-        <div className="card max-w-md p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-            <svg className="h-7 w-7 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-semibold text-slate-900">Срок действия истёк</h1>
-          <p className="mt-2 text-slate-600">Этот QR-код больше не действителен.</p>
-        </div>
-      </div>
+      <UtilityPage
+        variant="warning"
+        title="Срок действия истёк"
+        description="Этот QR-код больше не действителен."
+      />
     );
   }
 
@@ -80,17 +75,11 @@ export default async function HostedPage({ params, searchParams }: Props) {
     const scanCount = await db.scanEvent.count({ where: { qrCodeId: qr.id } });
     if (scanCount >= qr.maxScans) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
-          <div className="card max-w-md p-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-              <svg className="h-7 w-7 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-semibold text-slate-900">Срок действия истёк</h1>
-            <p className="mt-2 text-slate-600">Достигнут лимит сканирований.</p>
-          </div>
-        </div>
+        <UtilityPage
+          variant="warning"
+          title="Срок действия истёк"
+          description="Достигнут лимит сканирований."
+        />
       );
     }
   }

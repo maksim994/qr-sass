@@ -1,7 +1,6 @@
 "use client";
 import { fetchApi } from "@/lib/client-api";
 
-
 import { useEffect, useState } from "react";
 
 type Props = { slug: string; initialLikes: number };
@@ -53,25 +52,32 @@ export function ArticleUsefulBlock({ slug, initialLikes }: Props) {
   const alreadyVoted = voted;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="mb-4 font-semibold text-slate-900">Была ли полезна вам статья?</p>
-      <div className="flex items-center gap-4">
+    <div
+      style={{
+        borderRadius: "16px",
+        border: "1px solid var(--border-default)",
+        background: "var(--surface-card)",
+        boxShadow: "var(--shadow-sm)",
+        padding: "24px",
+      }}
+    >
+      <p style={{ marginBottom: "16px", font: "var(--fw-bold) 1rem/1.3 var(--font-display)", color: "var(--text-strong)" }}>
+        Была ли полезна вам статья?
+      </p>
+      <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
         <button
           type="button"
           onClick={handleVote}
           disabled={alreadyVoted || loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          className="fk-button fk-button--secondary fk-button--sm"
+          style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
         >
-          <svg
-            className="h-5 w-5"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
           </svg>
           {alreadyVoted ? "Спасибо!" : "Да, полезна"}
         </button>
-        <span className="text-sm text-slate-500">
+        <span style={{ font: "var(--fw-medium) var(--fs-sm)/1 var(--font-sans)", color: "var(--text-muted)" }}>
           {likes} {likes === 1 ? "лайк" : likes < 5 ? "лайка" : "лайков"}
         </span>
       </div>

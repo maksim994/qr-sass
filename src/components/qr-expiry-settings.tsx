@@ -76,7 +76,7 @@ export default function QrExpirySettings({ qrId, expireAt, maxScans, passwordReq
           className="input"
           min={new Date().toISOString().slice(0, 16)}
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs qrs-text-muted">
           Оставьте пустым, если срок не ограничен
         </p>
       </div>
@@ -90,7 +90,7 @@ export default function QrExpirySettings({ qrId, expireAt, maxScans, passwordReq
           placeholder="Без лимита"
           className="input"
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs qrs-text-muted">
           Текущее количество: {scanCount}. Оставьте пустым для неограниченного
         </p>
       </div>
@@ -104,7 +104,7 @@ export default function QrExpirySettings({ qrId, expireAt, maxScans, passwordReq
           className="input"
           autoComplete="new-password"
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs qrs-text-muted">
           {passwordRequired ? "Пароль установлен. Оставьте пустым чтобы убрать." : "Оставьте пустым, если пароль не нужен."}
         </p>
       </div>

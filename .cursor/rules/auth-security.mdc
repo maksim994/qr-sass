@@ -1,0 +1,42 @@
+---
+description: "Auth/security: JWT session, API keys, CSRF, OAuth, rate limits"
+globs: src/lib/*auth*.ts,src/lib/api-keys.ts,src/lib/telegram.ts,src/lib/yandex-auth.ts,src/lib/rate-limit.ts,src/middleware.ts,src/app/api/auth/**/*,src/app/api/telegram/**/*
+alwaysApply: false
+---
+
+# Auth / security
+
+## Prefer
+- Pages: `getSession` / `requireUser`; API: `getApiUser`; Admin: `requireAdmin`.
+- Cookies: `qr_saas_session`, `qr_workspace_id`, `csrf_token` — не плодить параллельные session keys.
+- API keys: префикс `qre_*` + проверка workspace membership (@src/lib/api-keys.ts).
+- OAuth/Telegram/Yandex — существующие lib (`yandex-auth`, `telegram`), не самодельный JWT.
+- Rate-limit на чувствительных auth/public endpoints; пароли — bcrypt; секреты не в клиентский бандл.
+- CSRF: мутации через `fetchApi`; skip только из списка ниже.
+
+## CSRF_SKIP_PREFIXES (verbatim)
+Держать в @src/middleware.ts **точно** эти префиксы (не расширять «тихо»):
+
+- `/api/billing/webhook`
+- `/api/auth/logout`
+- `/api/qr/verify-password`
+- `/api/gdpr/consent`
+
+Новый skip = добавить в список **и** комментарий why в middleware.
+
+## Never
+- Расширять CSRF skip «для удобства» без why и без записи в список.
+- Homemade JWT / своя crypto session вместо @src/lib/auth.ts.
+- Секреты, private keys, raw session payload в client components / `NEXT_PUBLIC_*`.
+- Логировать CSRF token, API key, password hash, OAuth code.
+
+## Anti-patterns
+- Доверять только Origin без CSRF cookie на cookie-session API.
+- Смешивать API-key и cookie auth без явной ветки.
+- Отключать rate-limit в prod «временно».
+
+## Gold
+- @src/lib/auth.ts
+- @src/lib/api-auth.ts
+- @src/middleware.ts
+- @src/lib/api-keys.ts

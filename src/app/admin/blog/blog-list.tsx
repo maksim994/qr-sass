@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { fetchApi } from "@/lib/client-api";
+import { Alert, Badge } from "@/components/ui";
 
 type Post = {
   id: string;
@@ -20,63 +21,58 @@ type Props = {
 };
 
 export function BlogList({ posts }: Props) {
+  if (posts.length === 0) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Alert variant="info" title="Нет статей">
+          <Link href="/admin/blog/new" className="qrs-navlink">
+            Создать первую статью
+          </Link>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-slate-200">
+    <div className="qrs-scroll qrs-data-table-wrap">
+      <table className="qrs-data-table">
         <thead>
           <tr>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Заголовок</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Просмотры</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Время чтения</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Статус</th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">Дата</th>
-            <th className="px-4 py-3 text-right text-sm font-semibold text-slate-900">Действия</th>
+            <th>Заголовок</th>
+            <th>Просмотры</th>
+            <th>Время чтения</th>
+            <th>Статус</th>
+            <th>Дата</th>
+            <th aria-label="Действия" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200">
-          {posts.length === 0 ? (
-            <tr>
-              <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                Нет статей. <Link href="/admin/blog/new" className="text-slate-700 underline">Создать</Link>
+        <tbody>
+          {posts.map((post) => (
+            <tr key={post.id}>
+              <td>{post.title}</td>
+              <td className="tnum">{post.views}</td>
+              <td style={{ color: "var(--text-muted)", fontWeight: "var(--fw-medium)" }}>
+                {post.readingTimeMinutes ? `${post.readingTimeMinutes} мин` : "—"}
+              </td>
+              <td>
+                <Badge variant={post.publishedAt ? "success" : "info"}>
+                  {post.publishedAt ? "Опубликован" : "Черновик"}
+                </Badge>
+              </td>
+              <td style={{ color: "var(--text-muted)", fontWeight: "var(--fw-medium)" }}>
+                {post.publishedAt
+                  ? new Date(post.publishedAt).toLocaleDateString("ru")
+                  : new Date(post.createdAt).toLocaleDateString("ru")}
+              </td>
+              <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                <Link href={`/admin/blog/${post.id}/edit`} className="qrs-data-action" style={{ color: "var(--color-primary)" }}>
+                  Редактировать
+                </Link>
+                {" · "}
+                <DeleteButton postId={post.id} postTitle={post.title} />
               </td>
             </tr>
-          ) : (
-            posts.map((post) => (
-              <tr key={post.id} className="bg-white hover:bg-slate-50">
-                <td className="px-4 py-3 text-sm text-slate-900">{post.title}</td>
-                <td className="px-4 py-3 text-sm text-slate-600">{post.views}</td>
-                <td className="px-4 py-3 text-sm text-slate-600">
-                  {post.readingTimeMinutes ? `${post.readingTimeMinutes} мин` : "—"}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={
-                      post.publishedAt
-                        ? "inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
-                        : "inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
-                    }
-                  >
-                    {post.publishedAt ? "Опубликован" : "Черновик"}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-sm text-slate-600">
-                  {post.publishedAt
-                    ? new Date(post.publishedAt).toLocaleDateString("ru")
-                    : new Date(post.createdAt).toLocaleDateString("ru")}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link
-                    href={`/admin/blog/${post.id}/edit`}
-                    className="text-sm font-medium text-slate-600 hover:text-slate-900"
-                  >
-                    Редактировать
-                  </Link>
-                  {" · "}
-                  <DeleteButton postId={post.id} postTitle={post.title} />
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
     </div>
@@ -96,7 +92,7 @@ function DeleteButton({ postId, postTitle }: { postId: string; postTitle: string
     window.location.reload();
   }
   return (
-    <button type="button" onClick={handleDelete} className="text-sm font-medium text-red-600 hover:text-red-700">
+    <button type="button" onClick={handleDelete} className="qrs-data-action qrs-data-action--danger">
       Удалить
     </button>
   );

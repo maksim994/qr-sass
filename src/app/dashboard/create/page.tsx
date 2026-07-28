@@ -1,54 +1,89 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/auth";
+import { selectWorkspace } from "@/lib/workspace-select";
+import { getDb } from "@/lib/db";
+import { getPlan } from "@/lib/plans";
 import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
-import { qrTypes, groupLabels } from "@/lib/qr-types";
-
-const groups = ["basic", "files", "business", "social"] as const;
+import { qrTypes } from "@/lib/qr-types";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import { Alert } from "@/components/ui";
+import { CreateTypePicker } from "@/components/dashboard/create-type-picker";
 
 export default async function CreatePage() {
+  const user = await requireUser();
+  const workspace = await selectWorkspace(user.memberships);
+  if (!workspace) redirect("/register");
+
   const disabled = await getDisabledQrTypes();
   const enabledTypes = qrTypes.filter((t) => !isQrTypeDisabled(t.type, disabled));
+
+  const db = getDb();
+  const [planInfo, totalQr] = await Promise.all([
+    getPlan(workspace.plan),
+    db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false } }),
+  ]);
+  const qrLimit = planInfo.limits.maxQrCodes;
+  const qrRemaining = qrLimit == null ? null : Math.max(0, qrLimit - totalQr);
+  const limitReached = qrLimit != null && totalQr >= qrLimit;
+
+  const pickerItems = enabledTypes.map((item) => {
+    const needsPaid = item.needsHostedPage || item.type === "VCARD";
+    const locked = limitReached || (needsPaid && !planInfo.limits.allowsDynamic);
+    return {
+      ...item,
+      locked,
+      lockHint: limitReached
+        ? "Лимит тарифа"
+        : needsPaid && !planInfo.limits.allowsDynamic
+          ? "Нужен Про"
+          : undefined,
+    };
+  });
+
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Создать QR-код</h1>
-        <p className="mt-1 text-sm text-slate-500">Выберите тип QR-кода, который хотите создать.</p>
-      </div>
+    <div>
+      <DashboardPageHeader
+        title="Создать QR-код"
+        description="Выберите тип контента — дальше настроите дизайн, срок действия и аналитику."
+      />
 
-      {groups.map((group) => {
-        const items = enabledTypes.filter((t) => t.group === group);
-        if (items.length === 0) return null;
-        return (
-          <div key={group} className="mb-8">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-400">
-              {groupLabels[group]}
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {items.map((item) => (
-                <Link
-                  key={item.type}
-                  href={`/dashboard/create/${item.type.toLowerCase()}`}
-                  className="card group flex items-start gap-3 p-4 transition hover:shadow-lg hover:ring-2 hover:ring-blue-200"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                    <p className="mt-0.5 text-xs text-slate-500 line-clamp-2">{item.description}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      {(limitReached || (qrRemaining != null && qrRemaining <= 3) || !planInfo.limits.allowsDynamic) ? (
+        <div className="qrs-create-alerts">
+          {limitReached ? (
+            <Alert variant="warning" title="Лимит тарифа">
+              Создано {totalQr} из {qrLimit} QR.{" "}
+              <Link href="/dashboard/billing" className="qrs-navlink">
+                Обновите тариф
+              </Link>{" "}
+              или удалите ненужные коды в библиотеке.
+            </Alert>
+          ) : qrRemaining != null && qrRemaining <= 3 ? (
+            <Alert variant="info" title="Осталось мало слотов">
+              Можно создать ещё {qrRemaining} QR на текущем тарифе.{" "}
+              <Link href="/dashboard/billing" className="qrs-navlink">
+                Смотреть тарифы
+              </Link>
+            </Alert>
+          ) : null}
 
-      {enabledTypes.length === 0 && (
-        <p className="text-sm text-slate-500">
-          Создание QR-кодов временно недоступно. Обратитесь к администратору.
-        </p>
+          {!planInfo.limits.allowsDynamic ? (
+            <Alert variant="info" title="Бесплатный тариф — только статика">
+              Динамические QR, меню, файлы и аналитика сканов доступны на Про.{" "}
+              <Link href="/dashboard/billing" className="qrs-navlink">
+                Перейти на Про
+              </Link>
+            </Alert>
+          ) : null}
+        </div>
+      ) : null}
+
+      {enabledTypes.length === 0 ? (
+        <Alert variant="warning" title="Создание недоступно">
+          Создание QR-кодов временно отключено. Обратитесь к администратору.
+        </Alert>
+      ) : (
+        <CreateTypePicker items={pickerItems} />
       )}
     </div>
   );

@@ -1,4 +1,9 @@
-import { QreateFooter } from "./qreate-footer";
+import {
+  HostedLandingCard,
+  HostedLandingEmpty,
+  HostedLandingShell,
+  HostedLandingTitle,
+} from "./hosted-landing-shell";
 
 type MenuItem = { name?: string; description?: string; price?: string | number };
 type Category = { name?: string; items?: MenuItem[] };
@@ -10,49 +15,38 @@ export function MenuLanding({ payload }: Props) {
   const categories = (payload.categories as Category[] | undefined) ?? [];
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+    <HostedLandingShell>
+      <HostedLandingCard>
+        <HostedLandingTitle>{title}</HostedLandingTitle>
 
-        {categories.length === 0 && (
-          <p className="mt-4 text-gray-500">Меню пока пусто</p>
+        {categories.length === 0 ? (
+          <HostedLandingEmpty>Меню пока пусто</HostedLandingEmpty>
+        ) : (
+          <div className="qrs-hosted-menu">
+            {categories.map((cat, ci) => (
+              <section key={ci} className="qrs-hosted-menu__section">
+                {cat.name ? <h2 className="qrs-hosted-menu__category">{cat.name}</h2> : null}
+
+                <ul className="qrs-hosted-menu__list">
+                  {(cat.items ?? []).map((item, ii) => (
+                    <li key={ii} className="qrs-hosted-menu__item">
+                      <div className="qrs-hosted-menu__item-main">
+                        <p className="qrs-hosted-menu__item-name">{item.name}</p>
+                        {item.description ? (
+                          <p className="qrs-hosted-menu__item-desc">{item.description}</p>
+                        ) : null}
+                      </div>
+                      {item.price != null ? (
+                        <span className="qrs-hosted-menu__price">{item.price}</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
         )}
-
-        <div className="mt-6 space-y-8">
-          {categories.map((cat, ci) => (
-            <section key={ci}>
-              {cat.name && (
-                <h2 className="border-b border-gray-100 pb-2 text-lg font-semibold text-gray-800">
-                  {cat.name}
-                </h2>
-              )}
-
-              <ul className="mt-3 space-y-3">
-                {(cat.items ?? []).map((item, ii) => (
-                  <li
-                    key={ii}
-                    className="flex items-start justify-between gap-4 rounded-xl bg-gray-50 p-4"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900">{item.name}</p>
-                      {item.description && (
-                        <p className="mt-0.5 text-sm text-gray-500">{item.description}</p>
-                      )}
-                    </div>
-                    {item.price != null && (
-                      <span className="shrink-0 font-semibold text-blue-600">
-                        {item.price}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      </div>
-
-      <QreateFooter />
-    </div>
+      </HostedLandingCard>
+    </HostedLandingShell>
   );
 }

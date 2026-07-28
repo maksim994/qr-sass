@@ -40,6 +40,7 @@ export const MSG = {
   COULD_NOT_ENCODE_PAYLOAD: "Не удалось сформировать содержимое QR-кода.",
   SCANNABILITY_TOO_LOW: "QR-код плохо читается. Улучшите контраст или упростите дизайн.",
   COULD_NOT_CREATE_QR: "Не удалось создать QR-код.",
+  COULD_NOT_DUPLICATE_QR: "Не удалось скопировать QR-код.",
   COULD_NOT_READ_QR: "Не удалось загрузить данные QR-кода.",
   COULD_NOT_UPDATE_QR: "Не удалось обновить QR-код.",
   COULD_NOT_DELETE_QR: "Не удалось удалить QR-код.",
@@ -72,10 +73,26 @@ export const MSG = {
   TELEGRAM_USER_MISSING: "Не получены данные пользователя Telegram.",
   TELEGRAM_AUTH_FAILED: "Не удалось авторизоваться через Telegram.",
   TELEGRAM_INVALID_SIGNATURE: "Недействительная подпись данных Telegram.",
+  YANDEX_AUTH_NOT_CONFIGURED: "Авторизация через Яндекс не настроена.",
+  YANDEX_AUTH_FAILED: "Не удалось авторизоваться через Яндекс.",
+  YANDEX_AUTH_INVALID_STATE: "Сессия авторизации через Яндекс истекла. Попробуйте ещё раз.",
+  YANDEX_EMAIL_REQUIRED: "Яндекс не передал email аккаунта.",
+  YANDEX_ALREADY_LINKED: "Этот аккаунт Яндекса уже привязан к другому пользователю.",
+  YANDEX_NOT_LINKED: "Яндекс не привязан к этому аккаунту.",
+  YANDEX_UNLINK_PASSWORD_REQUIRED: "Задайте пароль в профиле, чтобы отвязать Яндекс.",
   ONLY_HTTPS_HTTP_URL: "Разрешены только http и https URL.",
   DATABASE_URL_REQUIRED:
     "Не задан DATABASE_URL. Создайте .env из .env.example и укажите DATABASE_URL.",
   QR_TYPE_DISABLED: "Создание QR-кодов этого типа временно отключено.",
   QR_KIND_NOT_SUPPORTED: "Для этого типа QR доступен только статический режим.",
   INVALID_DISABLED_QR_TYPES: "Некорректный список отключённых типов QR-кодов.",
+  PLAN_DYNAMIC_REQUIRED:
+    "Динамические QR-коды доступны на тарифах Про и Бизнес. Обновите тариф в разделе «Оплата».",
+  QR_LIMIT_REACHED: (limit: number, remaining: number, requested: number) =>
+    remaining <= 0
+      ? `Достигнут лимит тарифа: не более ${limit} QR-кодов. Удалите лишние или обновите тариф.`
+      : `Недостаточно места по тарифу: осталось ${remaining} из ${limit}, запрошено ${requested}.`,
+  USER_LIMIT_REACHED: "Достигнут лимит пользователей по тарифу.",
+  MEMBER_NOT_REGISTERED: "Пользователь с таким email не найден. Он должен сначала зарегистрироваться.",
+  MEMBER_ALREADY_IN_TEAM: "Пользователь уже в команде.",
 } as const;

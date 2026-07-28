@@ -24,6 +24,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     authorName?: string | null;
     structuredData?: unknown;
     readingTimeMinutes?: number | null;
+    categoryId?: string | null;
     publishedAt?: string | null;
   }>(req);
   if (!data) return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
@@ -57,6 +58,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   }
   if (data.coverImageUrl !== undefined) update.coverImageUrl = data.coverImageUrl?.trim() || null;
   if (data.authorName !== undefined) update.authorName = data.authorName?.trim() || null;
+  if (data.categoryId !== undefined) update.categoryId = data.categoryId?.trim() || null;
   if (data.structuredData !== undefined) {
     const structured = normalizeStructuredDataInput(data.structuredData);
     update.structuredData = structured.ok && structured.data ? structured.data : null;

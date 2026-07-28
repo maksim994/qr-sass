@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { setMetrikaCounterId } from "@/lib/product-analytics";
 
 export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) {
   const [showBanner, setShowBanner] = useState(false);
@@ -16,10 +18,11 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
   }, [yandexMetrikaId]);
 
   const loadYandexMetrika = (id: string) => {
-    if ((window as any).ym) return; // Already loaded
+    setMetrikaCounterId(id);
+    if ((window as Window & { ym?: unknown }).ym) return;
 
     const code = `(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r)return;}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");ym(${id},"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:true});`;
-    
+
     const script = document.createElement("script");
     script.type = "text/javascript";
     script.innerHTML = code;
@@ -42,27 +45,31 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 shadow-lg sm:p-6">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <p className="text-sm text-slate-600">
+    <div
+      className="fixed bottom-0 left-0 right-0 z-50 border-t"
+      style={{
+        borderColor: "var(--border-default)",
+        background: "var(--surface-page)",
+        boxShadow: "var(--shadow-lg)",
+      }}
+    >
+      <div className="fk-container py-4 sm:py-6">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm qrs-text-default">
           Мы используем файлы cookie для улучшения работы сайта и аналитики. Продолжая использовать сайт, вы соглашаетесь с нашей{" "}
-          <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+          <Link href="/privacy-policy" className="hover:underline" style={{ color: "var(--color-primary)" }}>
             Политикой конфиденциальности
-          </Link>.
+          </Link>
+          .
         </p>
         <div className="flex shrink-0 gap-3">
-          <button
-            onClick={handleDecline}
-            className="rounded-md border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 btn btn-secondary"
-          >
+          <Button type="button" variant="secondary" size="sm" onClick={handleDecline}>
             Отклонить
-          </button>
-          <button
-            onClick={handleAccept}
-            className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 btn btn-primary"
-          >
+          </Button>
+          <Button type="button" variant="primary" size="sm" onClick={handleAccept}>
             Принять
-          </button>
+          </Button>
+        </div>
         </div>
       </div>
     </div>

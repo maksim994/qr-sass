@@ -1,0 +1,32 @@
+---
+description: "YooKassa, S3, BullMQ/redis integrations — not Stripe-first"
+globs: src/lib/yookassa.ts,src/lib/s3.ts,src/lib/queue.ts,src/lib/redis.ts,src/app/api/billing/**/*,src/app/api/upload/**/*,src/components/yookassa-widget.tsx
+alwaysApply: false
+---
+
+# Payments / integrations
+
+## Prefer
+- Платежи: YooKassa primary (@src/lib/yookassa.ts, widget) — не проектировать Stripe-first.
+- Billing webhook: CSRF skip **намеренный** (`/api/billing/webhook`); проверять подпись/идемпотентность провайдера.
+- Файлы: только через @src/lib/s3.ts (presign/upload helpers), не ad-hoc AWS SDK в route.
+- Очереди/кэш: @src/lib/queue.ts (BullMQ) + @src/lib/redis.ts — единые клиенты.
+- Секреты магазинов/S3 — через @src/lib/env.ts.
+
+## Never
+- Делать Stripe (или другого PSP) основным путём без явного продуктового решения.
+- Прямой `@aws-sdk` / новые S3 bucket helpers в обход `s3.ts`.
+- Ослаблять проверку webhook (skip CSRF + без verify = дыра).
+- Логировать payment tokens / S3 credentials.
+
+## Anti-patterns
+- Дублировать YooKassa API calls вне `yookassa.ts`.
+- Новый Redis connection на каждый request.
+- Смешивать upload ACL «public by default» без нужды.
+
+## Gold
+- @src/lib/yookassa.ts
+- @src/lib/s3.ts
+- @src/lib/queue.ts
+- @src/lib/redis.ts
+- @src/components/yookassa-widget.tsx

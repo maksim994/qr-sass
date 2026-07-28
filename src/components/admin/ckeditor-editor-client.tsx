@@ -84,7 +84,7 @@ const config = {
 export function CKEditorClient({ content, onChange }: Props) {
   useCKEditorStyles();
   return (
-    <div className="ckeditor-wrapper [&_.ck-editor__editable]:min-h-[280px]">
+    <div className="ckeditor-wrapper qrs-admin-ckeditor">
       <CKEditor
         editor={ClassicEditor}
         config={config}

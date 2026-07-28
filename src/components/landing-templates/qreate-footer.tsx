@@ -1,14 +1,11 @@
 export function QreateFooter() {
+  const appUrl = process.env.APP_URL ?? "https://qr-s.ru";
+
   return (
-    <footer className="mt-8 flex items-center justify-center gap-1.5 text-xs text-gray-400">
+    <footer className="qrs-hosted-footer">
       <span>Создано в</span>
-      <a
-        href={process.env.APP_URL ?? "https://qr-s.ru"}
-        className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        qr-s.ru
+      <a href={appUrl} target="_blank" rel="noopener noreferrer">
+        QR-S.ru
       </a>
     </footer>
   );

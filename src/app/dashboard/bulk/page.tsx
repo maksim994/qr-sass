@@ -2,50 +2,80 @@ import { requireUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { selectWorkspace } from "@/lib/workspace-select";
-import { getPlan } from "@/lib/plans";
+import { getBulkBatchLimit, getPlan } from "@/lib/plans";
+import { getDb } from "@/lib/db";
 import { BulkUploadClient } from "@/components/bulk-upload-client";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import { Alert } from "@/components/ui";
 
-const BULK_LIMITS: Record<string, number> = {
-  FREE: 50,
-  PRO: 1000,
-  BUSINESS: 5000,
-};
+function InlineCode({ children, sm }: { children: React.ReactNode; sm?: boolean }) {
+  return <code className={`qrs-inline-code${sm ? " qrs-inline-code--sm" : ""}`}>{children}</code>;
+}
 
 export default async function BulkPage() {
   const user = await requireUser();
   const workspace = await selectWorkspace(user.memberships);
   if (!workspace) redirect("/register");
 
-  const plan = await getPlan(workspace.plan);
-  const bulkLimit = BULK_LIMITS[plan.id] ?? 50;
+  const db = getDb();
+  const [plan, totalQr] = await Promise.all([
+    getPlan(workspace.plan),
+    db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false } }),
+  ]);
+  const bulkLimit = getBulkBatchLimit(plan.id);
+  const qrRemaining = plan.limits.maxQrCodes == null ? null : Math.max(0, plan.limits.maxQrCodes - totalQr);
+  const dynamicBlocked = !plan.limits.allowsDynamic;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <Link
-        href="/dashboard/library"
-        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-        </svg>
-        К библиотеке
-      </Link>
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900">Массовое создание QR</h1>
-      <p className="mt-2 text-slate-600">
-        Загрузите CSV или Excel с колонками <code className="rounded bg-slate-100 px-1">url</code>,{" "}
-        <code className="rounded bg-slate-100 px-1">name</code>, UTM-параметры. Лимит: {bulkLimit} за раз.
-      </p>
-      <div className="mt-6">
-        <BulkUploadClient workspaceId={workspace.id} bulkLimit={bulkLimit} />
-      </div>
-      <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <h2 className="text-sm font-semibold text-slate-900">Формат CSV</h2>
-        <pre className="mt-2 overflow-x-auto text-xs text-slate-600">
-{`url,name,utm_source,utm_medium,utm_campaign
-https://example.com,Кампания 1,campaign1,qr,summer`}
-        </pre>
-        <p className="mt-2 text-xs text-slate-500">
-          Обязательная колонка: url. Опционально: name, utm_source, utm_medium, utm_campaign, utm_term, utm_content, project_id.
+    <div className="qrs-bulk-page">
+      <DashboardPageHeader
+        title="Массовое создание QR"
+        description={
+          <>
+            Загрузите CSV или Excel с колонками <InlineCode>url</InlineCode>, <InlineCode>name</InlineCode>, UTM-параметры. Лимит партии:{" "}
+            <b className="tnum" style={{ color: "var(--text-strong)" }}>{bulkLimit}</b>
+            {qrRemaining != null ? (
+              <>
+                {" "}· осталось по тарифу: <b className="tnum" style={{ color: "var(--text-strong)" }}>{qrRemaining}</b>
+              </>
+            ) : null}
+            .
+          </>
+        }
+      />
+
+      {dynamicBlocked ? (
+        <div className="qrs-create-alerts">
+          <Alert variant="warning" title="Нужен тариф Про">
+            Массовое создание делает динамические QR. На бесплатном тарифе недоступно.{" "}
+            <Link href="/dashboard/billing" className="qrs-navlink">
+              Перейти на Про
+            </Link>
+          </Alert>
+        </div>
+      ) : qrRemaining === 0 ? (
+        <div className="qrs-create-alerts">
+          <Alert variant="warning" title="Лимит QR исчерпан">
+            Удалите коды в библиотеке или{" "}
+            <Link href="/dashboard/billing" className="qrs-navlink">
+              обновите тариф
+            </Link>
+            .
+          </Alert>
+        </div>
+      ) : (
+        <BulkUploadClient workspaceId={workspace.id} bulkLimit={Math.min(bulkLimit, qrRemaining ?? bulkLimit)} />
+      )}
+
+      <div className="qrs-bulk-card">
+        <div className="qrs-bulk-card-title qrs-bulk-card-title--spaced">Формат CSV</div>
+        <pre className="qrs-bulk-pre">{`url,name,utm_source,utm_medium,utm_campaign
+https://example.com,Кампания 1,campaign1,qr,summer`}</pre>
+        <p className="qrs-bulk-format-text">
+          Обязательная колонка — <InlineCode sm>url</InlineCode>. Опционально:{" "}
+          <InlineCode sm>name</InlineCode>, <InlineCode sm>utm_source</InlineCode>, <InlineCode sm>utm_medium</InlineCode>,{" "}
+          <InlineCode sm>utm_campaign</InlineCode>, <InlineCode sm>utm_term</InlineCode>, <InlineCode sm>utm_content</InlineCode>,{" "}
+          <InlineCode sm>project_id</InlineCode>.
         </p>
       </div>
     </div>

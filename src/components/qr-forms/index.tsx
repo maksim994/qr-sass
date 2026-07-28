@@ -76,7 +76,7 @@ export function QrContentForm({ type, payload, onChange, workspaceId }: Props) {
       return <SocialLinksForm payload={payload} onChange={onChange} />;
     default: {
       const _exhaustive: never = type;
-      return <p className="text-sm text-slate-500">Неизвестный тип контента: {_exhaustive}</p>;
+      return <p className="text-sm qrs-text-muted">Неизвестный тип контента: {_exhaustive}</p>;
     }
   }
 }

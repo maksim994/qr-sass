@@ -1,0 +1,31 @@
+---
+description: "UI/DS: fk-* tokens, Manrope, theme, shells"
+globs: src/components/**/*.{ts,tsx},src/styles/**/*,src/app/**/*.{ts,tsx},src/app/globals.css
+alwaysApply: false
+---
+
+# UI / design system
+
+## Prefer
+- Токены и компоненты: `fk-*` из @src/styles/design-system/; примитивы — @src/components/ui/ (напр. button).
+- Шрифт UI: Manrope (как в DS/fonts) — не подключать Inter/Roboto «по умолчанию».
+- Тема: `ThemeProvider` + `ThemeScript` (@src/components/theme-provider.tsx).
+- Каркасы: `DashboardShell` / `AdminShell` для кабинетных зон; не собирать sidebar с нуля.
+- Новые стили — через токены/утилиты DS, не разовые hex в JSX.
+
+## Never
+- Второй design system или импорт из `temp/_ds/` / `temp/` как runtime CSS.
+- AI-дефолты: purple-glow, Inter-only, кремово-терракотовый «brochure» клише, если это ломает fk-*.
+- Кодировать здесь auth helpers, CSRF skip, `await params` — это next/auth rules.
+
+## Anti-patterns
+- Карточки/тени/pill-кластеры без нужды там, где DS уже задаёт плотность.
+- Дублировать button/input стили мимо `@/components/ui`.
+- Inline `style={{ color: "#..." }}` вместо токена.
+
+## Gold
+- @src/styles/design-system/
+- @src/components/ui/button.tsx
+- @src/components/theme-provider.tsx
+- @src/components/dashboard/dashboard-shell.tsx
+- @src/components/admin/admin-shell.tsx

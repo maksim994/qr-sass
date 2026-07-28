@@ -1,0 +1,32 @@
+---
+description: "API routes: apiSuccess/apiError, getApiUser, Zod, fetchApi+CSRF"
+globs: src/app/api/**/*.ts,src/lib/api-*.ts,src/lib/client-api.ts,src/lib/validation.ts,src/lib/user-messages.ts
+alwaysApply: false
+---
+
+# API routes
+
+## Prefer
+- Ответы: `apiSuccess` / `apiError` из @src/lib/api-response.ts.
+- Тексты ошибок — `MSG.*` (@src/lib/user-messages.ts), русский UX.
+- Вход — Zod; при провале — `VALIDATION_ERROR` (единый код), не произвольные строки.
+- Пользователь API: `getApiUser` (@src/lib/api-auth.ts); для workspace-ресурсов — проверка membership.
+- Клиент: только `fetchApi` (@src/lib/client-api.ts) — CSRF cookie/header из коробки.
+- Эталон нового CRUD — @src/app/api/qr/route.ts.
+
+## Never
+- `NextResponse.json({...})` / raw JSON как основной контракт новых route.
+- Ad-hoc `{ error: "..." }` / статусы без `apiError` + `MSG`.
+- Обходить `fetchApi` (`fetch("/api/...")` без CSRF) для cookie-session мутаций.
+- Доверять `workspaceId` из body без membership check.
+
+## Anti-patterns
+- Смешивать session-user и API-key пути без явной ветки в `getApiUser`.
+- Возвращать stack traces / Zod issues целиком клиенту.
+- Дублировать shape ответа «успех в data / ошибка в error» вручную.
+
+## Gold
+- @src/lib/api-response.ts
+- @src/lib/api-auth.ts
+- @src/lib/client-api.ts
+- @src/app/api/qr/route.ts

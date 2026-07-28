@@ -61,7 +61,7 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs qrs-text-muted">
         Meta Pixel, GA4, GTM, Яндекс Метрика и VK Пиксель будут загружены на странице перед редиректом. Редирект задерживается на 150 мс.
       </p>
       <div>
@@ -113,7 +113,7 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
           placeholder="VK-RTRG-162959-XXXXX"
           className="input"
         />
-        <p className="mt-1 text-xs text-slate-500">ID из раздела Ретаргетинг → Пиксели в VK Рекламе</p>
+        <p className="mt-1 text-xs qrs-text-muted">ID из раздела Ретаргетинг → Пиксели в VK Рекламе</p>
       </div>
       <button type="submit" disabled={loading} className="btn btn-primary btn-sm">
         {loading ? "Сохранение…" : "Сохранить"}

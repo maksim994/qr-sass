@@ -1,17 +1,9 @@
 import { QrContentType, QrKind } from "@prisma/client";
 import { MSG } from "@/lib/user-messages";
+import { isSafeUrl } from "@/lib/url";
 import { z } from "zod";
 
-function isSafeUrlProtocol(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return ["https:", "http:"].includes(u.protocol);
-  } catch {
-    return false;
-  }
-}
-
-export const safeUrlSchema = z.string().refine(isSafeUrlProtocol, {
+export const safeUrlSchema = z.string().refine(isSafeUrl, {
   message: MSG.ONLY_HTTPS_HTTP_URL,
 });
 
@@ -108,7 +100,7 @@ export const styleSchema = z.object({
 
 function validatePayloadUrls(payload: Record<string, unknown>, contentType: string): boolean {
   const check = (url: unknown) =>
-    typeof url === "string" && isSafeUrlProtocol(url);
+    typeof url === "string" && isSafeUrl(url);
 
   if (["PDF", "IMAGE", "MP3"].includes(contentType)) {
     const fileUrl = payload.fileUrl;
@@ -176,7 +168,7 @@ export const createQrSchema = z
   );
 
 export const updateDynamicTargetSchema = z.object({
-  targetUrl: z.string().url().refine(isSafeUrlProtocol, {
+  targetUrl: z.string().url().refine(isSafeUrl, {
     message: MSG.ONLY_HTTPS_HTTP_URL,
   }),
 });

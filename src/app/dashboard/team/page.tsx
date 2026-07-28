@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { getPlan } from "@/lib/plans";
 import { redirect } from "next/navigation";
 import { selectWorkspace } from "@/lib/workspace-select";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { TeamPageClient } from "./team-client";
 
 export default async function TeamPage() {
@@ -28,16 +29,13 @@ export default async function TeamPage() {
   const canInvite = planInfo.limits.maxUsers === null || members.length < planInfo.limits.maxUsers;
   const myRole = members.find((m) => m.userId === user.id)?.role;
   const isAdmin = myRole === "OWNER" || myRole === "ADMIN";
+  const planLabel = `${planInfo.name} — ${
+    planInfo.limits.maxUsers == null ? "неограниченно пользователей" : `до ${planInfo.limits.maxUsers}`
+  }`;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Команда</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Участники рабочей области. Тариф: {planInfo.name} — {planInfo.limits.maxUsers == null ? "неограниченно пользователей" : `до ${planInfo.limits.maxUsers}`}.
-        </p>
-      </div>
-
+    <div className="qrs-team-page-wrap">
+      <DashboardPageHeader title="Команда" description={`Участники рабочей области. Тариф: ${planLabel}.`} />
       <TeamPageClient
         workspaceId={workspace.id}
         members={members.map((m) => ({
@@ -51,6 +49,7 @@ export default async function TeamPage() {
         }))}
         canInvite={canInvite && isAdmin}
         isAdmin={!!isAdmin}
+        planLabel={planInfo.name}
       />
     </div>
   );

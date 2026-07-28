@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { UsersTable } from "./users-table";
+import { AdminPageHeader, AdminDataCard } from "@/components/admin/admin-page";
 
 export default async function AdminUsersPage() {
   const db = getDb();
@@ -18,14 +19,14 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Пользователи</h1>
-        <p className="mt-1 text-sm text-slate-500">Список всех пользователей. Тариф можно изменить для каждого workspace.</p>
-      </div>
-      <div className="card overflow-hidden">
+    <div>
+      <AdminPageHeader
+        title="Пользователи"
+        description="Список всех пользователей. Тариф можно изменить для каждого workspace."
+      />
+      <AdminDataCard>
         <UsersTable users={users} />
-      </div>
+      </AdminDataCard>
     </div>
   );
 }

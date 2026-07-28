@@ -83,6 +83,107 @@ docker compose exec app node scripts/set-admin.mjs your@email.com
 3. PostgreSQL и Redis остаются без изменений
 4. Тома `postgres_data` и `redis_data` сохраняют данные
 
+Подробный чеклист — в разделе [Pre-deploy checklist (Coolify)](#pre-deploy-checklist-coolify).
+
+---
+
+## Pre-deploy checklist (Coolify)
+
+Выполняйте **на сервере** (Coolify → **Terminal** / SSH), в каталоге с `docker-compose.yml`.
+
+### За 15–30 минут до деплоя
+
+- [ ] **Убедиться, что `APP_URL` не меняется** (например `https://qr-s.ru`) — иначе сломаются напечатанные динамические QR с `/r/код`
+- [ ] **Не трогать тома** — не запускать `docker compose down -v`
+- [ ] **Бэкап PostgreSQL:**
+
+```bash
+docker compose exec postgres pg_dump -U postgres qr_saas > backup_$(date +%Y%m%d_%H%M).sql
+ls -lh backup_*.sql
+```
+
+- [ ] **Снимок QR-данных** (для сравнения после деплоя):
+
+```bash
+docker compose exec -T app node scripts/verify-qr-health.mjs --snapshot > qr-baseline_$(date +%Y%m%d_%H%M).json
+```
+
+- [ ] **Быстрый отчёт** (опционально, человекочитаемый):
+
+```bash
+docker compose exec app node scripts/verify-qr-health.mjs
+```
+
+Сохраните файлы `backup_*.sql` и `qr-baseline_*.json` **на хосте** (не только в контейнере).
+
+### Во время деплоя в Coolify
+
+- [ ] Деплой через обычный **Redeploy** / push в Git
+- [ ] Дождаться успешного `init-db` (`prisma db push --accept-data-loss=false`) — при риске потери данных деплой **остановится**, это ожидаемая защита
+- [ ] Проверить, что контейнер `app` в статусе **running**
+
+### Сразу после деплоя (5–10 минут)
+
+- [ ] **Сравнение QR с baseline:**
+
+```bash
+cat qr-baseline_YYYYMMDD_HHMM.json | docker compose exec -T app node scripts/verify-qr-health.mjs --compare -
+echo "exit code: $?"
+```
+
+Код выхода `0` — регрессии нет. Код `1` — что-то пропало, **не закрывайте инцидент**, смотрите rollback.
+
+- [ ] **Smoke test в браузере:**
+  - `/login` — вход
+  - `/admin/qr` — список QR на месте
+  - один **динамический** QR: `https://qr-s.ru/r/<код>` (редирект работает)
+  - один **хостed** QR при наличии: `/p/<код>`
+- [ ] **Статические ссылки** (тип «Ссылка», код «—») — это норма; они не используют `/r/`, URL зашит в сам QR
+
+### Если что-то пошло не так (rollback)
+
+1. В Coolify откатить на **предыдущий образ** / git tag
+2. Восстановить БД только если данные повреждены:
+
+```bash
+cat backup_YYYYMMDD_HHMM.sql | docker compose exec -T postgres psql -U postgres -d qr_saas
+```
+
+3. Повторить `verify-qr-health.mjs --compare` после отката
+
+### Запрещено на production без отдельного согласования
+
+| Команда | Почему |
+|---------|--------|
+| `docker compose down -v` | Удаляет `postgres_data` |
+| `prisma migrate reset` | Полный сброс БД |
+| `prisma db push --accept-data-loss` | Может удалить колонки/строки |
+| `DROP TABLE` / `TRUNCATE` | Потеря данных |
+
+---
+
+## Проверка QR (`verify-qr-health.mjs`)
+
+Скрипт читает БД через Prisma и **ничего не меняет**.
+
+| Режим | Команда |
+|-------|---------|
+| Отчёт | `docker compose exec app node scripts/verify-qr-health.mjs` |
+| JSON | `docker compose exec -T app node scripts/verify-qr-health.mjs --json` |
+| Снимок | `docker compose exec -T app node scripts/verify-qr-health.mjs --snapshot > qr-baseline.json` |
+| Сравнение | `cat qr-baseline.json \| docker compose exec -T app node scripts/verify-qr-health.mjs --compare -` |
+
+Локально (с `DATABASE_URL` на prod/staging):
+
+```bash
+npm run verify:qr
+```
+
+**Коды выхода:** `0` — ок; `1` — регрессия при `--compare`; `2` — ошибка или критические флаги у QR.
+
+**Нормально:** статические ссылки без `shortCode` (в админке «Код: —»).  
+**Проблема:** динамический QR без `shortCode` или без URL назначения.
+
 ---
 
 ## Бэкапы (рекомендуется)

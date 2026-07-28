@@ -189,7 +189,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
           {socialLinks.length === 0 ? (
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-6 text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-600"
+              className="qrs-dashed-zone flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed py-6 transition-colors"
               onClick={addSocial}
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -202,9 +202,9 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
               const platform = SOCIAL_PLATFORMS.find((p) => p.value === link.platform) ?? SOCIAL_PLATFORMS[0];
               const iconPath = SOCIAL_ICONS[link.platform] ?? SOCIAL_ICONS.Instagram;
               return (
-                <div key={i} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center">
+                <div key={i} className="grid gap-3 rounded-xl border qrs-border qrs-surface-card p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center">
                   <div className="flex items-center gap-2 sm:col-span-1">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg qrs-surface-subtle qrs-text-default">
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d={iconPath} />
                       </svg>
@@ -228,7 +228,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
                   />
                   <button
                     type="button"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg qrs-text-subtle transition-colors hover:bg-[var(--color-danger-subtle)] hover:text-[var(--color-danger)]"
                     onClick={() => removeSocial(i)}
                     title="Удалить"
                   >

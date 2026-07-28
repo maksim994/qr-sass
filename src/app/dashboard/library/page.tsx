@@ -6,6 +6,7 @@ import { contentTypeLabels } from "@/lib/qr-types";
 import QrLibrary from "@/components/qr-library";
 import { getPlan } from "@/lib/plans";
 import { selectWorkspace } from "@/lib/workspace-select";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 
 export default async function LibraryPage() {
   const user = await requireUser();
@@ -32,26 +33,18 @@ export default async function LibraryPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Библиотека QR-кодов
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Все QR-коды вашего пространства.
-          </p>
-        </div>
-        <Link href="/dashboard/create" className="btn btn-primary">
-          Создать QR-код
-        </Link>
-      </div>
-
-      <QrLibrary
-        items={items}
-        contentTypeLabels={contentTypeLabels}
-        exportFormats={plan.limits.exportFormats}
+    <div>
+      <DashboardPageHeader
+        title="Библиотека QR-кодов"
+        description="Все QR-коды вашего пространства."
+        action={
+          <Link href="/dashboard/create" className="fk-button fk-button--primary">
+            Создать QR-код
+          </Link>
+        }
       />
+
+      <QrLibrary items={items} contentTypeLabels={contentTypeLabels} exportFormats={plan.limits.exportFormats} />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
+
 import { fetchApi } from "@/lib/client-api";
-
-
 import { useCallback, useRef, useState } from "react";
+import { Alert } from "@/components/ui";
 
 type Props = {
   onUploaded: (url: string) => void;
@@ -42,9 +42,7 @@ export function FaviconUpload({ onUploaded, currentUrl }: Props) {
   return (
     <div className="space-y-2">
       <div
-        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition ${
-          uploading ? "border-blue-300 bg-blue-50" : "border-slate-300 bg-slate-50 hover:border-slate-400"
-        }`}
+        className={`qrs-upload-zone${uploading ? " qrs-upload-zone--active" : ""}`}
         onDrop={(e) => {
           e.preventDefault();
           const f = e.dataTransfer.files[0];
@@ -52,6 +50,11 @@ export function FaviconUpload({ onUploaded, currentUrl }: Props) {
         }}
         onDragOver={(e) => e.preventDefault()}
         onClick={() => inputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+        }}
       >
         <input
           ref={inputRef}
@@ -64,20 +67,26 @@ export function FaviconUpload({ onUploaded, currentUrl }: Props) {
           }}
         />
         {uploading ? (
-          <p className="text-sm text-slate-600">Загрузка…</p>
+          <p style={{ font: "var(--fw-medium) 14px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>Загрузка…</p>
         ) : currentUrl ? (
           <div className="flex flex-col items-center gap-2">
             <img src={currentUrl} alt="Favicon" className="h-16 w-16 object-contain" />
-            <p className="text-xs text-slate-500">Нажмите или перетащите для замены</p>
+            <p style={{ font: "var(--fw-medium) 12px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
+              Нажмите или перетащите для замены
+            </p>
           </div>
         ) : (
           <div className="text-center">
             <svg
-              className="mx-auto h-8 w-8 text-slate-400"
+              className="mx-auto"
+              width="32"
+              height="32"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
+              style={{ color: "var(--text-muted)" }}
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -85,12 +94,16 @@ export function FaviconUpload({ onUploaded, currentUrl }: Props) {
                 d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
               />
             </svg>
-            <p className="mt-2 text-sm text-slate-600">Перетащите favicon или нажмите для выбора</p>
-            <p className="mt-1 text-xs text-slate-400">ICO, PNG, WebP. До 512 КБ.</p>
+            <p style={{ marginTop: 8, font: "var(--fw-medium) 14px/1.4 var(--font-sans)", color: "var(--text-default)" }}>
+              Перетащите favicon или нажмите для выбора
+            </p>
+            <p style={{ marginTop: 4, font: "var(--fw-regular) 12px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
+              ICO, PNG, WebP. До 512 КБ.
+            </p>
           </div>
         )}
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error ? <Alert variant="danger">{error}</Alert> : null}
     </div>
   );
 }

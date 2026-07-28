@@ -1,5 +1,7 @@
 import { getDb } from "@/lib/db";
 import Link from "next/link";
+import { AdminPageHeader, AdminDataCard } from "@/components/admin/admin-page";
+import { Alert } from "@/components/ui";
 
 const contentTypeLabels: Record<string, string> = {
   URL: "Ссылка", TEXT: "Текст", EMAIL: "Email", PHONE: "Телефон", SMS: "SMS",
@@ -22,47 +24,56 @@ export default async function AdminQrPage() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">QR-коды</h1>
-        <p className="mt-1 text-sm text-slate-500">Все созданные QR-коды в системе</p>
-      </div>
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto px-6 py-4">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-slate-200">
-              <th className="py-3 font-semibold text-slate-900">Название</th>
-              <th className="py-3 font-semibold text-slate-900">Тип</th>
-              <th className="py-3 font-semibold text-slate-900">Workspace</th>
-              <th className="py-3 font-semibold text-slate-900">Создатель</th>
-              <th className="py-3 font-semibold text-slate-900">Сканы</th>
-              <th className="py-3 font-semibold text-slate-900">Код</th>
-              <th className="py-3 font-semibold text-slate-900">Создан</th>
-            </tr>
-          </thead>
-          <tbody>
-            {qrCodes.map((qr) => (
-              <tr key={qr.id} className="border-b border-slate-100">
-                <td className="py-3">
-                  <Link href={`/dashboard/qr/${qr.id}`} className="font-medium text-blue-600 hover:underline">
-                    {qr.name}
-                  </Link>
-                </td>
-                <td className="py-3">{contentTypeLabels[qr.contentType] ?? qr.contentType}</td>
-                <td className="py-3">{qr.workspace.name}</td>
-                <td className="py-3">{qr.createdBy.email}</td>
-                <td className="py-3">{qr._count.scanEvents}</td>
-                <td className="py-3 font-mono text-xs">{qr.shortCode ?? "—"}</td>
-                <td className="py-3 text-slate-500">
-                  {qr.createdAt.toLocaleDateString("ru-RU")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-      </div>
+    <div>
+      <AdminPageHeader title="QR-коды" description="Все созданные QR-коды в системе" />
+      <AdminDataCard>
+        {qrCodes.length === 0 ? (
+          <div style={{ padding: 24 }}>
+            <Alert variant="info" title="QR-кодов пока нет">
+              Когда пользователи создадут QR-коды, они появятся в этом списке.
+            </Alert>
+          </div>
+        ) : (
+          <div className="qrs-scroll qrs-data-table-wrap">
+            <table className="qrs-data-table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Тип</th>
+                  <th>Workspace</th>
+                  <th>Создатель</th>
+                  <th>Сканы</th>
+                  <th>Код</th>
+                  <th>Создан</th>
+                </tr>
+              </thead>
+              <tbody>
+                {qrCodes.map((qr) => (
+                  <tr key={qr.id}>
+                    <td>
+                      <Link href={`/admin/qr/${qr.id}`} className="qrs-navlink" style={{ fontWeight: "var(--fw-bold)" }}>
+                        {qr.name}
+                      </Link>
+                    </td>
+                    <td>{contentTypeLabels[qr.contentType] ?? qr.contentType}</td>
+                    <td>{qr.workspace.name}</td>
+                    <td>{qr.createdBy.email}</td>
+                    <td className="tnum">{qr._count.scanEvents}</td>
+                    <td>
+                      <code style={{ font: "var(--fw-medium) 12px/1 var(--font-mono)", color: "var(--text-muted)" }}>
+                        {qr.shortCode ?? "—"}
+                      </code>
+                    </td>
+                    <td style={{ color: "var(--text-muted)", fontWeight: "var(--fw-medium)" }}>
+                      {qr.createdAt.toLocaleDateString("ru-RU")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </AdminDataCard>
     </div>
   );
 }

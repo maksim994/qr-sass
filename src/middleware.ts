@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 
 const CSRF_SKIP_PREFIXES = [
   "/api/billing/webhook",
+  "/api/auth/logout",
   "/api/qr/verify-password",
   "/api/gdpr/consent",
 ];

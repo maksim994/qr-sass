@@ -20,14 +20,26 @@ export async function GET(req: Request) {
   const db = getDb();
   const user = await db.user.findUnique({
     where: { id: session.sub },
-    select: { id: true, email: true, name: true },
+    select: { id: true, email: true, name: true, avatarUrl: true, yandexId: true },
   });
 
   if (!user) {
     return apiError(MSG.USER_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
   }
 
-  return apiSuccess({ user }, 200, requestId);
+  return apiSuccess(
+    {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        yandexLinked: !!user.yandexId,
+      },
+    },
+    200,
+    requestId
+  );
 }
 
 export async function PATCH(req: Request) {

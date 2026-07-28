@@ -1,0 +1,30 @@
+/* ============================================================
+   ELEVATION — Финкуратор
+   Soft, diffuse, faintly blue-tinted shadows (friendly + airy).
+   Cards typically pair a 1px border with --shadow-sm so they
+   read on both white and tinted sections.
+   ============================================================ */
+
+:root {
+  --shadow-xs:  0 1px 2px rgba(var(--ink-rgb), 0.06);
+  --shadow-sm:  0 1px 3px rgba(var(--ink-rgb), 0.08), 0 1px 2px rgba(var(--ink-rgb), 0.04);
+  --shadow-md:  0 4px 12px rgba(20, 40, 90, 0.08), 0 2px 4px rgba(20, 40, 90, 0.05);
+  --shadow-lg:  0 12px 28px rgba(20, 40, 90, 0.12), 0 4px 8px rgba(20, 40, 90, 0.06);
+  --shadow-xl:  0 24px 48px rgba(20, 40, 90, 0.16), 0 8px 16px rgba(20, 40, 90, 0.08);
+  --shadow-brand: 0 10px 28px rgba(var(--brand-rgb), 0.28);
+  --shadow-accent: 0 10px 28px rgba(12, 134, 89, 0.26);
+
+  /* Focus ring — applied as box-shadow on interactive elements */
+  --shadow-focus: 0 0 0 3px rgba(var(--focus-ring), 0.35);
+  --shadow-focus-inset: inset 0 0 0 2px var(--border-focus);
+}
+
+[data-theme="dark"] {
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 4px 14px rgba(0, 0, 0, 0.55);
+  --shadow-lg:  0 14px 34px rgba(0, 0, 0, 0.6);
+  --shadow-xl:  0 26px 54px rgba(0, 0, 0, 0.66);
+  --shadow-brand: 0 10px 28px rgba(var(--brand-rgb), 0.4);
+  --shadow-accent: 0 10px 28px rgba(43, 185, 131, 0.34);
+}

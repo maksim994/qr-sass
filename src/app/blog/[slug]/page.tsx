@@ -1,11 +1,13 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { BlogPostContent } from "@/components/blog/blog-post-content";
 import { ArticleUsefulBlock } from "@/components/blog/article-useful-block";
 import { BlogViewTracker } from "@/components/blog/blog-view-tracker";
+import { Breadcrumbs } from "@/components/blog/breadcrumbs";
+import { RelatedPosts } from "@/components/blog/related-posts";
+import { ArticleShare } from "@/components/blog/article-share";
 import { buildDefaultArticleJsonLd, parseStructuredDataForPage } from "@/lib/blog-structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -15,6 +17,14 @@ export const dynamic = "force-dynamic";
 function formatViews(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}К`;
   return String(n);
+}
+
+function authorInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -27,7 +37,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const base = process.env.APP_URL ?? "http://localhost:3000";
   const url = `${base}/blog/${post.slug}`;
-
   const seoTitle = post.metaTitle?.trim() || `${post.title} — Блог qr-s.ru`;
   const seoDescription = post.metaDescription?.trim() || (post.excerpt ?? post.title);
 
@@ -65,9 +74,66 @@ export default async function BlogPostPage({ params }: Props) {
       readingTimeMinutes: true,
       publishedAt: true,
       updatedAt: true,
+      categoryId: true,
+      category: { select: { slug: true, name: true } },
     },
   });
   if (!post) notFound();
+
+  const relatedWhere = {
+    publishedAt: { not: null },
+    slug: { not: slug },
+    ...(post.categoryId ? { categoryId: post.categoryId } : {}),
+  };
+
+  let relatedPosts = await db.blogPost.findMany({
+    where: relatedWhere,
+    orderBy: { publishedAt: "desc" },
+    take: 3,
+    select: {
+      slug: true,
+      title: true,
+      excerpt: true,
+      coverImageUrl: true,
+      publishedAt: true,
+      readingTimeMinutes: true,
+      category: { select: { slug: true, name: true } },
+    },
+  });
+
+  if (relatedPosts.length < 3 && post.categoryId) {
+    const fallback = await db.blogPost.findMany({
+      where: { publishedAt: { not: null }, slug: { not: slug }, categoryId: { not: post.categoryId } },
+      orderBy: { publishedAt: "desc" },
+      take: 3 - relatedPosts.length,
+      select: {
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImageUrl: true,
+        publishedAt: true,
+        readingTimeMinutes: true,
+        category: { select: { slug: true, name: true } },
+      },
+    });
+    relatedPosts = [...relatedPosts, ...fallback];
+  } else if (relatedPosts.length < 3) {
+    const fallback = await db.blogPost.findMany({
+      where: { publishedAt: { not: null }, slug: { not: slug } },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+      select: {
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImageUrl: true,
+        publishedAt: true,
+        readingTimeMinutes: true,
+        category: { select: { slug: true, name: true } },
+      },
+    });
+    relatedPosts = fallback;
+  }
 
   const base = process.env.APP_URL ?? "http://localhost:3000";
   const articleUrl = `${base}/blog/${post.slug}`;
@@ -91,161 +157,110 @@ export default async function BlogPostPage({ params }: Props) {
     });
 
   const publishedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("ru", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+    ? new Date(post.publishedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric" })
     : null;
 
   return (
-    <main className="bg-slate-50">
+    <main style={{ background: "var(--surface-page)" }}>
       <BlogViewTracker slug={post.slug} />
-      <article className="border-b border-slate-200 bg-white py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <Link
-            href="/blog"
-            className="inline-flex items-center text-sm font-medium text-slate-500 transition hover:text-slate-900"
-          >
-            ← К списку статей
-          </Link>
 
-          <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:gap-12">
-            <header className="min-w-0 flex-1">
-              <span className="badge">Блог</span>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                {post.title}
-              </h1>
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
-                {post.authorName && (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="h-4 w-4 text-slate-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                      />
-                    </svg>
-                    {post.authorName}
-                  </span>
-                )}
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 text-slate-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                    />
-                  </svg>
-                  {publishedDate}
+      <section
+        style={{
+          padding: "clamp(32px, 5vw, 56px) 0 clamp(20px, 3vw, 32px)",
+          background: "radial-gradient(120% 80% at 85% -30%, var(--color-primary-subtle) 0%, transparent 50%), var(--surface-page)",
+        }}
+      >
+        <div className="fk-container" style={{ maxWidth: "820px" }}>
+          <Breadcrumbs
+            items={[
+              { label: "Главная", href: "/" },
+              { label: "Блог", href: "/blog" },
+              { label: post.title },
+            ]}
+          />
+          <header style={{ marginTop: "22px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+              <span style={{ padding: "5px 13px", borderRadius: "999px", background: "var(--color-primary-subtle)", color: "var(--color-primary)", font: "var(--fw-bold) 12px/1 var(--font-sans)" }}>
+                {post.category?.name ?? "Блог"}
+              </span>
+              {post.readingTimeMinutes != null && (
+                <span style={{ font: "var(--fw-medium) 13px/1 var(--font-sans)", color: "var(--text-muted)" }}>
+                  {post.readingTimeMinutes} минут чтения
                 </span>
-                {post.readingTimeMinutes != null && (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="h-4 w-4 text-slate-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    {post.readingTimeMinutes} мин чтения
-                  </span>
-                )}
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 text-slate-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                    />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {formatViews(post.views)} просмотров
-                </span>
-              </div>
-            </header>
-
-            <div className="shrink-0 w-full lg:w-80">
-              {post.coverImageUrl ? (
-                <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-100">
-                  <Image
-                    src={post.coverImageUrl}
-                    alt={post.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 320px"
-                    className="object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-blue-600/10">
-                  <svg
-                    className="h-16 w-16 text-blue-600/40"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"
-                    />
-                  </svg>
-                </div>
               )}
             </div>
+            <h1 style={{ font: "var(--fw-extra) clamp(2rem, 4.6vw, 3rem)/1.1 var(--font-display)", color: "var(--text-strong)", letterSpacing: "-0.03em", textWrap: "balance" }}>
+              {post.title}
+            </h1>
+            {post.excerpt && (
+              <p style={{ marginTop: "18px", font: "var(--fw-regular) clamp(1.05rem, 2vw, 1.2rem)/1.6 var(--font-sans)", color: "var(--text-muted)" }}>
+                {post.excerpt}
+              </p>
+            )}
+            <div style={{ marginTop: "26px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap", paddingTop: "22px", borderTop: "1px solid var(--border-subtle)" }}>
+              {post.authorName ? (
+                <span style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <span
+                    style={{ width: "44px", height: "44px", borderRadius: "999px", background: "var(--color-primary-subtle)", color: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", font: "var(--fw-bold) 15px/1 var(--font-sans)" }}
+                  >
+                    {authorInitials(post.authorName)}
+                  </span>
+                  <span>
+                    <span style={{ display: "block", font: "var(--fw-semibold) 14px/1.2 var(--font-sans)", color: "var(--text-strong)" }}>{post.authorName}</span>
+                    <span style={{ display: "block", marginTop: "3px", font: "var(--fw-regular) 12px/1.2 var(--font-sans)", color: "var(--text-muted)" }}>
+                      {publishedDate ?? "Блог QR-S.ru"}
+                    </span>
+                  </span>
+                </span>
+              ) : null}
+              <span style={{ font: "var(--fw-medium) 13px/1 var(--font-sans)", color: "var(--text-muted)" }}>{formatViews(post.views)} просмотров</span>
+              <ArticleShare url={articleUrl} title={post.title} />
+            </div>
+          </header>
+        </div>
+      </section>
+
+      <section style={{ paddingBottom: "clamp(24px, 4vw, 44px)" }}>
+        <div className="fk-container" style={{ maxWidth: "900px" }}>
+          <div
+            className={post.coverImageUrl ? "relative overflow-hidden" : ""}
+            style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-accent) 16%, transparent))", display: "flex", alignItems: "center", justifyContent: "center" }}
+          >
+            {post.coverImageUrl ? (
+              <Image src={post.coverImageUrl} alt={post.title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
+            ) : (
+              <svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <path d="M14 14h3v3M20 20v.01M14 20h.01M20 14v3" />
+              </svg>
+            )}
           </div>
         </div>
-      </article>
+      </section>
 
-      <section className="py-12">
-        <div className="mx-auto max-w-7xl px-6">
+      <section style={{ paddingBottom: "var(--section-y)" }}>
+        <div className="fk-container">
           <BlogPostContent content={post.content} />
-          <div className="mt-12">
+          <div style={{ maxWidth: "720px", margin: "48px auto 0" }}>
             <ArticleUsefulBlock slug={post.slug} initialLikes={post.likes} />
           </div>
         </div>
       </section>
 
-      <nav className="border-t border-slate-200 bg-white py-8">
-        <div className="mx-auto max-w-7xl px-6">
-          <Link
-            href="/blog"
-            className="card-flat inline-block px-6 py-3 text-slate-600 transition hover:text-slate-900 hover:border-slate-300"
-          >
-            ← Все статьи блога
-          </Link>
+      <section style={{ paddingBottom: "var(--section-y)", borderTop: "1px solid var(--border-subtle)" }}>
+        <div className="fk-container" style={{ paddingTop: "clamp(40px, 5vw, 64px)" }}>
+          <RelatedPosts
+            posts={relatedPosts.map((p) => ({
+              ...p,
+              publishedAt: p.publishedAt!,
+            }))}
+          />
         </div>
-      </nav>
+      </section>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </main>
   );
 }

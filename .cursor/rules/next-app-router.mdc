@@ -1,0 +1,31 @@
+---
+description: "Next.js App Router: RSC, layouts auth, middleware, params Promise"
+globs: src/app/**/*.{ts,tsx},src/middleware.ts
+alwaysApply: false
+---
+
+# Next.js App Router
+
+## Prefer
+- Server Components по умолчанию; `"use client"` только для интерактива.
+- Dashboard layout: `requireUser` + `selectWorkspace` (как @src/app/dashboard/layout.tsx).
+- Admin layout: `requireAdmin` (как @src/app/admin/layout.tsx).
+- `params` / `searchParams` в page/layout — `Promise<...>`, всегда `await`.
+- Мутации с клиента — через `fetchApi` (CSRF); поверхность CSRF — @src/middleware.ts.
+- Новые защищённые зоны — auth в layout/page (server), не в client wrapper.
+
+## Never
+- Проверять сессию/роль только в client-компоненте layout («client auth layout»).
+- Добавлять CSRF skip без записи в `CSRF_SKIP_PREFIXES` + комментария why (см. `auth-security.mdc`).
+- Синхронный `params` / `params.id` без `await` (Next 16).
+- Кодировать здесь `fk-*`, ThemeProvider, Manrope — это `ui-design-system.mdc`.
+
+## Anti-patterns
+- `useEffect` + fetch сессии вместо server `requireUser` / `getSession`.
+- Дублировать middleware-логику в каждом route handler «на всякий случай».
+- Прокидывать auth props через длинную client-цепочку вместо RSC layout.
+
+## Gold
+- @src/app/dashboard/layout.tsx
+- @src/app/admin/layout.tsx
+- @src/middleware.ts

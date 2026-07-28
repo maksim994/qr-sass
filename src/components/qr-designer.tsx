@@ -1,8 +1,8 @@
 "use client";
+
 import { fetchApi } from "@/lib/client-api";
-
-
 import { useCallback, useMemo, useRef, useState } from "react";
+import { Field, Input, Button } from "@/components/ui";
 
 export type QrStyle = {
   dotType: "square" | "dots" | "rounded" | "classy" | "classy-rounded" | "extra-rounded";
@@ -32,6 +32,16 @@ type Props = {
   workspaceId: string;
 };
 
+const FG_SWATCHES = ["#131720", "#1E4FD1", "#0C8659", "#173885", "#B91C1C", "#7C3AED"];
+const BG_SWATCHES = ["#FFFFFF", "#F5F7FA", "#0D1220", "#FEF3C7"];
+
+const EC_LEVELS: { value: QrStyle["errorCorrectionLevel"]; sub: string }[] = [
+  { value: "L", sub: "7%" },
+  { value: "M", sub: "15%" },
+  { value: "Q", sub: "25%" },
+  { value: "H", sub: "30%" },
+];
+
 function hexLuminance(hex: string) {
   const n = hex.replace("#", "");
   const f = n.length === 3 ? n.split("").map((x) => x + x).join("") : n;
@@ -51,331 +61,258 @@ function scoreScannability(fg: string, bg: string, margin: number, logoScale: nu
   return Math.max(0, score);
 }
 
-/* ── Inline SVG icons for dot styles ── */
+function normalizeHex(value: string) {
+  return value.toUpperCase();
+}
 
 function DotPreviewSquare() {
   return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8">
+    <svg viewBox="0 0 29 29" width="30" height="30" aria-hidden="true">
       <rect x="2" y="2" width="6" height="6" fill="currentColor" />
-      <rect x="9" y="2" width="6" height="6" fill="currentColor" />
-      <rect x="16" y="2" width="6" height="6" fill="currentColor" />
-      <rect x="2" y="9" width="6" height="6" fill="currentColor" />
-      <rect x="16" y="9" width="6" height="6" fill="currentColor" />
-      <rect x="2" y="16" width="6" height="6" fill="currentColor" />
-      <rect x="9" y="16" width="6" height="6" fill="currentColor" />
-      <rect x="16" y="16" width="6" height="6" fill="currentColor" />
-    </svg>
-  );
-}
-
-function DotPreviewDots() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8">
-      <circle cx="5" cy="5" r="3" fill="currentColor" />
-      <circle cx="12" cy="5" r="3" fill="currentColor" />
-      <circle cx="19" cy="5" r="3" fill="currentColor" />
-      <circle cx="5" cy="12" r="3" fill="currentColor" />
-      <circle cx="19" cy="12" r="3" fill="currentColor" />
-      <circle cx="5" cy="19" r="3" fill="currentColor" />
-      <circle cx="12" cy="19" r="3" fill="currentColor" />
-      <circle cx="19" cy="19" r="3" fill="currentColor" />
+      <rect x="11" y="2" width="6" height="6" fill="currentColor" />
+      <rect x="20" y="2" width="6" height="6" fill="currentColor" />
+      <rect x="2" y="11" width="6" height="6" fill="currentColor" />
+      <rect x="20" y="11" width="6" height="6" fill="currentColor" />
+      <rect x="2" y="20" width="6" height="6" fill="currentColor" />
+      <rect x="11" y="20" width="6" height="6" fill="currentColor" />
+      <rect x="20" y="20" width="6" height="6" fill="currentColor" />
     </svg>
   );
 }
 
 function DotPreviewRounded() {
   return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8">
-      <rect x="2" y="2" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="9" y="2" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="16" y="2" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="2" y="9" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="16" y="9" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="2" y="16" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="9" y="16" width="6" height="6" rx="1.5" fill="currentColor" />
-      <rect x="16" y="16" width="6" height="6" rx="1.5" fill="currentColor" />
+    <svg viewBox="0 0 29 29" width="30" height="30" aria-hidden="true">
+      <rect x="2" y="2" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="11" y="2" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="20" y="2" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="2" y="11" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="20" y="11" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="2" y="20" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="11" y="20" width="6" height="6" rx="2.4" fill="currentColor" />
+      <rect x="20" y="20" width="6" height="6" rx="2.4" fill="currentColor" />
+    </svg>
+  );
+}
+
+function DotPreviewDots() {
+  return (
+    <svg viewBox="0 0 29 29" width="30" height="30" aria-hidden="true">
+      <circle cx="5" cy="5" r="2.5" fill="currentColor" />
+      <circle cx="14" cy="5" r="2.5" fill="currentColor" />
+      <circle cx="23" cy="5" r="2.5" fill="currentColor" />
+      <circle cx="5" cy="14" r="2.5" fill="currentColor" />
+      <circle cx="23" cy="14" r="2.5" fill="currentColor" />
+      <circle cx="5" cy="23" r="2.5" fill="currentColor" />
+      <circle cx="14" cy="23" r="2.5" fill="currentColor" />
+      <circle cx="23" cy="23" r="2.5" fill="currentColor" />
     </svg>
   );
 }
 
 function DotPreviewClassy() {
   return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8">
-      <rect x="2" y="2" width="6" height="6" rx="0" fill="currentColor" />
-      <rect x="9" y="2" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="2" width="6" height="6" rx="0" fill="currentColor" />
-      <rect x="2" y="9" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="9" width="6" height="6" rx="0" fill="currentColor" />
-      <rect x="2" y="16" width="6" height="6" rx="0" fill="currentColor" />
-      <rect x="9" y="16" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="16" width="6" height="6" rx="0" fill="currentColor" />
+    <svg viewBox="0 0 29 29" width="30" height="30" aria-hidden="true">
+      <rect x="2" y="2" width="6" height="6" fill="currentColor" />
+      <rect x="11" y="2" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="20" y="2" width="6" height="6" fill="currentColor" />
+      <rect x="2" y="11" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="20" y="11" width="6" height="6" fill="currentColor" />
+      <rect x="2" y="20" width="6" height="6" fill="currentColor" />
+      <rect x="11" y="20" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="20" y="20" width="6" height="6" fill="currentColor" />
     </svg>
   );
 }
 
-function DotPreviewClassyRounded() {
+function DotPreviewSoft() {
   return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8">
-      <rect x="2" y="2" width="6" height="6" rx="2" fill="currentColor" />
-      <rect x="9" y="2" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="2" width="6" height="6" rx="2" fill="currentColor" />
-      <rect x="2" y="9" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="9" width="6" height="6" rx="2" fill="currentColor" />
-      <rect x="2" y="16" width="6" height="6" rx="2" fill="currentColor" />
-      <rect x="9" y="16" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="16" width="6" height="6" rx="2" fill="currentColor" />
-    </svg>
-  );
-}
-
-function DotPreviewExtraRounded() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8">
+    <svg viewBox="0 0 29 29" width="30" height="30" aria-hidden="true">
       <rect x="2" y="2" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="9" y="2" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="2" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="2" y="9" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="9" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="2" y="16" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="9" y="16" width="6" height="6" rx="3" fill="currentColor" />
-      <rect x="16" y="16" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="11" y="2" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="20" y="2" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="2" y="11" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="20" y="11" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="2" y="20" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="11" y="20" width="6" height="6" rx="3" fill="currentColor" />
+      <rect x="20" y="20" width="6" height="6" rx="3" fill="currentColor" />
+    </svg>
+  );
+}
+
+function DotPreviewDiamond() {
+  return (
+    <svg viewBox="0 0 29 29" width="30" height="30" aria-hidden="true">
+      <rect x="4" y="4" width="5" height="5" transform="rotate(45 6.5 6.5)" fill="currentColor" />
+      <rect x="13" y="4" width="5" height="5" transform="rotate(45 15.5 6.5)" fill="currentColor" />
+      <rect x="22" y="4" width="5" height="5" transform="rotate(45 24.5 6.5)" fill="currentColor" />
+      <rect x="4" y="13" width="5" height="5" transform="rotate(45 6.5 15.5)" fill="currentColor" />
+      <rect x="22" y="13" width="5" height="5" transform="rotate(45 24.5 15.5)" fill="currentColor" />
+      <rect x="4" y="22" width="5" height="5" transform="rotate(45 6.5 24.5)" fill="currentColor" />
+      <rect x="13" y="22" width="5" height="5" transform="rotate(45 15.5 24.5)" fill="currentColor" />
+      <rect x="22" y="22" width="5" height="5" transform="rotate(45 24.5 24.5)" fill="currentColor" />
     </svg>
   );
 }
 
 const dotStyleOptions: { value: QrStyle["dotType"]; label: string; Icon: React.FC }[] = [
   { value: "square", label: "Квадрат", Icon: DotPreviewSquare },
+  { value: "rounded", label: "Скругл.", Icon: DotPreviewRounded },
   { value: "dots", label: "Точки", Icon: DotPreviewDots },
-  { value: "rounded", label: "Скруглённые", Icon: DotPreviewRounded },
   { value: "classy", label: "Классика", Icon: DotPreviewClassy },
-  { value: "classy-rounded", label: "Классика+", Icon: DotPreviewClassyRounded },
-  { value: "extra-rounded", label: "Круглые", Icon: DotPreviewExtraRounded },
+  { value: "extra-rounded", label: "Мягкие", Icon: DotPreviewSoft },
+  { value: "classy-rounded", label: "Ромб", Icon: DotPreviewDiamond },
 ];
 
 const cornerSquareOptions: { value: QrStyle["cornerSquareType"]; label: string }[] = [
   { value: "square", label: "Квадрат" },
-  { value: "dot", label: "Точка" },
-  { value: "extra-rounded", label: "Скруглённые" },
+  { value: "extra-rounded", label: "Скругл." },
+  { value: "dot", label: "Круг" },
 ];
 
 const cornerDotOptions: { value: QrStyle["cornerDotType"]; label: string }[] = [
   { value: "square", label: "Квадрат" },
-  { value: "dot", label: "Точка" },
+  { value: "dot", label: "Скругл." },
 ];
 
-/* ── Section chevron icon ── */
-
-function ChevronIcon({ open }: { open: boolean }) {
+function CornerSquarePreview({ variant }: { variant: QrStyle["cornerSquareType"] }) {
+  const r = variant === "square" ? 1 : variant === "dot" ? 9 : 5;
   return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={`h-5 w-5 text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-    >
-      <path
-        fillRule="evenodd"
-        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06z"
-        clipRule="evenodd"
-      />
+    <svg viewBox="0 0 26 26" width="26" height="26" aria-hidden="true">
+      <rect x="2" y="2" width="22" height="22" rx={r} fill="none" stroke="currentColor" strokeWidth="4" />
     </svg>
   );
 }
 
-/* ── Section icons ── */
-
-function IconPattern() {
+function CornerDotPreview({ variant }: { variant: QrStyle["cornerDotType"] }) {
+  const r = variant === "square" ? 0 : 8;
   return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path d="M3 4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4zm9 0a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1V4zM3 13a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3zm9 0a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-3z" />
+    <svg viewBox="0 0 26 26" width="26" height="26" aria-hidden="true">
+      <rect x="6" y="6" width="14" height="14" rx={r} fill="currentColor" />
     </svg>
   );
 }
 
-function IconPalette() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path fillRule="evenodd" d="M3.5 2A1.5 1.5 0 0 0 2 3.5v13A1.5 1.5 0 0 0 3.5 18h13a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 12.378 2H3.5z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function IconCorner() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path d="M3.5 3A1.5 1.5 0 0 0 2 4.5v3A1.5 1.5 0 0 0 3.5 9h3A1.5 1.5 0 0 0 8 7.5v-3A1.5 1.5 0 0 0 6.5 3h-3zm0 8A1.5 1.5 0 0 0 2 12.5v3A1.5 1.5 0 0 0 3.5 17h3A1.5 1.5 0 0 0 8 15.5v-3A1.5 1.5 0 0 0 6.5 11h-3zm8-8A1.5 1.5 0 0 0 10 4.5v3A1.5 1.5 0 0 0 11.5 9h3A1.5 1.5 0 0 0 16 7.5v-3A1.5 1.5 0 0 0 14.5 3h-3z" />
-    </svg>
-  );
-}
-
-function IconFrame() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path fillRule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v11.5A2.25 2.25 0 0 0 4.25 18h11.5A2.25 2.25 0 0 0 18 15.75V4.25A2.25 2.25 0 0 0 15.75 2H4.25zM3.5 4.25a.75.75 0 0 1 .75-.75h11.5a.75.75 0 0 1 .75.75v11.5a.75.75 0 0 1-.75.75H4.25a.75.75 0 0 1-.75-.75V4.25z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function IconLogo() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path fillRule="evenodd" d="M1 5.25A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25v9.5A2.25 2.25 0 0 1 16.75 17H3.25A2.25 2.25 0 0 1 1 14.75v-9.5zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 0 0 .75-.75v-2.69l-2.22-2.219a.75.75 0 0 0-1.06 0l-1.91 1.909-4.16-4.159a.75.75 0 0 0-1.06 0L2.5 11.06zm12.22-5.185a1.125 1.125 0 1 0 0 2.25 1.125 1.125 0 0 0 0-2.25z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function IconSettings() {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
-      <path fillRule="evenodd" d="M8.34 1.804A1 1 0 0 1 9.32 1h1.36a1 1 0 0 1 .98.804l.295 1.473c.497.2.966.46 1.398.77l1.42-.47a1 1 0 0 1 1.187.44l.68 1.178a1 1 0 0 1-.207 1.244l-1.126 1.002a7 7 0 0 1 0 1.518l1.126 1.002a1 1 0 0 1 .207 1.244l-.68 1.178a1 1 0 0 1-1.187.44l-1.42-.47c-.432.31-.901.57-1.398.77l-.295 1.473a1 1 0 0 1-.98.804H9.32a1 1 0 0 1-.98-.804l-.295-1.473a7 7 0 0 1-1.398-.77l-1.42.47a1 1 0 0 1-1.187-.44l-.68-1.178a1 1 0 0 1 .207-1.244l1.126-1.002a7 7 0 0 1 0-1.518L3.566 7.46a1 1 0 0 1-.207-1.244l.68-1.178a1 1 0 0 1 1.187-.44l1.42.47c.432-.31.901-.57 1.398-.77l.295-1.473zM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-/* ── Color picker + hex input helper ── */
-
-function ColorPickerField({
-  label,
+function ColorHexRow({
   value,
   onChange,
   disabled,
+  compact,
+  ariaLabel,
 }: {
-  label: string;
   value: string;
   onChange: (v: string) => void;
   disabled?: boolean;
+  compact?: boolean;
+  ariaLabel: string;
 }) {
+  const size = compact ? "40px" : "46px";
   return (
-    <div>
-      <label className="label">{label}</label>
-      <div className="flex items-center gap-3">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          className="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 p-1 disabled:cursor-not-allowed disabled:opacity-50"
-        />
-        <input
-          className="input max-w-[120px] font-mono text-sm"
-          value={value}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
-          }}
-          disabled={disabled}
-          placeholder="#000000"
-        />
-      </div>
+    <div className="qrs-color-row">
+      <input
+        type="color"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        className="qrs-color-input"
+        style={{ width: size, height: size }}
+      />
+      <Input
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
+        }}
+        disabled={disabled}
+        placeholder="#000000"
+        className="qrs-color-hex"
+      />
     </div>
   );
 }
 
-/* ── Gradient sub-form ── */
+function ColorSwatchRow({
+  colors,
+  active,
+  onSelect,
+  insetBorder,
+}: {
+  colors: string[];
+  active: string;
+  onSelect: (color: string) => void;
+  insetBorder?: boolean;
+}) {
+  return (
+    <div className="qrs-swatch-row">
+      {colors.map((color) => (
+        <button
+          key={color}
+          type="button"
+          className="qrs-swatch"
+          aria-label={`Цвет ${color}`}
+          onClick={() => onSelect(color)}
+          style={{
+            background: color,
+            borderColor: normalizeHex(active) === normalizeHex(color) ? "var(--color-primary)" : "transparent",
+            boxShadow: insetBorder ? "inset 0 0 0 1px var(--border-default)" : "var(--shadow-xs)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
-function GradientEditor({
-  gradient,
+function SectionCheckbox({
+  label,
+  checked,
   onChange,
 }: {
-  gradient?: { type: "linear" | "radial"; colors: [string, string]; rotation?: number };
-  onChange: (g: { type: "linear" | "radial"; colors: [string, string]; rotation?: number } | undefined) => void;
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
 }) {
-  const enabled = !!gradient;
-  const g = gradient ?? { type: "linear" as const, colors: ["#000000", "#333333"] as [string, string], rotation: 0 };
-
   return (
-    <div className="mt-3 space-y-3">
-      <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input
-          type="checkbox"
-          checked={enabled}
-          onChange={(e) => onChange(e.target.checked ? g : undefined)}
-          className="h-4 w-4 rounded border-slate-300 accent-blue-600"
-        />
-        Использовать градиент
-      </label>
-      {enabled && (
-        <div className="grid gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:grid-cols-2">
-          <ColorPickerField label="Цвет 1" value={g.colors[0]} onChange={(v) => onChange({ ...g, colors: [v, g.colors[1]] })} />
-          <ColorPickerField label="Цвет 2" value={g.colors[1]} onChange={(v) => onChange({ ...g, colors: [g.colors[0], v] })} />
-          <div>
-            <label className="label">Тип</label>
-            <select
-              className="select"
-              value={g.type}
-              onChange={(e) => onChange({ ...g, type: e.target.value as "linear" | "radial" })}
-            >
-              <option value="linear">Линейный</option>
-              <option value="radial">Радиальный</option>
-            </select>
-          </div>
-          {g.type === "linear" && (
-            <div>
-              <label className="label">Угол ({g.rotation ?? 0}°)</label>
-              <input
-                className="mt-1 w-full accent-blue-600"
-                type="range"
-                min={0}
-                max={360}
-                value={g.rotation ?? 0}
-                onChange={(e) => onChange({ ...g, rotation: Number(e.target.value) })}
-              />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+    <label className="qrs-design-section-check">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      {label}
+    </label>
   );
 }
 
-/* ── Collapsible section wrapper ── */
-
-function Section({
+function DesignCard({
   title,
   icon,
-  open,
-  onToggle,
   children,
+  action,
 }: {
   title: string;
   icon: React.ReactNode;
-  open: boolean;
-  onToggle: () => void;
   children: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   return (
-    <div className="card-flat overflow-hidden">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50"
-      >
-        <span className="text-slate-500">{icon}</span>
-        <span className="flex-1 text-sm font-semibold text-slate-900">{title}</span>
-        <ChevronIcon open={open} />
-      </button>
-      {open && <div className="border-t border-slate-100 px-5 py-4 space-y-4">{children}</div>}
-    </div>
+    <section className="qrs-design-card">
+      <div className="qrs-design-card-head">
+        <div className="qrs-design-card-title">
+          {icon}
+          {title}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
   );
 }
 
-/* ── Main component ── */
-
 export function QrDesigner({ style, onChange, workspaceId }: Props) {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    pattern: true,
-    background: false,
-    corners: false,
-    frame: false,
-    logo: false,
-    additional: false,
-  });
-
   const [uploading, setUploading] = useState(false);
+  const [logoVisible, setLogoVisible] = useState(() => Boolean(style.logoUrl) || style.logoScale > 0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const toggle = useCallback((key: string) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
 
   const patch = useCallback(
     (partial: Partial<QrStyle>) => onChange({ ...style, ...partial }),
@@ -387,6 +324,14 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
     [style.dotColor, style.bgColor, style.bgTransparent, style.margin, style.logoScale],
   );
 
+  const scoreTone =
+    scannability >= 85 ? "var(--color-success)" : scannability >= 70 ? "var(--color-warning)" : "var(--color-danger)";
+  const scoreBg =
+    scannability >= 85 ? "var(--color-success-subtle)" : scannability >= 70 ? "var(--color-warning-subtle)" : "var(--color-danger-subtle)";
+
+  const gradientEnabled = Boolean(style.dotGradient);
+  const gradient = style.dotGradient ?? { type: "linear" as const, colors: [style.dotColor, "#1E4FD1"] as [string, string], rotation: 0 };
+
   async function handleLogoUpload(file: File) {
     setUploading(true);
     try {
@@ -396,275 +341,329 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
       const res = await fetchApi("/api/upload", { method: "POST", body: formData });
       if (!res.ok) return;
       const data = await res.json();
-      patch({ logoUrl: data.url ?? "", logoFileId: data.fileId ?? "" });
+      setLogoVisible(true);
+      patch({
+        logoUrl: data.url ?? "",
+        logoFileId: data.fileId ?? "",
+        logoScale: style.logoScale > 0 ? style.logoScale : 0.2,
+      });
     } finally {
       setUploading(false);
     }
   }
 
-  const scoreColor =
-    scannability >= 85
-      ? "text-green-600 bg-green-50"
-      : scannability >= 70
-        ? "text-amber-600 bg-amber-50"
-        : "text-red-600 bg-red-50";
-
   return (
-    <div className="space-y-3">
-      {/* Section 1: QR Pattern */}
-      <Section title="Узор QR-кода" icon={<IconPattern />} open={!!openSections.pattern} onToggle={() => toggle("pattern")}>
-        <div>
-          <label className="label">Стиль точек</label>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-            {dotStyleOptions.map(({ value, label, Icon }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => patch({ dotType: value })}
-                className={`card-flat flex flex-col items-center gap-1.5 p-3 transition-colors hover:bg-slate-50 ${
-                  style.dotType === value ? "ring-2 ring-blue-500 bg-blue-50/50" : ""
-                }`}
-              >
-                <Icon />
-                <span className="text-[11px] leading-tight text-slate-600">{label}</span>
-              </button>
-            ))}
-          </div>
+    <div className="qrs-design-stack">
+      <DesignCard
+        title="Узор QR-кода"
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+        }
+      >
+        <div className="qrs-design-tile-grid">
+          {dotStyleOptions.map(({ value, label, Icon }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => patch({ dotType: value })}
+              className={`qrs-design-option${style.dotType === value ? " qrs-design-option--active" : ""}`}
+            >
+              <Icon />
+              <span className="qrs-design-option-label">{label}</span>
+            </button>
+          ))}
         </div>
+      </DesignCard>
 
-        <ColorPickerField label="Цвет точек" value={style.dotColor} onChange={(v) => patch({ dotColor: v })} />
-
-        <GradientEditor gradient={style.dotGradient} onChange={(g) => patch({ dotGradient: g })} />
-      </Section>
-
-      {/* Section 2: Background */}
-      <Section title="Цвет фона" icon={<IconPalette />} open={!!openSections.background} onToggle={() => toggle("background")}>
-        <label className="flex items-center gap-2 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            checked={style.bgTransparent}
-            onChange={(e) => patch({ bgTransparent: e.target.checked })}
-            className="h-4 w-4 rounded border-slate-300 accent-blue-600"
+      <DesignCard
+        title="Цвет кода"
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-8.3-10-8.3Z" />
+          </svg>
+        }
+        action={
+          <SectionCheckbox
+            label="Градиент"
+            checked={gradientEnabled}
+            onChange={(checked) =>
+              patch({
+                dotGradient: checked
+                  ? { type: "linear", colors: [style.dotColor, gradient.colors[1] ?? "#1E4FD1"], rotation: 0 }
+                  : undefined,
+              })
+            }
           />
-          Прозрачный фон
-        </label>
-
-        <ColorPickerField
-          label="Цвет фона"
-          value={style.bgColor}
-          onChange={(v) => patch({ bgColor: v })}
-          disabled={style.bgTransparent}
+        }
+      >
+        <ColorHexRow
+          value={style.dotColor}
+          onChange={(v) =>
+            patch({
+              dotColor: v,
+              ...(gradientEnabled ? { dotGradient: { ...gradient, colors: [v, gradient.colors[1]] } } : {}),
+            })
+          }
+          ariaLabel="Цвет кода"
         />
-
-        <GradientEditor
-          gradient={style.bgGradient}
-          onChange={(g) => patch({ bgGradient: g })}
+        <ColorSwatchRow
+          colors={FG_SWATCHES}
+          active={style.dotColor}
+          onSelect={(color) => patch({ dotColor: color })}
         />
-      </Section>
+        {gradientEnabled ? (
+          <div className="qrs-design-subsection qrs-design-subsection--gradient">
+            <div className="qrs-design-subsection-label">Второй цвет градиента</div>
+            <ColorHexRow
+              value={gradient.colors[1]}
+              onChange={(v) => patch({ dotGradient: { ...gradient, colors: [gradient.colors[0], v] } })}
+              ariaLabel="Второй цвет градиента"
+            />
+          </div>
+        ) : null}
+      </DesignCard>
 
-      {/* Section 3: Corners */}
-      <Section title="Уголки QR-кода" icon={<IconCorner />} open={!!openSections.corners} onToggle={() => toggle("corners")}>
-        <div>
-          <label className="label">Стиль рамки уголков</label>
-          <div className="grid grid-cols-3 gap-2">
+      <DesignCard
+        title="Фон"
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="m3 15 4-4 3 3 5-5 6 6" />
+          </svg>
+        }
+        action={
+          <SectionCheckbox
+            label="Прозрачный"
+            checked={style.bgTransparent}
+            onChange={(checked) => patch({ bgTransparent: checked })}
+          />
+        }
+      >
+        {!style.bgTransparent ? (
+          <>
+            <ColorHexRow
+              value={style.bgColor}
+              onChange={(v) => patch({ bgColor: v })}
+              ariaLabel="Цвет фона"
+            />
+            <ColorSwatchRow
+              colors={BG_SWATCHES}
+              active={style.bgColor}
+              onSelect={(color) => patch({ bgColor: color, bgTransparent: false })}
+              insetBorder
+            />
+          </>
+        ) : null}
+      </DesignCard>
+
+      <DesignCard
+        title="Уголки"
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+          </svg>
+        }
+      >
+        <div className="qrs-design-subsection">
+          <div className="qrs-design-subsection-label">Рамка уголка</div>
+          <div className="qrs-design-tile-grid qrs-design-tile-grid--corners">
             {cornerSquareOptions.map(({ value, label }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => patch({ cornerSquareType: value })}
-                className={`card-flat px-3 py-2.5 text-center text-sm transition-colors hover:bg-slate-50 ${
-                  style.cornerSquareType === value ? "ring-2 ring-blue-500 bg-blue-50/50" : ""
-                }`}
+                className={`qrs-design-option qrs-design-option--compact${style.cornerSquareType === value ? " qrs-design-option--active" : ""}`}
               >
-                {label}
+                <CornerSquarePreview variant={value} />
+                <span className="qrs-design-option-label qrs-design-option-label--compact">{label}</span>
               </button>
             ))}
           </div>
+          <ColorHexRow
+            value={style.cornerSquareColor}
+            onChange={(v) => patch({ cornerSquareColor: v })}
+            compact
+            ariaLabel="Цвет рамки уголка"
+          />
         </div>
 
-        <ColorPickerField
-          label="Цвет рамки уголков"
-          value={style.cornerSquareColor}
-          onChange={(v) => patch({ cornerSquareColor: v })}
-        />
-
-        <div>
-          <label className="label">Стиль точек уголков</label>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="qrs-design-subsection">
+          <div className="qrs-design-subsection-label">Точка уголка</div>
+          <div className="qrs-design-tile-grid qrs-design-tile-grid--corners">
             {cornerDotOptions.map(({ value, label }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => patch({ cornerDotType: value })}
-                className={`card-flat px-3 py-2.5 text-center text-sm transition-colors hover:bg-slate-50 ${
-                  style.cornerDotType === value ? "ring-2 ring-blue-500 bg-blue-50/50" : ""
-                }`}
+                className={`qrs-design-option qrs-design-option--compact${style.cornerDotType === value ? " qrs-design-option--active" : ""}`}
               >
-                {label}
+                <CornerDotPreview variant={value} />
+                <span className="qrs-design-option-label qrs-design-option-label--compact">{label}</span>
               </button>
             ))}
           </div>
-        </div>
-
-        <ColorPickerField
-          label="Цвет точек уголков"
-          value={style.cornerDotColor}
-          onChange={(v) => patch({ cornerDotColor: v })}
-        />
-      </Section>
-
-      {/* Section 4: Frame */}
-      <Section title="Рамка" icon={<IconFrame />} open={!!openSections.frame} onToggle={() => toggle("frame")}>
-        <div>
-          <label className="label">Стиль рамки</label>
-          <select
-            className="select"
-            value={style.frameStyle}
-            onChange={(e) => patch({ frameStyle: e.target.value })}
-          >
-            <option value="none">Без рамки</option>
-            <option value="simple">Простая</option>
-            <option value="rounded">Скруглённая</option>
-            <option value="badge">Бейдж</option>
-            <option value="banner">Баннер</option>
-          </select>
-        </div>
-
-        <ColorPickerField label="Цвет рамки" value={style.frameColor} onChange={(v) => patch({ frameColor: v })} />
-
-        <div>
-          <label className="label">Текст на рамке</label>
-          <input
-            className="input"
-            value={style.frameText}
-            onChange={(e) => patch({ frameText: e.target.value })}
-            placeholder="Сканируй меня"
+          <ColorHexRow
+            value={style.cornerDotColor}
+            onChange={(v) => patch({ cornerDotColor: v })}
+            compact
+            ariaLabel="Цвет точки уголка"
           />
         </div>
-      </Section>
+      </DesignCard>
 
-      {/* Section 5: Logo */}
-      <Section title="Логотип" icon={<IconLogo />} open={!!openSections.logo} onToggle={() => toggle("logo")}>
-        <div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleLogoUpload(file);
-              e.target.value = "";
+      <DesignCard
+        title="Логотип в центре"
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+          </svg>
+        }
+        action={
+          <SectionCheckbox
+            label="Показать"
+            checked={logoVisible}
+            onChange={(checked) => {
+              setLogoVisible(checked);
+              patch({ logoScale: checked ? (style.logoScale > 0 ? style.logoScale : 0.2) : 0 });
             }}
           />
-          {style.logoUrl ? (
-            <div className="flex items-center gap-4">
-              <img
-                src={style.logoUrl}
-                alt="Логотип"
-                className="h-16 w-16 rounded-lg border border-slate-200 object-contain p-1"
-              />
-              <div className="flex gap-2">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => fileInputRef.current?.click()}>
-                  Заменить
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => patch({ logoUrl: "", logoFileId: "" })}
-                >
-                  Удалить
-                </button>
+        }
+      >
+        {logoVisible ? (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleLogoUpload(file);
+                e.target.value = "";
+              }}
+            />
+            {style.logoUrl ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <img
+                  src={style.logoUrl}
+                  alt="Логотип"
+                  className="qrs-design-logo-thumb"
+                />
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <Button variant="secondary" size="sm" type="button" onClick={() => fileInputRef.current?.click()}>
+                    Заменить
+                  </Button>
+                  <Button variant="ghost" size="sm" type="button" onClick={() => patch({ logoUrl: "", logoFileId: "", logoScale: 0 })}>
+                    Удалить
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              disabled={uploading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {uploading ? "Загрузка..." : "Загрузить логотип"}
-            </button>
-          )}
-        </div>
+            ) : (
+              <label htmlFor="qrs-logo-input" className="qrs-design-logo-upload">
+                <span style={{ font: "var(--fw-semibold) 13px/1.3 var(--font-sans)", color: "var(--color-primary)" }}>
+                  {uploading ? "Загрузка…" : "Загрузить логотип"}
+                </span>
+                <span style={{ font: "var(--fw-regular) 12px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>PNG, SVG или JPG · до 2 МБ</span>
+                <input
+                  id="qrs-logo-input"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleLogoUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
+            <Field label={`Размер логотипа (${Math.round(style.logoScale * 100)}%)`}>
+              <input
+                type="range"
+                min={0.12}
+                max={0.3}
+                step={0.01}
+                value={style.logoScale || 0.2}
+                onChange={(e) => patch({ logoScale: Number(e.target.value) })}
+                style={{ width: "100%", accentColor: "var(--color-primary)" }}
+              />
+            </Field>
+          </>
+        ) : null}
+      </DesignCard>
 
-        <div>
-          <label className="label">Масштаб логотипа ({style.logoScale.toFixed(2)})</label>
+      <DesignCard
+        title="Дополнительно"
+        icon={
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 7h-9M14 17H5" />
+            <circle cx="17" cy="17" r="3" />
+            <circle cx="7" cy="7" r="3" />
+          </svg>
+        }
+      >
+        <div className="qrs-design-subsection">
+          <div className="qrs-design-range-label">
+            <span>Отступ (тихая зона)</span>
+            <span className="tnum">{style.margin} мод.</span>
+          </div>
           <input
-            className="mt-1 w-full accent-blue-600"
-            type="range"
-            min={0}
-            max={0.3}
-            step={0.01}
-            value={style.logoScale}
-            onChange={(e) => patch({ logoScale: Number(e.target.value) })}
-          />
-        </div>
-
-        <div>
-          <label className="label">Отступ логотипа ({style.logoMargin}px)</label>
-          <input
-            className="mt-1 w-full accent-blue-600"
-            type="range"
-            min={0}
-            max={20}
-            value={style.logoMargin}
-            onChange={(e) => patch({ logoMargin: Number(e.target.value) })}
-          />
-        </div>
-      </Section>
-
-      {/* Section 6: Additional */}
-      <Section title="Дополнительно" icon={<IconSettings />} open={!!openSections.additional} onToggle={() => toggle("additional")}>
-        <div>
-          <label className="label">Отступ ({style.margin})</label>
-          <input
-            className="mt-1 w-full accent-blue-600"
             type="range"
             min={0}
             max={8}
             value={style.margin}
             onChange={(e) => patch({ margin: Number(e.target.value) })}
+            style={{ width: "100%", accentColor: "var(--color-primary)" }}
           />
         </div>
 
-        <div>
-          <label className="label">Коррекция ошибок</label>
-          <select
-            className="select"
-            value={style.errorCorrectionLevel}
-            onChange={(e) => patch({ errorCorrectionLevel: e.target.value as "L" | "M" | "Q" | "H" })}
-          >
-            <option value="L">L — низкая (7%)</option>
-            <option value="M">M — средняя (15%)</option>
-            <option value="Q">Q — повышенная (25%)</option>
-            <option value="H">H — высокая (30%)</option>
-          </select>
+        <div className="qrs-design-subsection">
+          <div className="qrs-design-subsection-label">Уровень коррекции ошибок</div>
+          <div className="qrs-design-ec-grid">
+            {EC_LEVELS.map(({ value, sub }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => patch({ errorCorrectionLevel: value })}
+                className={`qrs-design-ec-btn${style.errorCorrectionLevel === value ? " qrs-design-ec-btn--active" : ""}`}
+              >
+                {value}
+                <span>{sub}</span>
+              </button>
+            ))}
+          </div>
+          <p className="qrs-design-ec-hint">
+            Чем выше уровень, тем надёжнее считывается код с логотипом или на неровной поверхности.
+          </p>
         </div>
 
-        <div>
-          <label className="label">Качество сканирования</label>
-          <div className="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
-            <span className={`rounded-full px-3 py-1 text-xs font-bold ${scoreColor}`}>{scannability}/100</span>
-            <div className="flex-1">
-              <div className="h-2 rounded-full bg-slate-200">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    scannability >= 85 ? "bg-green-500" : scannability >= 70 ? "bg-amber-500" : "bg-red-500"
-                  }`}
-                  style={{ width: `${scannability}%` }}
-                />
-              </div>
+        <Field label="Качество сканирования">
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "10px", border: "1px solid var(--border-subtle)", background: "var(--surface-subtle)" }}>
+            <span style={{ borderRadius: "999px", padding: "4px 12px", font: "var(--fw-bold) 12px/1 var(--font-sans)", color: scoreTone, background: scoreBg }}>
+              {scannability}/100
+            </span>
+            <div style={{ flex: 1, height: "8px", borderRadius: "999px", background: "var(--surface-sunken)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${scannability}%`, borderRadius: "999px", background: scoreTone, transition: "width var(--dur-base) ease" }} />
             </div>
           </div>
-          {scannability < 70 && (
-            <p className="text-danger mt-2 text-sm">
+          {scannability < 70 ? (
+            <p style={{ marginTop: "8px", font: "var(--fw-regular) 13px/1.4 var(--font-sans)", color: "var(--color-danger)" }}>
               Увеличьте контрастность или отступ для улучшения сканируемости.
             </p>
-          )}
-        </div>
-      </Section>
+          ) : null}
+        </Field>
+      </DesignCard>
     </div>
   );
 }

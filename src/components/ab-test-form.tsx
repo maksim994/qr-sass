@@ -56,12 +56,12 @@ export default function AbTestForm({ qrId, abTest, scanCountA, scanCountB, onSav
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs qrs-text-muted">
         Случайный выбор URL (50/50). Cookie сохраняет вариант при повторных визитах.
       </p>
       {hasAbTest && (
-        <div className="rounded-lg bg-slate-50 p-3 text-sm">
-          <p className="font-medium text-slate-700">Метрики конверсии</p>
+        <div className="rounded-lg qrs-surface-subtle p-3 text-sm">
+          <p className="font-medium qrs-text-default">Метрики конверсии</p>
           <div className="mt-2 flex gap-6">
             <span>Вариант A: {scanCountA} сканов</span>
             <span>Вариант B: {scanCountB} сканов</span>

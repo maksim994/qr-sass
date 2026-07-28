@@ -1,0 +1,40 @@
+/* ============================================================
+   MOTION — Финкуратор
+   Quick, gentle, confidence-building. A subtle spring on
+   friendly interactions; calm fades elsewhere. Always respect
+   prefers-reduced-motion.
+   ============================================================ */
+
+:root {
+  --dur-instant: 80ms; /* @kind other */
+  --dur-fast:    140ms; /* @kind other */
+  --dur-base:    220ms; /* @kind other */
+  --dur-slow:    340ms; /* @kind other */
+  --dur-slower:  520ms; /* @kind other */
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.3, 1); /* @kind other */
+  --ease-in-out:   cubic-bezier(0.5, 0, 0.2, 1); /* @kind other */
+  --ease-emphasis: cubic-bezier(0.2, 0.9, 0.25, 1); /* @kind other */
+  --ease-spring:   cubic-bezier(0.22, 1.2, 0.32, 1); /* @kind other */
+
+  --transition-colors: color var(--dur-fast) var(--ease-standard),
+                       background-color var(--dur-fast) var(--ease-standard),
+                       border-color var(--dur-fast) var(--ease-standard),
+                       box-shadow var(--dur-fast) var(--ease-standard); /* @kind other */
+  --transition-transform: transform var(--dur-base) var(--ease-spring); /* @kind other */
+
+  /* Interaction conventions (documented for reference):
+     hover  → bg shifts one step darker (light) / lighter (dark) + tiny lift
+     active → transform: scale(0.98); shadow reduces
+     focus  → --shadow-focus ring, never remove outline silently */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms; /* @kind other */
+    --dur-fast: 0ms; /* @kind other */
+    --dur-base: 0ms; /* @kind other */
+    --dur-slow: 0ms; /* @kind other */
+    --dur-slower: 0ms; /* @kind other */
+  }
+}

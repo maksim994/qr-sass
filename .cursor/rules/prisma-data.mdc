@@ -1,0 +1,29 @@
+---
+description: "Prisma: getDb(), enums, workspace scope, db push"
+globs: prisma/**/*,src/lib/db.ts
+alwaysApply: false
+---
+
+# Prisma / data
+
+## Prefer
+- Доступ к БД только через `getDb()` из @src/lib/db.ts — не `new PrismaClient()`.
+- Tenant-данные фильтровать по workspace (или явный admin-scope); membership до мутаций.
+- Enums / статусы — как в @prisma/schema.prisma; не изобретать строковые литералы мимо schema.
+- Локальные схемы: `npm run prisma:push` (+ `prisma:generate`); не навязывать migrate-first без решения команды.
+- Индексы и relations менять осознанно; после schema — regenerate client.
+
+## Never
+- Запросы по `userId`/`id` без workspace (или admin) scope там, где модель multi-tenant.
+- Второй `PrismaClient` / прямой import `@prisma/client` singleton в фичах.
+- Считать `prisma migrate` обязательным дефолтом репо (здесь push-first).
+- Писать raw SQL без нужды; обходить enums «строкой снаружи».
+
+## Anti-patterns
+- `include: { everything: true }` на горячих списках.
+- Soft-delete / cascade «на глаз» без сверки schema.
+- Править только generated client без `schema.prisma`.
+
+## Gold
+- @src/lib/db.ts
+- @prisma/schema.prisma

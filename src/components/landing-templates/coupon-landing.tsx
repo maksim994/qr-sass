@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { QreateFooter } from "./qreate-footer";
+import {
+  HostedLandingCard,
+  HostedLandingShell,
+} from "./hosted-landing-shell";
 
 type Props = { payload: Record<string, unknown> };
 
@@ -14,38 +17,36 @@ export function CouponLanding({ payload }: Props) {
   const terms = payload.terms as string | undefined;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <div className="overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-100">
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-6 py-8 text-center text-white">
-          {discount != null && (
-            <p className="text-5xl font-extrabold tracking-tight">
+    <HostedLandingShell>
+      <HostedLandingCard className="qrs-hosted-coupon">
+        <div className="qrs-hosted-coupon__hero">
+          {discount != null ? (
+            <p className="qrs-hosted-coupon__discount">
               {typeof discount === "number" ? `-${discount}%` : discount}
             </p>
-          )}
-          <h1 className="mt-3 text-xl font-bold">{title}</h1>
-          {description && <p className="mt-2 text-sm text-blue-100">{description}</p>}
+          ) : null}
+          <h1 className="qrs-hosted-coupon__title">{title}</h1>
+          {description ? <p className="qrs-hosted-coupon__desc">{description}</p> : null}
         </div>
 
-        <div className="space-y-5 p-6">
-          {promoCode && <CopyableCode code={promoCode} />}
+        <div className="qrs-hosted-coupon__body">
+          {promoCode ? <CopyableCode code={promoCode} /> : null}
 
-          {expiryDate && (
-            <p className="text-center text-sm text-gray-500">
-              Действителен до: <span className="font-medium text-gray-700">{expiryDate}</span>
+          {expiryDate ? (
+            <p className="qrs-hosted-coupon__expiry">
+              Действителен до: <strong>{expiryDate}</strong>
             </p>
-          )}
+          ) : null}
 
-          {terms && (
-            <div className="rounded-xl bg-gray-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Условия</p>
-              <p className="mt-1 text-sm text-gray-600">{terms}</p>
+          {terms ? (
+            <div className="qrs-hosted-coupon__terms">
+              <p className="qrs-hosted-coupon__terms-label">Условия</p>
+              <p>{terms}</p>
             </div>
-          )}
+          ) : null}
         </div>
-      </div>
-
-      <QreateFooter />
-    </div>
+      </HostedLandingCard>
+    </HostedLandingShell>
   );
 }
 
@@ -57,19 +58,15 @@ function CopyableCode({ code }: { code: string }) {
       await navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch { /* clipboard not available */ }
+    } catch {
+      /* clipboard not available */
+    }
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="flex w-full items-center justify-between rounded-xl border-2 border-dashed border-blue-200 bg-blue-50 px-5 py-4 transition-colors hover:border-blue-300"
-    >
-      <span className="font-mono text-lg font-bold tracking-widest text-blue-700">{code}</span>
-      <span className="text-xs font-medium text-blue-500">
-        {copied ? "Скопировано" : "Копировать"}
-      </span>
+    <button type="button" onClick={handleCopy} className="qrs-hosted-coupon__code">
+      <span className="qrs-hosted-coupon__code-value">{code}</span>
+      <span className="qrs-hosted-coupon__code-action">{copied ? "Скопировано" : "Копировать"}</span>
     </button>
   );
 }

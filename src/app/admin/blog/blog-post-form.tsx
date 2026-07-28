@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { CoverImageUpload } from "@/components/admin/cover-image-upload";
+import { Alert, Button, Field, Input, Select } from "@/components/ui";
 
 function slugify(s: string) {
   return s
@@ -38,16 +39,21 @@ type BlogPostData = {
   readingTimeMinutes: string;
   structuredData: string;
   published: boolean;
+  categoryId: string;
 };
+
+type CategoryOption = { id: string; name: string };
 
 type Props = {
   post?: BlogPostData;
   mode: "create" | "edit";
+  categories?: CategoryOption[];
 };
 
-export function BlogPostForm({ post, mode }: Props) {
+export function BlogPostForm({ post, mode, categories = [] }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [lastContentImageUrl, setLastContentImageUrl] = useState("");
   const [state, setState] = useState<BlogPostData>({
     title: post?.title ?? "",
@@ -61,6 +67,7 @@ export function BlogPostForm({ post, mode }: Props) {
     readingTimeMinutes: post?.readingTimeMinutes ?? "",
     structuredData: post?.structuredData ?? "",
     published: post?.published ?? false,
+    categoryId: post?.categoryId ?? "",
   });
 
   useEffect(() => {
@@ -77,6 +84,7 @@ export function BlogPostForm({ post, mode }: Props) {
         readingTimeMinutes: post.readingTimeMinutes,
         structuredData: post.structuredData,
         published: post.published,
+        categoryId: post.categoryId,
       });
     }
   }, [post]);
@@ -94,6 +102,7 @@ export function BlogPostForm({ post, mode }: Props) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError(null);
     try {
       let structuredData: unknown = null;
       const sdRaw = state.structuredData.trim();
@@ -128,6 +137,7 @@ export function BlogPostForm({ post, mode }: Props) {
         coverImageUrl: state.coverImageUrl.trim() || null,
         authorName: state.authorName.trim() || null,
         structuredData,
+        categoryId: state.categoryId.trim() || null,
         publishedAt: state.published ? new Date().toISOString() : null,
       };
       if (readingTimeMinutes !== undefined) body.readingTimeMinutes = readingTimeMinutes;
@@ -156,7 +166,7 @@ export function BlogPostForm({ post, mode }: Props) {
         router.refresh();
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Ошибка сохранения");
+      setError(err instanceof Error ? err.message : "Ошибка сохранения");
     } finally {
       setSaving(false);
     }
@@ -164,168 +174,189 @@ export function BlogPostForm({ post, mode }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <div>
-        <label className="label">Заголовок</label>
-        <input
+      {error ? (
+        <Alert variant="danger" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
+
+      <Field label="Заголовок" htmlFor="blog-title" required>
+        <Input
+          id="blog-title"
           type="text"
-          className="input"
           value={state.title}
           onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
           required
           placeholder="Название статьи"
         />
-      </div>
-      <div>
-        <label className="label">Slug (URL)</label>
-        <input
+      </Field>
+
+      <Field label="Slug (URL)" htmlFor="blog-slug" required>
+        <Input
+          id="blog-slug"
           type="text"
-          className="input"
           value={state.slug}
           onChange={(e) => setState((s) => ({ ...s, slug: e.target.value }))}
           required
           placeholder="url-friendly-slug"
         />
-      </div>
+      </Field>
+
       <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <label className="label">Автор</label>
-          <input
+        <Field label="Автор" htmlFor="blog-author">
+          <Input
+            id="blog-author"
             type="text"
-            className="input"
             value={state.authorName}
             onChange={(e) => setState((s) => ({ ...s, authorName: e.target.value }))}
             placeholder="Имя автора для отображения на сайте"
           />
-        </div>
-        <div>
-          <label className="label">Время чтения (мин)</label>
-          <input
-            type="number"
-            min={1}
-            max={999}
-            className="input"
-            value={state.readingTimeMinutes}
-            onChange={(e) => setState((s) => ({ ...s, readingTimeMinutes: e.target.value }))}
-            placeholder="Авто из текста, если пусто"
-          />
-        </div>
+        </Field>
+        <Field label="Категория" htmlFor="blog-category">
+          <Select
+            id="blog-category"
+            value={state.categoryId}
+            onChange={(e) => setState((s) => ({ ...s, categoryId: e.target.value }))}
+          >
+            <option value="">Без категории</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
       </div>
-      <div>
-        <label className="label">Meta Title (SEO)</label>
-        <input
+
+      <Field label="Время чтения (мин)" htmlFor="blog-reading-time" hint="Авто из текста, если пусто">
+        <Input
+          id="blog-reading-time"
+          type="number"
+          min={1}
+          max={999}
+          value={state.readingTimeMinutes}
+          onChange={(e) => setState((s) => ({ ...s, readingTimeMinutes: e.target.value }))}
+          placeholder="Например: 5"
+          className="max-w-xs"
+        />
+      </Field>
+
+      <Field label="Meta Title (SEO)" htmlFor="blog-meta-title">
+        <Input
+          id="blog-meta-title"
           type="text"
-          className="input"
           value={state.metaTitle}
           onChange={(e) => setState((s) => ({ ...s, metaTitle: e.target.value }))}
           placeholder="Заголовок для поисковиков (по умолчанию — заголовок статьи)"
         />
-      </div>
-      <div>
-        <label className="label">Meta Description (SEO)</label>
+      </Field>
+
+      <Field label="Meta Description (SEO)" htmlFor="blog-meta-desc">
         <textarea
-          className="input min-h-[60px]"
+          id="blog-meta-desc"
+          className="fk-input min-h-[60px]"
           value={state.metaDescription}
           onChange={(e) => setState((s) => ({ ...s, metaDescription: e.target.value }))}
           placeholder="Описание для поисковиков и соцсетей (до ~160 символов)"
           rows={2}
         />
-      </div>
-      <div>
-        <label className="label">Краткое описание (для превью в списке, опционально)</label>
+      </Field>
+
+      <Field label="Краткое описание" htmlFor="blog-excerpt" hint="2–3 предложения для превью в списке (опционально)">
         <textarea
-          className="input min-h-[80px]"
+          id="blog-excerpt"
+          className="fk-input min-h-[80px]"
           value={state.excerpt}
           onChange={(e) => setState((s) => ({ ...s, excerpt: e.target.value }))}
-          placeholder="2–3 предложения для превью"
+          placeholder="Краткое описание статьи"
           rows={3}
         />
-      </div>
-      <div>
-        <label className="label">Контент</label>
-        <RichTextEditor
-          key={post?.id ?? "new"}
-          content={state.content}
-          onChange={(html) => setState((s) => ({ ...s, content: html }))}
-        />
-      </div>
-      <div>
-        <label className="label">Изображение в тексте статьи</label>
-        <p className="mb-2 text-xs text-slate-500">
-          Загрузите картинку — URL можно вставить в HTML-контент или добавить кнопкой ниже.
-        </p>
+      </Field>
+
+      <Field label="Контент">
+        <div className="qrs-admin-editor-card">
+          <RichTextEditor
+            key={post?.id ?? "new"}
+            content={state.content}
+            onChange={(html) => setState((s) => ({ ...s, content: html }))}
+          />
+        </div>
+      </Field>
+
+      <Field
+        label="Изображение в тексте статьи"
+        hint="Загрузите картинку — URL можно вставить в HTML-контент или добавить кнопкой ниже."
+      >
         <CoverImageUpload
           uploadEndpoint="/api/admin/blog/upload-content"
           onUploaded={(url) => setLastContentImageUrl(url)}
         />
-        {lastContentImageUrl && (
-          <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="break-all text-xs text-slate-600">{lastContentImageUrl}</p>
+        {lastContentImageUrl ? (
+          <div className="qrs-upload-result">
+            <p className="qrs-upload-result__url">{lastContentImageUrl}</p>
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn text-sm"
-                onClick={() => navigator.clipboard.writeText(lastContentImageUrl)}
-              >
+              <Button type="button" variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(lastContentImageUrl)}>
                 Скопировать URL
-              </button>
-              <button
-                type="button"
-                className="btn text-sm"
-                onClick={() => insertContentImage(lastContentImageUrl)}
-              >
+              </Button>
+              <Button type="button" variant="secondary" size="sm" onClick={() => insertContentImage(lastContentImageUrl)}>
                 Вставить в контент
-              </button>
+              </Button>
             </div>
           </div>
-        )}
-      </div>
-      <div>
-        <label className="label">Обложка статьи</label>
+        ) : null}
+      </Field>
+
+      <Field label="Обложка статьи">
         <CoverImageUpload
           currentUrl={state.coverImageUrl || undefined}
           onUploaded={(url) => setState((s) => ({ ...s, coverImageUrl: url }))}
         />
-        {state.coverImageUrl && (
-          <p className="mt-2">
-            <button
-              type="button"
-              onClick={() => setState((s) => ({ ...s, coverImageUrl: "" }))}
-              className="text-sm text-slate-500 hover:text-slate-700"
-            >
-              Убрать обложку
-            </button>
-          </p>
-        )}
-      </div>
-      <div>
-        <label className="label">Микроразметка (JSON-LD)</label>
+        {state.coverImageUrl ? (
+          <button
+            type="button"
+            onClick={() => setState((s) => ({ ...s, coverImageUrl: "" }))}
+            className="qrs-data-action"
+            style={{ marginTop: 8, color: "var(--text-muted)" }}
+          >
+            Убрать обложку
+          </button>
+        ) : null}
+      </Field>
+
+      <Field label="Микроразметка (JSON-LD)" htmlFor="blog-structured-data" hint="Опционально. Если пусто — генерируется автоматически.">
         <textarea
-          className="input min-h-[160px] font-mono text-sm"
+          id="blog-structured-data"
+          className="fk-input min-h-[160px] font-mono text-sm"
           value={state.structuredData}
           onChange={(e) => setState((s) => ({ ...s, structuredData: e.target.value }))}
-          placeholder={'Опционально. JSON-объект schema.org. Если пусто — генерируется автоматически.'}
+          placeholder={'{"@context": "https://schema.org", ...}'}
           rows={8}
         />
-      </div>
-      <div className="flex items-center gap-2">
+      </Field>
+
+      <label className="fk-choice fk-choice--checkbox">
         <input
           type="checkbox"
           id="published"
+          className="fk-choice__input"
           checked={state.published}
           onChange={(e) => setState((s) => ({ ...s, published: e.target.checked }))}
-          className="h-4 w-4 rounded border-slate-300"
         />
-        <label htmlFor="published" className="text-sm font-medium text-slate-700">
-          Опубликовать
-        </label>
-      </div>
-      <div className="flex gap-4">
-        <button type="submit" disabled={saving} className="btn btn-primary">
+        <span className="fk-choice__box" aria-hidden="true">
+          <svg className="fk-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </span>
+        <span className="fk-choice__text">Опубликовать</span>
+      </label>
+
+      <div className="flex flex-wrap gap-3">
+        <Button type="submit" disabled={saving}>
           {saving ? "Сохранение…" : mode === "create" ? "Создать" : "Сохранить"}
-        </button>
-        <button type="button" onClick={() => router.back()} className="btn">
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => router.back()}>
           Отмена
-        </button>
+        </Button>
       </div>
     </form>
   );

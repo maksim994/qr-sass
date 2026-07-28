@@ -6,6 +6,7 @@ import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-resp
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { assertCanCreateQrCodes } from "@/lib/plans";
 import { encodeQrContent, needsHostedPage } from "@/lib/qr";
 import { evaluateScannability } from "@/lib/scannability";
 import { createQrSchema } from "@/lib/validation";
@@ -97,6 +98,21 @@ export async function POST(request: Request) {
       return apiError(MSG.QR_KIND_NOT_SUPPORTED, "BAD_REQUEST", 400, undefined, requestId);
     }
     const isDynamic = data.kind === "DYNAMIC" || isHosted;
+
+    const workspace = await db.workspace.findUnique({
+      where: { id: data.workspaceId },
+      select: { plan: true },
+    });
+    const quota = await assertCanCreateQrCodes({
+      workspaceId: data.workspaceId,
+      planId: workspace?.plan,
+      count: 1,
+      needsDynamic: isDynamic || usesVcardDownload,
+    });
+    if (!quota.ok) {
+      return apiError(quota.message, "FORBIDDEN", 403, { code: quota.code }, requestId);
+    }
+
     const shortCode = isDynamic || usesVcardDownload ? nanoid(8) : null;
 
     let encodedContent = "";

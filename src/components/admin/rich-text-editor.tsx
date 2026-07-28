@@ -13,7 +13,7 @@ const CKEditorClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex min-h-[280px] items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
+      <div className="qrs-admin-editor-loading">
         Загрузка редактора…
       </div>
     ),

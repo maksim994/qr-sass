@@ -38,14 +38,14 @@ export function BlogPostsSlider({ posts }: Props) {
   return (
     <div className="relative mt-12 -mx-2 sm:-mx-4">
       {/* Gradient fade edges */}
-      <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-12 bg-gradient-to-r from-slate-50 to-transparent sm:w-16" />
-      <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-12 bg-gradient-to-l from-slate-50 to-transparent sm:w-16" />
+      <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-12 bg-gradient-to-r from-[var(--surface-subtle)] to-transparent sm:w-16" />
+      <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-12 bg-gradient-to-l from-[var(--surface-subtle)] to-transparent sm:w-16" />
 
       {/* Nav buttons - overlay on sides, hidden on small screens (swipe works) */}
       <button
         type="button"
         onClick={() => scroll("prev")}
-        className="absolute left-2 top-1/2 z-20 hidden -translate-y-1/2 sm:flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-lg ring-1 ring-slate-200/80 text-slate-600 backdrop-blur-sm transition hover:bg-white hover:text-slate-900 hover:shadow-xl active:scale-95"
+        className="absolute left-2 top-1/2 z-20 hidden -translate-y-1/2 sm:flex h-11 w-11 items-center justify-center rounded-full qrs-surface-card/95 shadow-lg ring-1 ring-[var(--border-default)]/80 qrs-text-default backdrop-blur-sm transition hover:bg-white hover:qrs-text-strong hover:shadow-xl active:scale-95"
         aria-label="Предыдущие статьи"
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -55,7 +55,7 @@ export function BlogPostsSlider({ posts }: Props) {
       <button
         type="button"
         onClick={() => scroll("next")}
-        className="absolute right-2 top-1/2 z-20 hidden -translate-y-1/2 sm:flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-lg ring-1 ring-slate-200/80 text-slate-600 backdrop-blur-sm transition hover:bg-white hover:text-slate-900 hover:shadow-xl active:scale-95"
+        className="absolute right-2 top-1/2 z-20 hidden -translate-y-1/2 sm:flex h-11 w-11 items-center justify-center rounded-full qrs-surface-card/95 shadow-lg ring-1 ring-[var(--border-default)]/80 qrs-text-default backdrop-blur-sm transition hover:bg-white hover:qrs-text-strong hover:shadow-xl active:scale-95"
         aria-label="Следующие статьи"
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -76,9 +76,9 @@ export function BlogPostsSlider({ posts }: Props) {
           >
             <Link
               href={`/blog/${post.slug}`}
-              className="block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/60 transition-all duration-300 hover:shadow-xl hover:ring-slate-300/80 hover:-translate-y-1"
+              className="block overflow-hidden rounded-2xl qrs-surface-card shadow-sm ring-1 ring-[var(--border-default)]/60 transition-all duration-300 hover:shadow-xl hover:ring-[var(--border-strong)]/80 hover:-translate-y-1"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+              <div className="relative aspect-[16/10] overflow-hidden qrs-surface-subtle">
                 {post.coverImageUrl ? (
                   <Image
                     src={post.coverImageUrl}
@@ -89,18 +89,18 @@ export function BlogPostsSlider({ posts }: Props) {
                     priority={index < 3}
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-100" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-sunken)] to-[var(--surface-subtle)]" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-semibold leading-snug text-slate-900 line-clamp-2 transition-colors group-hover:text-blue-600">
+                <h3 className="text-lg font-semibold leading-snug qrs-text-strong line-clamp-2 transition-colors group-hover:text-blue-600">
                   {post.title}
                 </h3>
                 {post.excerpt && (
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500">{post.excerpt}</p>
+                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed qrs-text-muted">{post.excerpt}</p>
                 )}
-                <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+                <div className="mt-4 flex items-center gap-3 text-xs qrs-text-subtle">
                   <time dateTime={post.publishedAt}>
                     {new Date(post.publishedAt).toLocaleDateString("ru", {
                       day: "numeric",
@@ -108,7 +108,7 @@ export function BlogPostsSlider({ posts }: Props) {
                       year: "numeric",
                     })}
                   </time>
-                  <span className="h-1 w-1 rounded-full bg-slate-300" />
+                  <span className="h-1 w-1 rounded-full qrs-surface-sunken" />
                   {post.readingTimeMinutes != null && (
                     <span>{post.readingTimeMinutes} мин</span>
                   )}

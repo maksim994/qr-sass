@@ -1,21 +1,40 @@
 "use client";
+
 import { fetchApi } from "@/lib/client-api";
-
-
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Alert } from "@/components/ui";
 
 type Props = {
   workspaceId: string;
   bulkLimit: number;
 };
 
+const ACCEPT = ".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const formRef = useRef<HTMLFormElement>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function pickFile(next: File | null) {
+    setFile(next);
+    setError("");
+  }
+
+  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
+    pickFile(e.target.files?.[0] ?? null);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragActive(false);
+    const dropped = e.dataTransfer.files?.[0];
+    if (dropped) pickFile(dropped);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,8 +64,8 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
       a.click();
       URL.revokeObjectURL(url);
       router.refresh();
-      setFile(null);
-      if (formRef.current) formRef.current.reset();
+      pickFile(null);
+      if (inputRef.current) inputRef.current.value = "";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка.");
     } finally {
@@ -55,29 +74,58 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="card p-6">
-      <label className="label">Файл CSV или Excel</label>
-      <input
-        type="file"
-        accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        onChange={(e) => {
-          setFile(e.target.files?.[0] ?? null);
-          setError("");
+    <form onSubmit={handleSubmit} className="qrs-bulk-card">
+      <div className="qrs-bulk-card-title">Файл CSV или Excel</div>
+
+      <label
+        className={`qrs-drop${dragActive ? " active" : ""}`}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setDragActive(true);
         }}
-        className="input block w-full"
-        disabled={loading}
-      />
-      <p className="mt-2 text-xs text-slate-500">
-        Максимум {bulkLimit} строк за один раз.
-      </p>
-      <button
-        type="submit"
-        disabled={loading || !file}
-        className="btn btn-primary mt-4"
+        onDragOver={(e) => e.preventDefault()}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          if (e.currentTarget === e.target) setDragActive(false);
+        }}
+        onDrop={handleDrop}
       >
-        {loading ? "Создание и ZIP…" : "Создать и скачать ZIP"}
-      </button>
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        <span className="qrs-drop-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <path d="M12 3v12" />
+            <path d="m7 8 5-5 5 5" />
+          </svg>
+        </span>
+        <span style={{ font: "var(--fw-semibold) 15px/1.3 var(--font-sans)", color: "var(--text-strong)" }}>
+          Перетащите файл сюда или{" "}
+          <span style={{ color: "var(--color-primary)" }}>выберите на диске</span>
+        </span>
+        <span style={{ font: "var(--fw-medium) 13px/1 var(--font-sans)", color: "var(--text-muted)" }}>
+          .csv, .xlsx — максимум {bulkLimit} строк за один раз
+        </span>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPT}
+          onChange={handleFileInput}
+          disabled={loading}
+          style={{ display: "none" }}
+        />
+      </label>
+
+      <div className="qrs-bulk-actions">
+        <button type="submit" disabled={loading || !file} className="fk-button fk-button--primary">
+          {loading ? "Создание и ZIP…" : "Создать и скачать ZIP"}
+        </button>
+        <span className="qrs-bulk-file-status">{file ? file.name : "Файл не выбран"}</span>
+      </div>
+
+      {error && (
+        <Alert variant="danger" title="Ошибка загрузки" onClose={() => setError("")} className="mt-3">
+          {error}
+        </Alert>
+      )}
     </form>
   );
 }

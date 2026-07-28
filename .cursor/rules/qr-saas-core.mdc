@@ -1,0 +1,31 @@
+---
+description: "Базовые конвенции qr-saas: стек, MSG, секреты, temp/, импорты"
+alwaysApply: true
+---
+
+# qr-saas core
+
+## Prefer
+- Стек: Next.js 16 App Router, React 19, Prisma 6, Tailwind 4, Zod; импорты через `@/*`.
+- UX/API ошибки пользователю — только через `MSG` из @src/lib/user-messages.ts (русский текст).
+- Секреты: не коммитить `.env`; канон — @src/lib/env.ts; `S3_*` / `YOOKASSA_*` — через domain libs (`process.env`), не размазывать по UI.
+- Логи — @src/lib/logger.ts; без токенов, паролей, CSRF, API keys в логах.
+- Один design system: `src/styles/design-system/` + `fk-*` токены; UI-детали — в `ui-design-system.mdc`.
+- Зависимости и скрипты сверять с @package.json.
+
+## Never
+- Английские UX-ошибки («Something went wrong», ad-hoc `error: "..."` для пользователя).
+- Коммитить `.env`, ключи, webhook secrets, session/JWT material.
+- Править или импортировать `temp/` как источник правды / второй DS.
+- Заводить параллельный design system или копировать токены из `temp/_ds/`.
+
+## Anti-patterns
+- Дублировать Prefer/Never из domain-rules в AGENTS.md.
+- Хардкод строк ошибок рядом с `apiError` / toast вместо `MSG.*`.
+- `console.log` секретов «для отладки».
+
+## Gold
+- @src/lib/user-messages.ts
+- @src/lib/env.ts
+- @src/lib/logger.ts
+- @package.json

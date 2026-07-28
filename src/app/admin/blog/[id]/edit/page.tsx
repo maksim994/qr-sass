@@ -1,30 +1,36 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { getDb } from "@/lib/db";
+import { ensureBlogCategories } from "@/lib/blog-categories";
 import { BlogPostForm, formatStructuredDataForEdit } from "../../blog-post-form";
+import { AdminPageHeader, AdminCard } from "@/components/admin/admin-page";
+import { Button } from "@/components/ui";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditBlogPostPage({ params }: Props) {
   const { id } = await params;
   const db = getDb();
-  const post = await db.blogPost.findUnique({ where: { id } });
+  const [post, categories] = await Promise.all([
+    db.blogPost.findUnique({ where: { id } }),
+    ensureBlogCategories(),
+  ]);
   if (!post) notFound();
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Редактирование</h1>
-          <p className="mt-1 text-sm text-slate-500">{post.title}</p>
-        </div>
-        <Link href={`/blog/${post.slug}`} className="text-sm font-medium text-blue-600 hover:text-blue-700 shrink-0" target="_blank">
-          Посмотреть на сайте →
-        </Link>
-      </div>
-      <div className="card p-6">
+    <div>
+      <AdminPageHeader
+        title="Редактирование"
+        description={post.title}
+        action={
+          <Button href={`/blog/${post.slug}`} variant="secondary" size="sm" target="_blank" rel="noopener noreferrer">
+            Посмотреть на сайте →
+          </Button>
+        }
+      />
+      <AdminCard>
         <BlogPostForm
           mode="edit"
+          categories={categories}
           post={{
             id: post.id,
             title: post.title,
@@ -38,9 +44,10 @@ export default async function EditBlogPostPage({ params }: Props) {
             readingTimeMinutes: post.readingTimeMinutes != null ? String(post.readingTimeMinutes) : "",
             structuredData: formatStructuredDataForEdit(post.structuredData),
             published: !!post.publishedAt,
+            categoryId: post.categoryId ?? "",
           }}
         />
-      </div>
+      </AdminCard>
     </div>
   );
 }

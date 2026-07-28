@@ -37,6 +37,10 @@ export function getFaviconKey(fileId: string, ext: string) {
   return `${prefix}/site/favicon_${fileId}.${ext}`;
 }
 
+export function getAvatarKey(userId: string, fileId: string, ext: string) {
+  return `${prefix}/avatars/${userId}/${fileId}.${ext}`;
+}
+
 export function getPublicFileUrl(key: string) {
   if (omitBucketInUrl) {
     return `${publicUrl}/${key}`;

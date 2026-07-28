@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { LogoMark } from "@/components/logo-mark";
 
 type LogoProps = {
   href?: string | null;
@@ -12,9 +12,9 @@ type LogoProps = {
 };
 
 const sizeConfig = {
-  sm: { icon: 32, title: "text-sm", tagline: "text-[10px]" },
-  md: { icon: 40, title: "text-lg", tagline: "text-xs" },
-  lg: { icon: 48, title: "text-xl", tagline: "text-sm" },
+  sm: { icon: 36, title: "17px", tagline: "11px" },
+  md: { icon: 40, title: "19px", tagline: "11px" },
+  lg: { icon: 48, title: "22px", tagline: "12px" },
 } as const;
 
 export function Logo({
@@ -27,27 +27,32 @@ export function Logo({
   className = "",
 }: LogoProps) {
   const config = sizeConfig[size];
-  const titleClass = inverted ? "text-white" : "text-slate-900";
-  const taglineClass = inverted ? "text-white/75" : "text-slate-500";
+  const titleColor = inverted ? "#fff" : "var(--text-strong)";
+  const taglineColor = inverted ? "rgba(255,255,255,0.75)" : "var(--text-muted)";
 
   const content = (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <Image
-        src="/logo-mark.png"
-        alt=""
-        width={config.icon}
-        height={config.icon}
-        className="shrink-0 rounded-lg"
-        priority
-      />
-      <span className="min-w-0 leading-tight">
-        <span className={`block font-bold tracking-tight ${config.title} ${titleClass}`}>
+    <span className={`inline-flex items-center gap-[11px] ${className}`}>
+      <LogoMark size={config.icon} />
+      <span className="min-w-0 leading-none">
+        <span
+          style={{
+            font: `var(--fw-extra) ${config.title}/1 var(--font-display)`,
+            color: titleColor,
+            letterSpacing: "-0.02em",
+          }}
+        >
           QR-S.ru
-          {suffix ? <span className="font-semibold"> {suffix}</span> : null}
+          {suffix ? <span style={{ fontWeight: 600 }}> {suffix}</span> : null}
         </span>
         {showTagline ? (
           <span
-            className={`block ${config.tagline} ${taglineClass} ${responsiveTagline ? "hidden md:block" : ""}`}
+            className={responsiveTagline ? "qrs-logo-tagline" : undefined}
+            style={{
+              display: responsiveTagline ? undefined : "block",
+              marginTop: "3px",
+              font: `var(--fw-medium) ${config.tagline}/1.3 var(--font-sans)`,
+              color: taglineColor,
+            }}
           >
             для вашего бизнеса
           </span>
@@ -58,7 +63,7 @@ export function Logo({
 
   if (href) {
     return (
-      <Link href={href} className="inline-flex transition-opacity hover:opacity-90">
+      <Link href={href} aria-label="QR-S.ru — на главную" className="inline-flex transition-opacity hover:opacity-90">
         {content}
       </Link>
     );

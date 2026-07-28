@@ -102,9 +102,7 @@ export function FileUploadField({ accept, workspaceId, onUploaded, currentFilena
     <div className="space-y-2">
       <div
         className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition cursor-pointer ${
-          dragging
-            ? "border-blue-400 bg-blue-50"
-            : "border-slate-300 bg-slate-50 hover:border-slate-400"
+          dragging ? "border-[var(--color-primary)] qrs-surface-subtle" : "qrs-border qrs-surface-subtle hover:border-[var(--border-strong)]"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -124,28 +122,28 @@ export function FileUploadField({ accept, workspaceId, onUploaded, currentFilena
 
         {uploading ? (
           <div className="w-full space-y-2 text-center">
-            <p className="text-sm text-slate-600">Загрузка... {progress}%</p>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <p className="text-sm qrs-text-default">Загрузка... {progress}%</p>
+            <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--surface-sunken)" }}>
               <div
-                className="h-full rounded-full bg-blue-500 transition-all"
-                style={{ width: `${progress}%` }}
+                className="h-full rounded-full transition-all"
+                style={{ width: `${progress}%`, background: "var(--color-primary)" }}
               />
             </div>
           </div>
         ) : currentFileUrl && accept.startsWith("image") ? (
           <div className="text-center">
             <img src={currentFileUrl} alt="Превью" className="mx-auto max-h-24 rounded-lg object-contain" />
-            <p className="mt-2 text-xs text-slate-500">Нажмите или перетащите для замены</p>
+            <p className="mt-2 text-xs qrs-text-muted">Нажмите или перетащите для замены</p>
           </div>
         ) : filename ? (
           <div className="text-center">
-            <p className="text-sm font-medium text-slate-700">{filename}</p>
-            <p className="mt-1 text-xs text-slate-500">Нажмите или перетащите для замены</p>
+            <p className="text-sm font-medium qrs-text-default">{filename}</p>
+            <p className="mt-1 text-xs qrs-text-muted">Нажмите или перетащите для замены</p>
           </div>
         ) : (
           <div className="text-center">
             <svg
-              className="mx-auto h-8 w-8 text-slate-400"
+              className="mx-auto h-8 w-8 qrs-text-subtle"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
@@ -157,7 +155,7 @@ export function FileUploadField({ accept, workspaceId, onUploaded, currentFilena
                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
               />
             </svg>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm qrs-text-default">
               Перетащите файл или нажмите для выбора
             </p>
           </div>

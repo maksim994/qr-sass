@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
+import { Alert, Badge } from "@/components/ui";
 
 type User = { id: string; email: string; name: string | null; isAdmin: boolean };
 
@@ -11,9 +12,11 @@ type Props = { initialUsers: User[] };
 export function AdminsList({ initialUsers }: Props) {
   const router = useRouter();
   const [updating, setUpdating] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function toggleAdmin(user: User) {
     setUpdating(user.id);
+    setError(null);
     try {
       const res = await fetchApi(`/api/admin/users/${user.id}/admin`, {
         method: "PATCH",
@@ -27,50 +30,63 @@ export function AdminsList({ initialUsers }: Props) {
       }
       router.refresh();
     } catch (e) {
-      alert((e instanceof Error ? e.message : "Не удалось изменить") || "Не удалось изменить");
+      setError(e instanceof Error ? e.message : "Не удалось изменить");
     } finally {
       setUpdating(null);
     }
   }
 
+  if (initialUsers.length === 0) {
+    return <p className="qrs-data-empty">Пользователей пока нет.</p>;
+  }
+
   return (
-    <div className="overflow-x-auto px-6 py-4">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-slate-200">
-            <th className="py-3 font-semibold text-slate-900">Email</th>
-            <th className="py-3 font-semibold text-slate-900">Имя</th>
-            <th className="py-3 font-semibold text-slate-900">Статус</th>
-            <th className="py-3 font-semibold text-slate-900">Действие</th>
-          </tr>
-        </thead>
-        <tbody>
-          {initialUsers.map((u) => (
-            <tr key={u.id} className="border-b border-slate-100">
-              <td className="py-3">{u.email}</td>
-              <td className="py-3">{u.name ?? "—"}</td>
-              <td className="py-3">
-                {u.isAdmin ? (
-                  <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                    Администратор
-                  </span>
-                ) : (
-                  <span className="text-slate-400">Пользователь</span>
-                )}
-              </td>
-              <td className="py-3">
-                <button
-                  onClick={() => toggleAdmin(u)}
-                  disabled={updating === u.id}
-                  className={`text-sm font-medium ${u.isAdmin ? "text-amber-600 hover:text-amber-700" : "text-blue-600 hover:text-blue-700"}`}
-                >
-                  {updating === u.id ? "…" : u.isAdmin ? "Снять права" : "Назначить админом"}
-                </button>
-              </td>
+    <div>
+      {error ? (
+        <div style={{ padding: "16px 24px 0" }}>
+          <Alert variant="danger" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </div>
+      ) : null}
+      <div className="qrs-scroll qrs-data-table-wrap">
+        <table className="qrs-data-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Имя</th>
+              <th>Статус</th>
+              <th aria-label="Действия" />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {initialUsers.map((u) => (
+              <tr key={u.id}>
+                <td>{u.email}</td>
+                <td style={{ color: "var(--text-default)", fontWeight: "var(--fw-medium)" }}>{u.name ?? "—"}</td>
+                <td>
+                  {u.isAdmin ? (
+                    <Badge variant="success">Администратор</Badge>
+                  ) : (
+                    <Badge variant="info">Пользователь</Badge>
+                  )}
+                </td>
+                <td style={{ textAlign: "right" }}>
+                  <button
+                    type="button"
+                    onClick={() => toggleAdmin(u)}
+                    disabled={updating === u.id}
+                    className={`qrs-data-action${u.isAdmin ? " qrs-data-action--danger" : ""}`}
+                    style={u.isAdmin ? undefined : { color: "var(--color-primary)" }}
+                  >
+                    {updating === u.id ? "…" : u.isAdmin ? "Снять права" : "Назначить админом"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

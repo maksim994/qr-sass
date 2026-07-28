@@ -326,7 +326,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
         {/* Create form */}
         <div className="card p-6">
           <h2 className="heading-md">Создание QR-кода</h2>
-          <p className="text-sm mt-1 text-slate-500">Настройте содержимое и стиль вашего QR-кода.</p>
+          <p className="text-sm mt-1 qrs-text-muted">Настройте содержимое и стиль вашего QR-кода.</p>
 
           <div className="mt-6 space-y-4">
             <div>
@@ -361,8 +361,8 @@ export function QrStudio({ workspace, initialItems }: Props) {
             {payloadFieldsForType()}
 
             {/* Style controls */}
-            <div className="border-t border-slate-100 pt-4">
-              <p className="text-sm font-semibold text-slate-900">Стиль</p>
+            <div className="border-t qrs-border pt-4" style={{ borderColor: "var(--border-subtle)" }}>
+              <p className="text-sm font-semibold qrs-text-strong">Стиль</p>
               <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="label">Цвет модулей</label>
@@ -371,9 +371,9 @@ export function QrStudio({ workspace, initialItems }: Props) {
                       type="color"
                       value={foreground}
                       onChange={(e) => setForeground(e.target.value)}
-                      className="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 p-1"
+                      className="h-10 w-14 cursor-pointer rounded-lg border qrs-border p-1"
                     />
-                    <span className="text-sm text-slate-500">{foreground}</span>
+                    <span className="text-sm qrs-text-muted">{foreground}</span>
                   </div>
                 </div>
                 <div>
@@ -383,9 +383,9 @@ export function QrStudio({ workspace, initialItems }: Props) {
                       type="color"
                       value={background}
                       onChange={(e) => setBackground(e.target.value)}
-                      className="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 p-1"
+                      className="h-10 w-14 cursor-pointer rounded-lg border qrs-border p-1"
                     />
-                    <span className="text-sm text-slate-500">{background}</span>
+                    <span className="text-sm qrs-text-muted">{background}</span>
                   </div>
                 </div>
                 <div>
@@ -429,12 +429,12 @@ export function QrStudio({ workspace, initialItems }: Props) {
           </div>
 
           {/* Quality + Create */}
-          <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
+          <div className="mt-6 flex items-center justify-between rounded-xl border qrs-border qrs-surface-subtle p-4">
             <div className="flex items-center gap-3">
               <span className={`rounded-full px-3 py-1 text-xs font-bold ${qualityColor}`}>
                 {qualityScore}/100
               </span>
-              <span className="text-sm text-slate-600">Качество сканирования</span>
+              <span className="text-sm qrs-text-default">Качество сканирования</span>
             </div>
             <button
               disabled={saving || qualityScore < 70}
@@ -453,10 +453,10 @@ export function QrStudio({ workspace, initialItems }: Props) {
         {/* Preview */}
         <div className="card p-6">
           <h3 className="heading-md">Предпросмотр</h3>
-          <div className="mt-4 flex justify-center rounded-xl border border-slate-100 bg-white p-6">
+          <div className="mt-4 flex justify-center rounded-xl border qrs-border qrs-surface-card p-6">
             <div ref={qrRef} />
           </div>
-          <p className="mt-3 text-center text-xs text-slate-400">
+          <p className="mt-3 text-center text-xs qrs-text-subtle">
             Встроенные ограничения защищают от ошибок сканирования.
           </p>
         </div>
@@ -472,25 +472,25 @@ export function QrStudio({ workspace, initialItems }: Props) {
         </div>
 
         {items.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-200 py-12 text-center">
-            <svg className="mx-auto h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="rounded-xl border border-dashed qrs-border py-12 text-center">
+            <svg className="mx-auto h-10 w-10 qrs-text-subtle" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
             </svg>
-            <p className="mt-3 text-sm text-slate-500">QR-коды ещё не созданы. Создайте первый выше.</p>
+            <p className="mt-3 text-sm qrs-text-muted">QR-коды ещё не созданы. Создайте первый выше.</p>
           </div>
         )}
 
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={item.id} className="rounded-xl border border-slate-200 bg-white p-4 transition hover:shadow-sm">
+            <div key={item.id} className="rounded-xl border qrs-border qrs-surface-card p-4 transition hover:shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-slate-900">{item.name}</p>
+                  <p className="font-semibold qrs-text-strong">{item.name}</p>
                   <div className="mt-1 flex flex-wrap gap-2">
                     <span className="badge">{kindLabels[item.kind]}</span>
                     <span className="badge">{contentTypeLabels[item.contentType]}</span>
-                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                    <span className="inline-flex items-center rounded-full qrs-surface-subtle px-2.5 py-0.5 text-xs font-medium qrs-text-default">
                       {item._count.scanEvents} скан.
                     </span>
                   </div>
@@ -505,7 +505,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
                 </div>
               </div>
               {item.kind === "DYNAMIC" && (
-                <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row">
+                <div className="mt-3 flex flex-col gap-2 border-t pt-3 sm:flex-row" style={{ borderColor: "var(--border-subtle)" }}>
                   <input
                     className="input flex-1"
                     value={dynamicTarget[item.id] ?? item.currentTargetUrl ?? ""}
@@ -518,7 +518,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
                 </div>
               )}
               {item.kind === "DYNAMIC" && item.shortCode && (
-                <p className="mt-2 text-xs text-slate-400">Короткая ссылка: /r/{item.shortCode}</p>
+                <p className="mt-2 text-xs qrs-text-subtle">Короткая ссылка: /r/{item.shortCode}</p>
               )}
             </div>
           ))}

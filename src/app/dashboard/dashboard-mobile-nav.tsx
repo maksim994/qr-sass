@@ -70,6 +70,8 @@ function IconSvg({ paths }: { paths: string[] }) {
   );
 }
 
+const navLinkClass = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium qrs-navlink";
+
 export function DashboardMobileNav({ isAdmin, email, workspaces, currentWorkspaceId }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -78,7 +80,7 @@ export function DashboardMobileNav({ isAdmin, email, workspaces, currentWorkspac
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+        className="fk-icon-button fk-icon-button--outline lg:hidden"
         aria-label="Меню"
       >
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -89,17 +91,21 @@ export function DashboardMobileNav({ isAdmin, email, workspaces, currentWorkspac
       {open && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            className="fixed inset-0 z-40 lg:hidden"
+            style={{ background: "rgba(19,23,32,0.5)" }}
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
-          <div className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] border-l border-slate-200 bg-white shadow-xl lg:hidden">
-            <div className="flex h-16 items-center justify-between border-b border-slate-200 px-6">
-              <span className="font-semibold text-slate-900">Меню</span>
+          <div
+            className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] shadow-xl lg:hidden"
+            style={{ background: "var(--surface-page)", borderLeft: "1px solid var(--border-subtle)" }}
+          >
+            <div className="flex h-16 items-center justify-between border-b px-6" style={{ borderColor: "var(--border-subtle)" }}>
+              <span className="font-semibold qrs-text-strong">Меню</span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                className="fk-icon-button fk-icon-button--ghost"
                 aria-label="Закрыть"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -107,27 +113,18 @@ export function DashboardMobileNav({ isAdmin, email, workspaces, currentWorkspac
                 </svg>
               </button>
             </div>
-            <nav className="flex flex-col gap-1 overflow-y-auto p-4 bg-slate-50">
+            <nav className="flex flex-col gap-1 overflow-y-auto p-4 qrs-surface-subtle">
               {navItems.map((item) => {
                 const paths = Array.isArray(item.icon) ? item.icon : [item.icon];
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  >
+                  <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={navLinkClass}>
                     <IconSvg paths={paths} />
                     {item.label}
                   </Link>
                 );
               })}
               {isAdmin && (
-                <Link
-                  href="/admin"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                >
+                <Link href="/admin" onClick={() => setOpen(false)} className={navLinkClass}>
                   <IconSvg
                     paths={[
                       "M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z",
@@ -136,14 +133,11 @@ export function DashboardMobileNav({ isAdmin, email, workspaces, currentWorkspac
                   Админ
                 </Link>
               )}
-              <div className="mt-2 space-y-2 border-t border-slate-200 pt-4">
+              <div className="mt-2 space-y-2 border-t pt-4" style={{ borderColor: "var(--border-subtle)" }}>
                 <WorkspaceSwitcher workspaces={workspaces} currentId={currentWorkspaceId} />
-                <p className="truncate px-3 text-xs text-slate-500">{email}</p>
+                <p className="truncate px-3 text-xs qrs-text-muted">{email}</p>
                 <form action="/api/auth/logout" method="post">
-                  <button
-                    type="submit"
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  >
+                  <button type="submit" className={`${navLinkClass} w-full`} style={{ background: "none", border: "none", cursor: "pointer" }}>
                     <IconSvg
                       paths={[
                         "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v4M12 15v3m0 3v.01M12 15l-3-3m0 0l3-3m-3 3h6",

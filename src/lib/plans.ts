@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { MSG } from "@/lib/user-messages";
 
 export type PlanId = "FREE" | "PRO" | "BUSINESS";
 export const PLAN_IDS: PlanId[] = ["FREE", "PRO", "BUSINESS"];
@@ -23,7 +24,7 @@ export type PlanInfo = {
 export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   FREE: {
     name: "Бесплатный",
-    description: "Базовый тариф для личного использования",
+    description: "Попробовать сервис и создать несколько статических QR",
     priceRub: 0,
     limits: {
       maxQrCodes: 10,
@@ -36,7 +37,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   },
   PRO: {
     name: "Про",
-    description: "Для малого бизнеса и команд",
+    description: "Для маркетинга и малого бизнеса: динамика, аналитика, смена ссылки",
     priceRub: 990,
     limits: {
       maxQrCodes: null,
@@ -49,7 +50,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   },
   BUSINESS: {
     name: "Бизнес",
-    description: "Для агентств и корпоративных клиентов",
+    description: "Для команды, агентства или сети: API, роли и без лимита пользователей",
     priceRub: 2990,
     limits: {
       maxQrCodes: null,
@@ -145,4 +146,74 @@ export function getPlanSync(planId: PlanId | string | null | undefined): PlanInf
 export function formatUsage(current: number, limit: number | null): string {
   if (limit === null) return `${current}`;
   return `${current} / ${limit}`;
+}
+
+/** Per-batch row caps for CSV/XLSX mass create (independent of maxQrCodes quota). */
+export const BULK_BATCH_LIMITS: Record<PlanId, number> = {
+  FREE: 50,
+  PRO: 1000,
+  BUSINESS: 5000,
+};
+
+export function getBulkBatchLimit(planId: PlanId | string | null | undefined): number {
+  const id = String(planId ?? "FREE").toUpperCase() as PlanId;
+  return BULK_BATCH_LIMITS[id] ?? BULK_BATCH_LIMITS.FREE;
+}
+
+export type QrCreateQuotaCheck = {
+  ok: true;
+  plan: PlanInfo;
+  currentCount: number;
+  remaining: number | null;
+} | {
+  ok: false;
+  plan: PlanInfo;
+  currentCount: number;
+  remaining: number | null;
+  code: "DYNAMIC_REQUIRED" | "QR_LIMIT";
+  message: string;
+};
+
+/**
+ * Shared plan gate for create / bulk / API.
+ * Counts non-archived QR codes in the workspace.
+ */
+export async function assertCanCreateQrCodes(options: {
+  workspaceId: string;
+  planId: string | null | undefined;
+  count?: number;
+  needsDynamic?: boolean;
+}): Promise<QrCreateQuotaCheck> {
+  const count = Math.max(1, options.count ?? 1);
+  const needsDynamic = options.needsDynamic ?? false;
+  const plan = await getPlan(options.planId);
+  const currentCount = await getDb().qrCode.count({
+    where: { workspaceId: options.workspaceId, isArchived: false },
+  });
+  const remaining =
+    plan.limits.maxQrCodes == null ? null : Math.max(0, plan.limits.maxQrCodes - currentCount);
+
+  if (needsDynamic && !plan.limits.allowsDynamic) {
+    return {
+      ok: false,
+      plan,
+      currentCount,
+      remaining,
+      code: "DYNAMIC_REQUIRED",
+      message: MSG.PLAN_DYNAMIC_REQUIRED,
+    };
+  }
+
+  if (plan.limits.maxQrCodes != null && currentCount + count > plan.limits.maxQrCodes) {
+    return {
+      ok: false,
+      plan,
+      currentCount,
+      remaining,
+      code: "QR_LIMIT",
+      message: MSG.QR_LIMIT_REACHED(plan.limits.maxQrCodes, remaining ?? 0, count),
+    };
+  }
+
+  return { ok: true, plan, currentCount, remaining };
 }

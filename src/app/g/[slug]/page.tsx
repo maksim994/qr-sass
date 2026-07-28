@@ -3,13 +3,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getDb } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { UtilityPage } from "@/components/utility/utility-page";
 
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 const COOKIE_NAME = "gdpr_consent";
 
 export default async function GdprGatePage({ params, searchParams }: Props) {
@@ -38,40 +39,36 @@ export default async function GdprGatePage({ params, searchParams }: Props) {
     redirect(targetPath);
   }
 
-  const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
-      <div className="card max-w-md p-8">
-        <h1 className="text-xl font-semibold text-slate-900">Согласие на обработку данных</h1>
-        <p className="mt-3 text-sm text-slate-600">
-          Переходя по ссылке, вы соглашаетесь с использованием cookies и обработкой персональных данных в
-          соответствии с политикой конфиденциальности.
-        </p>
-        {policyUrl && (
-          <Link href={policyUrl} target="_blank" rel="noopener noreferrer" className="mt-2 block text-sm text-blue-600 hover:underline">
-            Политика конфиденциальности →
-          </Link>
-        )}
-        <div className="mt-6 flex gap-3">
-          <GdprAcceptButton slug={slug} targetPath={targetPath} />
-          <Link href="/" className="btn btn-secondary flex-1 text-center">
-            Отказаться
-          </Link>
-        </div>
+    <UtilityPage
+      variant="info"
+      title="Согласие на обработку данных"
+      description="Переходя по ссылке, вы соглашаетесь с использованием cookies и обработкой персональных данных в соответствии с политикой конфиденциальности."
+    >
+      {policyUrl ? (
+        <Link href={policyUrl} target="_blank" rel="noopener noreferrer" className="qrs-utility-link">
+          Политика конфиденциальности →
+        </Link>
+      ) : null}
+
+      <div className="qrs-utility-actions">
+        <GdprAcceptButton slug={slug} targetPath={targetPath} />
+        <Button href="/" variant="secondary" block>
+          Отказаться
+        </Button>
       </div>
-    </div>
+    </UtilityPage>
   );
 }
 
 function GdprAcceptButton({ slug, targetPath }: { slug: string; targetPath: string }) {
   return (
-    <form action={`/api/gdpr/consent`} method="post" className="flex-1">
+    <form action={`/api/gdpr/consent`} method="post" className="qrs-utility-form-inline">
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="redirectTo" value={targetPath} />
-      <button type="submit" className="btn btn-primary w-full">
+      <Button type="submit" variant="primary" block>
         Принять
-      </button>
+      </Button>
     </form>
   );
 }

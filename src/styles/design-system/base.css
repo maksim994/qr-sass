@@ -1,0 +1,80 @@
+/* ============================================================
+   BASE — Финкуратор
+   Minimal, opinionated reset + element defaults wired to tokens,
+   plus a handful of shared utilities. Class names are BEM-free
+   helpers only; component styling lives with each component.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  font: var(--text-body);
+  color: var(--text-default);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* Headings inherit display font via role tokens; reset native sizes */
+h1, h2, h3, h4, h5, h6 { font-weight: var(--fw-bold); color: var(--text-strong); line-height: var(--lh-snug); }
+
+a { color: var(--text-link); text-decoration: none; transition: var(--transition-colors); }
+a:hover { color: var(--text-link-hover); }
+a:focus-visible { outline: none; box-shadow: var(--shadow-focus); border-radius: var(--radius-xs); }
+
+img, picture, svg, video { display: block; max-width: 100%; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:where(button) { cursor: pointer; }
+
+::selection { background: var(--color-primary-subtle); color: var(--text-strong); }
+
+/* Consistent, accessible focus for any keyboard-focused control */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+p { text-wrap: pretty; }
+h1, h2, h3, h4 { text-wrap: balance; }
+
+hr { border: none; border-top: var(--border-width) solid var(--border-default); }
+
+/* ---------------- Utilities ---------------- */
+
+.fk-container {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.fk-container--wide { max-width: var(--container-wide); }
+.fk-container--narrow { max-width: var(--container-md); }
+
+/* Tabular figures — for money, rates, terms, tables */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "lnum" 1; }
+
+/* Uppercase eyebrow label */
+.fk-eyebrow {
+  font: var(--fw-bold) var(--fs-2xs)/1 var(--font-sans);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+/* Accessibility: visually hidden but screen-reader available */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Section rhythm helper */
+.fk-section { padding-block: var(--section-y); }
+.fk-section--subtle { background: var(--surface-subtle); }

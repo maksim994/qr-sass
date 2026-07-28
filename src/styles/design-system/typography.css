@@ -1,0 +1,56 @@
+/* ============================================================
+   TYPOGRAPHY — Финкуратор
+   Airy / marketing-forward scale. Generous display sizes,
+   comfortable body. Numbers use tabular figures (.tnum) so
+   rate/sum/term columns line up.
+   ============================================================ */
+
+:root {
+  /* ---- Font sizes (px-fixed for predictable density) ---- */
+  --fs-3xs: 0.6875rem;  /* 11 — legal / ПСК fine print */
+  --fs-2xs: 0.75rem;    /* 12 — captions, badges */
+  --fs-xs:  0.8125rem;  /* 13 — meta, table cells */
+  --fs-sm:  0.875rem;   /* 14 — secondary body, labels */
+  --fs-base:1rem;       /* 16 — body */
+  --fs-md:  1.125rem;   /* 18 — lead body */
+  --fs-lg:  1.25rem;    /* 20 — card titles */
+  --fs-xl:  1.5rem;     /* 24 — H4 / section sub */
+  --fs-2xl: 1.875rem;   /* 30 — H3 */
+  --fs-3xl: 2.375rem;   /* 38 — H2 */
+  --fs-4xl: 3rem;       /* 48 — H1 */
+  --fs-5xl: 3.75rem;    /* 60 — hero display */
+  --fs-6xl: 4.5rem;     /* 72 — splash display */
+
+  /* ---- Weights ---- */
+  --fw-regular:  400; /* @kind font */
+  --fw-medium:   500; /* @kind font */
+  --fw-semibold: 600; /* @kind font */
+  --fw-bold:     700; /* @kind font */
+  --fw-extra:    800; /* @kind font */
+
+  /* ---- Line heights ---- */
+  --lh-none:    1; /* @kind font */
+  --lh-tight:   1.12; /* @kind font */
+  --lh-snug:    1.25; /* @kind font */
+  --lh-normal:  1.5; /* @kind font */
+  --lh-relaxed: 1.65; /* @kind font */
+
+  /* ---- Letter spacing ---- */
+  --ls-tighter: -0.03em; /* @kind font */
+  --ls-tight:   -0.015em; /* @kind font */
+  --ls-normal:  0; /* @kind font */
+  --ls-wide:    0.02em; /* @kind font */
+  --ls-eyebrow: 0.08em; /* @kind font */
+
+  /* ---- Semantic role tokens ---- */
+  --text-display:  var(--fw-extra)    var(--fs-5xl)/var(--lh-tight) var(--font-display); /* @kind font */
+  --text-h1:       var(--fw-extra)    var(--fs-4xl)/var(--lh-tight) var(--font-display); /* @kind font */
+  --text-h2:       var(--fw-bold)     var(--fs-3xl)/var(--lh-snug)  var(--font-display); /* @kind font */
+  --text-h3:       var(--fw-bold)     var(--fs-2xl)/var(--lh-snug)  var(--font-display); /* @kind font */
+  --text-h4:       var(--fw-semibold) var(--fs-xl)/var(--lh-snug)   var(--font-display); /* @kind font */
+  --text-lead:     var(--fw-regular)  var(--fs-md)/var(--lh-relaxed) var(--font-sans); /* @kind font */
+  --text-body:     var(--fw-regular)  var(--fs-base)/var(--lh-normal) var(--font-sans); /* @kind font */
+  --text-body-sm:  var(--fw-regular)  var(--fs-sm)/var(--lh-normal) var(--font-sans); /* @kind font */
+  --text-label:    var(--fw-semibold) var(--fs-sm)/var(--lh-snug)   var(--font-sans); /* @kind font */
+  --text-caption:  var(--fw-medium)   var(--fs-2xs)/var(--lh-snug)  var(--font-sans); /* @kind font */
+}

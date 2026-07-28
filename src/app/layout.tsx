@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
 import React from "react";
+import { Manrope } from "next/font/google";
 import parse from "html-react-parser";
 import "./globals.css";
 import { getSiteSettings } from "@/lib/site-settings";
 import { CookieBanner } from "@/components/cookie-banner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeScript } from "@/components/theme-script";
+
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
 
@@ -53,11 +63,16 @@ export default async function RootLayout({
   ].filter(Boolean);
 
   return (
-    <html lang="ru">
-      <head>{headContent}</head>
+    <html lang="ru" className={manrope.variable} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+        {headContent}
+      </head>
       <body className="antialiased">
-        {children}
-        <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
+        <ThemeProvider>
+          {children}
+          <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
+        </ThemeProvider>
       </body>
     </html>
   );
