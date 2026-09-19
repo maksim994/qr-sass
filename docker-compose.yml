@@ -84,7 +84,11 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      disable: true
+      test: ["CMD", "node", "-e", "const {PrismaClient}=require('@prisma/client');const p=new PrismaClient();p.notificationWorkerState.findUnique({where:{id:'default'}}).then(s=>process.exit(s && s.lastSeenAt && Date.now()-new Date(s.lastSeenAt).getTime()<60000?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
 
   analytics-purge:
@@ -108,7 +112,11 @@ services:
       init-db:
         condition: service_completed_successfully
     healthcheck:
-      disable: true
+      test: ["CMD", "node", "-e", "const {PrismaClient}=require('@prisma/client');const p=new PrismaClient();p.siteSettings.findUnique({where:{id:'default'}}).then(s=>process.exit(s && s.analyticsPurgedAt && Date.now()-new Date(s.analyticsPurgedAt).getTime()<93600000?0:1)).catch(()=>process.exit(1))"]
+      interval: 300s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
 
   postgres:
@@ -130,6 +138,12 @@ services:
   redis:
     image: redis:7-alpine
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     volumes:
       - redis_data:/data
     restart: unless-stopped
