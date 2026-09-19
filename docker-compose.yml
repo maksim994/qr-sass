@@ -107,6 +107,8 @@ services:
         condition: service_healthy
       init-db:
         condition: service_completed_successfully
+    healthcheck:
+      disable: true
     restart: unless-stopped
 
   postgres:
