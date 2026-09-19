@@ -10,8 +10,14 @@
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "test": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs --test src/lib/*.test.ts scripts/*.test.mjs",
+    "analytics:purge": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/purge-analytics-pii.ts",
     "admin:set": "node scripts/set-admin.mjs",
-    "verify:qr": "node scripts/verify-qr-health.mjs"
+    "billing:reconcile": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/reconcile-billing.ts",
+    "blog:sanitize": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/sanitize-blog.ts",
+    "seo:hygiene": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/seo-hygiene.ts",
+    "verify:qr": "node scripts/verify-qr-health.mjs",
+    "notifications:worker": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/notification-worker.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.995.0",
@@ -29,7 +35,8 @@
     "isomorphic-dompurify": "^3.0.0",
     "jose": "^6.1.3",
     "nanoid": "^5.1.6",
-    "next": "16.1.6",
+    "next": "^16.3.5",
+    "nodemailer": "^10.0.10",
     "papaparse": "^5.5.3",
     "pdf-lib": "^1.17.1",
     "prisma": "^6.19.2",
@@ -38,8 +45,7 @@
     "rate-limiter-flexible": "^9.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "sharp": "^0.34.5",
-    "xlsx": "^0.18.5",
+    "sharp": "^0.35.4",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -48,12 +54,13 @@
     "@types/archiver": "^7.0.0",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/papaparse": "^5.5.2",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "^16.3.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -2,6 +2,7 @@
 
 import { getCsrfToken } from "@/lib/client-api";
 import { useCallback, useRef, useState } from "react";
+import { PreviewImage } from "@/components/ui/preview-image";
 
 type Props = {
   accept: string;
@@ -10,9 +11,11 @@ type Props = {
   currentFilename?: string;
   /** Показывать превью загруженного изображения */
   currentFileUrl?: string;
+  labelledBy?: string;
+  ariaLabel?: string;
 };
 
-export function FileUploadField({ accept, workspaceId, onUploaded, currentFilename, currentFileUrl }: Props) {
+export function FileUploadField({ accept, workspaceId, onUploaded, currentFilename, currentFileUrl, labelledBy, ariaLabel }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -118,6 +121,8 @@ export function FileUploadField({ accept, workspaceId, onUploaded, currentFilena
           accept={accept}
           className="hidden"
           onChange={handleChange}
+          aria-labelledby={labelledBy}
+          aria-label={labelledBy ? undefined : ariaLabel ?? "Загрузить файл"}
         />
 
         {uploading ? (
@@ -132,7 +137,7 @@ export function FileUploadField({ accept, workspaceId, onUploaded, currentFilena
           </div>
         ) : currentFileUrl && accept.startsWith("image") ? (
           <div className="text-center">
-            <img src={currentFileUrl} alt="Превью" className="mx-auto max-h-24 rounded-lg object-contain" />
+            <PreviewImage src={currentFileUrl} alt="Превью" className="mx-auto max-h-24 rounded-lg object-contain" />
             <p className="mt-2 text-xs qrs-text-muted">Нажмите или перетащите для замены</p>
           </div>
         ) : filename ? (

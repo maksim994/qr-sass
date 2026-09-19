@@ -1,12 +1,16 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { getDb } from "@/lib/db";
 import { Logo } from "@/components/logo";
+import { getSeoPages } from "@/lib/seo-content";
+import { landingDetails } from "@/lib/landing-details";
 
 type Props = {
   session: { sub: string } | null;
+  children?: ReactNode;
 };
 
-export async function SiteFooter({ session }: Props) {
+export async function SiteFooter({ session, children }: Props) {
   const db = getDb();
   const settings = await db.siteSettings.findUnique({
     where: { id: "default" },
@@ -19,6 +23,7 @@ export async function SiteFooter({ session }: Props) {
 
   return (
     <footer style={{ borderTop: "1px solid var(--border-subtle)", background: "var(--surface-page)" }}>
+      {children}
       <div className="fk-container" style={{ paddingBlock: "48px" }}>
         <div
           className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5"
@@ -27,7 +32,7 @@ export async function SiteFooter({ session }: Props) {
           <div>
             <Logo href="/" size="md" />
             <p style={{ marginTop: "12px", ...linkStyle, maxWidth: "16em" }}>
-              Создавайте, кастомизируйте и отслеживайте QR-коды в одном месте.
+              Меняйте ссылку в QR после печати. PNG и SVG для экрана и типографии.
             </p>
           </div>
 
@@ -37,10 +42,15 @@ export async function SiteFooter({ session }: Props) {
             </p>
             <ul className="mt-3 space-y-2" style={{ listStyle: "none", padding: 0, margin: "12px 0 0" }}>
               {[
-                { label: "Возможности", href: "/#features" },
-                { label: "Типы кодов", href: "/#types" },
+                { label: "Как работает", href: "/#how" },
                 { label: "Тарифы", href: "/#pricing" },
                 { label: "FAQ", href: "/#faq" },
+                { label: "Блог", href: "/blog" },
+                { label: "История изменений", href: "/changelog" },
+                ...(children ? [
+                  { label: "Сценарии по отраслям", href: "/#use-cases" },
+                  { label: "Все типы QR", href: "/#types" },
+                ] : []),
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:opacity-80 transition-opacity" style={linkStyle}>
@@ -51,23 +61,20 @@ export async function SiteFooter({ session }: Props) {
             </ul>
           </div>
 
-          <div>
+          <nav aria-label="Решения с QR-кодами">
             <p style={{ font: "var(--fw-bold) var(--fs-sm)/1 var(--font-sans)", color: "var(--text-strong)" }}>
               Решения
             </p>
             <ul className="mt-3 space-y-2" style={{ listStyle: "none", padding: 0, margin: "12px 0 0" }}>
-              <li>
-                <Link href="/blog" className="hover:opacity-80 transition-opacity" style={linkStyle}>
-                  Блог
-                </Link>
-              </li>
-              <li>
-                <Link href="/changelog" className="hover:opacity-80 transition-opacity" style={linkStyle}>
-                  История изменений
-                </Link>
-              </li>
+              {getSeoPages().map((page) => (
+                <li key={page.slug}>
+                  <Link href={`/${page.slug}`} className="hover:opacity-80 transition-opacity" style={linkStyle}>
+                    {landingDetails[page.slug]?.label ?? page.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          </div>
+          </nav>
 
           <div>
             <p style={{ font: "var(--fw-bold) var(--fs-sm)/1 var(--font-sans)", color: "var(--text-strong)" }}>
@@ -108,9 +115,10 @@ export async function SiteFooter({ session }: Props) {
 
           <div>
             <p style={{ font: "var(--fw-bold) var(--fs-sm)/1 var(--font-sans)", color: "var(--text-strong)" }}>
-              Контакты
+              {settings?.contactEmail || settings?.contactPhone || settings?.requisitesName || settings?.requisitesInn ? "Контакты" : "Помощь"}
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: "12px 0 0", ...linkStyle }}>
+              {!settings?.contactEmail && !settings?.contactPhone && !settings?.requisitesName && !settings?.requisitesInn && <><li style={{ marginBottom: "8px" }}><Link href="/#faq" style={linkStyle}>Вопросы и ответы</Link></li><li><Link href="/qr-lifetime" style={linkStyle}>Срок работы QR-кода</Link></li></>}
               {settings?.requisitesName && <li style={{ marginBottom: "8px" }}>{settings.requisitesName}</li>}
               {settings?.requisitesInn && <li style={{ marginBottom: "8px" }}>ИНН: {settings.requisitesInn}</li>}
               {settings?.contactEmail && (
@@ -141,6 +149,9 @@ export async function SiteFooter({ session }: Props) {
             </Link>
             <Link href="/terms-of-service" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
               Пользовательское соглашение
+            </Link>
+            <Link href="/qr-lifetime" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
+              Срок жизни QR
             </Link>
           </div>
           <div>&copy; {new Date().getFullYear()} qr-s.ru. Все права защищены.</div>

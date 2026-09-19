@@ -1,8 +1,7 @@
 "use client";
 import { fetchApi } from "@/lib/client-api";
-
-
 import { useState } from "react";
+import { FormField } from "@/components/qr-forms/form-field";
 
 type SmartRedirect = {
   default?: string;
@@ -61,8 +60,7 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
       <p className="text-xs qrs-text-muted">
         Разные URL для iOS, Android и Desktop. Оставьте пустым для использования основного URL.
       </p>
-      <div>
-        <label className="label">По умолчанию</label>
+      <FormField label="По умолчанию">
         <input
           type="url"
           value={defaultUrl}
@@ -70,9 +68,8 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
           placeholder="https://example.com"
           className="input"
         />
-      </div>
-      <div>
-        <label className="label">iOS (App Store)</label>
+      </FormField>
+      <FormField label="iOS (App Store)">
         <input
           type="url"
           value={iosUrl}
@@ -80,9 +77,8 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
           placeholder="https://apps.apple.com/..."
           className="input"
         />
-      </div>
-      <div>
-        <label className="label">Android (Play Store)</label>
+      </FormField>
+      <FormField label="Android (Play Store)">
         <input
           type="url"
           value={androidUrl}
@@ -90,9 +86,8 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
           placeholder="https://play.google.com/..."
           className="input"
         />
-      </div>
-      <div>
-        <label className="label">Desktop</label>
+      </FormField>
+      <FormField label="Desktop">
         <input
           type="url"
           value={desktopUrl}
@@ -100,7 +95,7 @@ export default function SmartRedirectForm({ qrId, smartRedirect, onSaved }: Prop
           placeholder="https://example.com/desktop"
           className="input"
         />
-      </div>
+      </FormField>
       <button type="submit" disabled={loading} className="btn btn-primary btn-sm">
         {loading ? "Сохранение…" : "Сохранить"}
       </button>

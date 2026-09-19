@@ -1,4 +1,5 @@
 "use client";
+import styles from "@/components/admin/admin.module.css";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -91,12 +92,16 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
 
   const autoSlug = !post || mode === "create";
   useEffect(() => {
-    if (autoSlug && state.title) setState((s) => ({ ...s, slug: slugify(s.title) }));
+    if (autoSlug && state.title)
+      setState((s) => ({ ...s, slug: slugify(s.title) }));
   }, [state.title, autoSlug]);
 
   function insertContentImage(url: string) {
     const img = `<p><img src="${url}" alt="" /></p>`;
-    setState((s) => ({ ...s, content: s.content ? `${s.content}\n${img}` : img }));
+    setState((s) => ({
+      ...s,
+      content: s.content ? `${s.content}\n${img}` : img,
+    }));
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -109,11 +114,19 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
       if (sdRaw) {
         try {
           structuredData = JSON.parse(sdRaw);
-          if (!structuredData || typeof structuredData !== "object" || Array.isArray(structuredData)) {
+          if (
+            !structuredData ||
+            typeof structuredData !== "object" ||
+            Array.isArray(structuredData)
+          ) {
             throw new Error("Микроразметка должна быть JSON-объектом");
           }
         } catch (err) {
-          throw new Error(err instanceof Error ? err.message : "Некорректный JSON в поле микроразметки");
+          throw new Error(
+            err instanceof Error
+              ? err.message
+              : "Некорректный JSON в поле микроразметки",
+          );
         }
       }
 
@@ -140,7 +153,8 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
         categoryId: state.categoryId.trim() || null,
         publishedAt: state.published ? new Date().toISOString() : null,
       };
-      if (readingTimeMinutes !== undefined) body.readingTimeMinutes = readingTimeMinutes;
+      if (readingTimeMinutes !== undefined)
+        body.readingTimeMinutes = readingTimeMinutes;
 
       if (mode === "create") {
         const res = await fetchApi("/api/admin/blog", {
@@ -173,7 +187,7 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className={styles.stack}>
       {error ? (
         <Alert variant="danger" onClose={() => setError(null)}>
           {error}
@@ -202,13 +216,15 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
         />
       </Field>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className={styles.formColumns}>
         <Field label="Автор" htmlFor="blog-author">
           <Input
             id="blog-author"
             type="text"
             value={state.authorName}
-            onChange={(e) => setState((s) => ({ ...s, authorName: e.target.value }))}
+            onChange={(e) =>
+              setState((s) => ({ ...s, authorName: e.target.value }))
+            }
             placeholder="Имя автора для отображения на сайте"
           />
         </Field>
@@ -216,7 +232,9 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
           <Select
             id="blog-category"
             value={state.categoryId}
-            onChange={(e) => setState((s) => ({ ...s, categoryId: e.target.value }))}
+            onChange={(e) =>
+              setState((s) => ({ ...s, categoryId: e.target.value }))
+            }
           >
             <option value="">Без категории</option>
             {categories.map((cat) => (
@@ -228,14 +246,20 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
         </Field>
       </div>
 
-      <Field label="Время чтения (мин)" htmlFor="blog-reading-time" hint="Авто из текста, если пусто">
+      <Field
+        label="Время чтения (мин)"
+        htmlFor="blog-reading-time"
+        hint="Авто из текста, если пусто"
+      >
         <Input
           id="blog-reading-time"
           type="number"
           min={1}
           max={999}
           value={state.readingTimeMinutes}
-          onChange={(e) => setState((s) => ({ ...s, readingTimeMinutes: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, readingTimeMinutes: e.target.value }))
+          }
           placeholder="Например: 5"
           className="max-w-xs"
         />
@@ -246,7 +270,9 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
           id="blog-meta-title"
           type="text"
           value={state.metaTitle}
-          onChange={(e) => setState((s) => ({ ...s, metaTitle: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, metaTitle: e.target.value }))
+          }
           placeholder="Заголовок для поисковиков (по умолчанию — заголовок статьи)"
         />
       </Field>
@@ -256,13 +282,19 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
           id="blog-meta-desc"
           className="fk-input min-h-[60px]"
           value={state.metaDescription}
-          onChange={(e) => setState((s) => ({ ...s, metaDescription: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, metaDescription: e.target.value }))
+          }
           placeholder="Описание для поисковиков и соцсетей (до ~160 символов)"
           rows={2}
         />
       </Field>
 
-      <Field label="Краткое описание" htmlFor="blog-excerpt" hint="2–3 предложения для превью в списке (опционально)">
+      <Field
+        label="Краткое описание"
+        htmlFor="blog-excerpt"
+        hint="2–3 предложения для превью в списке (опционально)"
+      >
         <textarea
           id="blog-excerpt"
           className="fk-input min-h-[80px]"
@@ -295,10 +327,22 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
           <div className="qrs-upload-result">
             <p className="qrs-upload-result__url">{lastContentImageUrl}</p>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => navigator.clipboard.writeText(lastContentImageUrl)}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  navigator.clipboard.writeText(lastContentImageUrl)
+                }
+              >
                 Скопировать URL
               </Button>
-              <Button type="button" variant="secondary" size="sm" onClick={() => insertContentImage(lastContentImageUrl)}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => insertContentImage(lastContentImageUrl)}
+              >
                 Вставить в контент
               </Button>
             </div>
@@ -323,12 +367,18 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
         ) : null}
       </Field>
 
-      <Field label="Микроразметка (JSON-LD)" htmlFor="blog-structured-data" hint="Опционально. Если пусто — генерируется автоматически.">
+      <Field
+        label="Микроразметка (JSON-LD)"
+        htmlFor="blog-structured-data"
+        hint="Опционально. Если пусто — генерируется автоматически."
+      >
         <textarea
           id="blog-structured-data"
           className="fk-input min-h-[160px] font-mono text-sm"
           value={state.structuredData}
-          onChange={(e) => setState((s) => ({ ...s, structuredData: e.target.value }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, structuredData: e.target.value }))
+          }
           placeholder={'{"@context": "https://schema.org", ...}'}
           rows={8}
         />
@@ -340,10 +390,22 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
           id="published"
           className="fk-choice__input"
           checked={state.published}
-          onChange={(e) => setState((s) => ({ ...s, published: e.target.checked }))}
+          onChange={(e) =>
+            setState((s) => ({ ...s, published: e.target.checked }))
+          }
         />
         <span className="fk-choice__box" aria-hidden="true">
-          <svg className="fk-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            className="fk-icon"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M20 6 9 17l-5-5" />
           </svg>
         </span>

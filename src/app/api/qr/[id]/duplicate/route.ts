@@ -6,7 +6,9 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { assertCanCreateQrCodes } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
 import { needsHostedPage } from "@/lib/qr";
+import { FUNNEL_EVENTS, recordFunnelEvent } from "@/lib/funnel";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -29,15 +31,13 @@ export async function POST(request: Request, context: RouteContext) {
     const membership = user.memberships.find((m) => m.workspaceId === source.workspaceId);
     if (!membership) return unauthorized();
 
-    const workspace = await db.workspace.findUnique({
-      where: { id: source.workspaceId },
-      select: { plan: true },
-    });
+    const entitlements = await getEntitlements(source.workspaceId);
 
     const needsDynamic = source.kind === "DYNAMIC" || needsHostedPage(source.contentType) || source.contentType === "VCARD";
     const quota = await assertCanCreateQrCodes({
       workspaceId: source.workspaceId,
-      planId: workspace?.plan,
+      planId: entitlements.planId,
+      plan: entitlements.plan,
       count: 1,
       needsDynamic,
     });
@@ -48,7 +48,7 @@ export async function POST(request: Request, context: RouteContext) {
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const isHosted = needsHostedPage(source.contentType);
     const usesVcardDownload = source.contentType === "VCARD";
-    const isDynamic = source.kind === "DYNAMIC" || isHosted;
+    const isDynamic = source.kind === "DYNAMIC" || isHosted || usesVcardDownload;
     const shortCode = isDynamic || usesVcardDownload ? nanoid(8) : null;
 
     let encodedContent = source.encodedContent;
@@ -98,6 +98,14 @@ export async function POST(request: Request, context: RouteContext) {
       details: { sourceId: source.id, qrId: created.id },
     });
 
+    await recordFunnelEvent({
+      name: FUNNEL_EVENTS.qr_created,
+      workspaceId: created.workspaceId,
+      userId: user.id,
+      qrCodeId: created.id,
+      source: "duplicate",
+      oncePerQr: true,
+    });
     return apiSuccess({ qrId: created.id, shortCode: created.shortCode }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {

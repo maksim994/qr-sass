@@ -1,0 +1,17 @@
+.error {
+  position: fixed;
+  z-index: 450;
+  bottom: 24px;
+  right: 24px;
+  width: min(380px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--surface-card);
+  color: var(--text-default);
+  font-size: .875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.error p { margin: 0 0 12px; }
+@media (max-width: 600px) { .error { right: 16px; bottom: 16px; } }

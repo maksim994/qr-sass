@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
@@ -7,8 +9,7 @@ type Props = {
 
 export function PhoneForm({ payload, onChange }: Props) {
   return (
-    <div>
-      <label className="label">Номер телефона</label>
+    <FormField label="Номер телефона">
       <input
         className="input"
         type="tel"
@@ -16,6 +17,6 @@ export function PhoneForm({ payload, onChange }: Props) {
         onChange={(e) => onChange({ ...payload, phone: e.target.value })}
         placeholder="+7 999 123 45 67"
       />
-    </div>
+    </FormField>
   );
 }

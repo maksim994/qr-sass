@@ -5,10 +5,11 @@ import { useId } from "react";
 
 type Props = {
   checked: boolean;
+  disabled?: boolean;
   onChange: (checked: boolean) => void;
 };
 
-export function ConsentField({ checked, onChange }: Props) {
+export function ConsentField({ checked, onChange, disabled = false }: Props) {
   const id = useId();
 
   return (
@@ -19,6 +20,7 @@ export function ConsentField({ checked, onChange }: Props) {
         className="fk-choice__input"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
+        disabled={disabled}
         required
       />
       <span className="fk-choice__box" aria-hidden="true">

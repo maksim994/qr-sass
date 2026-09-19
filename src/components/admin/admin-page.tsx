@@ -1,3 +1,4 @@
+import styles from "./admin.module.css";
 import type { ReactNode } from "react";
 
 type HeaderProps = {
@@ -8,7 +9,12 @@ type HeaderProps = {
 };
 
 /** Shared page header — mirrors DashboardPageHeader patterns */
-export function AdminPageHeader({ title, description, action, className = "" }: HeaderProps) {
+export function AdminPageHeader({
+  title,
+  description,
+  action,
+  className = "",
+}: HeaderProps) {
   return (
     <div className={`qrs-page-head ${className}`.trim()}>
       <div>
@@ -22,7 +28,13 @@ export function AdminPageHeader({ title, description, action, className = "" }: 
           {title}
         </h1>
         {description ? (
-          <p style={{ marginTop: "8px", font: "var(--fw-regular) 15px/1.55 var(--font-sans)", color: "var(--text-muted)" }}>
+          <p
+            style={{
+              marginTop: "8px",
+              font: "var(--fw-regular) 15px/1.55 var(--font-sans)",
+              color: "var(--text-muted)",
+            }}
+          >
             {description}
           </p>
         ) : null}
@@ -32,11 +44,21 @@ export function AdminPageHeader({ title, description, action, className = "" }: 
   );
 }
 
-export function AdminCard({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function AdminCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div
-      className={`rounded-2xl p-6 ${className}`}
-      style={{ background: "var(--surface-card)", border: "1px solid var(--border-default)", boxShadow: "var(--shadow-sm)" }}
+      className={`${styles.card} ${className}`}
+      style={{
+        background: "var(--surface-card)",
+        border: "1px solid var(--border-default)",
+        boxShadow: "var(--shadow-sm)",
+      }}
     >
       {children}
     </div>
@@ -44,6 +66,12 @@ export function AdminCard({ children, className = "" }: { children: ReactNode; c
 }
 
 /** Table wrapper — same pattern as dashboard team / analytics */
-export function AdminDataCard({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function AdminDataCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return <div className={`qrs-data-card ${className}`.trim()}>{children}</div>;
 }

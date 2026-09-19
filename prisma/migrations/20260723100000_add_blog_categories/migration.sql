@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "BlogCategory" (
+CREATE TABLE IF NOT EXISTS "BlogCategory" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -11,16 +11,19 @@ CREATE TABLE "BlogCategory" (
 );
 
 -- AlterTable
-ALTER TABLE "BlogPost" ADD COLUMN "categoryId" TEXT;
+ALTER TABLE "BlogPost" ADD COLUMN IF NOT EXISTS "categoryId" TEXT;
 
 -- CreateIndex
-CREATE UNIQUE INDEX "BlogCategory_slug_key" ON "BlogCategory"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "BlogCategory_slug_key" ON "BlogCategory"("slug");
 
 -- CreateIndex
-CREATE INDEX "BlogCategory_sortOrder_idx" ON "BlogCategory"("sortOrder");
+CREATE INDEX IF NOT EXISTS "BlogCategory_sortOrder_idx" ON "BlogCategory"("sortOrder");
 
 -- CreateIndex
-CREATE INDEX "BlogPost_categoryId_idx" ON "BlogPost"("categoryId");
+CREATE INDEX IF NOT EXISTS "BlogPost_categoryId_idx" ON "BlogPost"("categoryId");
 
 -- AddForeignKey
-ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "BlogCategory"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "BlogCategory"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

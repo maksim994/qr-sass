@@ -7,11 +7,17 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { assertCanCreateQrCodes } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
 import { encodeQrContent, needsHostedPage } from "@/lib/qr";
 import { evaluateScannability } from "@/lib/scannability";
+import { applyTrackingPixelsToPayload } from "@/lib/tracking-pixels";
+import { stampTrackingConsentVersion } from "@/lib/qr-consent";
+import { collectUploadIds, projectBelongsToWorkspace, uploadsBelongToWorkspace } from "@/lib/tenant";
 import { createQrSchema } from "@/lib/validation";
 import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
 import { supportsDynamicKind } from "@/lib/qr-types";
+import { FUNNEL_EVENTS, isPrivateOrLocalIp, recordFunnelEvent } from "@/lib/funnel";
+import { getClientIp } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const requestId = getRequestId(request);
@@ -29,6 +35,7 @@ export async function GET(request: Request) {
     const isMember = user.memberships.some((m) => m.workspaceId === workspaceId);
     if (!isMember) return unauthorized();
 
+    const entitlements = await getEntitlements(workspaceId);
     const db = getDb();
     const qrs = await db.qrCode.findMany({
       where: {
@@ -38,11 +45,13 @@ export async function GET(request: Request) {
       orderBy: {
         createdAt: "desc",
       },
-      include: {
-        _count: {
-          select: { scanEvents: true },
-        },
-      },
+      include: entitlements.allowsAnalytics
+        ? {
+            _count: {
+              select: { scanEvents: true },
+            },
+          }
+        : undefined,
       take: 100,
     });
 
@@ -83,8 +92,25 @@ export async function POST(request: Request) {
 
     const db = getDb();
     const data = parsed.data;
+    const pixels = applyTrackingPixelsToPayload(data.payload as Record<string, unknown>);
+    if (!pixels.ok) {
+      return apiError(pixels.error, "VALIDATION_ERROR", 400, undefined, requestId);
+    }
+    const payload = stampTrackingConsentVersion({}, pixels.payload);
     const membership = user.memberships.find((m) => m.workspaceId === data.workspaceId);
     if (!membership) return unauthorized();
+    if (!(await projectBelongsToWorkspace(db, data.projectId, data.workspaceId))) {
+      return apiError(MSG.FORBIDDEN, "FORBIDDEN", 403, undefined, requestId);
+    }
+    if (
+      !(await uploadsBelongToWorkspace(
+        db,
+        collectUploadIds(payload, data.style as Record<string, unknown>),
+        data.workspaceId,
+      ))
+    ) {
+      return apiError(MSG.FORBIDDEN, "FORBIDDEN", 403, undefined, requestId);
+    }
 
     const disabledTypes = await getDisabledQrTypes();
     if (isQrTypeDisabled(data.contentType, disabledTypes)) {
@@ -97,15 +123,18 @@ export async function POST(request: Request) {
     if (data.kind === "DYNAMIC" && !isHosted && !supportsDynamicKind(data.contentType)) {
       return apiError(MSG.QR_KIND_NOT_SUPPORTED, "BAD_REQUEST", 400, undefined, requestId);
     }
-    const isDynamic = data.kind === "DYNAMIC" || isHosted;
+    const isDynamic = data.kind === "DYNAMIC" || isHosted || usesVcardDownload;
 
     const workspace = await db.workspace.findUnique({
       where: { id: data.workspaceId },
-      select: { plan: true },
+      select: { id: true },
     });
+    if (!workspace) return unauthorized();
+    const entitlements = await getEntitlements(data.workspaceId);
     const quota = await assertCanCreateQrCodes({
       workspaceId: data.workspaceId,
-      planId: workspace?.plan,
+      planId: entitlements.planId,
+      plan: entitlements.plan,
       count: 1,
       needsDynamic: isDynamic || usesVcardDownload,
     });
@@ -117,18 +146,13 @@ export async function POST(request: Request) {
 
     let encodedContent = "";
     if (!isHosted && !usesVcardDownload) {
-      encodedContent = encodeQrContent(data.contentType, data.payload);
+      encodedContent = encodeQrContent(data.contentType, payload);
       if (!encodedContent) {
         return apiError(MSG.COULD_NOT_ENCODE_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
       }
     }
 
-    const score = evaluateScannability({
-      foreground: data.style.dotColor,
-      background: data.style.bgTransparent ? "#ffffff" : data.style.bgColor,
-      margin: data.style.margin,
-      logoScale: data.style.logoScale,
-    });
+    const score = evaluateScannability(data.style);
 
     if (!score.safeToUse) {
       return apiError(MSG.SCANNABILITY_TOO_LOW, "VALIDATION_ERROR", 400, { score }, requestId);
@@ -175,8 +199,8 @@ export async function POST(request: Request) {
         name: data.name,
         shortCode,
         encodedContent: qrData,
-        currentTargetUrl: isDynamic && !isHosted ? (data.payload.url as string | undefined) : null,
-        payload: data.payload as object,
+        currentTargetUrl: isDynamic && !isHosted ? (payload.url as string | undefined) : null,
+        payload: payload as object,
         styleConfig: data.style as object,
         expireAt: isDynamic ? expireAt : undefined,
         maxScans: isDynamic ? maxScans : undefined,
@@ -184,7 +208,7 @@ export async function POST(request: Request) {
         revisions: {
           create: {
             changedById: user.id,
-            destinationUrl: isDynamic ? (data.payload.url as string | undefined) : null,
+            destinationUrl: isDynamic ? (payload.url as string | undefined) : null,
             encodedContent: isHosted || usesVcardDownload ? qrData : encodedContent,
           },
         },
@@ -198,6 +222,15 @@ export async function POST(request: Request) {
       message: "QR created",
       status: 200,
       details: { qrId: qr.id, kind: qr.kind, contentType: qr.contentType },
+    });
+    await recordFunnelEvent({
+      name: FUNNEL_EVENTS.qr_created,
+      workspaceId: qr.workspaceId,
+      userId: user.id,
+      qrCodeId: qr.id,
+      source: qr.contentType,
+      isTest: isPrivateOrLocalIp(getClientIp(request)),
+      oncePerQr: true,
     });
     return apiSuccess({ score, qrId: qr.id, shortCode: qr.shortCode }, 200, requestId);
   } catch (error) {

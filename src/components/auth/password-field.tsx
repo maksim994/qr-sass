@@ -1,8 +1,12 @@
 "use client";
 
 import { useId, useState } from "react";
+import Link from "next/link";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import styles from "./auth-shell.module.css";
+import { generatePassword } from "@/lib/generate-password";
 
 type Props = {
   value: string;
@@ -12,6 +16,8 @@ type Props = {
   required?: boolean;
   showForgotLink?: boolean;
   autoComplete?: string;
+  allowGenerate?: boolean;
+  disabled?: boolean;
 };
 
 export function PasswordField({
@@ -22,9 +28,13 @@ export function PasswordField({
   required = true,
   showForgotLink = false,
   autoComplete = "current-password",
+  allowGenerate = false,
+  disabled = false,
 }: Props) {
   const id = useId();
   const [visible, setVisible] = useState(false);
+  const [generated, setGenerated] = useState(false);
+  const generatedHintId = useId();
 
   return (
     <Field
@@ -33,9 +43,9 @@ export function PasswordField({
         showForgotLink ? (
           <span className="qrs-auth-field-label-row">
             <span>Пароль</span>
-            <span className="qrs-auth-forgot" title="Восстановление пароля скоро будет доступно">
+            <Link href="/forgot-password" className="qrs-auth-forgot">
               Забыли пароль?
-            </span>
+            </Link>
           </span>
         ) : (
           "Пароль"
@@ -47,24 +57,31 @@ export function PasswordField({
           id={id}
           type={visible ? "text" : "password"}
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => {
+            onChange(event.target.value);
+            setGenerated(false);
+          }}
           placeholder={placeholder}
           minLength={minLength}
           required={required}
           autoComplete={autoComplete}
+          disabled={disabled}
+          aria-describedby={generated ? generatedHintId : undefined}
           withSuffix
         />
         <button
           type="button"
           className="qrs-auth-password-toggle"
           onClick={() => setVisible((current) => !current)}
+          disabled={disabled}
+          aria-pressed={visible}
           aria-label={visible ? "Скрыть пароль" : "Показать пароль"}
         >
           {visible ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M3 3l18 18" />
-              <path d="M10.58 10.58A2 2 0 0 0 12 18a2 2 0 0 0 1.42-.58" />
-              <path d="M9.88 5.09A10.94 10.94 0 0 1 12 5c5 0 9.27 3.11 11 7.5a11.2 11.2 0 0 1-2.05 3.17M6.61 6.61A11.2 11.2 0 0 0 3 12.5C4.73 16.89 9 20 14 20a10.9 10.9 0 0 0 4.39-.9" />
+              <path d="M9.88 9.88a3 3 0 0 0 4.24 4.24" />
+              <path d="M10.7 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3 3.8M6.2 6.2A18 18 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 5.1-1.4" />
             </svg>
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -74,6 +91,26 @@ export function PasswordField({
           )}
         </button>
       </div>
+      {allowGenerate ? (
+        <>
+          <div className={styles.generate}><span>От 8 символов</span><Button
+            type="button"
+            variant="text"
+            size="sm"
+            disabled={disabled}
+            onClick={() => {
+              onChange(generatePassword());
+              setVisible(true);
+              setGenerated(true);
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" /></svg>Сгенерировать пароль
+          </Button></div>
+          <span id={generatedHintId} className={styles.passwordHint} role="status">
+            {generated ? "Пароль сгенерирован. Сохраните его в менеджере паролей." : ""}
+          </span>
+        </>
+      ) : null}
     </Field>
   );
 }

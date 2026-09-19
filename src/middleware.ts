@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { MSG } from "@/lib/user-messages";
 import type { NextRequest } from "next/server";
+import { pathNeedsNoindexHeader } from "@/lib/seo-hygiene";
 
 const CSRF_SKIP_PREFIXES = [
   "/api/billing/webhook",
@@ -18,6 +19,9 @@ function csrfBlockedResponse() {
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  if (pathNeedsNoindexHeader(request.nextUrl.pathname)) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
 
   // CSRF Protection for API routes
   if (request.nextUrl.pathname.startsWith("/api/")) {

@@ -19,6 +19,7 @@
 
 import { readFileSync } from "node:fs";
 import { PrismaClient } from "@prisma/client";
+import { compareSnapshots, qrContractHash } from "./qr-health-contract.mjs";
 
 const prisma = new PrismaClient();
 
@@ -100,6 +101,7 @@ function summarizeQr(qr) {
 
   return {
     id: qr.id,
+    contractHash: qrContractHash(qr),
     name: qr.name,
     kind: qr.kind,
     contentType: qr.contentType,
@@ -153,6 +155,7 @@ async function collectSnapshot() {
   }
 
   return {
+    version: 2,
     generatedAt: new Date().toISOString(),
     appUrl: process.env.APP_URL ?? null,
     totals: {
@@ -230,46 +233,6 @@ function printReport(snapshot) {
   }
 }
 
-function compareSnapshots(baseline, current) {
-  const errors = [];
-  const baselineIds = new Set(baseline.qrCodes.map((q) => q.id));
-  const currentIds = new Set(current.qrCodes.map((q) => q.id));
-
-  const missing = baseline.qrCodes.filter((q) => !currentIds.has(q.id));
-  const added = current.qrCodes.filter((q) => !baselineIds.has(q.id));
-
-  if (current.totals.qrCodes < baseline.totals.qrCodes) {
-    errors.push(
-      `Количество QR уменьшилось: было ${baseline.totals.qrCodes}, стало ${current.totals.qrCodes}`
-    );
-  }
-  if (current.totals.scanEvents < baseline.totals.scanEvents) {
-    errors.push(
-      `Количество сканов уменьшилось: было ${baseline.totals.scanEvents}, стало ${current.totals.scanEvents}`
-    );
-  }
-  if (missing.length > 0) {
-    errors.push(`Пропали QR (${missing.length}): ${missing.map((q) => q.name).join(", ")}`);
-  }
-
-  const changed = [];
-  for (const base of baseline.qrCodes) {
-    const now = current.qrCodes.find((q) => q.id === base.id);
-    if (!now) continue;
-    if (base.shortCode !== now.shortCode) {
-      changed.push(`${base.name}: shortCode ${base.shortCode ?? "—"} → ${now.shortCode ?? "—"}`);
-    }
-    if (base.kind !== now.kind) {
-      changed.push(`${base.name}: kind ${base.kind} → ${now.kind}`);
-    }
-    if (base.hasTarget !== now.hasTarget) {
-      changed.push(`${base.name}: hasTarget ${base.hasTarget} → ${now.hasTarget}`);
-    }
-  }
-
-  return { errors, missing, added, changed };
-}
-
 function printCompareResult(baseline, current, result) {
   console.log("=== QR compare (до → после деплоя) ===");
   console.log(`Baseline: ${baseline.generatedAt} (${baseline.totals.qrCodes} QR)`);
@@ -334,7 +297,8 @@ async function main() {
     if (args.json || args.mode === "snapshot") {
       console.log(out);
     }
-    process.exit(snapshot.critical.length > 0 ? 2 : 0);
+    process.exitCode = snapshot.critical.length > 0 ? 2 : 0;
+    return;
   }
 
   if (args.mode === "compare") {
@@ -345,7 +309,8 @@ async function main() {
     } else {
       printCompareResult(baseline, snapshot, result);
     }
-    process.exit(result.errors.length > 0 ? 1 : 0);
+    process.exitCode = result.errors.length > 0 ? 1 : 0;
+    return;
   }
 
   if (args.json) {
@@ -354,13 +319,13 @@ async function main() {
     printReport(snapshot);
   }
 
-  process.exit(snapshot.critical.length > 0 ? 2 : 0);
+  process.exitCode = snapshot.critical.length > 0 ? 2 : 0;
 }
 
 main()
   .catch((error) => {
     console.error(error);
-    process.exit(2);
+    process.exitCode = 2;
   })
   .finally(async () => {
     await prisma.$disconnect();

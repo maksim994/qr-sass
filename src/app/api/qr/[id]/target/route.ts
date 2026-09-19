@@ -4,6 +4,7 @@ import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-resp
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { assertAllowsDynamic } from "@/lib/entitlements";
 import { updateDynamicTargetSchema } from "@/lib/validation";
 
 type RouteContext = {
@@ -40,6 +41,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
+
+    const gate = await assertAllowsDynamic(qr.workspaceId);
+    if (!gate.ok) {
+      return apiError(MSG.PLAN_DYNAMIC_REQUIRED, "FORBIDDEN", 403, undefined, requestId);
+    }
 
     await db.qrCode.update({
       where: { id },

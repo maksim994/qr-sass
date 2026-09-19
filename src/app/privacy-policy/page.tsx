@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
+import { publicSiteUrl } from "@/lib/public-url";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
   description: "Политика конфиденциальности и обработки персональных данных",
+  alternates: { canonical: publicSiteUrl("/privacy-policy") },
 };
 
 export default async function PrivacyPolicyPage() {

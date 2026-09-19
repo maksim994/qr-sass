@@ -1,4 +1,4 @@
-import { isSafeUrl } from "@/lib/url";
+import { isDisplayableMediaUrl } from "@/lib/url";
 import {
   HostedLandingCard,
   HostedLandingEmpty,
@@ -13,7 +13,7 @@ export function Mp3Landing({ payload }: Props) {
   const title = (payload.title as string) || "Аудиозапись";
   const artist = payload.artist as string | undefined;
   const rawUrl = payload.fileUrl as string | undefined;
-  const fileUrl = rawUrl && isSafeUrl(rawUrl) ? rawUrl : undefined;
+  const fileUrl = rawUrl && isDisplayableMediaUrl(rawUrl) ? rawUrl : undefined;
 
   return (
     <HostedLandingShell>

@@ -1,5 +1,9 @@
-export function ThemeScript() {
-  const script = `
+"use client";
+
+import { useRef } from "react";
+import { useServerInsertedHTML } from "next/navigation";
+
+const script = `
 (function() {
   try {
     var t = localStorage.getItem('qrs-theme');
@@ -13,5 +17,15 @@ export function ThemeScript() {
   } catch (e) {}
 })();
 `;
-  return <script dangerouslySetInnerHTML={{ __html: script }} />;
+export function ThemeScript() {
+  const inserted = useRef(false);
+
+  // Keep the parser-executed bootstrap in the server head, outside client rendering.
+  useServerInsertedHTML(() => {
+    if (inserted.current) return null;
+    inserted.current = true;
+    return <script id="qrs-theme-init" dangerouslySetInnerHTML={{ __html: script }} />;
+  });
+
+  return null;
 }

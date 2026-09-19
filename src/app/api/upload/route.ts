@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { validateFileType } from "@/lib/file-validation";
 import { logger } from "@/lib/logger";
 import { uploadFile, getS3Key } from "@/lib/s3";
+import { workspaceFilePath } from "@/lib/workspace-file-path";
 import { nanoid } from "nanoid";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -56,17 +57,19 @@ export async function POST(request: Request) {
     const fileId = nanoid(12);
     const ext = validated.ext;
     const key = getS3Key(workspaceId, fileId, ext);
-    const url = await uploadFile(buffer, key, validated.mime);
+    await uploadFile(buffer, key, validated.mime);
+    const accessUrl = workspaceFilePath(fileId);
 
     const db = getDb();
     const record = await db.uploadedFile.create({
       data: {
+        id: fileId,
         workspaceId,
         key,
         filename: file.name,
         mimeType: validated.mime,
         sizeBytes: file.size,
-        url,
+        url: accessUrl,
       },
     });
 
@@ -79,7 +82,7 @@ export async function POST(request: Request) {
       details: { fileId: record.id, key, mimeType: validated.mime, sizeBytes: file.size },
     });
 
-    return apiSuccess({ fileId: record.id, url, key, filename: file.name }, 200, requestId);
+    return apiSuccess({ fileId: record.id, url: accessUrl, key, filename: file.name }, 200, requestId);
   } catch (error) {
     logger.error({
       area: "api",

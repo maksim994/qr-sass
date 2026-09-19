@@ -1,13 +1,15 @@
 import { QrContentType, QrKind } from "@prisma/client";
 import { MSG } from "@/lib/user-messages";
 import { isSafeUrl } from "@/lib/url";
+import { workspaceFileIdFromPath } from "@/lib/workspace-file-path";
 import { z } from "zod";
 
 export const safeUrlSchema = z.string().refine(isSafeUrl, {
   message: MSG.ONLY_HTTPS_HTTP_URL,
 });
 
-export const DEFAULT_WORKSPACE_NAME = "Моя команда";
+import { DEFAULT_WORKSPACE_NAME } from "@/lib/workspace-name";
+export { DEFAULT_WORKSPACE_NAME } from "@/lib/workspace-name";
 
 export function getValidationErrorMessage(error: z.ZodError): string | null {
   const flattened = error.flatten();
@@ -45,9 +47,19 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
+  remember: z.boolean().optional(),
   consent: z.boolean().refine(val => val === true, {
     message: "Необходимо согласие на обработку персональных данных",
   }).optional(), // Optional for backward compatibility with API, but required on frontend
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(16).max(128),
+  password: z.string().min(8).max(128),
 });
 
 export const profileUpdateSchema = z
@@ -60,37 +72,51 @@ export const profileUpdateSchema = z
   .refine(
     (d) => !d.newPassword || (d.currentPassword != null && d.currentPassword.length > 0),
     { message: "Текущий пароль обязателен для смены", path: ["currentPassword"] }
+  )
+  .refine(
+    (d) => !d.email || (d.currentPassword != null && d.currentPassword.length > 0),
+    { message: "Текущий пароль обязателен для смены email", path: ["currentPassword"] }
   );
+
+const opaqueHex = z
+  .string()
+  .regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Укажите непрозрачный HEX-цвет");
 
 export const styleSchema = z.object({
   dotType: z.enum(["square", "dots", "rounded", "classy", "classy-rounded", "extra-rounded"]).default("square"),
-  dotColor: z.string().default("#111111"),
+  dotColor: opaqueHex.default("#111111"),
   dotGradient: z.object({
     type: z.enum(["linear", "radial"]),
-    colors: z.tuple([z.string(), z.string()]),
+    colors: z.tuple([opaqueHex, opaqueHex]),
     rotation: z.number().optional(),
   }).optional(),
 
-  bgColor: z.string().default("#ffffff"),
+  bgColor: opaqueHex.default("#ffffff"),
   bgTransparent: z.boolean().default(false),
   bgGradient: z.object({
     type: z.enum(["linear", "radial"]),
-    colors: z.tuple([z.string(), z.string()]),
+    colors: z.tuple([opaqueHex, opaqueHex]),
     rotation: z.number().optional(),
   }).optional(),
 
   cornerSquareType: z.enum(["square", "dot", "extra-rounded"]).default("square"),
-  cornerSquareColor: z.string().default("#111111"),
+  cornerSquareColor: opaqueHex.default("#111111"),
 
   cornerDotType: z.enum(["square", "dot"]).default("square"),
-  cornerDotColor: z.string().default("#111111"),
+  cornerDotColor: opaqueHex.default("#111111"),
 
   frameStyle: z.string().optional(),
   frameColor: z.string().optional(),
   frameText: z.string().optional(),
 
-  logoFileId: z.string().optional(),
-  logoUrl: z.string().optional(),
+  logoFileId: z.string().max(64).optional(),
+  logoUrl: z
+    .string()
+    .max(2048)
+    .optional()
+    .refine((value) => !value || value.startsWith("data:image/") || isSafeUrl(value) || (value.startsWith("/") && !value.includes("..")), {
+      message: "Логотип: только https, относительный путь или data:image.",
+    }),
   logoScale: z.number().min(0).max(0.3).default(0),
   logoMargin: z.number().min(0).max(20).default(0),
 
@@ -98,17 +124,97 @@ export const styleSchema = z.object({
   errorCorrectionLevel: z.enum(["L", "M", "Q", "H"]).default("M"),
 });
 
+function nonempty(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function hasNamedMenuItem(payload: Record<string, unknown>): boolean {
+  const categories = payload.categories;
+  if (!Array.isArray(categories)) return nonempty(payload.title).length > 0;
+  return categories.some((category) => {
+    if (!category || typeof category !== "object") return false;
+    const items = (category as { items?: unknown }).items;
+    if (!Array.isArray(items)) return nonempty((category as { name?: unknown }).name).length > 0;
+    return items.some((item) => item && typeof item === "object" && nonempty((item as { name?: unknown }).name));
+  });
+}
+
+/** Reject empty/incomplete payloads before they are stored. */
+export function payloadMeetsType(payload: Record<string, unknown>, contentType: string): boolean {
+  switch (contentType) {
+    case "URL":
+      return nonempty(payload.url).length > 0;
+    case "TEXT":
+      return nonempty(payload.text).length > 0;
+    case "EMAIL":
+      return nonempty(payload.email).length > 0;
+    case "PHONE":
+    case "WHATSAPP":
+    case "SMS":
+      return nonempty(payload.phone).length > 0;
+    case "WIFI":
+      return nonempty(payload.ssid).length > 0;
+    case "VCARD":
+      return Boolean(
+        nonempty(payload.firstName) ||
+          nonempty(payload.lastName) ||
+          nonempty(payload.organization) ||
+          nonempty(payload.phone) ||
+          nonempty(payload.email),
+      );
+    case "LOCATION": {
+      const lat = Number(payload.latitude);
+      const lng = Number(payload.longitude);
+      return Number.isFinite(lat) && Number.isFinite(lng) && nonempty(payload.latitude) !== "" && nonempty(payload.longitude) !== "";
+    }
+    case "MENU":
+      return hasNamedMenuItem(payload);
+    case "PDF":
+    case "IMAGE":
+    case "MP3":
+      return nonempty(payload.fileUrl).length > 0;
+    case "VIDEO":
+      return nonempty(payload.videoUrl) !== "" || nonempty(payload.fileUrl) !== "";
+    case "LINK_LIST":
+      return Array.isArray(payload.links) && payload.links.some((link) => link && typeof link === "object" && nonempty((link as { url?: unknown }).url));
+    case "BUSINESS":
+    case "SOCIAL_LINKS":
+      return nonempty(payload.name) !== "" || nonempty(payload.title) !== "" || nonempty(payload.website) !== "";
+    case "COUPON":
+      return nonempty(payload.code) !== "" || nonempty(payload.title) !== "";
+    case "APP_STORE":
+      return nonempty(payload.iosUrl) !== "" || nonempty(payload.androidUrl) !== "" || nonempty(payload.url) !== "";
+    case "INSTAGRAM":
+    case "FACEBOOK":
+      return nonempty(payload.username) !== "" || nonempty(payload.pageUrl) !== "";
+    default:
+      return Object.keys(payload).length > 0;
+  }
+}
+
+function isHttpOrOwnedWorkspaceFileUrl(url: unknown, fileId?: unknown): boolean {
+  if (typeof url !== "string" || !url.trim()) return false;
+  if (isSafeUrl(url)) return true;
+  const pathId = workspaceFileIdFromPath(url);
+  if (!pathId) return false;
+  if (typeof fileId === "string" && fileId && fileId !== pathId) return false;
+  return true;
+}
+
 function validatePayloadUrls(payload: Record<string, unknown>, contentType: string): boolean {
-  const check = (url: unknown) =>
-    typeof url === "string" && isSafeUrl(url);
+  const check = (url: unknown) => typeof url === "string" && isSafeUrl(url);
 
   if (["PDF", "IMAGE", "MP3"].includes(contentType)) {
     const fileUrl = payload.fileUrl;
-    if (fileUrl !== undefined && fileUrl !== null && !check(fileUrl)) return false;
+    if (fileUrl !== undefined && fileUrl !== null && !isHttpOrOwnedWorkspaceFileUrl(fileUrl, payload.fileId)) {
+      return false;
+    }
   }
   if (contentType === "VIDEO") {
     const videoUrl = payload.videoUrl ?? payload.fileUrl;
-    if (videoUrl !== undefined && videoUrl !== null && !check(videoUrl)) return false;
+    if (videoUrl !== undefined && videoUrl !== null && !isHttpOrOwnedWorkspaceFileUrl(videoUrl, payload.fileId)) {
+      return false;
+    }
   }
   if (contentType === "URL") {
     const url = payload.url;
@@ -132,7 +238,9 @@ function validatePayloadUrls(payload: Record<string, unknown>, contentType: stri
       if (!check(href)) return false;
     }
     const logoUrl = payload.logo ?? payload.logoUrl;
-    if (logoUrl !== undefined && logoUrl !== null && !check(logoUrl)) return false;
+    if (logoUrl !== undefined && logoUrl !== null && !isHttpOrOwnedWorkspaceFileUrl(logoUrl, payload.logoFileId)) {
+      return false;
+    }
     const socialLinks = payload.socialLinks;
     if (Array.isArray(socialLinks)) {
       for (const l of socialLinks) {
@@ -162,6 +270,10 @@ export const createQrSchema = z
     maxScans: z.number().int().min(1).optional(),
     password: z.string().min(1).optional(),
   })
+  .refine(
+    (d) => payloadMeetsType(d.payload, d.contentType),
+    { message: MSG.INVALID_PAYLOAD, path: ["payload"] }
+  )
   .refine(
     (d) => validatePayloadUrls(d.payload, d.contentType),
     { message: MSG.INVALID_PAYLOAD_URL, path: ["payload"] }

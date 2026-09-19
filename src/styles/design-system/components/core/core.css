@@ -35,21 +35,21 @@
 
 /* variants */
 .fk-button--primary { background: var(--color-primary); color: var(--color-primary-on); }
-.fk-button--primary:not(:disabled):hover { background: var(--color-primary-hover); box-shadow: var(--shadow-md); }
+.fk-button--primary:not(:disabled):hover { background: var(--color-primary-hover); color: var(--color-primary-on); box-shadow: var(--shadow-md); }
 .fk-button--primary:not(:disabled):active { background: var(--color-primary-active); }
 
 .fk-button--accent { background: var(--color-accent); color: var(--color-accent-on); }
-.fk-button--accent:not(:disabled):hover { background: var(--color-accent-hover); box-shadow: var(--shadow-accent); }
+.fk-button--accent:not(:disabled):hover { background: var(--color-accent-hover); color: var(--color-accent-on); box-shadow: var(--shadow-accent); }
 .fk-button--accent:not(:disabled):active { background: var(--color-accent-active); }
 
 .fk-button--secondary { background: var(--surface-card); color: var(--text-strong); border-color: var(--border-strong); }
-.fk-button--secondary:not(:disabled):hover { background: var(--surface-subtle); border-color: var(--text-subtle); box-shadow: var(--shadow-sm); }
+.fk-button--secondary:not(:disabled):hover { background: var(--surface-subtle); color: var(--text-strong); border-color: var(--text-subtle); box-shadow: var(--shadow-sm); }
 
 .fk-button--ghost { background: transparent; color: var(--color-primary); }
-.fk-button--ghost:not(:disabled):hover { background: var(--color-primary-subtle); }
+.fk-button--ghost:not(:disabled):hover { background: var(--color-primary-subtle); color: var(--color-primary); }
 
 .fk-button--danger { background: var(--color-danger); color: #fff; }
-.fk-button--danger:not(:disabled):hover { background: var(--red-700); box-shadow: var(--shadow-md); }
+.fk-button--danger:not(:disabled):hover { background: var(--red-700); color: #fff; box-shadow: var(--shadow-md); }
 
 .fk-button--text { height: auto; padding: 0; color: var(--text-link); border: 0; }
 .fk-button--text:not(:disabled):hover { color: var(--text-link-hover); transform: none; text-decoration: underline; text-underline-offset: 3px; }

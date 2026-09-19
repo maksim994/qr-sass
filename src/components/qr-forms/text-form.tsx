@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
@@ -7,8 +9,7 @@ type Props = {
 
 export function TextForm({ payload, onChange }: Props) {
   return (
-    <div>
-      <label className="label">Текст</label>
+    <FormField label="Текст">
       <textarea
         className="textarea"
         rows={4}
@@ -16,6 +17,6 @@ export function TextForm({ payload, onChange }: Props) {
         onChange={(e) => onChange({ ...payload, text: e.target.value })}
         placeholder="Введите текст"
       />
-    </div>
+    </FormField>
   );
 }

@@ -1,12 +1,27 @@
+import { recordBusinessEvent } from "@/lib/business-events";
 import { nanoid } from "nanoid";
 import { MSG } from "@/lib/user-messages";
 import { createSessionToken, hashPassword, setAuthCookie } from "@/lib/auth";
-import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
+import {
+  apiError,
+  apiSuccess,
+  getRequestId,
+  readJsonBody,
+} from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { consumeRateLimit, getClientIp, registerRateLimiter } from "@/lib/rate-limit";
+import {
+  consumeRateLimit,
+  getClientIp,
+  registerRateLimiter,
+} from "@/lib/rate-limit";
 import { registerSchema, getValidationErrorMessage } from "@/lib/validation";
+import {
+  FUNNEL_EVENTS,
+  isPrivateOrLocalIp,
+  recordFunnelEvent,
+} from "@/lib/funnel";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -20,53 +35,112 @@ export async function POST(request: Request) {
         "VALIDATION_ERROR",
         429,
         limit.retryAfterMs ? { retryAfterMs: limit.retryAfterMs } : undefined,
-        requestId
+        requestId,
       );
     }
 
     const raw = await readJsonBody(request);
     if (!raw) {
-      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(
+        MSG.INVALID_JSON,
+        "BAD_REQUEST",
+        400,
+        undefined,
+        requestId,
+      );
     }
 
     const parsed = registerSchema.safeParse(raw);
     if (!parsed.success) {
-      const message = getValidationErrorMessage(parsed.error) ?? MSG.INVALID_PAYLOAD;
-      return apiError(message, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      const message =
+        getValidationErrorMessage(parsed.error) ?? MSG.INVALID_PAYLOAD;
+      return apiError(
+        message,
+        "VALIDATION_ERROR",
+        400,
+        parsed.error.flatten(),
+        requestId,
+      );
     }
 
     const db = getDb();
     const { email, name, password, workspaceName } = parsed.data;
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
-      return apiError(MSG.USER_ALREADY_EXISTS, "CONFLICT", 409, undefined, requestId);
+      return apiError(
+        MSG.USER_ALREADY_EXISTS,
+        "CONFLICT",
+        409,
+        undefined,
+        requestId,
+      );
     }
 
     const passwordHash = await hashPassword(password);
-    const workspaceSlug = `${workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30)}-${nanoid(6)}`;
+    const workspaceSlug = `${workspaceName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .slice(0, 30)}-${nanoid(6)}`;
 
-    const user = await db.user.create({
-      data: {
-        email,
-        name,
-        passwordHash,
-        memberships: {
-          create: {
-            role: "OWNER",
-            workspace: {
-              create: {
-                name: workspaceName,
-                slug: workspaceSlug,
+    const user = await db.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          name,
+          passwordHash,
+          memberships: {
+            create: {
+              role: "OWNER",
+              workspace: {
+                create: {
+                  name: workspaceName,
+                  slug: workspaceSlug,
+                },
               },
             },
           },
         },
-      },
-    });
+        include: { memberships: true },
+      });
 
-    const token = await createSessionToken({ sub: user.id, email: user.email });
+      const workspaceId = user.memberships[0]?.workspaceId;
+      if (workspaceId) {
+        const isTest =
+          process.env.NODE_ENV !== "production" || isPrivateOrLocalIp(ip);
+        await recordFunnelEvent({
+          name: FUNNEL_EVENTS.registration_completed,
+          workspaceId,
+          userId: user.id,
+          source: "email",
+          isTest,
+          oncePerWorkspace: true,
+          tx,
+          throwOnError: true,
+        });
+        await recordBusinessEvent(tx, {
+          key: `registration:${user.id}`,
+          name: "registration_completed",
+          workspaceId,
+          userId: user.id,
+          isTest,
+          payload: { source: "email" },
+        });
+      }
+      return user;
+    });
+    const token = await createSessionToken({
+      sub: user.id,
+      email: user.email,
+      sv: user.sessionVersion,
+    });
     await setAuthCookie(token);
-    logger.info({ area: "api", route, message: "User registered", requestId, status: 200 });
+    logger.info({
+      area: "api",
+      route,
+      message: "User registered",
+      requestId,
+      status: 200,
+    });
     return apiSuccess({ userId: user.id }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
@@ -92,6 +166,12 @@ export async function POST(request: Request) {
           ? { name: error.name, message: error.message, stack: error.stack }
           : error,
     });
-    return apiError(MSG.COULD_NOT_CREATE_ACCOUNT, "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(
+      MSG.COULD_NOT_CREATE_ACCOUNT,
+      "INTERNAL_ERROR",
+      500,
+      undefined,
+      requestId,
+    );
   }
 }

@@ -1,106 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { groupLabels, type QrTypeInfo } from "@/lib/qr-types";
-import { CreateTypeLink } from "@/components/dashboard/create-type-link";
-import { Alert } from "@/components/ui";
+import { CreateTypeLink } from "./create-type-link";
+import { Button, Input } from "@/components/ui";
+import styles from "./create-flow.module.css";
 
-type Item = QrTypeInfo & {
-  locked: boolean;
-  lockHint?: string;
-};
-
+type Item = QrTypeInfo & { locked: boolean; lockHint?: string };
 const GROUP_ORDER = ["basic", "files", "business", "social"] as const;
 
 export function CreateTypePicker({ items }: { items: Item[] }) {
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState<"all" | (typeof GROUP_ORDER)[number]>("all");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const filtered = useMemo(() => items.filter((item) => (group === "all" || item.group === group)
+    && `${item.label} ${item.description} ${item.type}`.toLocaleLowerCase("ru").includes(query.trim().toLocaleLowerCase("ru"))), [items, query, group]);
+  const featured = !query.trim() && group === "all" ? items.find((item) => item.type === "URL") : undefined;
+  const sections = GROUP_ORDER.map((key) => ({ key, label: groupLabels[key], items: filtered.filter((item) => item.group === key) })).filter((section) => section.items.length);
+  function reset() { setQuery(""); setGroup("all"); searchRef.current?.focus(); }
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return items.filter((item) => {
-      if (group !== "all" && item.group !== group) return false;
-      if (!q) return true;
-      return (
-        item.label.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
-        item.type.toLowerCase().includes(q)
-      );
-    });
-  }, [items, query, group]);
-
-  const sections = useMemo(() => {
-    return GROUP_ORDER.map((key) => ({
-      key,
-      label: groupLabels[key] ?? key,
-      items: filtered.filter((item) => item.group === key),
-    })).filter((section) => section.items.length > 0);
-  }, [filtered]);
-
-  return (
-    <div>
-      <div className="qrs-create-toolbar">
-        <div className="qrs-lib-search qrs-create-search">
-          <svg className="qrs-lib-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            type="search"
-            placeholder="Поиск типа: меню, PDF, ссылка…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="qrs-lib-search-input"
-            aria-label="Поиск типа QR"
-          />
-        </div>
-        <div className="qrs-lib-filters" role="tablist" aria-label="Группы типов">
-          <button
-            type="button"
-            className={`qrs-lib-filter${group === "all" ? " active" : ""}`}
-            onClick={() => setGroup("all")}
-          >
-            Все
-          </button>
-          {GROUP_ORDER.map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={`qrs-lib-filter${group === key ? " active" : ""}`}
-              onClick={() => setGroup(key)}
-            >
-              {groupLabels[key]}
-            </button>
-          ))}
-        </div>
+  return <div className={styles.picker}>
+    {featured && <CreateTypeLink {...featured} featured />}
+    <div className={styles.toolbar}>
+      <div className={styles.filters} role="group" aria-label="Группы типов QR">
+        {(["all", ...GROUP_ORDER] as const).filter((key) => key === "all" || items.some((item) => item.group === key)).map((key) => <button key={key} type="button" aria-pressed={group === key} onClick={() => setGroup(key)}>{key === "all" ? "Все типы" : groupLabels[key]}</button>)}
       </div>
-
-      {sections.length === 0 ? (
-        <Alert variant="info" title="Ничего не найдено">
-          Попробуйте другой запрос или сбросьте фильтр группы.
-        </Alert>
-      ) : (
-        <div className="qrs-create-sections">
-          {sections.map((section) => (
-            <section key={section.key} className="qrs-create-section">
-              <h2 className="qrs-create-section-title">{section.label}</h2>
-              <div className="qrs-type-grid">
-                {section.items.map((item) => (
-                  <CreateTypeLink
-                    key={item.type}
-                    type={item.type}
-                    label={item.label}
-                    description={item.description}
-                    icon={item.icon}
-                    locked={item.locked}
-                    lockHint={item.lockHint}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
+      <div className={styles.search}><Input ref={searchRef} type="search" placeholder="Найти тип: PDF, Wi-Fi…" aria-label="Поиск типа QR" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
     </div>
-  );
+    <p className={styles.results} role="status">{query.trim() || group !== "all" ? `Найдено типов: ${filtered.length}` : "Выберите, что откроется при сканировании"}</p>
+    {filtered.length === 0 ? <div className={styles.empty}><h2>Такого типа пока не нашли</h2><p>Попробуйте другое название или вернитесь ко всем типам.</p><Button variant="secondary" onClick={reset}>Сбросить поиск и фильтр</Button></div>
+      : sections.map((section) => <section className={styles.section} key={section.key} aria-labelledby={`create-group-${section.key}`}><h2 id={`create-group-${section.key}`}>{section.label}<span>{section.items.length}</span></h2><div className={styles.typeGrid}>{section.items.map((item) => <CreateTypeLink key={item.type} {...item} />)}</div></section>)}
+  </div>;
 }

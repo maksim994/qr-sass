@@ -1,18 +1,18 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
 };
 
 export function WhatsappForm({ payload, onChange }: Props) {
-  const set = (field: string, value: string) =>
-    onChange({ ...payload, [field]: value });
+  const set = (field: string, value: string) => onChange({ ...payload, [field]: value });
 
   return (
     <div className="grid gap-4">
-      <div>
-        <label className="label">Номер телефона</label>
+      <FormField label="Номер телефона">
         <input
           className="input"
           type="tel"
@@ -20,9 +20,8 @@ export function WhatsappForm({ payload, onChange }: Props) {
           onChange={(e) => set("phone", e.target.value)}
           placeholder="+7 999 123 45 67"
         />
-      </div>
-      <div>
-        <label className="label">Сообщение</label>
+      </FormField>
+      <FormField label="Сообщение">
         <textarea
           className="textarea"
           rows={3}
@@ -30,7 +29,7 @@ export function WhatsappForm({ payload, onChange }: Props) {
           onChange={(e) => set("message", e.target.value)}
           placeholder="Текст сообщения"
         />
-      </div>
+      </FormField>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { FileUploadField } from "./file-upload-field";
+import { FormField } from "./form-field";
 
 const SOCIAL_PLATFORMS = [
   { value: "Instagram", label: "Instagram", placeholder: "instagram.com/username" },
@@ -65,14 +66,14 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Logo */}
       <div>
-        <label className="label">Логотип</label>
+        <p className="label" id="business-logo-label">Логотип</p>
         <FileUploadField
           accept="image/*"
           workspaceId={workspaceId}
           currentFilename={payload.logoFilename as string | undefined}
           currentFileUrl={(payload.logo as string) || undefined}
+          labelledBy="business-logo-label"
           onUploaded={({ fileUrl, fileId, filename }) =>
             onChange({ ...payload, logo: fileUrl, logoFileId: fileId, logoFilename: filename })
           }
@@ -80,17 +81,15 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <label className="label">Название компании</label>
+        <FormField label="Название компании" className="sm:col-span-2">
           <input
             className="input"
             value={String(payload.companyName || "")}
             onChange={(e) => set("companyName", e.target.value)}
             placeholder="ООО Компания"
           />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="label">Описание</label>
+        </FormField>
+        <FormField label="Описание" className="sm:col-span-2">
           <textarea
             className="textarea"
             rows={2}
@@ -98,21 +97,20 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
             onChange={(e) => set("description", e.target.value)}
             placeholder="Краткое описание компании"
           />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="label">Адрес</label>
+        </FormField>
+        <FormField label="Адрес" className="sm:col-span-2">
           <input
             className="input"
             value={String(payload.address || "")}
             onChange={(e) => set("address", e.target.value)}
             placeholder="г. Москва, ул. Примерная, 1"
           />
-        </div>
+        </FormField>
 
         {/* Multiple phones */}
         <div className="sm:col-span-2">
           <div className="flex items-center justify-between">
-            <label className="label">Телефоны</label>
+            <p className="label">Телефоны</p>
             <button type="button" className="btn btn-ghost btn-sm" onClick={addPhone}>
               + Добавить
             </button>
@@ -129,6 +127,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
                     className="input flex-1"
                     type="tel"
                     value={ph}
+                    aria-label={`Телефон ${i + 1}`}
                     onChange={(e) => setPhone(i, e.target.value)}
                     placeholder="+7 999 123 45 67"
                   />
@@ -145,8 +144,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
           </div>
         </div>
 
-        <div>
-          <label className="label">Email</label>
+        <FormField label="Email">
           <input
             className="input"
             type="email"
@@ -154,9 +152,8 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
             onChange={(e) => set("email", e.target.value)}
             placeholder="info@company.com"
           />
-        </div>
-        <div>
-          <label className="label">Сайт</label>
+        </FormField>
+        <FormField label="Сайт">
           <input
             className="input"
             type="url"
@@ -164,9 +161,8 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
             onChange={(e) => set("website", e.target.value)}
             placeholder="https://company.com"
           />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="label">Часы работы</label>
+        </FormField>
+        <FormField label="Часы работы" className="sm:col-span-2">
           <textarea
             className="textarea"
             rows={3}
@@ -174,13 +170,13 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
             onChange={(e) => set("hours", e.target.value)}
             placeholder={"Пн-Пт: 9:00-18:00\nСб: 10:00-15:00\nВс: выходной"}
           />
-        </div>
+        </FormField>
       </div>
 
       {/* Social links */}
       <div>
         <div className="flex items-center justify-between">
-          <label className="label">Социальные сети</label>
+          <p className="label">Социальные сети</p>
           <button type="button" className="btn btn-ghost btn-sm" onClick={addSocial}>
             + Добавить
           </button>
@@ -212,6 +208,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
                     <select
                       className="select min-w-0 flex-1"
                       value={link.platform}
+                      aria-label={`Платформа ${i + 1}`}
                       onChange={(e) => setSocialField(i, "platform", e.target.value)}
                     >
                       {SOCIAL_PLATFORMS.map((p) => (
@@ -223,6 +220,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
                     className="input min-w-0 text-sm"
                     type="url"
                     value={link.url}
+                    aria-label={`Ссылка ${platform.label}`}
                     onChange={(e) => setSocialField(i, "url", e.target.value)}
                     placeholder={platform.placeholder}
                   />
@@ -231,6 +229,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg qrs-text-subtle transition-colors hover:bg-[var(--color-danger-subtle)] hover:text-[var(--color-danger)]"
                     onClick={() => removeSocial(i)}
                     title="Удалить"
+                    aria-label={`Удалить ${platform.label}`}
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />

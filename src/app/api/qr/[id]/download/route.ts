@@ -5,7 +5,10 @@ import { apiError, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { getPlan } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
+import { evaluateScannability, styleToScannability } from "@/lib/scannability";
+import { FUNNEL_EVENTS, isPrivateOrLocalIp, recordFunnelEvent } from "@/lib/funnel";
+import { getClientIp } from "@/lib/rate-limit";
 import {
   renderStyledQrEps,
   renderStyledQrJpg,
@@ -40,11 +43,8 @@ export async function GET(request: Request, context: RouteContext) {
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
 
-    const workspace = await db.workspace.findUnique({
-      where: { id: qr.workspaceId },
-      select: { plan: true },
-    });
-    const plan = await getPlan(workspace?.plan);
+    const entitlements = await getEntitlements(qr.workspaceId);
+    const plan = entitlements.plan;
     const allowedFormats = new Set(plan.limits.exportFormats.map((f) => f.toLowerCase()));
     if (!allowedFormats.has(format.toLowerCase())) {
       return apiError(
@@ -57,11 +57,28 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     const style = (qr.styleConfig as Record<string, unknown> | null) ?? {};
+    const score = evaluateScannability(styleToScannability(style));
+    if (!score.safeToUse) {
+      return apiError(MSG.SCANNABILITY_TOO_LOW, "VALIDATION_ERROR", 400, { score }, requestId);
+    }
     const safeFilename = qr.name.replace(/[^\w.-]/g, "_");
     const utf8Filename = encodeURIComponent(qr.name);
 
+    const markDownloaded = async () => {
+      await recordFunnelEvent({
+        name: FUNNEL_EVENTS.qr_downloaded,
+        workspaceId: qr.workspaceId,
+        userId: user.id,
+        qrCodeId: qr.id,
+        source: format,
+        isTest: isPrivateOrLocalIp(getClientIp(request)),
+        oncePerQr: true,
+      });
+    };
+
     if (format === "svg") {
       const svg = await renderStyledQrSvg(qr.encodedContent, style);
+      await markDownloaded();
       return new NextResponse(svg, {
         headers: {
           "Content-Type": "image/svg+xml; charset=utf-8",
@@ -72,6 +89,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     if (format === "jpg" || format === "jpeg") {
       const jpg = await renderStyledQrJpg(qr.encodedContent, style);
+      await markDownloaded();
       return new NextResponse(new Uint8Array(jpg), {
         headers: {
           "Content-Type": "image/jpeg",
@@ -82,6 +100,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     if (format === "eps") {
       const eps = await renderStyledQrEps(qr.encodedContent, style);
+      await markDownloaded();
       return new NextResponse(new Uint8Array(eps), {
         headers: {
           "Content-Type": "application/postscript",
@@ -92,6 +111,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     if (format === "pdf") {
       const pdf = await renderStyledQrPdf(qr.encodedContent, style);
+      await markDownloaded();
       return new NextResponse(new Uint8Array(pdf), {
         headers: {
           "Content-Type": "application/pdf",
@@ -101,6 +121,7 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     const png = await renderStyledQrPng(qr.encodedContent, style);
+    await markDownloaded();
     return new NextResponse(new Uint8Array(png), {
       headers: {
         "Content-Type": "image/png",

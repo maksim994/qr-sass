@@ -1,8 +1,9 @@
 "use client";
 import { fetchApi } from "@/lib/client-api";
-
-
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { MSG } from "@/lib/user-messages";
+import { FormField } from "@/components/qr-forms/form-field";
 
 type Props = {
   qrId: string;
@@ -11,11 +12,15 @@ type Props = {
 
 export default function UpdateTarget({ qrId, currentUrl }: Props) {
   const [url, setUrl] = useState(currentUrl ?? "");
+  const router = useRouter();
+  const pending = useRef(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (pending.current) return;
+    pending.current = true;
     setLoading(true);
     setMessage(null);
 
@@ -28,24 +33,25 @@ export default function UpdateTarget({ qrId, currentUrl }: Props) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error ?? "Не удалось обновить URL.");
+        throw new Error(data?.error ?? MSG.COULD_NOT_UPDATE_TARGET);
       }
 
       setMessage({ type: "ok", text: "URL успешно обновлён." });
+      router.refresh();
     } catch (err) {
       setMessage({
         type: "err",
-        text: err instanceof Error ? err.message : "Произошла ошибка.",
+        text: err instanceof Error ? err.message : MSG.UNEXPECTED_RESPONSE,
       });
     } finally {
+      pending.current = false;
       setLoading(false);
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      <label className="label">Целевой URL</label>
-      <div className="flex gap-2">
+      <FormField label="Целевой URL">
         <input
           type="url"
           value={url}
@@ -54,12 +60,12 @@ export default function UpdateTarget({ qrId, currentUrl }: Props) {
           required
           className="input"
         />
-        <button type="submit" disabled={loading} className="btn btn-primary btn-sm shrink-0">
-          {loading ? "Сохранение…" : "Сохранить"}
-        </button>
-      </div>
+      </FormField>
+      <button type="submit" disabled={loading} className="btn btn-primary btn-sm mt-2">
+        {loading ? "Сохранение…" : "Сохранить"}
+      </button>
       {message && (
-        <p className={`mt-2 text-sm ${message.type === "ok" ? "text-green-600" : "text-red-600"}`}>
+        <p role={message.type === "err" ? "alert" : "status"} className={`mt-2 text-sm ${message.type === "ok" ? "text-success" : "text-danger"}`}>
           {message.text}
         </p>
       )}

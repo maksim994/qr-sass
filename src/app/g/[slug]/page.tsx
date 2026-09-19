@@ -1,41 +1,47 @@
-import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getDb } from "@/lib/db";
+import { safeInternalPath } from "@/lib/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { UtilityPage } from "@/components/utility/utility-page";
+import { qrUnavailablePath } from "@/lib/qr-lifetime-policy";
+import { hasQrConsent, qrConsentCookieName, requiredConsentVersion } from "@/lib/qr-consent";
+import { NOINDEX_ROBOTS } from "@/lib/seo-hygiene";
 
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-const COOKIE_NAME = "gdpr_consent";
+export const metadata = {
+  robots: NOINDEX_ROBOTS,
+};
 
 export default async function GdprGatePage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
-  const targetPath = typeof sp?.to === "string" && sp.to.startsWith("/") ? sp.to : `/r/${slug}`;
+  const targetPath = safeInternalPath(typeof sp?.to === "string" ? sp.to : "", `/r/${slug}`);
 
   const db = getDb();
   const qr = await db.qrCode.findFirst({
-    where: { shortCode: slug, kind: "DYNAMIC", isArchived: false },
-    select: { id: true, currentTargetUrl: true, payload: true },
+    where: { shortCode: slug, kind: "DYNAMIC" },
+    select: { id: true, currentTargetUrl: true, payload: true, isArchived: true },
   });
 
-  if (!qr) notFound();
+  if (!qr) redirect(qrUnavailablePath("missing"));
+  if (qr.isArchived) redirect(qrUnavailablePath("archived"));
 
   const payload = (qr.payload as Record<string, unknown>) ?? {};
-  const gdprRequired = payload.gdprRequired === true;
+  const version = requiredConsentVersion(payload);
   const policyUrl = (typeof sp?.policy === "string" ? sp.policy : null) ?? (typeof payload.gdprPolicyUrl === "string" ? payload.gdprPolicyUrl : undefined);
-  if (!gdprRequired) {
+  if (version <= 0) {
     redirect(targetPath);
   }
 
   const cookieStore = await cookies();
-  const consent = cookieStore.get(COOKIE_NAME);
-  if (consent?.value === "1") {
+  const consent = cookieStore.get(qrConsentCookieName(slug));
+  if (hasQrConsent(consent?.value, version)) {
     redirect(targetPath);
   }
 

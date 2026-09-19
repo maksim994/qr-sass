@@ -5,12 +5,15 @@ import { CreateQrClient } from "@/components/create-qr-client";
 import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
 import { getQrTypeInfo } from "@/lib/qr-types";
 import { getDb } from "@/lib/db";
-import { getPlan } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
+import { parseCreatePrefill } from "@/lib/qr-draft";
 
 export default async function CreateTypePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ type: string }>;
+  searchParams: Promise<{ url?: string; kind?: string }>;
 }) {
   const { type } = await params;
   const typeUpper = type.toUpperCase();
@@ -25,12 +28,14 @@ export default async function CreateTypePage({
   if (!workspace) redirect("/register");
 
   const db = getDb();
-  const [planInfo, totalQr] = await Promise.all([
-    getPlan(workspace.plan),
+  const [entitlements, totalQr] = await Promise.all([
+    getEntitlements(workspace.id),
     db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false } }),
   ]);
+  const planInfo = entitlements.plan;
   const qrLimit = planInfo.limits.maxQrCodes;
   const qrRemaining = qrLimit == null ? null : Math.max(0, qrLimit - totalQr);
+  const initialDraft = typeUpper === "URL" ? parseCreatePrefill(await searchParams) : null;
 
   return (
     <CreateQrClient
@@ -40,6 +45,7 @@ export default async function CreateTypePage({
         qrRemaining,
         qrLimitReached: qrLimit != null && totalQr >= qrLimit,
       }}
+      initialDraft={initialDraft}
     />
   );
 }

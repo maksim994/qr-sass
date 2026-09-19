@@ -10,12 +10,26 @@ import {
 import { MSG } from "@/lib/user-messages";
 import { logger } from "@/lib/logger";
 import { getRequestId } from "@/lib/api-response";
+import { safePostAuthPath } from "@/lib/safe-redirect";
 
 const STATE_COOKIE = "yandex_oauth_state";
 const MODE_COOKIE = "yandex_oauth_mode";
+const NEXT_COOKIE = "yandex_oauth_next";
 
-function loginRedirect(request: Request, message: string) {
-  return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, request.url));
+function readNextPath(raw: string | undefined): string {
+  if (!raw) return "/dashboard";
+  try {
+    return safePostAuthPath(decodeURIComponent(raw), "/dashboard");
+  } catch {
+    return "/dashboard";
+  }
+}
+
+function loginRedirect(request: Request, message: string, nextPath: string) {
+  const url = new URL("/login", request.url);
+  url.searchParams.set("error", message);
+  if (nextPath !== "/dashboard") url.searchParams.set("next", nextPath);
+  return NextResponse.redirect(url);
 }
 
 function profileRedirect(request: Request, params: Record<string, string>) {
@@ -35,22 +49,24 @@ export async function GET(request: Request) {
   const cookieStore = await cookies();
   const expectedState = cookieStore.get(STATE_COOKIE)?.value;
   const mode = cookieStore.get(MODE_COOKIE)?.value === "link" ? "link" : "login";
+  const nextPath = readNextPath(cookieStore.get(NEXT_COOKIE)?.value);
   cookieStore.delete(STATE_COOKIE);
   cookieStore.delete(MODE_COOKIE);
+  cookieStore.delete(NEXT_COOKIE);
 
   if (error) {
     logger.warn({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex rejected authorization", code: error, status: 302 });
     if (mode === "link") {
       return profileRedirect(request, { yandex: "error", message: MSG.YANDEX_AUTH_FAILED });
     }
-    return loginRedirect(request, MSG.YANDEX_AUTH_FAILED);
+      return loginRedirect(request, MSG.YANDEX_AUTH_FAILED, nextPath);
   }
 
   if (!code || !state || !expectedState || state !== expectedState) {
     if (mode === "link") {
       return profileRedirect(request, { yandex: "error", message: MSG.YANDEX_AUTH_INVALID_STATE });
     }
-    return loginRedirect(request, MSG.YANDEX_AUTH_INVALID_STATE);
+      return loginRedirect(request, MSG.YANDEX_AUTH_INVALID_STATE, nextPath);
   }
 
   try {
@@ -60,7 +76,7 @@ export async function GET(request: Request) {
     if (mode === "link") {
       const session = await getSession();
       if (!session?.sub) {
-        return loginRedirect(request, MSG.UNAUTHORIZED);
+        return loginRedirect(request, MSG.UNAUTHORIZED, nextPath);
       }
       await linkYandexToUser(session.sub, profile);
       logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex link success", status: 302 });
@@ -68,10 +84,10 @@ export async function GET(request: Request) {
     }
 
     const user = await findOrCreateYandexUser(profile);
-    const token = await createSessionToken({ sub: user.id, email: user.email });
+    const token = await createSessionToken({ sub: user.id, email: user.email, sv: user.sessionVersion });
     await setAuthCookie(token);
     logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex auth success", status: 302 });
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL(nextPath, request.url));
   } catch (authError) {
     logger.error({
       area: "api",
@@ -96,6 +112,6 @@ export async function GET(request: Request) {
     if (mode === "link") {
       return profileRedirect(request, { yandex: "error", message });
     }
-    return loginRedirect(request, message);
+    return loginRedirect(request, message, nextPath);
   }
 }

@@ -4,6 +4,9 @@ import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-resp
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { sanitizeTrackingPixels } from "@/lib/tracking-pixels";
+import { stampTrackingConsentVersion } from "@/lib/qr-consent";
+import { assertAllowsDynamic } from "@/lib/entitlements";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -22,12 +25,14 @@ export async function PATCH(request: Request, context: RouteContext) {
       return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
     }
 
-    const trackingPixels: Record<string, string | null> = {};
-    if (raw.metaPixelId !== undefined) trackingPixels.metaPixelId = typeof raw.metaPixelId === "string" && raw.metaPixelId.trim() ? raw.metaPixelId.trim() : null;
-    if (raw.ga4Id !== undefined) trackingPixels.ga4Id = typeof raw.ga4Id === "string" && raw.ga4Id.trim() ? raw.ga4Id.trim() : null;
-    if (raw.gtmId !== undefined) trackingPixels.gtmId = typeof raw.gtmId === "string" && raw.gtmId.trim() ? raw.gtmId.trim() : null;
-    if (raw.ymCounterId !== undefined) trackingPixels.ymCounterId = typeof raw.ymCounterId === "string" && raw.ymCounterId.trim() ? raw.ymCounterId.trim() : null;
-    if (raw.vkPixelId !== undefined) trackingPixels.vkPixelId = typeof raw.vkPixelId === "string" && raw.vkPixelId.trim() ? raw.vkPixelId.trim() : null;
+    if (typeof raw.gtmId === "string" && raw.gtmId.trim()) {
+      return apiError(MSG.GTM_DISABLED, "VALIDATION_ERROR", 400, undefined, requestId);
+    }
+
+    const sanitized = sanitizeTrackingPixels(raw);
+    if (!sanitized.ok) {
+      return apiError(sanitized.error, "VALIDATION_ERROR", 400, undefined, requestId);
+    }
 
     const db = getDb();
     const qr = await db.qrCode.findUnique({ where: { id } });
@@ -41,34 +46,23 @@ export async function PATCH(request: Request, context: RouteContext) {
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
 
-    const currentPayload = (qr.payload as Record<string, unknown>) ?? {};
-    const curr = (currentPayload.trackingPixels as Record<string, unknown>) ?? {};
-    const newTrackingPixels: Record<string, string> = {};
-    const v = (key: "metaPixelId" | "ga4Id" | "gtmId" | "ymCounterId" | "vkPixelId") => {
-      if (raw[key] !== undefined) return trackingPixels[key];
-      return (curr[key] as string) ?? null;
-    };
-    const m = v("metaPixelId");
-    const g = v("ga4Id");
-    const t = v("gtmId");
-    const ym = v("ymCounterId");
-    const vk = v("vkPixelId");
-    if (m) newTrackingPixels.metaPixelId = m;
-    if (g) newTrackingPixels.ga4Id = g;
-    if (t) newTrackingPixels.gtmId = t;
-    if (ym) newTrackingPixels.ymCounterId = ym;
-    if (vk) newTrackingPixels.vkPixelId = vk;
+    const gate = await assertAllowsDynamic(qr.workspaceId);
+    if (!gate.ok) {
+      return apiError(MSG.PLAN_DYNAMIC_REQUIRED, "FORBIDDEN", 403, undefined, requestId);
+    }
 
+    const currentPayload = (qr.payload as Record<string, unknown>) ?? {};
     const newPayload = { ...currentPayload };
-    if (Object.keys(newTrackingPixels).length === 0) {
+    if (!sanitized.value) {
       delete newPayload.trackingPixels;
     } else {
-      newPayload.trackingPixels = newTrackingPixels;
+      newPayload.trackingPixels = sanitized.value;
     }
+    const payload = stampTrackingConsentVersion(currentPayload, newPayload);
 
     await db.qrCode.update({
       where: { id },
-      data: { payload: newPayload as object },
+      data: { payload: payload as object },
     });
 
     logger.info({

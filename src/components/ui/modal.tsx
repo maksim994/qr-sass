@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useId, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./button";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  closeDisabled?: boolean;
   title: ReactNode;
   subtitle?: ReactNode;
   size?: "sm" | "md" | "lg";
@@ -14,37 +16,53 @@ type Props = {
   children: ReactNode;
 };
 
-export function Modal({ open, onClose, title, subtitle, size = "md", footer, children }: Props) {
+export function Modal({ open, onClose, closeDisabled = false, title, subtitle, size = "md", footer, children }: Props) {
   const titleId = useId();
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  const handleEscape = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
+    const overlay = overlayRef.current;
+    const siblings = Array.from(document.body.children).filter((node) => node !== overlay);
+    siblings.forEach((node) => {
+      if (node instanceof HTMLElement) node.inert = true;
+    });
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", onKeyDown);
-
     return () => {
+      siblings.forEach((node) => {
+        if (node instanceof HTMLElement) node.inert = false;
+      });
       document.body.style.overflow = prevOverflow;
-      document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open, onClose]);
+  }, [open]);
+
+  // Restore background interactivity before returning focus to the trigger.
+  useFocusTrap(open, dialogRef, handleEscape);
 
   if (!open || typeof document === "undefined") return null;
 
   const sizeClass = size === "sm" ? "fk-modal--sm" : size === "lg" ? "fk-modal--lg" : "";
 
   return createPortal(
-    <div className="fk-modal-overlay" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      ref={overlayRef}
+      className="fk-modal-overlay"
+      role="presentation"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div
+        ref={dialogRef}
         className={`fk-modal ${sizeClass}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
       >
         <div className="fk-modal__head">
           <div>
@@ -53,7 +71,7 @@ export function Modal({ open, onClose, title, subtitle, size = "md", footer, chi
             </h2>
             {subtitle ? <p className="fk-modal__sub">{subtitle}</p> : null}
           </div>
-          <Button variant="ghost" size="sm" type="button" onClick={onClose} aria-label="Закрыть">
+          <Button variant="ghost" size="sm" type="button" onClick={onClose} disabled={closeDisabled} aria-label="Закрыть">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>

@@ -1,4 +1,5 @@
 "use client";
+import styles from "@/components/admin/admin.module.css";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -21,7 +22,14 @@ type OverrideRow = {
 };
 
 type Props = {
-  initialOverrides: Record<string, { maxQrCodes: number | null; maxUsers: number | null; priceRub?: number | null }>;
+  initialOverrides: Record<
+    string,
+    {
+      maxQrCodes: number | null;
+      maxUsers: number | null;
+      priceRub?: number | null;
+    }
+  >;
 };
 
 export function PlansForm({ initialOverrides }: Props) {
@@ -61,7 +69,9 @@ export function PlansForm({ initialOverrides }: Props) {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error((err as { error?: string })?.error ?? "Ошибка сохранения");
+        throw new Error(
+          (err as { error?: string })?.error ?? "Ошибка сохранения",
+        );
       }
       router.refresh();
     } catch (e) {
@@ -72,7 +82,7 @@ export function PlansForm({ initialOverrides }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={styles.stack}>
       {error ? (
         <Alert variant="danger" onClose={() => setError(null)}>
           {error}
@@ -80,21 +90,25 @@ export function PlansForm({ initialOverrides }: Props) {
       ) : null}
 
       {PLAN_IDS.map((planId) => (
-        <section
-          key={planId}
-          className="qrs-admin-form-section"
-        >
-          <h2 style={{ font: "var(--fw-bold) 1.1rem/1.2 var(--font-display)", color: "var(--text-strong)" }}>
+        <section key={planId} className="qrs-admin-form-section">
+          <h2
+            style={{
+              font: "var(--fw-bold) 1.1rem/1.2 var(--font-display)",
+              color: "var(--text-strong)",
+            }}
+          >
             {PLAN_NAMES[planId]}
           </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={styles.planFields}>
             <Field label="Цена, ₽/мес" htmlFor={`price-${planId}`}>
               <Input
                 id={`price-${planId}`}
                 type="number"
                 min={0}
                 placeholder="0 = бесплатно"
-                value={state[planId]?.priceRub != null ? state[planId].priceRub : ""}
+                value={
+                  state[planId]?.priceRub != null ? state[planId].priceRub : ""
+                }
                 onChange={(e) => {
                   const v = e.target.value;
                   setState((s) => ({
@@ -107,12 +121,20 @@ export function PlansForm({ initialOverrides }: Props) {
                 }}
               />
             </Field>
-            <Field label="Макс. QR-кодов" htmlFor={`qr-${planId}`} hint="Пусто = без лимита">
+            <Field
+              label="Макс. QR-кодов"
+              htmlFor={`qr-${planId}`}
+              hint="Пусто = без лимита"
+            >
               <Input
                 id={`qr-${planId}`}
                 type="number"
                 min={0}
-                value={state[planId]?.maxQrCodes != null ? state[planId].maxQrCodes : ""}
+                value={
+                  state[planId]?.maxQrCodes != null
+                    ? state[planId].maxQrCodes
+                    : ""
+                }
                 onChange={(e) => {
                   const v = e.target.value;
                   setState((s) => ({
@@ -125,12 +147,18 @@ export function PlansForm({ initialOverrides }: Props) {
                 }}
               />
             </Field>
-            <Field label="Макс. пользователей" htmlFor={`users-${planId}`} hint="Пусто = без лимита">
+            <Field
+              label="Макс. пользователей"
+              htmlFor={`users-${planId}`}
+              hint="Пусто = без лимита"
+            >
               <Input
                 id={`users-${planId}`}
                 type="number"
                 min={0}
-                value={state[planId]?.maxUsers != null ? state[planId].maxUsers : ""}
+                value={
+                  state[planId]?.maxUsers != null ? state[planId].maxUsers : ""
+                }
                 onChange={(e) => {
                   const v = e.target.value;
                   setState((s) => ({
@@ -144,7 +172,11 @@ export function PlansForm({ initialOverrides }: Props) {
               />
             </Field>
             <div className="flex items-end">
-              <Button type="button" onClick={() => save(planId)} disabled={saving === planId}>
+              <Button
+                type="button"
+                onClick={() => save(planId)}
+                disabled={saving === planId}
+              >
                 {saving === planId ? "Сохранение…" : "Сохранить"}
               </Button>
             </div>

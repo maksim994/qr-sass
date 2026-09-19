@@ -14,13 +14,7 @@ export function WorkspaceSwitcher({ workspaces, currentId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  if (workspaces.length <= 1) {
-    return (
-      <div className="rounded-lg bg-blue-50 px-3 py-2">
-        <p className="text-xs font-semibold text-blue-700">{workspaces[0]?.name ?? "—"}</p>
-      </div>
-    );
-  }
+  if (workspaces.length <= 1) return null;
 
   async function select(id: string) {
     if (id === currentId) return;
@@ -40,8 +34,9 @@ export function WorkspaceSwitcher({ workspaces, currentId }: Props) {
 
   return (
     <div className="rounded-lg bg-blue-50 px-3 py-2">
-      <label className="text-xs font-semibold text-blue-700">Рабочая область</label>
+      <label htmlFor="cabinet-switcher" className="text-xs font-semibold text-blue-700">Кабинет</label>
       <select
+        id="cabinet-switcher"
         value={currentId}
         onChange={(e) => select(e.target.value)}
         disabled={loading}

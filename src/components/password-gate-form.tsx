@@ -9,13 +9,17 @@ import { UtilityPage } from "@/components/utility/utility-page";
 
 type Props = {
   code: string;
-  redirectTo: string;
   error?: string;
 };
 
-export function PasswordGateForm({ code, redirectTo, error }: Props) {
+export function PasswordGateForm({ code, error }: Props) {
   const [loading, setLoading] = useState(false);
-  const errMsg = error === "invalid_password" ? "Неверный пароль. Попробуйте ещё раз." : "";
+  const errMsg =
+    error === "invalid_password"
+      ? "Неверный пароль. Попробуйте ещё раз."
+      : error === "rate_limited"
+        ? "Слишком много попыток. Подождите и попробуйте снова."
+        : "";
 
   return (
     <UtilityPage
@@ -37,7 +41,6 @@ export function PasswordGateForm({ code, redirectTo, error }: Props) {
         className="qrs-utility-form"
       >
         <input type="hidden" name="code" value={code} />
-        <input type="hidden" name="redirectTo" value={redirectTo} />
         <Field label="Пароль" htmlFor="qr-password" required>
           <Input
             id="qr-password"

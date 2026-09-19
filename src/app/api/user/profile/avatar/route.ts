@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     const fileId = nanoid(12);
     const key = getAvatarKey(session.sub, fileId, validated.ext);
-    const url = await uploadFile(buffer, key, validated.mime);
+    const url = await uploadFile(buffer, key, validated.mime, "public");
 
     const db = getDb();
     const updated = await db.user.update({

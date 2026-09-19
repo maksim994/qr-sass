@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { CopyButton } from "@/components/copy-button";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui";
 import {
   apiDocsEndpoints,
@@ -9,6 +10,8 @@ import {
   methodBadgeVariant,
   type ApiEndpoint,
 } from "@/lib/api-docs-content";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 type Props = {
   baseUrl: string;
@@ -19,12 +22,19 @@ function MethodBadge({ method }: { method: ApiEndpoint["method"] }) {
 }
 
 function CodeBlock({ children }: { children: string }) {
-  return <pre className="qrs-api-docs-pre">{children}</pre>;
+  return <div><pre className="qrs-api-docs-pre"><code>{children}</code></pre><CopyButton value={children} label="Скопировать пример" /></div>;
 }
 
 export function ApiDocsClient({ baseUrl }: Props) {
   const [navOpen, setNavOpen] = useState(false);
   const [activeId, setActiveId] = useState(apiDocsNav[0]?.id ?? "authentication");
+  const overlayNav = useMediaQuery("(max-width: 980px)");
+  const navRef = useRef<HTMLElement>(null);
+  const navId = useId();
+  const overlayClosed = overlayNav && !navOpen;
+  const closeNav = useCallback(() => setNavOpen(false), []);
+
+  useFocusTrap(overlayNav && navOpen, navRef, closeNav);
 
   const groups = useMemo(() => {
     const map = new Map<string, typeof apiDocsNav>();
@@ -57,7 +67,7 @@ export function ApiDocsClient({ baseUrl }: Props) {
   function scrollTo(id: string) {
     setActiveId(id);
     setNavOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   }
 
   return (
@@ -71,7 +81,15 @@ export function ApiDocsClient({ baseUrl }: Props) {
         />
       ) : null}
 
-      <aside className={`qrs-api-docs-nav ${navOpen ? "open" : ""}`} aria-label="Разделы документации">
+      <aside
+        ref={navRef}
+        id={navId}
+        className={`qrs-api-docs-nav ${navOpen ? "open" : ""}`}
+        aria-label="Разделы документации"
+        inert={overlayClosed ? true : undefined}
+        aria-hidden={overlayClosed ? true : undefined}
+        tabIndex={overlayNav && navOpen ? -1 : undefined}
+      >
         <div className="qrs-api-docs-nav-inner qrs-scroll">
           {groups.map(([group, items]) => (
             <div key={group} className="qrs-api-docs-nav-group">
@@ -100,6 +118,8 @@ export function ApiDocsClient({ baseUrl }: Props) {
           <button
             type="button"
             className="fk-button fk-button--secondary fk-button--sm"
+            aria-expanded={navOpen}
+            aria-controls={navId}
             onClick={() => setNavOpen(true)}
           >
             Разделы
@@ -119,7 +139,7 @@ export function ApiDocsClient({ baseUrl }: Props) {
             </li>
           </ul>
           <p className="qrs-api-docs-text">
-            API-ключи создаются в{" "}
+            API-ключи доступны на тарифе Бизнес и создаются в{" "}
             <Link href="/dashboard/api-keys" className="qrs-navlink">
               разделе API-ключи
             </Link>

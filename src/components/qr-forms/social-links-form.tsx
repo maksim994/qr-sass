@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 const PLATFORM_OPTIONS = [
   "Instagram",
   "Facebook",
@@ -44,8 +46,7 @@ export function SocialLinksForm({ payload, onChange }: Props) {
     <div className="space-y-4">
       {links.map((link, i) => (
         <div key={i} className="card-flat p-3 grid gap-2 sm:grid-cols-[auto_1fr_auto] items-end">
-          <div>
-            <label className="label">Платформа</label>
+          <FormField label="Платформа">
             <select
               className="select"
               value={link.platform}
@@ -57,9 +58,8 @@ export function SocialLinksForm({ payload, onChange }: Props) {
                 </option>
               ))}
             </select>
-          </div>
-          <div>
-            <label className="label">URL</label>
+          </FormField>
+          <FormField label="URL">
             <input
               className="input"
               type="url"
@@ -67,7 +67,7 @@ export function SocialLinksForm({ payload, onChange }: Props) {
               onChange={(e) => setField(i, "url", e.target.value)}
               placeholder="https://..."
             />
-          </div>
+          </FormField>
           <button
             type="button"
             className="btn btn-sm text-red-600 self-end"

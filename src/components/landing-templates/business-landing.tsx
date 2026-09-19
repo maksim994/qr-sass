@@ -1,5 +1,6 @@
 import { isSafeUrl } from "@/lib/url";
 import { Button } from "@/components/ui/button";
+import { PreviewImage } from "@/components/ui/preview-image";
 import {
   HostedLandingCard,
   HostedLandingShell,
@@ -59,7 +60,7 @@ export function BusinessLanding({ payload }: Props) {
         <div className="qrs-hosted-business__header">
           {logoUrl ? (
             <div className="qrs-hosted-business__logo">
-              <img src={logoUrl} alt={companyName} />
+              <PreviewImage src={logoUrl} alt={companyName} />
             </div>
           ) : (
             <div className="qrs-hosted-business__avatar" aria-hidden="true">

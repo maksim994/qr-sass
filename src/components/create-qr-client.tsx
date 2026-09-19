@@ -2,7 +2,7 @@
 
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useId, useState, useSyncExternalStore } from "react";
 import { QrContentForm } from "@/components/qr-forms";
 import { QrDesigner, type QrStyle } from "@/components/qr-designer";
 import { BusinessLanding } from "@/components/landing-templates/business-landing";
@@ -12,15 +12,27 @@ import { QrContentType } from "@prisma/client";
 import Link from "next/link";
 import { Field, Input, Button, Alert } from "@/components/ui";
 import { QrAdvancedSettingsBlock } from "@/components/qr/qr-advanced-settings";
+import { canonicalQrData } from "@/lib/qr-canonical";
+import { evaluateScannability, styleToScannability } from "@/lib/scannability";
 import {
-  getQrWizardSubtitle,
   QrKindSegment,
-  QrStaticInfoAlert,
   QrWizardPageHead,
   QrWizardPreview,
   QrWizardTabs,
 } from "@/components/qr/qr-wizard-shared";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
+import { QrLifetimeNote } from "@/components/qr/qr-lifetime-note";
+import {
+  clearQrCreateDraft,
+  nameFromUrl,
+  parseQrCreateDraft,
+  readQrDraftSnapshot,
+  subscribeQrDraft,
+  type QrCreateDraft,
+} from "@/lib/qr-draft";
+
+import styles from "@/components/dashboard/create-flow.module.css";
+import { MSG } from "@/lib/user-messages";
 
 type PlanGate = {
   allowsDynamic: boolean;
@@ -51,9 +63,11 @@ const defaultStyle: QrStyle = {
 export function CreateQrClient({
   workspaceId,
   planGate,
+  initialDraft = null,
 }: {
   workspaceId: string;
   planGate: PlanGate;
+  initialDraft?: QrCreateDraft | null;
 }) {
   const params = useParams();
   const router = useRouter();
@@ -63,50 +77,66 @@ export function CreateQrClient({
   const needsDynamicByType = !!typeInfo?.needsHostedPage || typeParam === "VCARD";
   const dynamicBlocked = needsDynamicByType && !planGate.allowsDynamic;
 
-  const [name, setName] = useState(typeInfo?.label ? `${typeInfo.label} QR` : "Новый QR");
-  const [kind, setKind] = useState<"STATIC" | "DYNAMIC">(
-    planGate.allowsDynamic && canChooseKind ? "STATIC" : "STATIC"
-  );
+  const storedRaw = useSyncExternalStore(subscribeQrDraft, readQrDraftSnapshot, () => null);
+  const storedDraft = typeParam === "URL" ? parseQrCreateDraft(storedRaw) : null;
+  const draft = typeParam === "URL" ? initialDraft ?? storedDraft : null;
+
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [kindOverride, setKindOverride] = useState<"STATIC" | "DYNAMIC" | null>(null);
   const [payload, setPayload] = useState<Record<string, unknown>>({});
   const [style, setStyle] = useState<QrStyle>(defaultStyle);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"content" | "design">("content");
+  const contentPanelId = useId();
+  const designPanelId = useId();
 
   const [expireAt, setExpireAt] = useState("");
   const [maxScans, setMaxScans] = useState("");
   const [password, setPassword] = useState("");
   const [gdprRequired, setGdprRequired] = useState(false);
   const [gdprPolicyUrl, setGdprPolicyUrl] = useState("");
-  const [smartRedirect, setSmartRedirect] = useState<{ default?: string; ios?: string; android?: string; desktop?: string }>({});
+  const [smartRedirect] = useState<{ default?: string; ios?: string; android?: string; desktop?: string }>({});
   const [trackingPixels, setTrackingPixels] = useState<{ metaPixelId?: string; ga4Id?: string; gtmId?: string; ymCounterId?: string; vkPixelId?: string }>({});
-  const [abTest, setAbTest] = useState<{ urlA?: string; urlB?: string }>({});
+  const [abTest] = useState<{ urlA?: string; urlB?: string }>({});
 
-  const previewData = useMemo(() => {
-    if (typeParam === "URL") return String(payload.url || "https://example.com");
-    if (typeParam === "TEXT") return String(payload.text || "Hello");
-    if (typeParam === "PHONE") return `tel:${payload.phone || ""}`;
-    if (typeParam === "EMAIL") return `mailto:${payload.email || ""}`;
-    if (typeParam === "WIFI") return `WIFI:S:${payload.ssid || ""};T:WPA;P:${payload.password || ""};;`;
-    if (typeParam === "INSTAGRAM") return `https://instagram.com/${String(payload.username || "example").replace(/^@/, "")}`;
-    if (typeParam === "FACEBOOK") return String(payload.pageUrl || "https://facebook.com");
-    if (typeParam === "WHATSAPP") return `https://wa.me/${String(payload.phone || "")}`;
-    return "https://example.com";
-  }, [typeParam, payload]);
-
-  const qrRef = useQrStylingPreview(previewData, style);
+  const urlTouched = Object.prototype.hasOwnProperty.call(payload, "url");
+  const resolvedUrl = typeParam === "URL"
+    ? (urlTouched ? String(payload.url ?? "") : (draft?.url ?? ""))
+    : String(payload.url ?? "");
+  const formPayload = typeParam === "URL" ? { ...payload, url: resolvedUrl } : payload;
+  const requestedKind = kindOverride ?? draft?.kind ?? "STATIC";
+  const kind: "STATIC" | "DYNAMIC" = planGate.allowsDynamic ? requestedKind : "STATIC";
+  const wantedDynamic = typeParam === "URL" && requestedKind === "DYNAMIC" && !planGate.allowsDynamic;
+  const defaultName = typeInfo?.label ? `${typeInfo.label} QR` : "Новый QR";
+  const name = nameOverride ?? (resolvedUrl ? nameFromUrl(resolvedUrl) : defaultName);
 
   const actualKindPreview = typeInfo?.needsHostedPage ? "DYNAMIC" : canChooseKind ? kind : "STATIC";
+  const canonical = canonicalQrData({
+    contentType: typeParam as QrContentType,
+    payload: formPayload,
+    kind: actualKindPreview,
+    shortCode: null,
+    appUrl: typeof window !== "undefined" ? window.location.origin : "",
+  });
+  const previewData = canonical.data;
+  const qrRef = useQrStylingPreview(previewData, style);
+  const scan = evaluateScannability(styleToScannability(style));
+  const downloadBlockedReason = canonical.isDynamic
+    ? "Сначала сохраните QR — иначе скачается неуправляемая ссылка, которую нельзя сменить после печати."
+    : !canonical.ready
+      ? "Заполните содержимое, чтобы скачать код."
+      : undefined;
   const showAdvanced = (kind === "DYNAMIC" && canChooseKind) || !!typeInfo?.needsHostedPage;
-  const showStaticInfo = kind === "STATIC" && canChooseKind && !typeInfo?.needsHostedPage && activeTab === "content";
 
   async function handleSave() {
+    if (saving) return;
     setSaving(true);
     setError("");
 
     if (planGate.qrLimitReached) {
       setSaving(false);
-      setError("Достигнут лимит QR-кодов по тарифу. Обновите тариф или удалите лишние коды.");
+      setError(MSG.QR_CREATE_LIMIT);
       return;
     }
 
@@ -115,11 +145,11 @@ export function CreateQrClient({
 
     if ((actualKind === "DYNAMIC" || typeParam === "VCARD") && !planGate.allowsDynamic) {
       setSaving(false);
-      setError("Динамические QR доступны на тарифах Про и Бизнес.");
+      setError(MSG.QR_CREATE_DYNAMIC_PLAN);
       return;
     }
 
-    const mergedPayload = { ...payload };
+    const mergedPayload = { ...formPayload };
     if (actualKind === "DYNAMIC") {
       mergedPayload.gdprRequired = gdprRequired;
       if (gdprPolicyUrl.trim()) mergedPayload.gdprPolicyUrl = gdprPolicyUrl.trim();
@@ -133,7 +163,6 @@ export function CreateQrClient({
         const tp: Record<string, string> = {};
         if (trackingPixels.metaPixelId?.trim()) tp.metaPixelId = trackingPixels.metaPixelId.trim();
         if (trackingPixels.ga4Id?.trim()) tp.ga4Id = trackingPixels.ga4Id.trim();
-        if (trackingPixels.gtmId?.trim()) tp.gtmId = trackingPixels.gtmId.trim();
         if (trackingPixels.ymCounterId?.trim()) tp.ymCounterId = trackingPixels.ymCounterId.trim();
         if (trackingPixels.vkPixelId?.trim()) tp.vkPixelId = trackingPixels.vkPixelId.trim();
         if (Object.keys(tp).length) mergedPayload.trackingPixels = tp;
@@ -161,26 +190,33 @@ export function CreateQrClient({
       if (password.trim()) body.password = password;
     }
 
-    const response = await fetchApi("/api/qr", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    try {
+      const response = await fetchApi("/api/qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-    const parsed = await parseApiResponse<{ qrId?: string }>(response);
-    setSaving(false);
+      const parsed = await parseApiResponse<{ qrId?: string }>(response);
+      setSaving(false);
 
-    if (!parsed.ok) {
-      setError(parsed.error ?? "Не удалось создать QR-код.");
-      return;
+      if (!parsed.ok) {
+        setError(parsed.error ?? MSG.COULD_NOT_CREATE_QR);
+        return;
+      }
+
+      trackGoal(PRODUCT_GOALS.qr_created, { contentType: typeParam, kind: actualKind });
+      if (actualKind === "DYNAMIC") {
+        trackGoal(PRODUCT_GOALS.dynamic_qr_created, { contentType: typeParam });
+      }
+      clearQrCreateDraft();
+
+      router.push(`/dashboard/qr/${parsed.data?.qrId}`);
+    } catch {
+      setError(MSG.AUTH_NETWORK_ERROR);
+    } finally {
+      setSaving(false);
     }
-
-    trackGoal(PRODUCT_GOALS.qr_created, { contentType: typeParam, kind: actualKind });
-    if (actualKind === "DYNAMIC") {
-      trackGoal(PRODUCT_GOALS.dynamic_qr_created, { contentType: typeParam });
-    }
-
-    router.push(`/dashboard/qr/${parsed.data?.qrId}`);
   }
 
   if (!typeInfo) {
@@ -197,30 +233,21 @@ export function CreateQrClient({
   }
 
   return (
-    <div className="qrs-dash-main-inner">
+    <div className={styles.editor}>
       <QrWizardPageHead
         backHref="/dashboard/create"
+        backLabel="К выбору типа QR"
         contentType={typeParam}
-        title={typeInfo.description}
-        subtitle={getQrWizardSubtitle(typeParam, typeInfo.label)}
-        kindControl={
-          typeInfo.needsHostedPage ? (
-            <span className="fk-badge fk-badge--accent">Динамический</span>
-          ) : canChooseKind && planGate.allowsDynamic ? (
-            <QrKindSegment value={kind} onChange={setKind} />
-          ) : canChooseKind && !planGate.allowsDynamic ? (
-            <QrKindSegment value="STATIC" onChange={() => {}} disabled />
-          ) : (
-            <QrKindSegment value="STATIC" onChange={() => {}} disabled />
-          )
-        }
+        title={`QR-код: ${typeInfo.label}`}
+        subtitle="Добавьте содержимое и настройте оформление перед сохранением."
       />
 
       <div className="qrs-build-grid">
         <div>
           {(planGate.qrLimitReached ||
             (planGate.qrRemaining != null && planGate.qrRemaining <= 3) ||
-            dynamicBlocked) && (
+            dynamicBlocked ||
+            wantedDynamic) && (
             <div className="qrs-create-alerts">
               {planGate.qrLimitReached ? (
                 <Alert variant="warning" title="Лимит QR-кодов">
@@ -238,7 +265,14 @@ export function CreateQrClient({
                 </Alert>
               ) : null}
 
-              {dynamicBlocked ? (
+              {wantedDynamic ? (
+                <Alert variant="warning" title="Нужен тариф Про">
+                  Вы выбрали код, который можно менять после печати. На бесплатном тарифе доступна только статика.{" "}
+                  <Link href="/dashboard/billing" className="qrs-navlink">
+                    Перейти на Про
+                  </Link>
+                </Alert>
+              ) : dynamicBlocked ? (
                 <Alert variant="warning" title="Нужен тариф Про">
                   Этот тип создаёт динамический QR с короткой ссылкой. На бесплатном тарифе доступны только статические коды.{" "}
                   <Link href="/dashboard/billing" className="qrs-navlink">
@@ -249,34 +283,58 @@ export function CreateQrClient({
             </div>
           )}
 
-          <div style={{ marginBottom: "22px" }}>
-            <Field
-              label="Название"
-              hint="Укажите название для удобного поиска в библиотеке."
-            >
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Например, Ссылка на сайт"
-            />
-          </Field>
-          </div>
+          {canChooseKind ? <section className={styles.mode} aria-labelledby="qr-mode-title">
+            <h2 id="qr-mode-title">Как будет работать ссылка</h2>
+            <QrKindSegment value={kind} onChange={setKindOverride} disabled={!planGate.allowsDynamic} />
+            <p>{kind === "DYNAMIC" ? "Ссылку можно менять после печати. Открытия будут доступны в аналитике." : "Ссылка записана прямо в QR-код. После печати её нельзя изменить; статистика открытий не собирается."}
+              {!planGate.allowsDynamic && <> Для смены ссылки и аналитики — <Link href="/dashboard/billing">тариф Про</Link>.</>}
+            </p>
+          </section> : needsDynamicByType ? <div className={styles.mode}><p>Материал откроется по постоянной ссылке QR-S. Готовый QR появится после сохранения.</p></div> : null}
 
-          <QrWizardTabs value={activeTab} onChange={setActiveTab} />
+          <QrWizardTabs
+            value={activeTab}
+            onChange={setActiveTab}
+            contentId={contentPanelId}
+            designId={designPanelId}
+          />
+
+          <a href="#create-preview" className={styles.previewJump}>К предпросмотру ↓</a>
 
           {activeTab === "content" ? (
-            <div className="qrs-wizard-card">
+            <div
+              id={contentPanelId}
+              role="tabpanel"
+              aria-labelledby={`${contentPanelId}-tab`}
+              className="qrs-wizard-card"
+            >
+              <p className={styles.contentHint}>{typeInfo.description}</p>
               <QrContentForm
                 type={typeParam as QrContentType}
-                payload={payload}
+                payload={formPayload}
                 onChange={setPayload}
                 workspaceId={workspaceId}
               />
             </div>
           ) : (
-            <QrDesigner style={style} onChange={setStyle} workspaceId={workspaceId} />
+            <div id={designPanelId} role="tabpanel" aria-labelledby={`${designPanelId}-tab`}>
+              <QrDesigner style={style} onChange={setStyle} workspaceId={workspaceId} />
+            </div>
           )}
+
+          <div className={styles.nameField}>
+            <Field
+              label="Название в библиотеке"
+              hint={resolvedUrl && !nameOverride ? "Подставили из адреса — можно изменить." : "Укажите название для удобного поиска в библиотеке."}
+            >
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setNameOverride(e.target.value)}
+              placeholder="Например, Ссылка на сайт"
+            />
+          </Field>
+          </div>
+
 
           {showAdvanced ? (
             <QrAdvancedSettingsBlock
@@ -296,20 +354,19 @@ export function CreateQrClient({
               }}
               trackingPixels={trackingPixels}
               onTrackingPixelsChange={setTrackingPixels}
-              abTest={abTest}
-              onAbTestChange={setAbTest}
             />
           ) : null}
 
-          {showStaticInfo ? (
-            <div style={{ marginTop: "20px" }}>
-              <QrStaticInfoAlert />
-            </div>
-          ) : null}
+
         </div>
 
         <QrWizardPreview
-          kindLabel={actualKindPreview === "DYNAMIC" ? "Динамический" : "Статический"}
+          id="create-preview"
+          kindLabel={canonical.isDynamic ? "Динамический" : "Статический"}
+          previewReady={canonical.ready}
+          emptyPreviewTitle={canonical.isDynamic ? "QR появится после создания" : "Здесь будет ваш QR-код"}
+          emptyPreviewHint={canonical.isDynamic ? "Сначала сохраним материал и назначим коду постоянную ссылку." : "Заполните содержимое — предпросмотр обновится автоматически."}
+          saveDisabled={planGate.qrLimitReached || dynamicBlocked}
           qrRef={qrRef}
           hostedPreview={typeParam === "BUSINESS" ? <BusinessLanding payload={payload} /> : undefined}
           saveLabel="Создать QR-код"
@@ -318,6 +375,15 @@ export function CreateQrClient({
           error={error}
           previewData={previewData}
           style={style}
+          readable={scan.safeToUse}
+          downloadBlockedReason={canonical.ready ? downloadBlockedReason : undefined}
+          lifetimeHint={
+            actualKindPreview === "DYNAMIC" ? (
+              <QrLifetimeNote variant="download-dynamic" />
+            ) : canonical.ready ? (
+              <QrLifetimeNote variant="download-static" />
+            ) : null
+          }
         />
       </div>
     </div>

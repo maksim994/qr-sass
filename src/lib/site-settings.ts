@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { getDefaultRobotsTxt } from "@/lib/seo-hygiene";
 
 export type SiteSettingsData = {
   yandexMetrikaId: string | null;
@@ -16,17 +17,7 @@ const defaults: SiteSettingsData = {
   indexNowKey: null,
 };
 
-export function getDefaultRobotsTxt(): string {
-  const base = process.env.APP_URL ?? "http://localhost:3000";
-  return `User-agent: *
-Allow: /
-Disallow: /dashboard
-Disallow: /dashboard/
-Disallow: /admin
-Disallow: /admin/
-
-Sitemap: ${base}/sitemap.xml`;
-}
+export { getDefaultRobotsTxt };
 
 /** При build (нет БД) возвращает defaults, чтобы layout не падал */
 export async function getSiteSettings(): Promise<SiteSettingsData> {

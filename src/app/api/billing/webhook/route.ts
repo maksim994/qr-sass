@@ -1,83 +1,78 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MSG } from "@/lib/user-messages";
-import { getDb } from "@/lib/db";
+import { logger } from "@/lib/logger";
+import { getYookassaPayment } from "@/lib/yookassa";
+import { billingActionFromRemoteStatus } from "@/lib/billing-provider";
+import { cancelPendingPayment, fulfillYookassaPayment } from "@/lib/billing-apply";
 
-// YooKassa IPs for webhook verification
-const YOOKASSA_IPS = [
-  "185.71.76.0/27",
-  "185.71.77.0/27",
-  "77.75.153.0/25",
-  "77.75.156.11",
-  "77.75.156.35",
-  "77.75.154.128/25",
-  "2a02:5180::/32",
-];
+function jsonOk() {
+  return NextResponse.json({ success: true });
+}
 
 export async function POST(req: NextRequest) {
-  const prisma = getDb();
   try {
-    // В реальном проекте здесь нужно проверять IP-адрес отправителя (req.ip)
-    // на соответствие YOOKASSA_IPS
+    const body = (await req.json().catch(() => null)) as
+      | { event?: string; object?: { id?: string } }
+      | null;
+    const event = typeof body?.event === "string" ? body.event : "";
+    const providerPaymentId = typeof body?.object?.id === "string" ? body.object.id.trim() : "";
 
-    const body = await req.json();
-
-    if (body.event === "payment.succeeded") {
-      const paymentObj = body.object;
-      const providerPaymentId = paymentObj.id;
-      const metadata = paymentObj.metadata;
-
-      const payment = await prisma.payment.findUnique({
-        where: { providerPaymentId },
+    if (!providerPaymentId) {
+      logger.warn({
+        area: "api",
+        route: "/api/billing/webhook",
+        message: "Webhook without payment id",
+        code: "BAD_REQUEST",
+        status: 200,
       });
-
-      if (payment && payment.status !== "SUCCEEDED") {
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: { status: "SUCCEEDED" },
-        });
-
-        const workspaceId = metadata.workspaceId;
-        const planId = metadata.planId;
-
-        if (workspaceId && planId) {
-          // Обновляем подписку
-          const currentPeriodEnd = new Date();
-          currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
-
-          await prisma.subscription.upsert({
-            where: { workspaceId },
-            create: {
-              workspaceId,
-              plan: planId,
-              currentPeriodEnd,
-            },
-            update: {
-              plan: planId,
-              currentPeriodEnd,
-              status: "active",
-            },
-          });
-
-          // Обновляем план в Workspace (для обратной совместимости)
-          await prisma.workspace.update({
-            where: { id: workspaceId },
-            data: { plan: planId },
-          });
-        }
-      }
-    } else if (body.event === "payment.canceled") {
-      const paymentObj = body.object;
-      const providerPaymentId = paymentObj.id;
-
-      await prisma.payment.updateMany({
-        where: { providerPaymentId },
-        data: { status: "CANCELED" },
-      });
+      return jsonOk();
     }
 
-    return NextResponse.json({ success: true });
+    const remote = await getYookassaPayment(providerPaymentId);
+    if (!remote) {
+      logger.warn({
+        area: "api",
+        route: "/api/billing/webhook",
+        message: "Unknown YooKassa payment",
+        code: "NOT_FOUND",
+        status: 200,
+        details: { providerPaymentId, event },
+      });
+      return jsonOk();
+    }
+
+    const action = billingActionFromRemoteStatus(remote.status);
+
+    if (action === "cancel") {
+      await cancelPendingPayment(providerPaymentId);
+      return jsonOk();
+    }
+
+    if (action !== "succeed") {
+      return jsonOk();
+    }
+
+    const result = await fulfillYookassaPayment(remote);
+    if (result.reason === "unmatched") {
+      logger.warn({
+        area: "api",
+        route: "/api/billing/webhook",
+        message: "Webhook payment could not be matched to a local order",
+        code: "NOT_FOUND",
+        status: 200,
+        details: { providerPaymentId, reason: result.reason, event },
+      });
+    }
+    return jsonOk();
   } catch (error) {
-    console.error("Webhook error:", error);
+    logger.error({
+      area: "api",
+      route: "/api/billing/webhook",
+      message: "Webhook error",
+      code: "INTERNAL_ERROR",
+      status: 500,
+      details: error instanceof Error ? { message: error.message } : error,
+    });
     return NextResponse.json({ error: MSG.INTERNAL_ERROR }, { status: 500 });
   }
 }

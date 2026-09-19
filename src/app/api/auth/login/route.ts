@@ -46,8 +46,8 @@ export async function POST(request: Request) {
       return apiError(MSG.INVALID_CREDENTIALS, "UNAUTHORIZED", 401, undefined, requestId);
     }
 
-    const token = await createSessionToken({ sub: user.id, email: user.email });
-    await setAuthCookie(token);
+    const token = await createSessionToken({ sub: user.id, email: user.email, sv: user.sessionVersion }, { remember: !!parsed.data.remember });
+    await setAuthCookie(token, { remember: !!parsed.data.remember });
     logger.info({ area: "api", route, message: "User logged in", requestId, status: 200 });
     return apiSuccess({ userId: user.id }, 200, requestId);
   } catch (error) {

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
+import { publicSiteUrl } from "@/lib/public-url";
 
 export const metadata: Metadata = {
   title: "Пользовательское соглашение",
   description: "Пользовательское соглашение об использовании сервиса",
+  alternates: { canonical: publicSiteUrl("/terms-of-service") },
 };
 
 export default async function TermsOfServicePage() {

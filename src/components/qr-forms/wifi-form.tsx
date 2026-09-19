@@ -1,27 +1,26 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
 };
 
 export function WifiForm({ payload, onChange }: Props) {
-  const set = (field: string, value: string) =>
-    onChange({ ...payload, [field]: value });
+  const set = (field: string, value: string) => onChange({ ...payload, [field]: value });
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <div className="sm:col-span-2">
-        <label className="label">Имя сети (SSID)</label>
+      <FormField label="Имя сети (SSID)" className="sm:col-span-2">
         <input
           className="input"
           value={String(payload.ssid || "")}
           onChange={(e) => set("ssid", e.target.value)}
           placeholder="MyNetwork"
         />
-      </div>
-      <div>
-        <label className="label">Пароль</label>
+      </FormField>
+      <FormField label="Пароль">
         <input
           className="input"
           type="password"
@@ -29,9 +28,8 @@ export function WifiForm({ payload, onChange }: Props) {
           onChange={(e) => set("password", e.target.value)}
           placeholder="Пароль сети"
         />
-      </div>
-      <div>
-        <label className="label">Тип шифрования</label>
+      </FormField>
+      <FormField label="Тип шифрования">
         <select
           className="select"
           value={String(payload.encryption || "WPA")}
@@ -41,7 +39,7 @@ export function WifiForm({ payload, onChange }: Props) {
           <option value="WEP">WEP</option>
           <option value="nopass">Без пароля</option>
         </select>
-      </div>
+      </FormField>
     </div>
   );
 }

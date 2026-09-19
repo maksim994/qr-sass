@@ -34,6 +34,13 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Локальный пользователь (только dev, не production):
+
+- логин: `user@local.ru`
+- пароль: `eRwoxcWdVNW0XYzc`
+
+Вход: `/login`.
+
 ## Important routes
 
 - `/` — маркетинг
@@ -58,12 +65,17 @@ Open `http://localhost:3000`.
 
 ## Не забыть (ops / продукт)
 
-### 1. Яндекс Метрика — цели воронки
+### 1. Яндекс Метрика — клиентские цели
 
 Код шлёт `reachGoal` из `src/lib/product-analytics.ts` **только после cookie consent**.  
 ID счётчика — в админке Site Settings.
 
-В кабинете Метрики нужно **вручную создать цели** с теми же идентификаторами:
+Продуктовая воронка считается **на сервере** (`FunnelEvent`, отчёт `/admin/funnel`):
+активация = сохранённый QR + скачанный файл + первое внешнее открытие;
+оплата = `payment_succeeded` после статуса YooKassa `SUCCEEDED`.
+Клиентский `subscription_paid` **нельзя** считать оплатой и код его больше не шлёт.
+
+В кабинете Метрики цели с теми же идентификаторами — вспомогательные, не источник правды:
 
 - `registration_completed`
 - `qr_type_selected`
@@ -72,7 +84,6 @@ ID счётчика — в админке Site Settings.
 - `qr_downloaded`
 - `pricing_viewed`
 - `checkout_started`
-- `subscription_paid`
 - `member_invited`
 - `api_key_created`
 

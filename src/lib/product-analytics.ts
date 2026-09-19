@@ -8,6 +8,7 @@ export const PRODUCT_GOALS = {
   qr_downloaded: "qr_downloaded",
   pricing_viewed: "pricing_viewed",
   checkout_started: "checkout_started",
+  /** Do not fire from the widget. Payment is FunnelEvent payment_succeeded after SUCCEEDED. */
   subscription_paid: "subscription_paid",
   member_invited: "member_invited",
   api_key_created: "api_key_created",
@@ -38,6 +39,7 @@ export function setMetrikaCounterId(id: string) {
 
 export function trackGoal(goal: ProductGoal, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
+  if (goal === PRODUCT_GOALS.subscription_paid) return;
   const id = getMetrikaId();
   const ym = (window as YmWindow).ym;
   if (!id || typeof ym !== "function") return;

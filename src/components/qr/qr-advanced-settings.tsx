@@ -18,13 +18,6 @@ const iconRetarget = (
   </svg>
 );
 
-const iconAb = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M3 3v18h18" />
-    <path d="m7 14 4-4 3 3 5-6" />
-  </svg>
-);
-
 type ExpiryProps = {
   expireAt: string;
   onExpireAtChange: (value: string) => void;
@@ -73,7 +66,10 @@ export function QrExpiryAccordion({
           placeholder="Без лимита"
         />
       </Field>
-      <Field label="Пароль на QR" hint={passwordHint}>
+      <Field
+        label="Пароль на QR"
+        hint={passwordHint ?? "Пароль открывает страницу и файл. Прямая ссылка на хранилище для новых загрузок не работает."}
+      >
         <Input
           type="password"
           value={password}
@@ -125,33 +121,9 @@ export function QrRetargetingAccordion({
   return (
     <QrAdvancedAccordion title="Ретаргетинг" icon={iconRetarget}>
       <p style={{ margin: 0, font: "var(--fw-regular) 13px/1.5 var(--font-sans)", color: "var(--text-muted)" }}>
-        Добавьте пиксели на страницу редиректа, чтобы собирать аудиторию для рекламы.
+        Подключите Яндекс Метрику или VK Пиксель для отслеживания переходов из QR-кода.
       </p>
-      <Field label="Meta Pixel ID">
-        <Input
-          type="text"
-          value={trackingPixels.metaPixelId ?? ""}
-          onChange={(e) => onChange({ ...trackingPixels, metaPixelId: e.target.value })}
-          placeholder="000000000000000"
-        />
-      </Field>
-      <Field label="GA4 Measurement ID">
-        <Input
-          type="text"
-          value={trackingPixels.ga4Id ?? ""}
-          onChange={(e) => onChange({ ...trackingPixels, ga4Id: e.target.value })}
-          placeholder="G-XXXXXXXXXX"
-        />
-      </Field>
-      <Field label="Google Tag Manager ID">
-        <Input
-          type="text"
-          value={trackingPixels.gtmId ?? ""}
-          onChange={(e) => onChange({ ...trackingPixels, gtmId: e.target.value })}
-          placeholder="GTM-XXXXXXX"
-        />
-      </Field>
-      <Field label="Яндекс Метрика / VK Пиксель">
+      <Field label="Яндекс Метрика (номер счётчика)">
         <Input
           type="text"
           value={trackingPixels.ymCounterId ?? ""}
@@ -171,52 +143,16 @@ export function QrRetargetingAccordion({
   );
 }
 
-export function QrAbTestAccordion({
-  abTest,
-  onChange,
-}: {
-  abTest: { urlA?: string; urlB?: string };
-  onChange: (value: { urlA?: string; urlB?: string }) => void;
-}) {
-  return (
-    <QrAdvancedAccordion title="A/B-тестирование" icon={iconAb}>
-      <p style={{ margin: 0, font: "var(--fw-regular) 13px/1.5 var(--font-sans)", color: "var(--text-muted)" }}>
-        Разделите трафик между двумя URL и сравните конверсию.
-      </p>
-      <Field label="Вариант A — 50%">
-        <Input
-          type="url"
-          value={abTest.urlA ?? ""}
-          onChange={(e) => onChange({ ...abTest, urlA: e.target.value })}
-          placeholder="https://example.com/a"
-        />
-      </Field>
-      <Field label="Вариант B — 50%">
-        <Input
-          type="url"
-          value={abTest.urlB ?? ""}
-          onChange={(e) => onChange({ ...abTest, urlB: e.target.value })}
-          placeholder="https://example.com/b"
-        />
-      </Field>
-    </QrAdvancedAccordion>
-  );
-}
-
 export function QrAdvancedSettingsBlock({
   showUrlExtras,
   expiry,
   trackingPixels,
   onTrackingPixelsChange,
-  abTest,
-  onAbTestChange,
 }: {
   showUrlExtras: boolean;
   expiry: ExpiryProps;
   trackingPixels: TrackingPixels;
   onTrackingPixelsChange: (value: TrackingPixels) => void;
-  abTest: { urlA?: string; urlB?: string };
-  onAbTestChange: (value: { urlA?: string; urlB?: string }) => void;
 }) {
   return (
     <div style={{ marginTop: "24px" }}>
@@ -226,7 +162,6 @@ export function QrAdvancedSettingsBlock({
         {showUrlExtras ? (
           <>
             <QrRetargetingAccordion trackingPixels={trackingPixels} onChange={onTrackingPixelsChange} />
-            <QrAbTestAccordion abTest={abTest} onChange={onAbTestChange} />
           </>
         ) : null}
       </div>

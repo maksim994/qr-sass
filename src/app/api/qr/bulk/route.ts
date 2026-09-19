@@ -2,16 +2,19 @@ import { nanoid } from "nanoid";
 import { MSG } from "@/lib/user-messages";
 import archiver from "archiver";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
 import { NextResponse } from "next/server";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { getPlan, getBulkBatchLimit, assertCanCreateQrCodes } from "@/lib/plans";
+import { getBulkBatchLimit, assertCanCreateQrCodes } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
 import { defaultStyle, renderQrPng } from "@/lib/qr";
 import { isSafeUrl } from "@/lib/url";
+import { projectBelongsToWorkspace } from "@/lib/tenant";
+import { FUNNEL_EVENTS, recordFunnelEvent } from "@/lib/funnel";
+import { BodyTooLargeError, MAX_BULK_BYTES, formDataWithinLimit } from "@/lib/request-body-limit";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -20,7 +23,18 @@ export async function POST(request: Request) {
     const user = await getApiUser();
     if (!user) return unauthorized();
 
-    const formData = await request.formData();
+    let formData: FormData;
+    try {
+      formData = await formDataWithinLimit(request, MAX_BULK_BYTES);
+    } catch (error) {
+      if (error instanceof BodyTooLargeError || (error instanceof Error && "status" in error && (error as { status: number }).status === 413)) {
+        return apiError("Файл слишком большой. Максимум 1 МБ.", "VALIDATION_ERROR", 413, undefined, requestId);
+      }
+      if (error instanceof Error && "status" in error && (error as { status: number }).status === 411) {
+        return apiError(error.message, "VALIDATION_ERROR", 411, undefined, requestId);
+      }
+      throw error;
+    }
     const file = formData.get("file") as File | null;
     const workspaceId = formData.get("workspaceId") as string | null;
     const projectId = (formData.get("projectId") as string) || undefined;
@@ -28,36 +42,34 @@ export async function POST(request: Request) {
     if (!file || !workspaceId) {
       return apiError(MSG.FILE_AND_WORKSPACE_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
+    if (file.size > MAX_BULK_BYTES) {
+      return apiError("Файл слишком большой. Максимум 1 МБ.", "VALIDATION_ERROR", 413, undefined, requestId);
+    }
 
     const membership = user.memberships.find((m) => m.workspaceId === workspaceId);
     if (!membership) return unauthorized();
 
     const db = getDb();
-    const workspace = await db.workspace.findUnique({
-      where: { id: workspaceId },
-      select: { plan: true },
-    });
-    const plan = await getPlan(workspace?.plan);
+    if (!(await projectBelongsToWorkspace(db, projectId, workspaceId))) {
+      return apiError(MSG.FORBIDDEN, "FORBIDDEN", 403, undefined, requestId);
+    }
+
+    const entitlements = await getEntitlements(workspaceId);
+    const plan = entitlements.plan;
     const bulkLimit = getBulkBatchLimit(plan.id);
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const ext = (file.name || "").toLowerCase().slice(-4);
-    let rows: Record<string, string>[] = [];
-
-    if (ext === ".csv" || file.type === "text/csv") {
-      const text = buffer.toString("utf-8");
-      const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
-      rows = parsed.data?.filter((r) => Object.keys(r).length > 0) ?? [];
-    } else if (ext === "xlsx" || ext === ".xls" || file.type?.includes("spreadsheet")) {
-      const wb = XLSX.read(buffer, { type: "buffer" });
-      const firstSheet = wb.Sheets[wb.SheetNames[0]];
-      if (!firstSheet) {
-        return apiError(MSG.EMPTY_SPREADSHEET, "VALIDATION_ERROR", 400, undefined, requestId);
-      }
-      rows = XLSX.utils.sheet_to_json<Record<string, string>>(firstSheet);
-    } else {
+    if (buffer.length > MAX_BULK_BYTES) {
+      return apiError("Файл слишком большой. Максимум 1 МБ.", "VALIDATION_ERROR", 413, undefined, requestId);
+    }
+    const ext = (file.name || "").toLowerCase();
+    const isCsv = ext.endsWith(".csv") || file.type === "text/csv";
+    if (!isCsv) {
       return apiError(MSG.UNSUPPORTED_BULK_FORMAT, "BAD_REQUEST", 400, undefined, requestId);
     }
+    const text = buffer.toString("utf-8");
+    const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
+    const rows = parsed.data?.filter((r) => Object.keys(r).length > 0) ?? [];
 
     const normalizeKey = (key: string) => key.trim().toLowerCase().replace(/\s+/g, "_");
     const normalizedRows = rows.map((r) => {
@@ -115,7 +127,8 @@ export async function POST(request: Request) {
 
     const quota = await assertCanCreateQrCodes({
       workspaceId,
-      planId: workspace?.plan,
+      planId: entitlements.planId,
+      plan: entitlements.plan,
       count: items.length,
       needsDynamic: true,
     });
@@ -158,6 +171,14 @@ export async function POST(request: Request) {
         shortCode: qr.shortCode!,
         name: qr.name,
         encodedContent: qr.encodedContent,
+      });
+      await recordFunnelEvent({
+        name: FUNNEL_EVENTS.qr_created,
+        workspaceId,
+        userId: user.id,
+        qrCodeId: qr.id,
+        source: "bulk",
+        oncePerQr: true,
       });
     }
 

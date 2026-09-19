@@ -1,40 +1,39 @@
 import type { MetadataRoute } from "next";
-import { getSeoPages } from "@/lib/seo-content";
 import { getDb } from "@/lib/db";
+import { publicOrigin } from "@/lib/public-url";
+import { buildIndexableStaticPaths, isDeniedSitemapPath } from "@/lib/seo-hygiene";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const base = publicOrigin();
 
-  const db = getDb();
-  const blogPosts = await db.blogPost.findMany({
-    where: { publishedAt: { not: null } },
-    select: { slug: true, updatedAt: true },
-  });
+  const staticEntries: MetadataRoute.Sitemap = buildIndexableStaticPaths()
+    .filter((path) => !isDeniedSitemapPath(path))
+    .map((path) => ({
+      url: path === "/" ? base : `${base}${path}`,
+      changeFrequency: "weekly" as const,
+      priority: path === "/" ? 1 : path === "/blog" ? 0.8 : 0.7,
+    }));
 
-  const staticPages = [
-    "",
-    "/login",
-    "/register",
-    "/blog",
-    "/changelog",
-    ...getSeoPages().map((p) => `/${p.slug}`),
-  ];
+  let blogEntries: MetadataRoute.Sitemap = [];
+  try {
+    const db = getDb();
+    const blogPosts = await db.blogPost.findMany({
+      where: { publishedAt: { not: null } },
+      select: { slug: true, updatedAt: true },
+    });
+    blogEntries = blogPosts
+      .filter((post) => post.slug && !isDeniedSitemapPath(`/blog/${post.slug}`))
+      .map((post) => ({
+        url: `${base}/blog/${post.slug}`,
+        lastModified: post.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      }));
+  } catch {
+    blogEntries = [];
+  }
 
-  const staticEntries: MetadataRoute.Sitemap = staticPages.map((path) => ({
-    url: path ? `${base}${path}` : base,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: path === "" ? 1 : path === "/blog" ? 0.8 : 0.7,
-  }));
-
-  const blogEntries: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${base}/blog/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
-
-  return [...staticEntries, ...blogEntries];
+  return [...staticEntries, ...blogEntries].filter((entry) => !isDeniedSitemapPath(entry.url));
 }

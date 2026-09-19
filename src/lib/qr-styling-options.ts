@@ -75,6 +75,8 @@ export function buildQrStylingOptions(data: string, style: QrStyle, size = 280) 
       ? {
           image: style.logoUrl,
           imageOptions: {
+            hideBackgroundDots: true,
+            saveAsBlob: false,
             crossOrigin: "anonymous" as const,
             margin: style.logoMargin,
             imageSize: style.logoScale || 0.2,

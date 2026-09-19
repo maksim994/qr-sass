@@ -9,7 +9,8 @@ export default async function AdminPlansPage() {
 
   return (
     <div>
-      <AdminPageHeader title="Тарифы" description="Параметры лимитов. Изменения применяются сразу на всём сайте." />
+      <AdminPageHeader title="Тарифы" description="Публичные тарифы. Изменения не затрагивают сохранённые архивные условия." />
+      <p>Скрытый тариф «Для своих»: 0 ₽, бессрочно, все возможности, QR и участники без лимитов. Назначается в карточке кабинета через «Изменить доступ».</p>
       <AdminCard>
         <PlansForm initialOverrides={byPlan} />
       </AdminCard>

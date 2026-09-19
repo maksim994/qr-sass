@@ -4,6 +4,7 @@ import { Manrope } from "next/font/google";
 import parse from "html-react-parser";
 import "./globals.css";
 import { getSiteSettings } from "@/lib/site-settings";
+import { publicOrigin } from "@/lib/public-url";
 import { CookieBanner } from "@/components/cookie-banner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeScript } from "@/components/theme-script";
@@ -15,7 +16,7 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
+const baseUrl = publicOrigin();
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -23,19 +24,19 @@ export const metadata: Metadata = {
     default: "qr-s.ru — Генератор QR-кодов",
     template: "%s | qr-s.ru",
   },
-  description: "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией и мгновенным скачиванием.",
+  description: "Создавайте статические и динамические QR-коды: смена ссылки после печати, PNG и SVG, открытия по дням и устройству.",
   openGraph: {
     type: "website",
     locale: "ru_RU",
     url: baseUrl,
     siteName: "qr-s.ru",
     title: "qr-s.ru — Генератор QR-кодов",
-    description: "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией и мгновенным скачиванием.",
+    description: "Создавайте статические и динамические QR-коды: смена ссылки после печати, PNG и SVG, открытия по дням и устройству.",
   },
   twitter: {
     card: "summary_large_image",
     title: "qr-s.ru — Генератор QR-кодов",
-    description: "Создавайте статические и динамические QR-коды с аналитикой, кастомизацией и мгновенным скачиванием.",
+    description: "Создавайте статические и динамические QR-коды: смена ссылки после печати, PNG и SVG, открытия по дням и устройству.",
   },
 };
 

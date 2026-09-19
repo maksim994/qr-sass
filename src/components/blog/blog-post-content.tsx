@@ -1,7 +1,8 @@
 "use client";
 
 import DOMPurify from "isomorphic-dompurify";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 
 function slugify(text: string): string {
   return text
@@ -13,14 +14,47 @@ function slugify(text: string): string {
 
 type TocItem = { id: string; text: string };
 
+function withHeadingIds(html: string): { html: string; items: TocItem[] } {
+  const items: TocItem[] = [];
+  const usedIds = new Set<string>();
+  const next = html.replace(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi, (_full, attrs = "", inner: string) => {
+    const text = inner.replace(/<[^>]+>/g, "").trim();
+    let id = slugify(text) || `section-${items.length}`;
+    if (usedIds.has(id)) {
+      let n = 1;
+      while (usedIds.has(`${id}-${n}`)) n += 1;
+      id = `${id}-${n}`;
+    }
+    usedIds.add(id);
+    items.push({ id, text });
+    const cleanedAttrs = String(attrs).replace(/\s+id=(["']).*?\1/i, "");
+    return `<h2${cleanedAttrs} id="${id}">${inner}</h2>`;
+  });
+  return { html: next, items };
+}
+
+const SANITIZE = {
+  ALLOWED_TAGS: [
+    "h1", "h2", "h3", "h4", "h5", "h6", "p", "br", "hr",
+    "strong", "b", "em", "i", "u", "s", "code", "pre",
+    "ul", "ol", "li", "blockquote", "a", "img",
+    "table", "thead", "tbody", "tr", "th", "td",
+  ],
+  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel"],
+};
+
 type Props = { content: string };
 
 export function BlogPostContent({ content }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
+
+  const { html, items: tocItems } = useMemo(() => {
+    const sanitized = DOMPurify.sanitize(content, SANITIZE);
+    return withHeadingIds(sanitized);
+  }, [content]);
 
   const scrollToSection = (id: string) => {
     const el = containerRef.current;
@@ -33,24 +67,44 @@ export function BlogPostContent({ content }: Props) {
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || tocItems.length === 0) return;
 
-    const headings = el.querySelectorAll<HTMLHeadingElement>("h2");
-    const items: TocItem[] = [];
-    const usedIds = new Set<string>();
-    headings.forEach((h, i) => {
-      const text = h.textContent || "";
-      let id = slugify(text) || `section-${i}`;
-      if (usedIds.has(id)) {
-        let n = 1;
-        while (usedIds.has(`${id}-${n}`)) n++;
-        id = `${id}-${n}`;
-      }
-      usedIds.add(id);
-      h.id = id;
-      items.push({ id, text });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: "-100px 0px -60% 0px", threshold: 0 }
+    );
+
+    tocItems.forEach(({ id }) => {
+      const target = el.querySelector(`#${CSS.escape(id)}`);
+      if (target) observer.observe(target);
     });
-    setTocItems(items);
+
+    return () => observer.disconnect();
+  }, [tocItems]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const articleTop = rect.top + window.scrollY;
+      const articleHeight = el.offsetHeight;
+      const viewportCenter = window.scrollY + window.innerHeight / 2;
+      const readAmount = Math.max(0, Math.min(articleHeight, viewportCenter - articleTop));
+      const pct = articleHeight > 0 ? Math.min(100, Math.round((readAmount / articleHeight) * 100)) : 0;
+      setProgress(pct);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
   }, [content]);
 
   useEffect(() => {
@@ -162,9 +216,9 @@ export function BlogPostContent({ content }: Props) {
               ))}
             </nav>
             <div style={{ marginTop: "26px", padding: "18px", borderRadius: "12px", background: "var(--surface-subtle)", border: "1px solid var(--border-subtle)" }}>
-              <div style={{ font: "var(--fw-bold) 14px/1.3 var(--font-display)", color: "var(--text-strong)" }}>Попробуйте бесплатно</div>
-              <p style={{ marginTop: "6px", font: "var(--fw-regular) 12.5px/1.5 var(--font-sans)", color: "var(--text-muted)" }}>Первый динамический QR — без карты.</p>
-              <a href="/register" className="fk-button fk-button--accent fk-button--sm" style={{ width: "100%", marginTop: "12px" }}>Создать QR</a>
+              <div style={{ font: "var(--fw-bold) 14px/1.3 var(--font-display)", color: "var(--text-strong)" }}>Создать QR по ссылке</div>
+              <p style={{ marginTop: "6px", font: "var(--fw-regular) 12.5px/1.5 var(--font-sans)", color: "var(--text-muted)" }}>Вставьте адрес — сохраним через регистрацию, без повторного заполнения.</p>
+              <Link href="/#create-qr" className="fk-button fk-button--accent fk-button--sm" style={{ width: "100%", marginTop: "12px" }}>К форме на главной</Link>
             </div>
             <div className="mt-5 pt-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
               <p className="text-xs font-medium" style={{ color: "var(--text-subtle)" }}>Прогресс чтения</p>
@@ -184,17 +238,7 @@ export function BlogPostContent({ content }: Props) {
       <div
         ref={containerRef}
         className="min-w-0 qrs-body"
-        dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(content, {
-            ALLOWED_TAGS: [
-              "h1", "h2", "h3", "h4", "h5", "h6", "p", "br", "hr",
-              "strong", "b", "em", "i", "u", "s", "code", "pre",
-              "ul", "ol", "li", "blockquote", "a", "img",
-              "table", "thead", "tbody", "tr", "th", "td",
-            ],
-            ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel"],
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
   );

@@ -6,7 +6,11 @@ import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { evaluateScannability } from "@/lib/scannability";
 import { encodeQrContent, needsHostedPage } from "@/lib/qr";
-import { updateQrSchema, validatePayloadUrls } from "@/lib/validation";
+import { applyTrackingPixelsToPayload } from "@/lib/tracking-pixels";
+import { stampTrackingConsentVersion } from "@/lib/qr-consent";
+import { collectUploadIds, uploadsBelongToWorkspace } from "@/lib/tenant";
+import { updateQrSchema, validatePayloadUrls, payloadMeetsType } from "@/lib/validation";
+import { assertAllowsDynamic, getEntitlements } from "@/lib/entitlements";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 
@@ -44,7 +48,8 @@ export async function GET(request: Request, context: RouteContext) {
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
 
-    return apiSuccess({ qr }, 200, requestId);
+    const entitlements = await getEntitlements(qr.workspaceId);
+    return apiSuccess({ qr: entitlements.allowsAnalytics ? qr : { ...qr, scanEvents: [] } }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
@@ -88,8 +93,19 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const data = parsed.data;
     const existingPayload = (qr.payload as Record<string, unknown>) ?? {};
-    const nextPayload =
+    let nextPayload =
       data.payload != null ? ({ ...existingPayload, ...data.payload } as Record<string, unknown>) : existingPayload;
+    if (data.payload != null) {
+      const pixels = applyTrackingPixelsToPayload(nextPayload);
+      if (!pixels.ok) {
+        return apiError(pixels.error, "VALIDATION_ERROR", 400, undefined, requestId);
+      }
+      nextPayload = stampTrackingConsentVersion(existingPayload, pixels.payload);
+    }
+
+    const isHosted = needsHostedPage(qr.contentType);
+    const usesVcardDownload = qr.contentType === "VCARD";
+    const isManaged = qr.kind === "DYNAMIC" || isHosted || usesVcardDownload;
 
     if (
       data.payload != null &&
@@ -103,14 +119,25 @@ export async function PATCH(request: Request, context: RouteContext) {
         requestId
       );
     }
+    if (data.payload != null && !payloadMeetsType(nextPayload, qr.contentType)) {
+      return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
+    }
+
+    if (
+      !(await uploadsBelongToWorkspace(
+        db,
+        collectUploadIds(
+          data.payload != null ? nextPayload : {},
+          data.style != null ? (data.style as Record<string, unknown>) : null,
+        ),
+        qr.workspaceId,
+      ))
+    ) {
+      return apiError(MSG.FORBIDDEN, "FORBIDDEN", 403, undefined, requestId);
+    }
 
     if (data.style != null) {
-      const score = evaluateScannability({
-        foreground: data.style.dotColor,
-        background: data.style.bgTransparent ? "#ffffff" : data.style.bgColor,
-        margin: data.style.margin,
-        logoScale: data.style.logoScale,
-      });
+      const score = evaluateScannability(data.style);
       if (!score.safeToUse) {
         return apiError(MSG.SCANNABILITY_TOO_LOW, "VALIDATION_ERROR", 400, { score }, requestId);
       }
@@ -121,7 +148,18 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (data.payload != null) updateData.payload = nextPayload as object;
     if (data.style != null) updateData.styleConfig = data.style as object;
 
-    if (qr.kind === "DYNAMIC") {
+    if (isManaged) {
+      const changesPaidFeature =
+        data.payload != null ||
+        data.expireAt !== undefined ||
+        data.maxScans !== undefined ||
+        data.password !== undefined;
+      if (changesPaidFeature) {
+        const gate = await assertAllowsDynamic(qr.workspaceId);
+        if (!gate.ok) {
+          return apiError(MSG.PLAN_DYNAMIC_REQUIRED, "FORBIDDEN", 403, undefined, requestId);
+        }
+      }
       if (data.expireAt !== undefined) updateData.expireAt = data.expireAt ? new Date(data.expireAt) : null;
       if (data.maxScans !== undefined) updateData.maxScans = data.maxScans;
       if (data.password !== undefined) {
@@ -134,8 +172,6 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const payloadChanged = data.payload != null;
-    const isHosted = needsHostedPage(qr.contentType);
-    const usesVcardDownload = qr.contentType === "VCARD";
 
     if (usesVcardDownload && !qr.shortCode) {
       const shortCode = nanoid(8);

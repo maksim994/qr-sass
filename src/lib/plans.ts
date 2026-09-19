@@ -13,6 +13,7 @@ export type PlanLimits = {
 };
 
 export type PlanInfo = {
+  accessMode?: "standard" | "archive" | "friends";
   id: PlanId;
   name: string;
   description: string;
@@ -20,6 +21,41 @@ export type PlanInfo = {
   limits: PlanLimits;
   limitLabels: string[];
 };
+
+function exportLimitLabel(formats: PlanLimits["exportFormats"]): string {
+  const hasPdfOrEps = formats.includes("PDF") || formats.includes("EPS");
+  if (hasPdfOrEps) {
+    return "PNG и SVG; PDF и EPS — растровая картинка";
+  }
+  if (formats.includes("SVG")) {
+    return "Экспорт PNG и SVG";
+  }
+  return "Экспорт PNG";
+}
+
+function analyticsLimitLabel(limits: PlanLimits): string {
+  if (!limits.allowsDynamic) return "Только статические";
+  return "Динамика: смена ссылки и открытия по дням";
+}
+
+function usersLimitLabel(limits: PlanLimits): string {
+  if (limits.maxUsers === 1) return "1 пользователь";
+  if (limits.maxUsers != null) return `До ${limits.maxUsers} участников workspace`;
+  return "Участники: уже зарегистрированные пользователи";
+}
+
+export function buildLimitLabels(limits: PlanLimits, planId: PlanId): string[] {
+  const parts: string[] = [];
+  if (limits.maxQrCodes != null) parts.push(`До ${limits.maxQrCodes} QR-кодов`);
+  else parts.push("Неограниченные QR-коды");
+  parts.push(analyticsLimitLabel(limits));
+  parts.push(exportLimitLabel(limits.exportFormats));
+  parts.push(usersLimitLabel(limits));
+  if (planId === "BUSINESS") {
+    parts.push("Workspace API-ключи");
+  }
+  return parts;
+}
 
 export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   FREE: {
@@ -33,11 +69,16 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       allowsAnalytics: false,
       exportFormats: ["PNG", "SVG"],
     },
-    limitLabels: ["До 10 QR-кодов", "Только статические", "Экспорт PNG и SVG", "1 пользователь"],
+    limitLabels: [
+      "До 10 QR-кодов",
+      "Только статические",
+      "Экспорт PNG и SVG",
+      "1 пользователь",
+    ],
   },
   PRO: {
     name: "Про",
-    description: "Для маркетинга и малого бизнеса: динамика, аналитика, смена ссылки",
+    description: "Динамика, открытия по дням и устройству, смена ссылки после печати",
     priceRub: 990,
     limits: {
       maxQrCodes: null,
@@ -46,11 +87,16 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       allowsAnalytics: true,
       exportFormats: ["PNG", "SVG", "JPG", "EPS", "PDF"],
     },
-    limitLabels: ["Неограниченные QR-коды", "Динамические QR с аналитикой", "Экспорт PNG, SVG, JPG, EPS, PDF", "До 5 пользователей"],
+    limitLabels: [
+      "Неограниченные QR-коды",
+      "Динамика: смена ссылки и открытия по дням",
+      "PNG и SVG; PDF и EPS — растровая картинка",
+      "До 5 участников workspace",
+    ],
   },
   BUSINESS: {
     name: "Бизнес",
-    description: "Для команды, агентства или сети: API, роли и без лимита пользователей",
+    description: "То же, что Про, плюс API-ключи workspace. Белой метки нет",
     priceRub: 2990,
     limits: {
       maxQrCodes: null,
@@ -59,35 +105,17 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       allowsAnalytics: true,
       exportFormats: ["PNG", "SVG", "JPG", "EPS", "PDF"],
     },
-    limitLabels: ["Неограниченные QR-коды", "Неограниченные пользователи", "API-доступ", "Белая метка"],
+    limitLabels: [
+      "Неограниченные QR-коды",
+      "Динамика: смена ссылки и открытия по дням",
+      "PNG и SVG; PDF и EPS — растровая картинка",
+      "Участники: уже зарегистрированные пользователи",
+      "Workspace API-ключи",
+    ],
   },
 };
 
-function buildLimitLabels(limits: PlanLimits, planId: PlanId): string[] {
-  const parts: string[] = [];
-  if (limits.maxQrCodes != null) parts.push(`До ${limits.maxQrCodes} QR-кодов`);
-  else parts.push("Неограниченные QR-коды");
-  parts.push(limits.allowsDynamic ? "Динамические QR с аналитикой" : "Только статические");
-  if (limits.exportFormats.includes("PDF")) {
-    parts.push("Экспорт PNG, SVG, JPG, EPS, PDF");
-  } else if (limits.exportFormats.length > 1) {
-    parts.push("Экспорт PNG и SVG");
-  } else {
-    parts.push("Экспорт PNG");
-  }
-  if (limits.maxUsers != null) {
-    parts.push(limits.maxUsers === 1 ? "1 пользователь" : `До ${limits.maxUsers} пользователей`);
-  } else {
-    parts.push("Неограниченные пользователи");
-  }
-  if (planId === "BUSINESS") {
-    parts.push("API-доступ");
-    parts.push("Белая метка");
-  }
-  return parts;
-}
-
-export async function getPlan(planId: PlanId | string | null | undefined): Promise<PlanInfo> {
+export async function getPlan(planId: PlanId | string | null | undefined, options?: { strict?: boolean }): Promise<PlanInfo> {
   const id = String(planId ?? "FREE").toUpperCase() as PlanId;
   const base = PLAN_DEFAULTS[id] ?? PLAN_DEFAULTS.FREE;
 
@@ -132,7 +160,8 @@ export async function getPlan(planId: PlanId | string | null | undefined): Promi
       limits,
       limitLabels: buildLimitLabels(limits, id),
     };
-  } catch {
+  } catch (error) {
+    if (options?.strict) throw error;
     return { id, ...base };
   }
 }
@@ -181,12 +210,13 @@ export type QrCreateQuotaCheck = {
 export async function assertCanCreateQrCodes(options: {
   workspaceId: string;
   planId: string | null | undefined;
+  plan: PlanInfo;
   count?: number;
   needsDynamic?: boolean;
 }): Promise<QrCreateQuotaCheck> {
   const count = Math.max(1, options.count ?? 1);
   const needsDynamic = options.needsDynamic ?? false;
-  const plan = await getPlan(options.planId);
+  const plan = options.plan;
   const currentCount = await getDb().qrCode.count({
     where: { workspaceId: options.workspaceId, isArchived: false },
   });

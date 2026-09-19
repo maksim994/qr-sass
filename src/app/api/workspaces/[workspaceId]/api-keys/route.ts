@@ -2,7 +2,7 @@ import { getDb } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { getWorkspaceAdminOrNull } from "@/lib/workspace-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
-import { getPlan } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
 import { generateApiKey } from "@/lib/api-keys";
 
 export async function GET(
@@ -28,9 +28,8 @@ export async function GET(
     );
   }
 
-  const planInfo = await getPlan(membership.workspace.plan);
-  const allowsApi = planInfo.id === "BUSINESS";
-  if (!allowsApi) {
+  const entitlements = await getEntitlements(workspaceId);
+  if (!entitlements.allowsApi) {
     return apiError("API-доступ доступен только на тарифе Бизнес.", "FORBIDDEN", 403, undefined, requestId);
   }
 
@@ -73,9 +72,8 @@ export async function POST(
     );
   }
 
-  const planInfo = await getPlan(membership.workspace.plan);
-  const allowsApi = planInfo.id === "BUSINESS";
-  if (!allowsApi) {
+  const entitlements = await getEntitlements(workspaceId);
+  if (!entitlements.allowsApi) {
     return apiError("API-доступ доступен только на тарифе Бизнес.", "FORBIDDEN", 403, undefined, requestId);
   }
 

@@ -1,0 +1,30 @@
+.page { max-width: 1000px; }
+.stack { display: grid; gap: 20px; }
+.panel { padding: 28px; border: 1px solid var(--border-subtle); background: var(--surface-page); border-radius: 12px; min-width: 0; }
+.panel h2 { font-size: 1.0625rem; font-weight: 700; color: var(--text-strong); }
+.description { margin: 8px 0 24px; font-size: .875rem; line-height: 1.6; color: var(--text-muted); }
+.identity { display: flex; align-items: center; gap: 24px; }
+.identityText { min-width: 0; } .identityText h2 { overflow-wrap: anywhere; }
+.identityText p { margin: 5px 0 14px; color: var(--text-muted); font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.avatar { width: 88px; height: 88px; flex: none; border-radius: 50%; background: var(--color-primary-subtle); color: var(--text-link); font-size: 2rem; font-weight: 700; border: 0; overflow: hidden; cursor: pointer; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.photoActions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.identity small,.field small,.hint { color: var(--text-muted); font-size: .75rem; line-height: 1.6; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; border: none; padding: 0; min-width: 0; }
+.field { display: grid; gap: 8px; min-width: 0; font-size: .875rem; color: var(--text-default); }
+.field input { width: 100%; min-width: 0; }
+.security { grid-column: 1/-1; border-top: 1px solid var(--border-subtle); margin-top: 2px; padding-top: 8px; }
+.security summary { cursor: pointer; padding: 12px 0; color: var(--text-strong); font-size: .875rem; font-weight: 600; }
+.passwordFields { display: grid; gap: 18px; max-width: 440px; margin-top: 18px; }
+.passwordFields > button { justify-self: start; }
+.emailConfirm { grid-column: 1/-1; max-width: 440px; } .emailConfirm p { margin-top: 8px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.sectionHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.sectionHead span { font-size: .75rem; color: var(--text-muted); }
+.workspace { margin-top: 20px; display: grid; gap: 16px; }
+.workspace .description { margin: -8px 0 4px; }
+.workspace > button { justify-self: start; }
+.workspace .field { max-width: 560px; }
+.feedback:focus { outline: 2px solid var(--text-link); outline-offset: 4px; }
+.page :is(button,a,summary):focus-visible { outline: 2px solid var(--text-link); outline-offset: 4px; }
+@media (max-width: 600px) { .panel { padding: 20px; } .fields { grid-template-columns: 1fr; gap: 18px; } .identity { align-items: flex-start; gap: 16px; } .avatar { width: 56px; height: 56px; font-size: 1.5rem; } .actions { flex-direction: column; } .field input { font-size: 1rem; } .sectionHead { flex-wrap: wrap; } }

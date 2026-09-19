@@ -1,3 +1,4 @@
+import styles from "./profile.module.css";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -5,6 +6,7 @@ import { selectWorkspace } from "@/lib/workspace-select";
 import { isYandexAuthConfigured } from "@/lib/yandex-auth";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { Alert } from "@/components/ui";
+import { WorkspaceNameForm } from "./workspace-name-form";
 import { ProfileForm } from "./profile-form";
 
 function roleLabel(isAdmin: boolean, membershipRole: string): string {
@@ -23,7 +25,7 @@ export default async function ProfilePage() {
   const canChangePassword = user.passwordHash !== "telegram-auth";
 
   return (
-    <div className="qrs-profile-page">
+    <div className={styles.page}>
       <DashboardPageHeader title="Профиль" description="Личные данные и настройки аккаунта." />
 
       <Suspense
@@ -43,6 +45,9 @@ export default async function ProfilePage() {
           subtitle={`${roleLabel(!!user.isAdmin, membership?.role ?? "MEMBER")} · ${workspace.name}`}
         />
       </Suspense>
+      {membership && ["OWNER", "ADMIN"].includes(membership.role) ? (
+        <WorkspaceNameForm key={workspace.id} workspaceId={workspace.id} initialName={workspace.name} />
+      ) : null}
     </div>
   );
 }

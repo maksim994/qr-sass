@@ -59,3 +59,22 @@ export function supportsDynamicKind(type: QrContentType | string): boolean {
 export const contentTypeLabels: Record<string, string> = Object.fromEntries(
   qrTypes.map((t) => [t.type, t.label]),
 );
+
+/** Homepage first row: URL, menu, Wi-Fi, vCard — not the full catalog. */
+export const POPULAR_QR_TYPES = ["URL", "MENU", "WIFI", "VCARD"] as const;
+
+export function splitPopularQrTypes<T extends { type: string }>(types: T[]): {
+  popular: T[];
+  rest: T[];
+} {
+  const popular: T[] = [];
+  for (const id of POPULAR_QR_TYPES) {
+    const found = types.find((item) => item.type === id);
+    if (found) popular.push(found);
+  }
+  const popularSet = new Set<string>(POPULAR_QR_TYPES);
+  return {
+    popular,
+    rest: types.filter((item) => !popularSet.has(item.type)),
+  };
+}

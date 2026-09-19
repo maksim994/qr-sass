@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { FileUploadField } from "./file-upload-field";
+import { FormField } from "./form-field";
 
 type Props = {
   payload: Record<string, unknown>;
@@ -31,22 +32,22 @@ export function VideoForm({ payload, onChange, workspaceId }: Props) {
 
   return (
     <div className="grid gap-4">
-      <div>
-        <label className="label">Название</label>
+      <FormField label="Название">
         <input
           className="input"
           value={String(payload.title || "")}
           onChange={(e) => onChange({ ...payload, title: e.target.value })}
           placeholder="Название видео"
         />
-      </div>
+      </FormField>
 
       <div>
-        <label className="label">Источник видео</label>
-        <div className="flex gap-2">
+        <p className="label" id="video-source-label">Источник видео</p>
+        <div className="flex gap-2" role="group" aria-labelledby="video-source-label">
           <button
             type="button"
             className={`btn btn-sm ${mode === "upload" ? "btn-primary" : ""}`}
+            aria-pressed={mode === "upload"}
             onClick={() => setMode("upload")}
           >
             Загрузить файл
@@ -54,6 +55,7 @@ export function VideoForm({ payload, onChange, workspaceId }: Props) {
           <button
             type="button"
             className={`btn btn-sm ${mode === "youtube" ? "btn-primary" : ""}`}
+            aria-pressed={mode === "youtube"}
             onClick={() => setMode("youtube")}
           >
             Ссылка YouTube
@@ -62,8 +64,7 @@ export function VideoForm({ payload, onChange, workspaceId }: Props) {
       </div>
 
       {mode === "youtube" ? (
-        <div>
-          <label className="label">URL видео (YouTube)</label>
+        <FormField label="URL видео (YouTube)">
           <input
             className="input"
             type="url"
@@ -79,15 +80,16 @@ export function VideoForm({ payload, onChange, workspaceId }: Props) {
             }
             placeholder="https://youtube.com/watch?v=..."
           />
-        </div>
+        </FormField>
       ) : (
         <div>
-          <label className="label">Видеофайл</label>
+          <p className="label" id="video-file-label">Видеофайл</p>
           <FileUploadField
             accept="video/*"
             workspaceId={workspaceId}
             onUploaded={handleUploaded}
             currentFilename={String(payload.filename || "")}
+            labelledBy="video-file-label"
           />
         </div>
       )}

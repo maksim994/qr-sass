@@ -1,59 +1,43 @@
-import { getDb } from "@/lib/db";
-import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
-import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
-import { WorkspacePlan } from "@prisma/client";
-
-const PLAN_IDS = ["FREE", "PRO", "BUSINESS"] as const;
-
+import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";
+import {
+  adminAccessSchema,
+  changeWorkspaceAccess,
+  AdminOperationError,
+} from "@/lib/admin-operations";
+import { MSG } from "@/lib/user-messages";
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ workspaceId: string }> }
+  { params }: { params: Promise<{ workspaceId: string }> },
 ) {
-  const { workspaceId } = await params;
-  const requestId = getRequestId(req);
-  const admin = await getAdminOrNull();
-  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
-
-  const data = await readJsonBody<{ plan: string }>(req);
-  if (!data?.plan || !PLAN_IDS.includes(data.plan as (typeof PLAN_IDS)[number])) {
-    return apiError(MSG.VALID_PLAN_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
-  }
-
+  const actor = await getAdminOrNull();
+  if (!actor) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401);
+  const input = adminAccessSchema.safeParse(await readJsonBody(req));
+  if (!input.success)
+    return apiError(MSG.ADMIN_CHANGE_INVALID, "VALIDATION_ERROR", 400);
   try {
-    const db = getDb();
-    const newPlan = data.plan as WorkspacePlan;
-
-    const workspace = await db.workspace.update({
-      where: { id: workspaceId },
-      data: { plan: newPlan },
-    });
-
-    if (newPlan === "PRO" || newPlan === "BUSINESS") {
-      const periodEnd = new Date();
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-      await db.subscription.upsert({
-        where: { workspaceId },
-        create: {
-          workspaceId,
-          plan: newPlan,
-          status: "active",
-          currentPeriodEnd: periodEnd,
-        },
-        update: {
-          plan: newPlan,
-          status: "active",
-          currentPeriodEnd: periodEnd,
-        },
-      });
-    }
-
-    return apiSuccess(workspace);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Database error";
-    if (msg.includes("Record to update not found") || msg.includes("record to update not found")) {
-      return apiError(MSG.WORKSPACE_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
-    }
-    return apiError(msg, "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiSuccess(
+      await changeWorkspaceAccess(
+        actor,
+        (await params).workspaceId,
+        input.data,
+      ),
+    );
+  } catch (error) {
+    return apiError(
+      error instanceof AdminOperationError
+        ? error.message
+        : MSG.ADMIN_CHANGE_FAILED,
+      error instanceof AdminOperationError
+        ? error.status === 409
+          ? "CONFLICT"
+          : error.status === 404
+            ? "NOT_FOUND"
+            : error.status === 403
+              ? "FORBIDDEN"
+              : "BAD_REQUEST"
+        : "INTERNAL_ERROR",
+      error instanceof AdminOperationError ? error.status : 500,
+    );
   }
 }

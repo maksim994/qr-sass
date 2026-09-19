@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { FileUploadField } from "./file-upload-field";
+import { FormField } from "./form-field";
 
 type Props = {
   payload: Record<string, unknown>;
@@ -19,22 +20,22 @@ export function PdfForm({ payload, onChange, workspaceId }: Props) {
 
   return (
     <div className="grid gap-4">
-      <div>
-        <label className="label">Название</label>
+      <FormField label="Название">
         <input
           className="input"
           value={String(payload.title || "")}
           onChange={(e) => onChange({ ...payload, title: e.target.value })}
           placeholder="Название документа"
         />
-      </div>
+      </FormField>
       <div>
-        <label className="label">PDF-файл</label>
+        <p className="label" id="pdf-file-label">PDF-файл</p>
         <FileUploadField
           accept="application/pdf"
           workspaceId={workspaceId}
           onUploaded={handleUploaded}
           currentFilename={String(payload.filename || "")}
+          labelledBy="pdf-file-label"
         />
       </div>
     </div>

@@ -1,5 +1,5 @@
 /**
- * URL safety helpers: scheme allowlist + basic SSRF protections for user-supplied URLs.
+ * URL safety helpers: scheme allowlist + SSRF protections for user-supplied URLs.
  */
 
 const ALLOWED_SCHEMES = ["https:", "http:"] as const;
@@ -9,10 +9,34 @@ const BLOCKED_HOSTNAMES = new Set([
   "localhost.localdomain",
   "metadata.google.internal",
   "metadata",
+  "0.0.0.0",
+  "255.255.255.255",
 ]);
 
+function stripBrackets(hostname: string): string {
+  const host = hostname.toLowerCase().replace(/\.$/, "");
+  return host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
+}
+
+function hexPairToIpv4(high: string, low: string): string {
+  const hi = Number.parseInt(high, 16);
+  const lo = Number.parseInt(low, 16);
+  return `${(hi >> 8) & 255}.${hi & 255}.${(lo >> 8) & 255}.${lo & 255}`;
+}
+
+export function ipv4FromMapped(hostname: string): string | null {
+  const inner = stripBrackets(hostname);
+  const dotted = inner.match(/(?:^|:)ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i);
+  if (dotted?.[1]) return dotted[1];
+  const hex = inner.match(/(?:^|:)ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i);
+  if (hex) return hexPairToIpv4(hex[1], hex[2]);
+  return null;
+}
+
 function isPrivateOrLocalIpv4(hostname: string): boolean {
-  const m = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  const mapped = ipv4FromMapped(hostname);
+  const candidate = mapped ?? hostname;
+  const m = candidate.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
   if (!m) return false;
   const parts = m.slice(1).map((p) => Number(p));
   if (parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return true;
@@ -24,24 +48,35 @@ function isPrivateOrLocalIpv4(hostname: string): boolean {
   if (a === 169 && b === 254) return true;
   if (a === 172 && b >= 16 && b <= 31) return true;
   if (a === 192 && b === 168) return true;
-  if (a === 100 && b >= 64 && b <= 127) return true; // carrier-grade NAT
+  if (a === 100 && b >= 64 && b <= 127) return true;
   return false;
 }
 
-function isBlockedHostname(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/\.$/, "");
+function isPrivateOrLocalIpv6(hostname: string): boolean {
+  const inner = stripBrackets(hostname);
+  if (!inner.includes(":")) return false;
+  if (inner === "::1" || inner === "::") return true;
+  const mapped = ipv4FromMapped(inner);
+  if (mapped) return isPrivateOrLocalIpv4(mapped);
+  if (inner.startsWith("fc") || inner.startsWith("fd") || inner.startsWith("fe80")) return true;
+  return false;
+}
+
+export function isBlockedHostname(hostname: string): boolean {
+  const host = stripBrackets(hostname);
   if (!host) return true;
   if (BLOCKED_HOSTNAMES.has(host)) return true;
   if (host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal")) return true;
-  if (host === "::1" || host === "[::1]") return true;
-  if (host.startsWith("[")) {
-    const inner = host.slice(1, -1).toLowerCase();
-    if (inner === "::1" || inner.startsWith("fc") || inner.startsWith("fd") || inner.startsWith("fe80")) {
-      return true;
-    }
-  }
-  if (isPrivateOrLocalIpv4(host)) return true;
+  if (isPrivateOrLocalIpv4(host) || isPrivateOrLocalIpv6(host)) return true;
   return false;
+}
+
+export function isHostedAssetPath(url: string): boolean {
+  return /^\/api\/qr\/[A-Za-z0-9_-]+\/asset(?:\?.*)?$/.test(url.trim());
+}
+
+export function isDisplayableMediaUrl(url: string): boolean {
+  return isSafeUrl(url) || isHostedAssetPath(url);
 }
 
 /**

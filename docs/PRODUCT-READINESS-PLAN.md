@@ -24,9 +24,9 @@
 
 ### Цели Метрики (создать в кабинете счётчика)
 
-> **TODO ops:** без этого шага воронка в UI Метрики пустая.
+> **TODO ops:** без этого шага воронка в UI Метрики пустая. Продуктовая цепочка activation→payment — `/admin/funnel` (серверные `FunnelEvent`). `subscription_paid` из виджета оплатой не является.
 
-`registration_completed`, `qr_type_selected`, `qr_created`, `dynamic_qr_created`, `qr_downloaded`, `pricing_viewed`, `checkout_started`, `subscription_paid`, `member_invited`, `api_key_created`
+`registration_completed`, `qr_type_selected`, `qr_created`, `dynamic_qr_created`, `qr_downloaded`, `pricing_viewed`, `checkout_started`, `member_invited`, `api_key_created`
 
 ## Волна B (сделано в коде)
 
@@ -43,6 +43,10 @@
 - Кэш правил редиректа (Redis) — **отложен**: rate limit + async scan уже снижают риск; полноценный edge-cache — отдельная задача.
 - Экспорт CSV: до 5000 событий за период; cookie-auth через тот же session (ссылка `<a href>`).
 - Дубликат не копирует `passwordHash` (нужно задать пароль заново).
+
+## Исследование спроса (аудит B32)
+
+Протокол и план 10 интервью: [`docs/research-2026-09-18/`](./research-2026-09-18/README.md). Карточка текущего пользователя пустая, пока не будет разговора. Пилоты B33 не начинать с выдуманных задач.
 
 ## Волна C (по спросу)
 

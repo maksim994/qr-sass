@@ -1,139 +1,57 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  dismissOnboarding,
-  hasOnboardingDownloaded,
-  isOnboardingDismissed,
-} from "@/lib/product-analytics";
+import { useId, useState, useSyncExternalStore } from "react";
+import { dismissOnboarding, hasOnboardingDownloaded, isOnboardingDismissed } from "@/lib/product-analytics";
+import styles from "./onboarding-checklist.module.css";
 
 type Props = {
   hasQr: boolean;
-  hasScan: boolean;
-  hasDynamic: boolean;
-  hasTeam: boolean;
+  hasDownload: boolean;
+  hasFirstExternalOpen: boolean;
+  canTrackOpens: boolean;
 };
 
-type Step = {
-  id: string;
-  title: string;
-  description: string;
-  href: string;
-  cta: string;
-  done: boolean;
-};
+function subscribeNoop() { return () => undefined; }
 
-export function OnboardingChecklist({ hasQr, hasScan, hasDynamic, hasTeam }: Props) {
-  const [ready, setReady] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const [downloaded, setDownloaded] = useState(false);
-
-  useEffect(() => {
-    setDismissed(isOnboardingDismissed());
-    setDownloaded(hasOnboardingDownloaded());
-    setReady(true);
-  }, []);
-
-  if (!ready || dismissed) return null;
-
-  // Scan implies the code was already used/shared — count download done.
-  const downloadDone = downloaded || hasScan;
-
-  const steps: Step[] = [
-    {
-      id: "create",
-      title: "Создайте первый QR-код",
-      description: "Выберите тип и сохраните код в библиотеке.",
-      href: "/dashboard/create",
-      cta: "Создать",
-      done: hasQr,
-    },
-    {
-      id: "download",
-      title: "Скачайте QR",
-      description: "PNG или SVG — для печати, меню или рекламы.",
-      href: hasQr ? "/dashboard/library" : "/dashboard/create",
-      cta: "К библиотеке",
-      done: downloadDone,
-    },
-    {
-      id: "scan",
-      title: "Получите первое сканирование",
-      description: "Отсканируйте динамический код телефоном или откройте короткую ссылку.",
-      href: hasQr ? "/dashboard/analytics" : "/dashboard/create",
-      cta: "Аналитика",
-      done: hasScan,
-    },
-    {
-      id: "value",
-      title: "Попробуйте динамику или команду",
-      description: "Смените ссылку без перепечатки или пригласите коллегу.",
-      href: hasDynamic || hasTeam ? "/dashboard/team" : "/dashboard/billing",
-      cta: hasDynamic || hasTeam ? "Команда" : "Тарифы",
-      done: hasDynamic || hasTeam,
-    },
+export function OnboardingChecklist({ hasQr, hasDownload, hasFirstExternalOpen, canTrackOpens }: Props) {
+  const dismissedStored = useSyncExternalStore(subscribeNoop, isOnboardingDismissed, () => false);
+  const downloaded = useSyncExternalStore(subscribeNoop, hasOnboardingDownloaded, () => false);
+  const [dismissedLocal, setDismissedLocal] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const listId = useId();
+  const steps = [
+    { id: "create", title: "Создайте первый QR-код", description: "Начните со ссылки или выберите другой тип содержимого.", href: "/dashboard/create", cta: "Создать", done: hasQr },
+    { id: "download", title: "Скачайте готовый код", description: "Выберите формат в библиотеке и проверьте код камерой телефона перед печатью.", href: hasQr ? "/dashboard/library" : "/dashboard/create", cta: hasQr ? "К моим кодам" : "Создать", done: downloaded || hasDownload },
+    ...(canTrackOpens ? [{ id: "scan", title: "Посмотрите первые открытия", description: "После перехода по вашему динамическому QR появится статистика. Открытия в режиме проверки не учитываются.", href: "/dashboard/analytics", cta: "Аналитика", done: hasFirstExternalOpen }] : []),
   ];
-
-  const doneCount = steps.filter((s) => s.done).length;
-  if (doneCount === steps.length) return null;
+  const doneCount = steps.filter((step) => step.done).length;
+  const current = steps.find((step) => !step.done);
+  if (dismissedStored || dismissedLocal || !current) return null;
 
   return (
-    <section className="qrs-onboarding" aria-label="Первые шаги">
-      <div className="qrs-onboarding__head">
-        <div className="qrs-onboarding__intro">
-          <div className="qrs-onboarding__eyebrow">
-            {doneCount} из {steps.length} шагов выполнено
-          </div>
-          <h2 className="qrs-onboarding__title">Начните с главного</h2>
-          <p className="qrs-onboarding__lead">
-            Создайте QR, скачайте его и убедитесь, что сканирования появляются в аналитике.
-          </p>
+    <section className={styles.checklist} aria-label="Первые шаги">
+      <div className={styles.head}>
+        <h2>Первые шаги <span>{doneCount} из {steps.length}</span></h2>
+        <div className={styles.controls}>
+          <button type="button" aria-expanded={expanded} aria-controls={listId} onClick={() => setExpanded(!expanded)}>
+            {expanded ? "Свернуть" : "Все шаги"}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true" className={expanded ? styles.rotated : undefined}><path d="m6 9 6 6 6-6" /></svg>
+          </button>
+          <button type="button" className={styles.dismiss} onClick={() => { dismissOnboarding(); setDismissedLocal(true); }}>Скрыть</button>
         </div>
-        <button
-          type="button"
-          className="qrs-onboarding__dismiss"
-          onClick={() => {
-            dismissOnboarding();
-            setDismissed(true);
-          }}
-        >
-          Скрыть
-        </button>
       </div>
-
-      <div className="qrs-onboarding__list" role="list">
-        {steps.map((step, index) => (
-          <div
-            key={step.id}
-            role="listitem"
-            className={`qrs-onboarding__item${step.done ? " is-done" : ""}`}
-          >
-            <span className="qrs-onboarding__index" aria-hidden="true">
-              {step.done ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-              ) : (
-                index + 1
-              )}
-            </span>
-            <div className="qrs-onboarding__body">
-              <div className="qrs-onboarding__item-title">{step.title}</div>
-              <div className="qrs-onboarding__item-desc">{step.description}</div>
-            </div>
-            <div className="qrs-onboarding__action">
-              {step.done ? (
-                <span className="qrs-onboarding__done-label">Готово</span>
-              ) : (
-                <Link href={step.href} className="fk-button fk-button--secondary fk-button--sm">
-                  {step.cta}
-                </Link>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      {!expanded && <div className={styles.current}>
+        <span className={styles.stepNumber} aria-hidden="true">{steps.indexOf(current) + 1}</span>
+        <div className={styles.copy}><h3>{current.title}</h3><p>{current.description}</p></div>
+        <Link href={current.href} className={styles.action}>{current.cta}<span aria-hidden="true">→</span></Link>
+      </div>}
+      <ol id={listId} className={styles.list} hidden={!expanded}>
+        {steps.map((step, index) => <li key={step.id}>
+          <span className={styles.stepNumber} aria-hidden="true">{step.done ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m5 12 4 4L19 6" /></svg> : index + 1}</span>
+          <div className={styles.copy}><h3>{step.title}</h3><p>{step.description}</p></div>
+          {step.done ? <span className={styles.done}>Готово</span> : <Link href={step.href} className={styles.action}>{step.cta}<span aria-hidden="true">→</span></Link>}
+        </li>)}
+      </ol>
     </section>
   );
 }

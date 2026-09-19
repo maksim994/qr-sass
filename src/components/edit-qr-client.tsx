@@ -2,13 +2,15 @@
 
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { QrContentForm } from "@/components/qr-forms";
 import { QrDesigner, type QrStyle } from "@/components/qr-designer";
 import { BusinessLanding } from "@/components/landing-templates/business-landing";
 import { getQrTypeInfo } from "@/lib/qr-types";
 import { useQrStylingPreview } from "@/hooks/use-qr-styling-preview";
-import { getQrPreviewData } from "@/lib/qr-preview-data";
+import { canonicalQrData } from "@/lib/qr-canonical";
+import { evaluateScannability, styleToScannability } from "@/lib/scannability";
+import { qrPublicPath } from "@/lib/safe-redirect";
 import { QrContentType } from "@prisma/client";
 import { parseStyleConfig } from "@/lib/qr-style-config";
 import { Field, Input, Button } from "@/components/ui";
@@ -19,6 +21,9 @@ import {
   QrWizardPreview,
   QrWizardTabs,
 } from "@/components/qr/qr-wizard-shared";
+import { QrLifetimeNote } from "@/components/qr/qr-lifetime-note";
+import { MSG } from "@/lib/user-messages";
+import { savedQrIdForDownload } from "@/lib/qr-download-gate";
 
 function toDateTimeLocalValue(iso: string | null) {
   if (!iso) return "";
@@ -50,8 +55,11 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
   const [payload, setPayload] = useState<Record<string, unknown>>(initialPayload);
   const [style, setStyle] = useState<QrStyle>(() => parseStyleConfig(initialQr.styleConfig));
   const [saving, setSaving] = useState(false);
+  const savePending = useRef(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"content" | "design">("content");
+  const contentPanelId = useId();
+  const designPanelId = useId();
 
   const [expireAt, setExpireAt] = useState(toDateTimeLocalValue(initialQr.expireAt));
   const [maxScans, setMaxScans] = useState(initialQr.maxScans != null ? String(initialQr.maxScans) : "");
@@ -59,7 +67,7 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
   const [hasPassword, setHasPassword] = useState(initialQr.hasPassword);
   const [gdprRequired, setGdprRequired] = useState(initialPayload.gdprRequired === true);
   const [gdprPolicyUrl, setGdprPolicyUrl] = useState(String(initialPayload.gdprPolicyUrl ?? ""));
-  const [smartRedirect, setSmartRedirect] = useState<{
+  const [smartRedirect] = useState<{
     default?: string;
     ios?: string;
     android?: string;
@@ -83,97 +91,123 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
     ymCounterId?: string;
     vkPixelId?: string;
   }) ?? {});
-  const [abTest, setAbTest] = useState<{ urlA?: string; urlB?: string }>(
+  const [abTest] = useState<{ urlA?: string; urlB?: string }>(
     () => (initialPayload.abTest as { urlA?: string; urlB?: string }) ?? {},
   );
 
-  const previewData = useMemo(() => {
-    const appUrl = typeof window !== "undefined" ? window.location.origin : "https://example.com";
-    return getQrPreviewData(initialQr.contentType, payload, {
-      appUrl,
-      shortCode: initialQr.shortCode,
-      kind: initialQr.kind,
-    });
-  }, [initialQr.contentType, initialQr.kind, initialQr.shortCode, payload]);
-
+  const canonical = canonicalQrData({
+    contentType: initialQr.contentType,
+    payload,
+    kind: initialQr.kind,
+    shortCode: initialQr.shortCode,
+    appUrl: typeof window !== "undefined" ? window.location.origin : "",
+  });
+  const previewData = canonical.data;
   const qrRef = useQrStylingPreview(previewData, style);
+  const scan = evaluateScannability(styleToScannability(style));
   const isDynamic = initialQr.kind === "DYNAMIC" || !!typeInfo?.needsHostedPage;
+  const dirty =
+    name !== initialQr.name ||
+    JSON.stringify(payload) !== JSON.stringify(initialPayload) ||
+    JSON.stringify(style) !== JSON.stringify(parseStyleConfig(initialQr.styleConfig)) ||
+    (isDynamic && (
+      expireAt !== toDateTimeLocalValue(initialQr.expireAt) ||
+      maxScans !== (initialQr.maxScans != null ? String(initialQr.maxScans) : "") ||
+      password !== "" ||
+      gdprRequired !== (initialPayload.gdprRequired === true) ||
+      gdprPolicyUrl !== String(initialPayload.gdprPolicyUrl ?? "") ||
+      JSON.stringify(trackingPixels) !== JSON.stringify(initialPayload.trackingPixels ?? {})
+    ));
+  const downloadBlockedReason = dirty
+    ? "Сначала сохраните изменения — скачивается только сохранённый QR."
+    : !canonical.ready
+      ? canonical.isDynamic
+        ? "Сначала сохраните QR, чтобы скачать короткую ссылку."
+        : "Заполните содержимое, чтобы скачать код."
+      : !scan.safeToUse
+        ? "Контраст или фон небезопасны для сканирования."
+        : undefined;
 
   const shortLink = initialQr.shortCode
-    ? initialQr.kind === "DYNAMIC" && !typeInfo?.needsHostedPage
-      ? `/r/${initialQr.shortCode}`
-      : `/p/${initialQr.shortCode}`
+    ? qrPublicPath({ shortCode: initialQr.shortCode, contentType: initialQr.contentType })
     : null;
 
   async function handleSave() {
+    if (savePending.current) return;
+    savePending.current = true;
     setSaving(true);
     setError("");
 
-    const mergedPayload = { ...payload };
-    if (isDynamic) {
-      mergedPayload.gdprRequired = gdprRequired;
-      if (gdprPolicyUrl.trim()) mergedPayload.gdprPolicyUrl = gdprPolicyUrl.trim();
-      else delete mergedPayload.gdprPolicyUrl;
+    try {
 
-      if (initialQr.contentType === "URL" && !typeInfo?.needsHostedPage) {
-        const sr: Record<string, string> = {};
-        if (smartRedirect.default?.trim()) sr.default = smartRedirect.default.trim();
-        if (smartRedirect.ios?.trim()) sr.ios = smartRedirect.ios.trim();
-        if (smartRedirect.android?.trim()) sr.android = smartRedirect.android.trim();
-        if (smartRedirect.desktop?.trim()) sr.desktop = smartRedirect.desktop.trim();
-        if (Object.keys(sr).length) mergedPayload.smartRedirect = sr;
-        else delete mergedPayload.smartRedirect;
+      const mergedPayload = { ...payload };
+      if (isDynamic) {
+        mergedPayload.gdprRequired = gdprRequired;
+        if (gdprPolicyUrl.trim()) mergedPayload.gdprPolicyUrl = gdprPolicyUrl.trim();
+        else delete mergedPayload.gdprPolicyUrl;
 
-        const tp: Record<string, string> = {};
-        if (trackingPixels.metaPixelId?.trim()) tp.metaPixelId = trackingPixels.metaPixelId.trim();
-        if (trackingPixels.ga4Id?.trim()) tp.ga4Id = trackingPixels.ga4Id.trim();
-        if (trackingPixels.gtmId?.trim()) tp.gtmId = trackingPixels.gtmId.trim();
-        if (trackingPixels.ymCounterId?.trim()) tp.ymCounterId = trackingPixels.ymCounterId.trim();
-        if (trackingPixels.vkPixelId?.trim()) tp.vkPixelId = trackingPixels.vkPixelId.trim();
-        if (Object.keys(tp).length) mergedPayload.trackingPixels = tp;
-        else delete mergedPayload.trackingPixels;
+        if (initialQr.contentType === "URL" && !typeInfo?.needsHostedPage) {
+          const sr: Record<string, string> = {};
+          if (smartRedirect.default?.trim()) sr.default = smartRedirect.default.trim();
+          if (smartRedirect.ios?.trim()) sr.ios = smartRedirect.ios.trim();
+          if (smartRedirect.android?.trim()) sr.android = smartRedirect.android.trim();
+          if (smartRedirect.desktop?.trim()) sr.desktop = smartRedirect.desktop.trim();
+          if (Object.keys(sr).length) mergedPayload.smartRedirect = sr;
+          else delete mergedPayload.smartRedirect;
 
-        const ab: Record<string, string> = {};
-        if (abTest.urlA?.trim()) ab.urlA = abTest.urlA.trim();
-        if (abTest.urlB?.trim()) ab.urlB = abTest.urlB.trim();
-        if (Object.keys(ab).length === 2) mergedPayload.abTest = ab;
-        else delete mergedPayload.abTest;
+          const tp: Record<string, string> = {};
+          if (trackingPixels.metaPixelId?.trim()) tp.metaPixelId = trackingPixels.metaPixelId.trim();
+          if (trackingPixels.ga4Id?.trim()) tp.ga4Id = trackingPixels.ga4Id.trim();
+          if (trackingPixels.ymCounterId?.trim()) tp.ymCounterId = trackingPixels.ymCounterId.trim();
+          if (trackingPixels.vkPixelId?.trim()) tp.vkPixelId = trackingPixels.vkPixelId.trim();
+          if (Object.keys(tp).length) mergedPayload.trackingPixels = tp;
+          else delete mergedPayload.trackingPixels;
+
+          const ab: Record<string, string> = {};
+          if (abTest.urlA?.trim()) ab.urlA = abTest.urlA.trim();
+          if (abTest.urlB?.trim()) ab.urlB = abTest.urlB.trim();
+          if (Object.keys(ab).length === 2) mergedPayload.abTest = ab;
+          else delete mergedPayload.abTest;
+        }
       }
-    }
 
-    const body: Record<string, unknown> = { name, payload: mergedPayload, style };
-    if (initialQr.kind === "DYNAMIC") {
-      body.expireAt = expireAt.trim() ? new Date(expireAt).toISOString() : null;
-      if (maxScans.trim()) {
-        const n = parseInt(maxScans, 10);
-        body.maxScans = Number.isInteger(n) && n >= 1 ? n : null;
-      } else {
-        body.maxScans = null;
+      const body: Record<string, unknown> = { name, payload: mergedPayload, style };
+      if (initialQr.kind === "DYNAMIC") {
+        body.expireAt = expireAt.trim() ? new Date(expireAt).toISOString() : null;
+        if (maxScans.trim()) {
+          const n = parseInt(maxScans, 10);
+          body.maxScans = Number.isInteger(n) && n >= 1 ? n : null;
+        } else {
+          body.maxScans = null;
+        }
+        if (password.trim()) body.password = password.trim();
       }
-      if (password.trim()) body.password = password.trim();
+
+      const response = await fetchApi(`/api/qr/${initialQr.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const parsed = await parseApiResponse<{ updated?: boolean }>(response);
+      if (!parsed.ok) {
+        setError(parsed.error ?? MSG.QR_SAVE_FAILED);
+        return;
+      }
+
+      if (password.trim()) {
+        setHasPassword(true);
+        setPassword("");
+      }
+
+      router.push(`/dashboard/qr/${initialQr.id}`);
+      router.refresh();
+    } catch {
+      setError(MSG.AUTH_NETWORK_ERROR);
+    } finally {
+      savePending.current = false;
+      setSaving(false);
     }
-
-    const response = await fetchApi(`/api/qr/${initialQr.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    const parsed = await parseApiResponse<{ updated?: boolean }>(response);
-    setSaving(false);
-
-    if (!parsed.ok) {
-      setError(parsed.error ?? "Не удалось сохранить изменения.");
-      return;
-    }
-
-    if (password.trim()) {
-      setHasPassword(true);
-      setPassword("");
-    }
-
-    router.push(`/dashboard/qr/${initialQr.id}`);
-    router.refresh();
   }
 
   if (!typeInfo) {
@@ -216,10 +250,20 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
             </Field>
           </div>
 
-          <QrWizardTabs value={activeTab} onChange={setActiveTab} />
+          <QrWizardTabs
+            value={activeTab}
+            onChange={setActiveTab}
+            contentId={contentPanelId}
+            designId={designPanelId}
+          />
 
           {activeTab === "content" ? (
-            <div className="qrs-wizard-card">
+            <div
+              id={contentPanelId}
+              role="tabpanel"
+              aria-labelledby={`${contentPanelId}-tab`}
+              className="qrs-wizard-card"
+            >
               <QrContentForm
                 type={initialQr.contentType}
                 payload={payload}
@@ -228,7 +272,9 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
               />
             </div>
           ) : (
-            <QrDesigner style={style} onChange={setStyle} workspaceId={workspaceId} />
+            <div id={designPanelId} role="tabpanel" aria-labelledby={`${designPanelId}-tab`}>
+              <QrDesigner style={style} onChange={setStyle} workspaceId={workspaceId} />
+            </div>
           )}
 
           {isDynamic ? (
@@ -249,8 +295,6 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
               }}
               trackingPixels={trackingPixels}
               onTrackingPixelsChange={setTrackingPixels}
-              abTest={abTest}
-              onAbTestChange={setAbTest}
             />
           ) : null}
         </div>
@@ -266,6 +310,16 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
           shortLink={shortLink}
           previewData={previewData}
           style={style}
+          readable={scan.safeToUse}
+          downloadBlockedReason={downloadBlockedReason}
+          qrId={savedQrIdForDownload(initialQr.id, dirty)}
+          lifetimeHint={
+            initialQr.kind === "DYNAMIC" ? (
+              <QrLifetimeNote variant="download-dynamic" />
+            ) : (
+              <QrLifetimeNote variant="download-static" />
+            )
+          }
         />
       </div>
     </div>

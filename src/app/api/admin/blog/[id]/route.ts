@@ -4,6 +4,8 @@ import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
 import { normalizeStructuredDataInput } from "@/lib/blog-structured-data";
+import { publicSiteUrl } from "@/lib/public-url";
+import { sanitizeBlogFields } from "@/lib/blog-sanitize";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -81,17 +83,37 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     update.slug = slug;
   }
 
+  const clean = sanitizeBlogFields({
+    slug: typeof update.slug === "string" ? update.slug : existing.slug,
+    title: typeof update.title === "string" ? update.title : existing.title,
+    excerpt: (update.excerpt !== undefined ? update.excerpt : existing.excerpt) as string | null,
+    metaTitle: (update.metaTitle !== undefined ? update.metaTitle : existing.metaTitle) as string | null,
+    metaDescription: (update.metaDescription !== undefined ? update.metaDescription : existing.metaDescription) as string | null,
+    content: typeof update.content === "string" ? update.content : existing.content,
+    structuredData: (update.structuredData !== undefined ? update.structuredData : existing.structuredData) as string | null,
+  });
+  if (data.title !== undefined) update.title = clean.title;
+  if (data.excerpt !== undefined) update.excerpt = clean.excerpt;
+  if (data.metaTitle !== undefined) update.metaTitle = clean.metaTitle;
+  if (data.metaDescription !== undefined) update.metaDescription = clean.metaDescription;
+  if (data.content !== undefined) {
+    update.content = clean.content;
+    if (data.readingTimeMinutes === undefined) {
+      update.readingTimeMinutes = calculateReadingTimeMinutes(String(clean.content));
+    }
+  }
+  if (data.structuredData !== undefined) update.structuredData = clean.structuredData;
+
   const post = await db.blogPost.update({
     where: { id },
     data: update,
   });
 
   if (post.publishedAt) {
-    const base = (process.env.APP_URL ?? "https://qr-s.ru").replace(/\/$/, "");
     const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
     if (settings?.indexNowKey) {
       const { notifyIndexNow } = await import("@/lib/indexnow");
-      const url = `${base}/blog/${post.slug}`;
+      const url = publicSiteUrl(`/blog/${post.slug}`);
       await notifyIndexNow([url], settings.indexNowKey);
     }
   }

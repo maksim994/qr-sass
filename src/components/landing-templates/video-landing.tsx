@@ -1,4 +1,4 @@
-import { isSafeUrl } from "@/lib/url";
+import { isDisplayableMediaUrl } from "@/lib/url";
 import {
   HostedLandingCard,
   HostedLandingEmpty,
@@ -23,8 +23,8 @@ export function VideoLanding({ payload }: Props) {
   const title = (payload.title as string) || "Видео";
   const rawVideoUrl = payload.videoUrl as string | undefined;
   const rawFileUrl = payload.fileUrl as string | undefined;
-  const safeVideoUrl = rawVideoUrl && isSafeUrl(rawVideoUrl) ? rawVideoUrl : undefined;
-  const safeFileUrl = rawFileUrl && isSafeUrl(rawFileUrl) ? rawFileUrl : undefined;
+  const safeVideoUrl = rawVideoUrl && isDisplayableMediaUrl(rawVideoUrl) ? rawVideoUrl : undefined;
+  const safeFileUrl = rawFileUrl && isDisplayableMediaUrl(rawFileUrl) ? rawFileUrl : undefined;
   const src = safeVideoUrl || safeFileUrl;
 
   const youtubeId = src ? getYouTubeId(src) : null;

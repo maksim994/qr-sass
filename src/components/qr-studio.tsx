@@ -7,6 +7,7 @@ import QRCodeStyling from "qr-code-styling";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parseApiResponse } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
+import { encodeQrContent } from "@/lib/qr-content";
 
 type Workspace = { id: string; name: string };
 
@@ -38,29 +39,6 @@ const kindLabels: Record<string, string> = {
   STATIC: "Статический",
   DYNAMIC: "Динамический",
 };
-
-function encodedContentFromPayload(type: QrContentType, payload: Record<string, string>) {
-  switch (type) {
-    case "URL":
-      return payload.url || "";
-    case "TEXT":
-      return payload.text || "";
-    case "EMAIL":
-      return `mailto:${payload.email || ""}?subject=${encodeURIComponent(payload.subject || "")}&body=${encodeURIComponent(payload.body || "")}`;
-    case "PHONE":
-      return `tel:${payload.phone || ""}`;
-    case "SMS":
-      return `smsto:${payload.phone || ""}:${payload.message || ""}`;
-    case "WIFI":
-      return `WIFI:T:${payload.encryption || "WPA"};S:${payload.ssid || ""};P:${payload.password || ""};;`;
-    case "VCARD":
-      return `BEGIN:VCARD\nVERSION:3.0\nN:${payload.lastName || ""};${payload.firstName || ""}\nFN:${payload.firstName || ""} ${payload.lastName || ""}\nORG:${payload.organization || ""}\nTITLE:${payload.title || ""}\nTEL:${payload.phone || ""}\nEMAIL:${payload.email || ""}\nEND:VCARD`;
-    case "LOCATION":
-      return `geo:${payload.latitude || ""},${payload.longitude || ""}`;
-    default:
-      return "";
-  }
-}
 
 function hexToLuminance(hex: string) {
   const n = hex.replace("#", "");
@@ -104,7 +82,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
   const [error, setError] = useState("");
   const [dynamicTarget, setDynamicTarget] = useState<Record<string, string>>({});
 
-  const previewData = useMemo(() => encodedContentFromPayload(type, payload), [type, payload]);
+  const previewData = useMemo(() => encodeQrContent(type, payload), [type, payload]);
   const qualityScore = useMemo(
     () => scoreScannability(foreground, background, margin, logoScale),
     [foreground, background, margin, logoScale],
@@ -118,7 +96,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
       qrInstance.current = new QRCodeStyling({
         width: 260,
         height: 260,
-        data: previewData || "https://example.com",
+        data: previewData || " ",
         margin,
         dotsOptions: { type: dotStyle, color: foreground },
         cornersSquareOptions: { type: cornerStyle, color: foreground },
@@ -131,7 +109,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
     }
 
     qrInstance.current.update({
-      data: previewData || "https://example.com",
+      data: previewData || " ",
       margin,
       dotsOptions: { type: dotStyle, color: foreground },
       cornersSquareOptions: { type: cornerStyle, color: foreground },

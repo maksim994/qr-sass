@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type MenuItem = { name: string; description: string; price: string };
 type Category = { name: string; items: MenuItem[] };
 
@@ -59,6 +61,7 @@ export function MenuForm({ payload, onChange }: Props) {
             <input
               className="input flex-1"
               value={cat.name}
+              aria-label={`Название категории ${ci + 1}`}
               onChange={(e) => setCategoryName(ci, e.target.value)}
               placeholder="Название категории"
             />
@@ -73,33 +76,30 @@ export function MenuForm({ payload, onChange }: Props) {
 
           {cat.items.map((item, ii) => (
             <div key={ii} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-end">
-              <div>
-                <label className="label">Название</label>
+              <FormField label="Название">
                 <input
                   className="input"
                   value={item.name}
                   onChange={(e) => setItemField(ci, ii, "name", e.target.value)}
                   placeholder="Блюдо"
                 />
-              </div>
-              <div>
-                <label className="label">Описание</label>
+              </FormField>
+              <FormField label="Описание">
                 <input
                   className="input"
                   value={item.description}
                   onChange={(e) => setItemField(ci, ii, "description", e.target.value)}
                   placeholder="Описание"
                 />
-              </div>
-              <div>
-                <label className="label">Цена</label>
+              </FormField>
+              <FormField label="Цена">
                 <input
                   className="input"
                   value={item.price}
                   onChange={(e) => setItemField(ci, ii, "price", e.target.value)}
                   placeholder="500"
                 />
-              </div>
+              </FormField>
               <button
                 type="button"
                 className="btn btn-sm text-red-600 self-end"

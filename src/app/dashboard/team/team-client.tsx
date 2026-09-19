@@ -1,182 +1,93 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fetchApi } from "@/lib/client-api";
-import { Alert, Badge, Button, Input } from "@/components/ui";
+import { fetchApi, parseApiResponse } from "@/lib/client-api";
+import { Alert, Button, Input, Modal } from "@/components/ui";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
+import { MSG } from "@/lib/user-messages";
+import styles from "./team.module.css";
 
 type Member = {
-  id: string;
-  userId: string;
-  email: string;
-  name: string | null;
-  role: string;
-  roleLabel: string;
-  isCurrentUser: boolean;
+  id: string; userId: string; email: string; name: string | null;
+  role: string; roleLabel: string; isCurrentUser: boolean;
 };
-
 type Props = {
-  workspaceId: string;
-  members: Member[];
-  canInvite: boolean;
-  isAdmin: boolean;
-  planLabel: string;
+  workspaceId: string; members: Member[]; canInvite: boolean;
+  isAdmin: boolean; planLabel: string; maxUsers: number | null;
 };
 
-export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planLabel }: Props) {
+export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planLabel, maxUsers }: Props) {
   const router = useRouter();
+  const emailId = useId();
+  const pending = useRef(false);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [removing, setRemoving] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [selected, setSelected] = useState<Member | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const busy = loading || removing;
 
-  async function invite() {
-    if (!email.trim() || !canInvite) return;
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+  useEffect(() => { if (error || success) feedbackRef.current?.focus(); }, [error, success]);
+
+  async function invite(event: React.FormEvent) {
+    event.preventDefault();
+    if (!email.trim() || !canInvite || pending.current) return;
+    pending.current = true;
+    setLoading(true); setError(null); setSuccess(null);
     try {
       const res = await fetchApi(`/api/workspaces/${workspaceId}/members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: email.trim() }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError((data as { error?: string })?.error ?? "Не удалось добавить участника");
-        return;
-      }
-      setEmail("");
-      setSuccess("Участник добавлен в команду");
+      const result = await parseApiResponse(res);
+      if (!result.ok) { setError(result.error ?? MSG.TEAM_ADD_FAILED); return; }
+      setEmail(""); setSuccess("Участник добавлен в команду.");
       trackGoal(PRODUCT_GOALS.member_invited);
       router.refresh();
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError(MSG.TEAM_ADD_FAILED); }
+    finally { pending.current = false; setLoading(false); }
   }
 
-  async function remove(userId: string) {
-    if (!confirm("Исключить участника из команды?")) return;
-    setRemoving(userId);
-    setError(null);
-    setSuccess(null);
+  async function remove() {
+    if (!selected || pending.current) return;
+    pending.current = true;
+    setRemoving(true); setRemoveError(null); setError(null); setSuccess(null);
     try {
-      const res = await fetchApi(`/api/workspaces/${workspaceId}/members/${userId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError((data as { error?: string })?.error ?? "Не удалось исключить участника");
-        return;
-      }
-      setSuccess("Участник исключён из команды");
-      router.refresh();
-    } finally {
-      setRemoving(null);
-    }
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/members/${selected.userId}`, { method: "DELETE" });
+      const result = await parseApiResponse(res);
+      if (!result.ok) { setRemoveError(result.error ?? MSG.TEAM_REMOVE_FAILED); return; }
+      setSelected(null); setSuccess("Участник исключён из команды."); router.refresh();
+    } catch { setRemoveError(MSG.TEAM_REMOVE_FAILED); }
+    finally { pending.current = false; setRemoving(false); }
   }
 
-  return (
-    <div className="qrs-team-page">
-      {error ? (
-        <Alert variant="danger" title="Ошибка" onClose={() => setError(null)} className="qrs-team-alert">
-          {error}
-        </Alert>
-      ) : null}
-      {success ? (
-        <Alert variant="success" title="Готово" onClose={() => setSuccess(null)} className="qrs-team-alert">
-          {success}
-        </Alert>
-      ) : null}
-
-      {canInvite ? (
-        <div className="qrs-wizard-card qrs-team-invite-card">
-          <div style={{ font: "var(--fw-bold) 1.05rem/1.2 var(--font-display)", color: "var(--text-strong)" }}>
-            Пригласить по email
-          </div>
-          <p style={{ marginTop: "6px", marginBottom: "18px", font: "var(--fw-regular) 13px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>
-            Пользователь должен быть уже зарегистрирован в qr-s.ru.
-          </p>
-          <div className="qrs-invite-row">
-            <Input
-              type="email"
-              placeholder="email@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && invite()}
-              className="qrs-team-input"
-              disabled={loading}
-            />
-            <Button onClick={invite} disabled={loading || !email.trim()}>
-              {loading ? "Добавление…" : "Добавить"}
-            </Button>
-          </div>
-        </div>
-      ) : !isAdmin ? (
-        <Alert variant="info" className="qrs-team-alert">
-          Управлять составом команды могут только владелец и администраторы. Тариф: {planLabel}.
-        </Alert>
-      ) : (
-        <Alert variant="warning" className="qrs-team-alert">
-          Достигнут лимит участников на тарифе {planLabel}.{" "}
-          <a href="/dashboard/billing" className="qrs-navlink">
-            Обновить тариф
-          </a>
-        </Alert>
-      )}
-
-      <div className="qrs-data-card qrs-team-table-card">
-        {members.length === 0 ? (
-          <p className="qrs-data-empty">Участников пока нет.</p>
-        ) : (
-          <div className="qrs-scroll qrs-data-table-wrap">
-            <table className="qrs-data-table">
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Имя</th>
-                  <th>Роль</th>
-                  {isAdmin ? <th aria-label="Действия" /> : null}
-                </tr>
-              </thead>
-              <tbody>
-                {members.map((m) => (
-                  <tr key={m.id}>
-                    <td>
-                      <span className="qrs-team-email-cell">
-                        {m.email}
-                        {m.isCurrentUser ? <Badge variant="primary">Вы</Badge> : null}
-                      </span>
-                    </td>
-                    <td style={{ color: "var(--text-default)", fontWeight: "var(--fw-medium)" }}>{m.name ?? "—"}</td>
-                    <td>
-                      <Badge variant="primary">{m.roleLabel}</Badge>
-                    </td>
-                    {isAdmin ? (
-                      <td style={{ textAlign: "right" }}>
-                        {!m.isCurrentUser && m.role !== "OWNER" ? (
-                          <button
-                            type="button"
-                            onClick={() => remove(m.userId)}
-                            disabled={removing === m.userId}
-                            className="qrs-data-action qrs-data-action--danger"
-                          >
-                            {removing === m.userId ? "…" : "Исключить"}
-                          </button>
-                        ) : null}
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <div className={styles.team}>
+    <section className={styles.summary} aria-label="Участники и тариф">
+      <div><h2>Доступ к кабинету</h2><p>Тариф «{planLabel}»</p></div>
+      <p className={styles.capacity}><strong>{members.length.toLocaleString("ru-RU")}{maxUsers !== null ? ` из ${maxUsers.toLocaleString("ru-RU")}` : ""}</strong><span>{maxUsers === null ? "участников · без лимита" : "мест занято"}</span></p>
+    </section>
+    {(error || success) && <div ref={feedbackRef} tabIndex={-1} className={styles.feedback}><Alert variant={error ? "danger" : "success"} onClose={() => { setError(null); setSuccess(null); }}>{error || success}</Alert></div>}
+    {isAdmin ? <section className={styles.panel} aria-labelledby="team-add-title">
+      <h2 id="team-add-title">Добавить участника</h2>
+      {canInvite ? <><p className={styles.description}>Укажите email пользователя, который уже зарегистрирован в QR-S.ru. Он сразу получит доступ к этому кабинету с ролью «Участник». Письмо не отправляется.</p>
+        <form onSubmit={invite} className={styles.addForm}><div><label htmlFor={emailId}>Email участника</label><Input id={emailId} type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={busy} required autoComplete="off"/></div><Button type="submit" disabled={busy || !email.trim()}>{loading ? "Добавление…" : "Добавить участника"}</Button></form>
+      </> : <div className={styles.limit}><p>Все места на текущем тарифе заняты. Чтобы добавить человека, освободите место или выберите тариф с большим лимитом.</p><Link href="/dashboard/billing" className="fk-button fk-button--secondary">Посмотреть тарифы</Link></div>}
+    </section> : <p className={styles.notice}>Добавлять и исключать участников могут владелец и администраторы кабинета.</p>}
+    <section className={styles.members} aria-labelledby="team-members-title"><h2 id="team-members-title">Участники кабинета <span>{members.length}</span></h2>
+      {members.length === 0 ? <p className={styles.empty}>Участников пока нет.</p> : <table className={styles.table}><caption className="sr-only">Состав команды и роли участников</caption><thead><tr><th scope="col">Участник</th><th scope="col">Роль</th>{isAdmin && <th scope="col"><span className="sr-only">Действия</span></th>}</tr></thead><tbody>{members.map(member => <tr key={member.id}>
+        <td><div className={styles.person}><span className={styles.avatar} aria-hidden="true">{(member.name?.trim() || member.email)[0]?.toUpperCase()}</span><div className={styles.identity}><div className={styles.name}>{member.name?.trim() || member.email}{member.isCurrentUser && <span className={styles.you}>Вы</span>}</div>{member.name?.trim() && <p>{member.email}</p>}</div></div></td>
+        <td className={styles.role}><span className={styles.mobileLabel}>Роль</span>{member.roleLabel}</td>
+        {isAdmin && <td className={styles.action}>{!member.isCurrentUser && member.role !== "OWNER" && <button type="button" disabled={busy} className={styles.remove} aria-label={`Исключить: ${member.name?.trim() || member.email}`} onClick={() => { setRemoveError(null); setSelected(member); }}>Исключить</button>}</td>}
+      </tr>)}</tbody></table>}
+    </section>
+    <details className={styles.roles}><summary>Что означают роли</summary><dl><div><dt>Владелец</dt><dd>Управляет кабинетом и командой. Его нельзя исключить из списка участников.</dd></div><div><dt>Администратор</dt><dd>Может добавлять и исключать участников в пределах лимита тарифа.</dd></div><div><dt>Участник</dt><dd>Работает в общем кабинете, но не управляет составом команды.</dd></div></dl></details>
+    {selected && <Modal open title="Исключить участника?" closeDisabled={removing} onClose={() => { if (!pending.current) setSelected(null); }} footer={<><Button variant="secondary" disabled={removing} onClick={() => setSelected(null)}>Отмена</Button><Button variant="danger" disabled={removing} onClick={remove}>{removing ? "Исключение…" : "Исключить"}</Button></>}>
+      <p className={styles.selectedName}>{selected.name?.trim() || selected.email}</p>{selected.name?.trim() && <p className={styles.selectedEmail}>{selected.email}</p>}<p className={styles.description}>Пользователь потеряет доступ к этому кабинету. Его аккаунт останется в сервисе.</p>{removeError && <Alert variant="danger">{removeError}</Alert>}
+    </Modal>}
+  </div>;
 }

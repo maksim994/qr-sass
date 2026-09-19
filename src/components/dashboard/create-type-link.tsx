@@ -2,82 +2,18 @@
 
 import Link from "next/link";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
+import styles from "./create-flow.module.css";
 
-type Props = {
-  type: string;
-  label: string;
-  description: string;
-  icon: string;
-  locked?: boolean;
-  lockHint?: string;
-};
+type Props = { type: string; label: string; description: string; icon: string; locked?: boolean; lockHint?: string; featured?: boolean };
 
-export function CreateTypeLink({ type, label, description, icon, locked, lockHint }: Props) {
-  const href = `/dashboard/create/${type.toLowerCase()}`;
-
-  const content = (
-    <>
-      <span
-        style={{
-          width: "44px",
-          height: "44px",
-          borderRadius: "10px",
-          background: "var(--color-primary-subtle)",
-          color: "var(--color-primary)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d={icon} />
-        </svg>
-      </span>
-      <div style={{ marginTop: "14px", font: "var(--fw-bold) 15px/1.2 var(--font-display)", color: "var(--text-strong)" }}>
-        {label}
-      </div>
-      <div style={{ marginTop: "4px", font: "var(--fw-regular) 13px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>
-        {description}
-      </div>
-      {lockHint ? (
-        <div style={{ marginTop: "10px", font: "var(--fw-semibold) 12px/1.2 var(--font-sans)", color: "var(--color-warning)" }}>
-          {lockHint}
-        </div>
-      ) : null}
-    </>
-  );
-
-  const style = {
-    textAlign: "left" as const,
-    background: "var(--surface-card)",
-    border: "1px solid var(--border-default)",
-    borderRadius: "12px",
-    padding: "20px",
-    display: "block",
-    opacity: locked ? 0.72 : 1,
-  };
-
-  if (locked) {
-    return (
-      <Link
-        href="/dashboard/billing"
-        className="qrs-row-lift"
-        style={style}
-        onClick={() => trackGoal(PRODUCT_GOALS.qr_type_selected, { type, locked: true })}
-      >
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <Link
-      href={href}
-      className="qrs-row-lift"
-      style={style}
-      onClick={() => trackGoal(PRODUCT_GOALS.qr_type_selected, { type })}
-    >
-      {content}
-    </Link>
-  );
+export function CreateTypeLink({ type, label, description, icon, locked, lockHint, featured }: Props) {
+  return <Link href={locked ? "/dashboard/billing" : `/dashboard/create/${type.toLowerCase()}`}
+    className={`${styles.typeLink} ${featured ? styles.featured : ""}`}
+    onClick={() => trackGoal(PRODUCT_GOALS.qr_type_selected, { type, ...(locked ? { locked: true } : {}) })}>
+    <svg className={styles.typeIcon} width="24" height="24" fill="none" viewBox="0 0 24 24" strokeWidth="1.6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={icon} /></svg>
+    <span className={styles.typeCopy}><strong>{featured ? "QR-код для ссылки" : label}</strong><span>{description}</span>
+      {lockHint && <span className={styles.lockHint}>{lockHint} · Смотреть тарифы</span>}
+    </span>
+    <svg className={styles.arrow} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+  </Link>;
 }

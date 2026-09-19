@@ -1,4 +1,4 @@
-import { isSafeUrl } from "@/lib/url";
+import { isDisplayableMediaUrl } from "@/lib/url";
 import {
   HostedLandingCard,
   HostedLandingEmpty,
@@ -11,7 +11,7 @@ type Props = { payload: Record<string, unknown> };
 export function ImageLanding({ payload }: Props) {
   const title = (payload.title as string) || "Изображение";
   const rawUrl = payload.fileUrl as string | undefined;
-  const fileUrl = rawUrl && isSafeUrl(rawUrl) ? rawUrl : undefined;
+  const fileUrl = rawUrl && isDisplayableMediaUrl(rawUrl) ? rawUrl : undefined;
 
   return (
     <HostedLandingShell>

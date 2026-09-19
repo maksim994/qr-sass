@@ -9,7 +9,9 @@ import { Breadcrumbs } from "@/components/blog/breadcrumbs";
 import { BlogPagination } from "@/components/blog/blog-pagination";
 import { BlogCategoryChips } from "@/components/blog/blog-category-chips";
 import { BlogCardIcon } from "@/components/blog/blog-card-icon";
-import { NewsletterBlock } from "@/components/blog/newsletter-block";
+import { sanitizeBlogFields } from "@/lib/blog-sanitize";
+import { publicSiteUrl } from "@/lib/public-url";
+import { blogListIndexing } from "@/lib/seo-hygiene";
 
 export const dynamic = "force-dynamic";
 
@@ -22,15 +24,21 @@ function formatPostDate(date: Date) {
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const { category: categorySlug } = await searchParams;
+  const { category: categorySlug, page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const indexing = blogListIndexing(currentPage, categorySlug);
+  const canonical = publicSiteUrl(indexing.canonicalPath);
+
   if (!categorySlug) {
     return {
       title: "Блог — qr-s.ru",
       description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
+      alternates: { canonical },
+      robots: indexing.robots,
       openGraph: {
         title: "Блог — qr-s.ru",
         description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
-        url: "/blog",
+        url: canonical,
       },
     };
   }
@@ -40,9 +48,11 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title: `${name} — Блог qr-s.ru`,
     description: `Статьи в категории «${name}»: гайды, кейсы и аналитика по QR-кодам.`,
+    alternates: { canonical },
+    robots: indexing.robots,
     openGraph: {
       title: `${name} — Блог qr-s.ru`,
-      url: `/blog?category=${categorySlug}`,
+      url: canonical,
     },
   };
 }
@@ -84,9 +94,18 @@ export default async function BlogListPage({ searchParams }: Props) {
     }),
   ]);
 
+  const cleanPosts = posts.map((item) => {
+    const clean = sanitizeBlogFields({ slug: item.slug, title: item.title, excerpt: item.excerpt });
+    return {
+      ...item,
+      title: clean.title ?? item.title,
+      excerpt: clean.excerpt ?? item.excerpt,
+    };
+  });
+
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const featured = currentPage === 1 && posts.length > 0 ? posts[0] : null;
-  const gridPosts = currentPage === 1 && featured ? posts.slice(1) : posts;
+  const featured = currentPage === 1 && cleanPosts.length > 0 ? cleanPosts[0] : null;
+  const gridPosts = currentPage === 1 && featured ? cleanPosts.slice(1) : cleanPosts;
   const featuredMeta = featured ? getBlogCardMeta(featured.category?.slug, 0) : null;
 
   return (
@@ -111,10 +130,10 @@ export default async function BlogListPage({ searchParams }: Props) {
                 textWrap: "balance",
               }}
             >
-              {activeCategory ? activeCategory.name : "Полезные статьи о QR-кодах"}
+              {activeCategory ? activeCategory.name : "Статьи о QR-кодах"}
             </h1>
             <p style={{ marginTop: "16px", maxWidth: "52ch", font: "var(--fw-regular) clamp(1rem, 2vw, 1.15rem)/1.6 var(--font-sans)", color: "var(--text-muted)" }}>
-              Гайды, кейсы и разборы аналитики: как выбрать тип кода, измерить офлайн-рекламу и не потерять ни одного сканирования.
+              Как выбрать тип кода, сменить ссылку после печати и смотреть открытия по дням. Без географии и выдуманных обещаний.
             </p>
             <BlogCategoryChips categories={categories} activeSlug={activeCategory?.slug} />
           </div>
@@ -123,7 +142,7 @@ export default async function BlogListPage({ searchParams }: Props) {
 
       <section style={{ paddingBottom: "clamp(32px, 5vw, 56px)" }}>
         <div className="fk-container">
-          {posts.length === 0 ? (
+          {cleanPosts.length === 0 ? (
             <div className="p-12 text-center rounded-2xl" style={{ border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-muted)" }}>
               {activeCategory ? `В категории «${activeCategory.name}» пока нет статей.` : "Пока нет опубликованных статей."}
             </div>
@@ -266,8 +285,6 @@ export default async function BlogListPage({ searchParams }: Props) {
           </div>
         </section>
       )}
-
-      <NewsletterBlock />
     </main>
   );
 }

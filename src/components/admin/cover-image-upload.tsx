@@ -3,6 +3,7 @@
 import { fetchApi } from "@/lib/client-api";
 import { useCallback, useRef, useState } from "react";
 import { Alert } from "@/components/ui";
+import { PreviewImage } from "@/components/ui/preview-image";
 
 type Props = {
   onUploaded: (url: string) => void;
@@ -75,7 +76,7 @@ export function CoverImageUpload({
           <p style={{ font: "var(--fw-medium) 14px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>Загрузка и оптимизация…</p>
         ) : currentUrl ? (
           <div className="text-center">
-            <img src={currentUrl} alt="Превью" className="mx-auto max-h-32 rounded-lg object-contain" />
+            <PreviewImage src={currentUrl} alt="Превью" className="mx-auto max-h-32 rounded-lg object-contain" />
             <p style={{ marginTop: 8, font: "var(--fw-medium) 12px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
               Нажмите или перетащите для замены
             </p>

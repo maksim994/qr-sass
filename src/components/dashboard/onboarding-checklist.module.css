@@ -1,0 +1,28 @@
+.checklist { margin-bottom: 24px; padding: 18px 22px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-page); }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.head h2 { display: flex; align-items: center; gap: 12px; font-size: .8125rem; font-weight: 700; }
+.head h2 span { color: var(--text-muted); font-size: .75rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.controls { display: flex; gap: 18px; align-items: center; }
+.controls button { display: inline-flex; align-items: center; gap: 5px; padding: 3px 0; color: var(--text-muted); background: none; border: 0; font-size: .75rem; cursor: pointer; }
+.controls button:hover { color: var(--text-link); }
+.controls .dismiss { color: var(--text-muted); }
+.rotated { transform: rotate(180deg); }
+.current, .list li { display: flex; align-items: center; gap: 12px; }
+.stepNumber { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; color: var(--text-link); background: var(--color-primary-subtle); font-size: .75rem; font-weight: 700; }
+.copy { flex: 1; min-width: 0; }
+.copy h3 { font-size: .875rem; font-weight: 600; }
+.copy p { margin-top: 4px; color: var(--text-muted); font-size: .75rem; line-height: 1.6; max-width: 80ch; }
+.action { display: flex; align-items: center; gap: 10px; flex: none; padding: 8px 0; color: var(--text-link); font-size: .8125rem; font-weight: 600; }
+.done { color: var(--text-muted); font-size: .75rem; }
+.list { padding: 0; list-style: none; }
+.list li + li { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+@media (max-width: 600px) {
+  .checklist { padding: 16px; }
+  .head { gap: 8px; }
+  .head h2 { gap: 8px; }
+  .controls { gap: 12px; }
+  .controls button { font-size: .6875rem; min-height: 28px; }
+  .current, .list li { display: grid; grid-template-columns: 30px 1fr; gap: 4px 10px; align-items: start; }
+  .stepNumber { margin-top: 2px; }
+  .action, .done { grid-column: 2; justify-self: start; }
+}

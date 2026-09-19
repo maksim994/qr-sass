@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
@@ -7,8 +9,7 @@ type Props = {
 
 export function UrlForm({ payload, onChange }: Props) {
   return (
-    <div>
-      <label className="label">URL-адрес</label>
+    <FormField label="URL-адрес">
       <input
         className="input"
         type="url"
@@ -16,6 +17,6 @@ export function UrlForm({ payload, onChange }: Props) {
         onChange={(e) => onChange({ ...payload, url: e.target.value })}
         placeholder="https://example.com"
       />
-    </div>
+    </FormField>
   );
 }

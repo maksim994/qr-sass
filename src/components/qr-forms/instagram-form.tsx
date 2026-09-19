@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
@@ -7,14 +9,13 @@ type Props = {
 
 export function InstagramForm({ payload, onChange }: Props) {
   return (
-    <div>
-      <label className="label">Имя пользователя Instagram</label>
+    <FormField label="Имя пользователя Instagram">
       <input
         className="input"
         value={String(payload.username || "")}
         onChange={(e) => onChange({ ...payload, username: e.target.value })}
         placeholder="username"
       />
-    </div>
+    </FormField>
   );
 }

@@ -2,7 +2,7 @@ import { getDb } from "@/lib/db";
 import { MSG } from "@/lib/user-messages";
 import { getWorkspaceAdminOrNull } from "@/lib/workspace-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
-import { getPlan } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
 
 export async function POST(
   req: Request,
@@ -20,8 +20,8 @@ export async function POST(
   }
   const email = data.email.trim().toLowerCase();
 
-  const planInfo = await getPlan(membership.workspace.plan);
-  const userLimit = planInfo.limits.maxUsers;
+  const entitlements = await getEntitlements(workspaceId);
+  const userLimit = entitlements.plan.limits.maxUsers;
   if (userLimit !== null) {
     const current = await getDb().membership.count({ where: { workspaceId } });
     if (current >= userLimit) {

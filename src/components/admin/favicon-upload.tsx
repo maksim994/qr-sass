@@ -3,6 +3,7 @@
 import { fetchApi } from "@/lib/client-api";
 import { useCallback, useRef, useState } from "react";
 import { Alert } from "@/components/ui";
+import { PreviewImage } from "@/components/ui/preview-image";
 
 type Props = {
   onUploaded: (url: string) => void;
@@ -70,7 +71,7 @@ export function FaviconUpload({ onUploaded, currentUrl }: Props) {
           <p style={{ font: "var(--fw-medium) 14px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>Загрузка…</p>
         ) : currentUrl ? (
           <div className="flex flex-col items-center gap-2">
-            <img src={currentUrl} alt="Favicon" className="h-16 w-16 object-contain" />
+            <PreviewImage src={currentUrl} alt="Favicon" className="h-16 w-16 object-contain" />
             <p style={{ font: "var(--fw-medium) 12px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
               Нажмите или перетащите для замены
             </p>

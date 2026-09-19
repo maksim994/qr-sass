@@ -1,765 +1,172 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { getPlan, getPlanSync, type PlanId } from "@/lib/plans";
+import { getPlan, type PlanInfo } from "@/lib/plans";
 import { qrTypes } from "@/lib/qr-types";
+import { QR_LIFETIME, QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
 import { getDisabledQrTypes } from "@/lib/disabled-qr-types";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
-import { FaqAccordion } from "@/components/landing/faq-accordion";
-import { HomeHeroVisual } from "@/components/landing/home-hero-visual";
-import { BlogCardIcon } from "@/components/blog/blog-card-icon";
-import { getBlogCardMeta } from "@/lib/blog-card-meta";
+import { HomeQuickStart } from "@/components/landing/home-quick-start";
+import { HomeHero, IndustryShowcase, TypeExplorer, DynamicDemo, DesignPlayground, AnalyticsDemo, HomeFooterExperience } from "@/components/landing/home-experience";
+import { HomeQrPreview } from "@/components/landing/home-qr-preview";
+import { publicSiteUrl } from "@/lib/public-url";
+import { sanitizeBlogFields } from "@/lib/blog-sanitize";
+import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
-
-const baseUrl = process.env.APP_URL ?? "https://qr-s.ru";
-
+const baseUrl = publicSiteUrl();
 export const metadata: Metadata = {
-  title: "qr-s.ru — QR-коды, которыми можно управлять после печати",
-  description:
-    "Меняйте ссылку без перепечатки, измеряйте сканирования и работайте командой. Динамические QR для рекламы, меню и упаковки. Бесплатный старт.",
-  keywords: [
-    "генератор qr кодов",
-    "создать qr код",
-    "динамический qr код",
-    "qr код онлайн",
-    "qr аналитика",
-    "красивый qr код",
-  ],
+  title: "Создать QR-код онлайн — генератор QR-S.ru",
+  description: "Создавайте QR-коды для ссылок, меню и файлов. Настройте оформление, скачайте PNG или SVG. Динамические QR позволяют менять ссылку после печати.",
+  keywords: ["генератор qr кодов", "создать qr код", "динамический qr код", "qr код онлайн"],
   alternates: { canonical: baseUrl },
   openGraph: {
-    title: "qr-s.ru — QR-коды, которыми можно управлять после печати",
-    description:
-      "Меняйте ссылку без перепечатки, измеряйте сканирования и работайте командой. Динамические QR для рекламы, меню и упаковки.",
+    title: "Ваша ссылка. Ваш QR-код. — QR-S.ru",
+    description: "QR-коды для сайта, меню и печатных материалов. Создавайте, делитесь и управляйте ссылками в одном кабинете.",
     url: baseUrl,
   },
 };
 
-const PLAN_META: Record<
-  PlanId,
-  { cta: string; href: string; highlighted: boolean }
-> = {
-  FREE: { cta: "Начать бесплатно", href: "/register", highlighted: false },
-  PRO: { cta: "Попробовать 14 дней", href: "/register", highlighted: true },
-  BUSINESS: { cta: "Перейти к оплате", href: "/register", highlighted: false },
-};
-
-const features = [
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
-        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" />
-      </svg>
-    ),
-    title: "Меняйте ссылку после печати",
-    description: "Не переделывайте меню, упаковку и рекламу — обновите URL в кабинете за секунды.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" />
-      </svg>
-    ),
-    title: "Узнайте, кто сканирует",
-    description: "Где, когда и с каких устройств открывают QR — география, устройства и динамика по дням.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-    title: "Работайте всей командой",
-    description: "Общий workspace, роли и доступ к одним и тем же QR — для сетей, агентств и отделов маркетинга.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" />
-      </svg>
-    ),
-    title: "Сотни QR из CSV",
-    description: "Загрузите таблицу с URL и UTM — получите архив кодов для кампаний, SKU и персональных ссылок.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
-        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
-        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-8.3-10-8.3Z" />
-      </svg>
-    ),
-    title: "Дизайн под бренд",
-    description: "Цвета, форма модулей, логотип. Проверка читаемости не даст напечатать несканируемый код.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="18" height="11" x="3" y="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-      </svg>
-    ),
-    title: "Контроль доступа",
-    description: "Пароль, срок действия, лимит сканов, A/B-тесты и пиксели ретаргетинга на странице перехода.",
-  },
-];
-
-const stats = [
-  { value: "20+", label: "типов QR-кодов" },
-  { value: "Динамика", label: "смена ссылки без перепечатки" },
-  { value: "Команда", label: "роли и общий workspace" },
-  { value: "CSV", label: "массовое создание с UTM" },
-];
-
-const useCases = [
-  {
-    title: "Рестораны и кафе",
-    text: "QR-меню на столиках: обновили блюда — гости видят новую версию без перепечатки.",
-    href: "/qr-menu",
-  },
-  {
-    title: "Упаковка товара",
-    text: "Инструкция, акция или отзывы на упаковке. Контент меняете после тиража.",
-    href: "/qr-for-packaging",
-  },
-  {
-    title: "Агентства",
-    text: "Сотни кодов для клиентов из CSV, роли в команде и API для интеграций.",
-    href: "/qr-for-agencies",
-  },
-  {
-    title: "Мероприятия",
-    text: "Регистрация, программа и стенды — разные QR и аналитика по зонам.",
-    href: "/qr-for-events",
-  },
-];
-
-const howSteps = [
-  { step: "01", title: "Выберите задачу", text: "Ссылка, меню, файл или визитка. Предпросмотр обновляется сразу." },
-  { step: "02", title: "Оформите и сохраните", text: "Цвета бренда, логотип, проверка читаемости. Скачайте PNG/SVG или разместите динамический код." },
-  { step: "03", title: "Управляйте после печати", text: "Меняйте ссылку, смотрите сканы и подключайте команду — без новых макетов." },
-];
-
 const faqs = [
-  { question: "Чем динамический QR лучше бесплатного генератора картинки?", answer: "Статический код «зашивает» ссылку навсегда. Динамический ведёт на короткий URL QR-S.ru: вы меняете назначение, считаете сканы и ограничиваете доступ — без перепечатки материалов." },
-  { question: "Что такое динамический QR-код?", answer: "Динамический QR перенаправляет на промежуточный URL, который можно изменить в любой момент. Это позволяет обновлять ссылку назначения без перепечатки меню, упаковки и рекламы." },
-  { question: "Можно ли подключить аналитику и ретаргетинг?", answer: "Да. На странице редиректа поддерживаются Meta Pixel, Google Analytics, Яндекс Метрика и VK Пиксель. Также доступно A/B-тестирование двух вариантов URL." },
-  { question: "Какие форматы скачивания поддерживаются?", answer: "На платных тарифах доступны PNG, SVG, JPG, EPS и PDF. PNG и JPG подходят для цифровых каналов, SVG и EPS — для типографии, PDF — для полиграфии." },
-  { question: "Есть ли ограничения на бесплатном тарифе?", answer: "На бесплатном тарифе — до 10 статических QR с базовой кастомизацией. Динамика, аналитика, bulk и команда — на тарифах Про и Бизнес." },
-  { question: "Как обеспечивается качество сканирования?", answer: "Встроенная проверка scannability анализирует контраст, отступы и логотип и предупреждает, если код может плохо считываться." },
+  { question: "Можно создать QR-код бесплатно?", answer: "Да. Бесплатный тариф позволяет создавать статические QR-коды и скачивать их в доступных форматах. Лимит кодов и форматы указаны в тарифах выше. Для сохранения кода нужен аккаунт." },
+  { question: "Чем обычный QR отличается от динамического?", answer: "Обычный, или статический, QR содержит вашу ссылку напрямую — изменить её после печати нельзя. Динамический QR ведёт через короткую ссылку QR-S.ru: её назначение можно менять в кабинете на платном тарифе." },
+  { question: "Что будет с кодом после окончания тарифа?", answer: QR_LIFETIME.billing },
+  { question: "Подойдёт ли QR для печати?", answer: "Да. SVG сохраняет чёткость при масштабировании, PNG подходит для готовых макетов. Оставьте свободное поле вокруг кода и проверьте его камерой телефона перед тиражом. На платных тарифах доступны дополнительные форматы; PDF и EPS содержат растровое изображение." },
+  { question: "Какую статистику можно посмотреть?", answer: "Для динамических QR на тарифе с аналитикой доступны открытия по дням и типу устройства. Боты учитываются отдельно. География и уникальные посетители не определяются." },
 ];
 
-const testimonials = [
-  {
-    name: "Сценарий: сеть кафе",
-    role: "Меню и акции",
-    text: "Один QR на стол — сезонное меню и акции обновляются в кабинете, без новой печати наклейки.",
-  },
-  {
-    name: "Сценарий: производитель",
-    role: "Упаковка и инструкции",
-    text: "На тираже печатаете стабильный код, а внутри ведёте на актуальную инструкцию или розыгрыш.",
-  },
-  {
-    name: "Сценарий: агентство",
-    role: "Кампании клиентов",
-    text: "Создаёте сотни персональных кодов из CSV за минуты и смотрите, какие стойки дают больше сканов.",
-  },
-  {
-    name: "Сценарий: ивент",
-    role: "Регистрация и зоны",
-    text: "Разные QR на вход, стенды и раздатку — сравниваете отклик по площадкам в одном отчёте.",
-  },
-  {
-    name: "Сценарий: HR",
-    role: "Вакансии и визитки",
-    text: "На бейдже или визитке — динамическая ссылка: сменили должность или лендинг вакансии без перепечатки.",
-  },
-  {
-    name: "Сценарий: retail",
-    role: "Наружная и полка",
-    text: "Меняете акцию на баннере или ценнике, а QR на носителе остаётся тем же.",
-  },
-];
+function Arrow() { return <span aria-hidden="true">↗</span>; }
+function Check() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>; }
 
-const LATEST_POSTS_COUNT = 20;
-
-function formatPrice(rub: number): string {
-  return rub.toLocaleString("ru-RU");
-}
-
-function SectionHeader({ eyebrow, title, description }: { eyebrow: string; title: ReactNode; description?: string }) {
-  return (
-    <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
-      <span
-        className="fk-eyebrow"
-        style={{
-          display: "inline-block",
-          font: "var(--fw-bold) 12px/1 var(--font-sans)",
-          letterSpacing: "0.08em",
-          color: "var(--color-primary)",
-        }}
-      >
-        {eyebrow}
-      </span>
-      <h2
-        style={{
-          marginTop: "12px",
-          font: "var(--fw-bold) clamp(1.9rem, 3.2vw, 2.35rem)/1.15 var(--font-display)",
-          letterSpacing: "-0.02em",
-          color: "var(--text-strong)",
-        }}
-      >
-        {title}
-      </h2>
-      {description && (
-        <p style={{ margin: "14px auto 0", maxWidth: "560px", font: "var(--fw-regular) 1.05rem/1.55 var(--font-sans)", color: "var(--text-muted)" }}>
-          {description}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function CheckIcon({ color = "var(--color-success)" }: { color?: string }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none", marginTop: "1px" }}>
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
+function planFeatures(plan: PlanInfo) {
+  const { limits } = plan;
+  return [
+    limits.maxQrCodes == null ? "Без лимита на количество QR" : `До ${limits.maxQrCodes} QR-кодов`,
+    limits.allowsDynamic ? "Смена ссылки после печати" : "Статические QR-коды",
+    ...(limits.allowsAnalytics ? ["Статистика открытий"] : []),
+    `Экспорт ${limits.exportFormats.join(", ")}`,
+    limits.maxUsers === 1 ? "Для одного пользователя" : limits.maxUsers == null ? "Совместная работа команды" : `Команда до ${limits.maxUsers} человек`,
+    ...(plan.id === "BUSINESS" ? ["Доступ к API"] : []),
+  ];
 }
 
 export default async function HomePage() {
-  const session = await getSession();
-
-  let latestPosts: Array<{
-    slug: string;
-    title: string;
-    excerpt: string | null;
-    coverImageUrl: string | null;
-    publishedAt: Date | null;
-    views: number;
-    likes: number;
-    readingTimeMinutes: number | null;
-    category: { slug: string; name: string } | null;
-  }> = [];
-  let planInfos: Awaited<ReturnType<typeof getPlan>>[] = [];
-  let disabledTypes: Awaited<ReturnType<typeof getDisabledQrTypes>> = [];
-
-  try {
-    const db = getDb();
-    [latestPosts, disabledTypes, ...planInfos] = await Promise.all([
-      db.blogPost.findMany({
-        where: { publishedAt: { not: null } },
-        orderBy: { publishedAt: "desc" },
-        take: LATEST_POSTS_COUNT,
-        select: {
-          slug: true,
-          title: true,
-          excerpt: true,
-          coverImageUrl: true,
-          publishedAt: true,
-          views: true,
-          likes: true,
-          readingTimeMinutes: true,
-          category: { select: { slug: true, name: true } },
-        },
-      }),
-      getDisabledQrTypes(),
-      getPlan("FREE"),
-      getPlan("PRO"),
-      getPlan("BUSINESS"),
-    ]);
-  } catch {
-    planInfos = [getPlanSync("FREE"), getPlanSync("PRO"), getPlanSync("BUSINESS")];
-  }
-
-  const plans = planInfos.map((plan) => ({
-    ...plan,
-    price: formatPrice(plan.priceRub),
-    ...PLAN_META[plan.id],
-  }));
-
-  const enabledTypes = qrTypes
-    .filter((t) => !disabledTypes.includes(t.type))
-    .slice(0, 8);
-
+  const [session, free, pro, business, disabledTypes] = await Promise.all([
+    getSession(), getPlan("FREE"), getPlan("PRO"), getPlan("BUSINESS"), getDisabledQrTypes(),
+  ]);
   let isAdmin = false;
-  if (session?.sub) {
-    try {
-      const user = await getDb().user.findUnique({ where: { id: session.sub } });
-      isAdmin = (user as { isAdmin?: boolean } | null)?.isAdmin ?? false;
-    } catch {
-      isAdmin = false;
-    }
-  }
-
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: { "@type": "Answer", text: faq.answer },
-    })),
-  };
+  let posts: { slug: string; title: string; excerpt: string | null }[] = [];
+  try {
+    const [user, latestPosts] = await Promise.all([
+      session?.sub ? getDb().user.findUnique({ where: { id: session.sub }, select: { isAdmin: true } }) : Promise.resolve(null),
+      getDb().blogPost.findMany({ where: { publishedAt: { not: null } }, orderBy: { publishedAt: "desc" }, take: 3, select: { slug: true, title: true, excerpt: true } }),
+    ]);
+    isAdmin = user?.isAdmin ?? false;
+    posts = latestPosts.map(post => {
+      const clean = sanitizeBlogFields(post);
+      return { ...post, title: clean.title ?? post.title, excerpt: clean.excerpt ?? post.excerpt };
+    });
+  } catch { /* The generator and default plans remain available without optional content. */ }
+  const enabledTypes = qrTypes.filter(type => !disabledTypes.includes(type.type));
+  const otherTypes = ["WIFI", "VCARD", "PDF"].flatMap(type => enabledTypes.filter(item => item.type === type));
+  const startPath = session ? "/dashboard/create" : "/register";
+  const plans = [free, pro, business];
+  const descriptions = { FREE: "Для первых кодов и простых задач", PRO: "Для ссылок, которые меняются", BUSINESS: "Для команды и интеграций" };
+  const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(faq => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--surface-page)", color: "var(--text-default)" }}>
-      <SiteHeader session={session} isAdmin={isAdmin} />
+    <div className={styles.home}>
+      <SiteHeader session={session} isAdmin={isAdmin} minimal />
       <main>
-        {/* Hero */}
-        <section id="hero" className="qrs-hero">
-          <div className="fk-container qrs-hero-grid">
-            <div className="qrs-hero-copy">
-              <span className="fk-badge fk-badge--accent fk-badge--lg">
-                <span className="fk-badge__dot" />
-                Бесплатный старт · без карты
-              </span>
-              <h1>
-                Создавайте <span style={{ color: "var(--color-primary)" }}>QR‑коды</span>,
-                <br />
-                которые работают на вас
-              </h1>
-              <p className="qrs-hero-lead">
-                Меняйте ссылку после печати, измеряйте сканирования и работайте командой — для рекламы, меню и упаковки.
-              </p>
-              <div className="qrs-hero-cta">
-                <Button href={session ? "/dashboard/create" : "/register"} variant="accent" size="lg">
-                  Начать бесплатно
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                  </svg>
-                </Button>
-                <Button href="/dynamic-qr" variant="secondary" size="lg">
-                  Что такое динамический QR
-                </Button>
-              </div>
-              <div className="qrs-hero-checklist">
-                {["Смена ссылки без перепечатки", "Аналитика сканирований", "Команда и массовое создание"].map((text) => (
-                  <div key={text} className="flex items-center gap-2" style={{ font: "var(--fw-semibold) 13px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
-                    <CheckIcon />
-                    {text}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <HomeHeroVisual />
+        <HomeHero />
+        <div className={`${styles.container} ${styles.valueStrip}`} aria-label="Возможности сервиса">
+          <span><Check /> От ссылки до электронного меню</span><span><Check /> Дизайн под ваш бренд</span><span><Check /> Смена ссылки после печати</span><span><Check /> Статистика открытий</span>
+        </div>
+
+        <section className={`${styles.container} ${styles.section} ${styles.quickSection}`} aria-labelledby="quick-title">
+          <div className={styles.quickCopy}><h2 id="quick-title">Первая идея?<br />Превратите её в QR.</h2><p>Вставьте ссылку. Вы увидите код сразу, а оформление и скачивание будут доступны на следующем шаге.</p><a href="#types" className={styles.textLink}>Или выберите другой тип <Arrow /></a></div>
+          <HomeQuickStart signedIn={Boolean(session)} urlEnabled={enabledTypes.some(type => type.type === "URL")} otherTypes={otherTypes} />
+        </section>
+
+        <section className={`${styles.container} ${styles.how}`} id="how" aria-labelledby="how-title">
+          <h2 id="how-title" className="sr-only">Три шага до готового QR-кода</h2>
+          {[
+            ["1", "Добавьте содержимое", "Ссылку на сайт, меню, файл или контакты."],
+            ["2", "Настройте оформление", "Выберите цвет, добавьте логотип и рамку."],
+            ["3", "Скачайте и поделитесь", "Разместите код на экране или в печатном макете."],
+          ].map(([step, title, text]) => <div key={step} className={styles.step}><span>{step}</span><div><h3>{title}</h3><p>{text}</p></div></div>)}
+        </section>
+
+        <section id="use-cases" className={`${styles.container} ${styles.section}`}>
+          <div className={styles.sectionHeading}><h2>Готовые сценарии<br />для вашей отрасли</h2><p>От учебных материалов до мероприятий и услуг. <br />Найдите свою задачу — и подходящий тип QR.</p></div>
+          <IndustryShowcase types={enabledTypes} signedIn={Boolean(session)} />
+        </section>
+
+        <section id="features" className={styles.featureSection}>
+          <div className={`${styles.container} ${styles.featureGrid}`}>
+            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>Доступно на Про · пробный период 14 дней</p></div>
+            <DynamicDemo />
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="qrs-stats-band" aria-label="Ключевые показатели" style={{ borderBlock: "1px solid var(--border-subtle)", background: "var(--surface-subtle)" }}>
-          <div className="fk-container">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="tnum" style={{ font: "var(--fw-extra) clamp(1.8rem, 3.5vw, 2.4rem)/1 var(--font-display)", color: "var(--text-strong)" }}>
-                  {s.value}
-                </div>
-                <div className="mt-1.5" style={{ font: "var(--fw-medium) 13px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
-                  {s.label}
-                </div>
-              </div>
-            ))}
+        <section id="types" className={`${styles.container} ${styles.section}`}>
+          <div className={styles.sectionHeading}><h2>Не только ссылки. <br />Всё, чем вы делитесь.</h2><p>Файлы, контакты, Wi-Fi или страница компании. <br />Выберите содержимое — мы поможем упаковать его в QR.</p></div>
+          <TypeExplorer types={enabledTypes} signedIn={Boolean(session)} />
+        </section>
+
+        <section className={`${styles.container} ${styles.designSection}`}>
+          <DesignPlayground />
+          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет, добавьте логотип и выберите рамку в редакторе.</p><p>Попробуйте цвет и подпись в примере. Свой код вы настроите в редакторе.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />Рамка с призывом к действию</li></ul><Button href={startPath} variant="secondary">Открыть редактор <Arrow /></Button></div>
+        </section>
+
+        <section className={styles.printSection}>
+          <div className={`${styles.container} ${styles.printGrid}`}>
+            <div><h2>С экрана. <br />На бумагу. <br /><span>В реальный мир.</span></h2><p>Визитка, упаковка, настольная табличка или большой плакат. Скачайте QR в подходящем формате и добавьте в свой макет.</p><div className={styles.formatLabels}><span>SVG <small>Для любого размера</small></span><span>PNG <small>Для готового макета</small></span></div><p className={styles.printHint}>Перед тиражом проверьте код камерой телефона и сохраните свободное поле вокруг него.</p></div>
+            <div className={styles.printArtwork} aria-label="Пример QR-кода в печатном макете"><div className={styles.printPoster}><span>ИЗ ОФЛАЙНА — В ОНЛАЙН</span><strong>У каждой<br />вещи есть<br />продолжение.</strong><HomeQrPreview value="https://qr-s.ru/qr-for-packaging" /><span>ОТКРОЙТЕ ЕГО ОДНИМ СКАНОМ ↗</span></div><div className={styles.printSticker}><HomeQrPreview value="https://qr-s.ru" /><span>Начнём<br />знакомство? ↗</span></div><span className={styles.printExample}>Примеры печатных материалов</span></div>
           </div>
         </section>
 
-        {/* Features */}
-        <section id="features" className="fk-section">
-          <div className="fk-container">
-            <SectionHeader
-              eyebrow="Зачем QR-S.ru"
-              title="Не просто генератор — управление после печати"
-              description="Бесплатные картинки QR копируют. Ценность — в смене ссылки, аналитике и работе команды."
-            />
-            <div
-              className="qrs-grid-3"
-              style={{
-                marginTop: "48px",
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "24px",
-              }}
-            >
-              {features.map((f) => (
-                <article
-                  key={f.title}
-                  className="qrs-card-lift"
-                  style={{ background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "12px", boxShadow: "var(--shadow-sm)", padding: "28px" }}
-                >
-                  <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "var(--color-primary-subtle)", color: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
-                    {f.icon}
-                  </div>
-                  <h3 style={{ font: "var(--fw-bold) 1.2rem/1.3 var(--font-display)", color: "var(--text-strong)" }}>{f.title}</h3>
-                  <p style={{ marginTop: "10px", font: "var(--fw-regular) 0.95rem/1.6 var(--font-sans)", color: "var(--text-muted)" }}>{f.description}</p>
-                </article>
-              ))}
-            </div>
+        <section className={`${styles.container} ${styles.analyticsSection}`}>
+          <div className={styles.featureCopy}><h2>Вы разместили код. <br />Его открывают?</h2><p>Для динамических QR с аналитикой смотрите открытия по дням и устройствам. Сравнивайте активность после размещения в разных материалах.</p><ul><li><Check />История открытий по дням</li><li><Check />Типы устройств посетителей</li><li><Check />Боты учитываются отдельно</li></ul><Link href="#pricing" className={styles.textLink}>Выбрать тариф с аналитикой <Arrow /></Link></div>
+          <AnalyticsDemo />
+        </section>
+
+        <section className={`${styles.container} ${styles.workspaceSection}`}>
+          <div className={styles.sectionHeading}><h2>Кодов становится больше. <br />Порядок остаётся.</h2><p>От одной ссылки до материалов всей команды — <br />в едином личном кабинете.</p></div>
+          <div className={styles.workspaceFeatures}>
+            <article><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M6 14h14l4 5h18v21H6V14Zm0 0V8h15l4 6h17v5" /><path d="M14 27h20m-20 6h12" /></svg><h3>Всё на своих местах</h3><p>Находите свои QR-коды, меняйте содержимое и возвращайтесь к нужным материалам.</p></article>
+            <article><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="18" cy="16" r="7" /><path d="M4 40v-4a14 14 0 0 1 28 0v4M32 9a7 7 0 0 1 0 14m3 5a12 12 0 0 1 9 12" /></svg><h3>Вместе с командой</h3><p>Подключайте коллег к работе. Количество пользователей зависит от выбранного тарифа.</p></article>
+            <article><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m16 13-11 11 11 11m16-22 11 11-11 11M28 7l-8 34" /></svg><h3>Ближе к вашим процессам</h3><p>Используйте API на тарифе Бизнес, чтобы связать создание QR с вашими системами.</p></article>
           </div>
         </section>
 
-        {/* Use cases */}
-        <section id="use-cases" style={{ paddingBlock: "var(--section-y)", background: "var(--surface-card)" }}>
-          <div className="fk-container">
-            <SectionHeader
-              eyebrow="Как используют"
-              title="Отрасли, где динамический QR окупается сразу"
-              description="Выберите сценарий — откроется страница с примерами и CTA."
-            />
-            <div
-              className="qrs-grid-2"
-              style={{
-                marginTop: "40px",
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {useCases.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="qrs-row-lift"
-                  style={{
-                    display: "block",
-                    padding: "24px 26px",
-                    borderRadius: "14px",
-                    border: "1px solid var(--border-default)",
-                    background: "var(--surface-subtle)",
-                  }}
-                >
-                  <div style={{ font: "var(--fw-bold) 1.1rem/1.3 var(--font-display)", color: "var(--text-strong)" }}>{item.title}</div>
-                  <p style={{ marginTop: "8px", font: "var(--fw-regular) 0.95rem/1.5 var(--font-sans)", color: "var(--text-muted)" }}>{item.text}</p>
-                  <span className="qrs-navlink" style={{ display: "inline-block", marginTop: "12px" }}>
-                    Подробнее →
-                  </span>
-                </Link>
-              ))}
-            </div>
+        <section id="pricing" className={`${styles.container} ${styles.section} ${styles.pricingSection}`}>
+          <div className={styles.pricingHeading}><div><h2>Ваши задачи.<br />Ваш тариф.</h2><p>Начните бесплатно. Подключайте больше возможностей по мере роста.</p></div><span><Check /> Про: 14 дней без карты</span></div>
+          <div className={styles.pricing}>
+            {plans.map(plan => <article key={plan.id} className={`${styles.plan} ${plan.id === "PRO" ? styles.featuredPlan : ""}`}>
+              <div className={styles.planName}><h3>{plan.name}</h3>{plan.id === "PRO" && <span>Для регулярной работы</span>}</div><p className={styles.planDescription}>{descriptions[plan.id]}</p>
+              <p className={styles.price}>{plan.priceRub.toLocaleString("ru-RU")} <span>₽ / месяц</span></p>
+              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/#create-qr" : "/register"} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? "Попробовать 14 дней" : "Выбрать Бизнес"}</Button>
+              <ul>{planFeatures(plan).map(feature => <li key={feature}><Check />{feature}</li>)}</ul>
+            </article>)}
           </div>
+          <div className={styles.pricingNotes}><p>Пробный период Про — 14 дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
         </section>
 
-        {/* QR Types */}
-        <section id="types" style={{ paddingBlock: "var(--section-y)", background: "var(--surface-subtle)", borderBlock: "1px solid var(--border-subtle)" }}>
-          <div className="fk-container">
-            <SectionHeader eyebrow="Типы кодов" title="Один QR-код под каждую задачу" description="Выберите тип контента — сервис соберёт код, страницу редиректа и аналитику автоматически." />
-            <div
-              className="qrs-grid-3"
-              style={{
-                marginTop: "44px",
-                display: "grid",
-                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {enabledTypes.map((t) => (
-                <div key={t.type} style={{ background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "10px", padding: "18px 18px 20px" }}>
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="var(--color-primary)" strokeLinecap="round" strokeLinejoin="round">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={t.icon} />
-                  </svg>
-                  <div style={{ marginTop: "12px", font: "var(--fw-bold) 15px/1.2 var(--font-display)", color: "var(--text-strong)" }}>{t.label}</div>
-                  <div style={{ marginTop: "4px", font: "var(--fw-regular) 13px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>{t.description}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <section id="faq" className={`${styles.container} ${styles.faqSection}`}>
+          <div><h2>Остались вопросы?</h2><p>Самое важное перед первым кодом.</p></div>
+          <div className={styles.faqList}>{faqs.map(faq => <details key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div>
         </section>
 
-        {/* How it works */}
-        <section id="how" className="fk-section">
-          <div className="fk-container">
-            <SectionHeader eyebrow="Как это работает" title="Три шага до готового кода" />
-            <div
-              className="qrs-grid-3"
-              style={{
-                marginTop: "48px",
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "24px",
-              }}
-            >
-              {howSteps.map((s) => (
-                <div key={s.step} style={{ position: "relative", padding: "8px" }}>
-                  <div style={{ width: "62px", height: "62px", borderRadius: "999px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px", font: "var(--fw-extra) 24px/1 var(--font-sans)", color: "var(--color-primary)", background: "var(--color-primary-subtle)" }}>
-                    {s.step}
-                  </div>
-                  <h3 style={{ font: "var(--fw-bold) 1.2rem/1.3 var(--font-display)", color: "var(--text-strong)" }}>{s.title}</h3>
-                  <p style={{ marginTop: "10px", font: "var(--fw-regular) 0.95rem/1.6 var(--font-sans)", color: "var(--text-muted)" }}>{s.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {posts.length > 0 && <section className={`${styles.container} ${styles.articles}`}><div className={styles.sectionHeading}><h2>Идеи для ваших QR-кодов</h2><Link href="/blog" className={styles.textLink}>Все статьи <Arrow /></Link></div><div>{posts.map(post => <Link href={`/blog/${post.slug}`} key={post.slug}><h3>{post.title}</h3>{post.excerpt && <p>{post.excerpt}</p>}<span aria-hidden="true">↗</span></Link>)}</div></section>}
 
-        {/* Pricing */}
-        <section id="pricing" style={{ paddingBlock: "var(--section-y)", background: "var(--surface-subtle)", borderBlock: "1px solid var(--border-subtle)" }}>
-          <div className="fk-container">
-            <SectionHeader
-              eyebrow="Тарифы"
-              title={
-                <>
-                  Понятная разница:
-                  <br />
-                  попробовать → маркетинг → команда
-                </>
-              }
-              description="Бесплатный — статика. Про — динамика и аналитика. Бизнес — команда и API."
-            />
-            <div
-              className="qrs-price-grid"
-              style={{
-                marginTop: "48px",
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "24px",
-                alignItems: "start",
-              }}
-            >
-              {plans.map((plan) => {
-                const highlighted = plan.highlighted;
-                const features =
-                  plan.id === "FREE"
-                    ? ["До 10 статических QR", "Попробовать сервис без карты", "Экспорт PNG и SVG", "1 пользователь"]
-                    : plan.id === "PRO"
-                      ? ["Неограниченные QR", "Динамика: смена ссылки без перепечатки", "Аналитика сканов, гео, устройства", "Пароль, срок, пиксели, A/B", "Экспорт PNG, SVG, PDF, EPS", "До 5 пользователей"]
-                      : ["Всё из тарифа Про", "Неограниченные пользователи", "API-доступ", "Для агентств и сетей", "Белая метка (White Label)"];
 
-                return (
-                  <div
-                    key={plan.id}
-                    style={{
-                      position: "relative",
-                      background: highlighted ? "var(--color-primary)" : "var(--surface-card)",
-                      border: `1px solid ${highlighted ? "var(--color-primary)" : "var(--border-default)"}`,
-                      borderRadius: "16px",
-                      boxShadow: highlighted ? "var(--shadow-lg)" : "var(--shadow-sm)",
-                      color: highlighted ? "#fff" : undefined,
-                      padding: "30px",
-                    }}
-                  >
-                    {highlighted && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: "-13px",
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          padding: "5px 14px",
-                          borderRadius: "999px",
-                          background: "var(--color-accent)",
-                          color: "#fff",
-                          font: "var(--fw-bold) 11px/1 var(--font-sans)",
-                          letterSpacing: "0.04em",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        ПОПУЛЯРНЫЙ
-                      </span>
-                    )}
-                    <div style={{ font: "var(--fw-bold) 1.15rem/1.2 var(--font-display)", color: highlighted ? "#fff" : "var(--text-strong)" }}>
-                      {plan.name}
-                    </div>
-                    <div style={{ marginTop: "6px", minHeight: "38px", font: "var(--fw-regular) 13px/1.4 var(--font-sans)", color: highlighted ? "rgba(255,255,255,0.82)" : "var(--text-muted)" }}>
-                      {plan.description}
-                    </div>
-                    <div style={{ marginTop: "18px", display: "flex", alignItems: "baseline", gap: "6px" }}>
-                      <span className="tnum" style={{ font: "var(--fw-extra) 2.6rem/1 var(--font-display)", color: highlighted ? "#fff" : "var(--text-strong)" }}>
-                        {plan.price}
-                      </span>
-                      <span style={{ font: "var(--fw-medium) 14px/1 var(--font-sans)", color: highlighted ? "rgba(255,255,255,0.82)" : "var(--text-muted)" }}>
-                        ₽/мес
-                      </span>
-                    </div>
-                    <div style={{ margin: "24px 0" }}>
-                      <Button
-                        href={session ? "/dashboard/billing" : plan.href}
-                        variant={highlighted ? "accent" : plan.id === "FREE" ? "secondary" : "primary"}
-                        size="md"
-                        block
-                        style={highlighted ? undefined : undefined}
-                      >
-                        {plan.cta}
-                      </Button>
-                    </div>
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
-                      {features.map((f) => (
-                        <li key={f} className="flex gap-2.5" style={{ font: "var(--fw-regular) 14px/1.4 var(--font-sans)", color: highlighted ? "#fff" : "var(--text-default)" }}>
-                          <CheckIcon color={highlighted ? "#fff" : "var(--color-success)"} />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section id="reviews" className="fk-section">
-          <div className="fk-container">
-            <SectionHeader eyebrow="Сценарии" title="Как это выглядит на практике" description="Типовые сценарии без выдуманных логотипов — честная упаковка ценности." />
-            <div
-              className="qrs-grid-3"
-              style={{
-                marginTop: "44px",
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "24px",
-              }}
-            >
-              {testimonials.map((t) => (
-                <figure key={t.name} style={{ background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "12px", padding: "26px", margin: 0 }}>
-                  <blockquote style={{ font: "var(--fw-regular) 15px/1.65 var(--font-sans)", color: "var(--text-default)", margin: 0 }}>
-                    {t.text}
-                  </blockquote>
-                  <figcaption style={{ marginTop: "18px", font: "var(--fw-bold) 14px/1.3 var(--font-sans)", color: "var(--text-strong)" }}>
-                    {t.name}
-                    <div style={{ font: "var(--fw-regular) 13px/1.3 var(--font-sans)", color: "var(--text-muted)", marginTop: "2px" }}>{t.role}</div>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section id="faq" style={{ paddingBlock: "var(--section-y)", background: "var(--surface-subtle)", borderBlock: "1px solid var(--border-subtle)" }}>
-          <div className="fk-container" style={{ maxWidth: "820px" }}>
-            <SectionHeader eyebrow="FAQ" title="Частые вопросы" />
-            <div style={{ marginTop: "40px" }}>
-              <FaqAccordion items={faqs} />
-            </div>
-          </div>
-        </section>
-
-        {/* Blog */}
-        <section id="blog" className="fk-section">
-          <div className="fk-container">
-            <div style={{ position: "relative", marginBottom: "40px" }}>
-              <SectionHeader eyebrow="Блог" title="Полезные материалы" description="О QR-кодах, маркетинге и аналитике." />
-              <Link href="/blog" className="qrs-navlink qrs-section-link">
-                Все статьи →
-              </Link>
-            </div>
-            {latestPosts.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl" style={{ border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-muted)" }}>
-                Пока нет опубликованных статей. Следите за обновлениями!
-              </div>
-            ) : (
-              <div
-                className="qrs-grid-3"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                  gap: "24px",
-                }}
-              >
-                {latestPosts.slice(0, 3).map((post, index) => {
-                  const meta = getBlogCardMeta(post.category?.slug, index);
-                  return (
-                    <Link
-                      key={post.slug}
-                      href={`/blog/${post.slug}`}
-                      className="qrs-card-lift"
-                      style={{
-                        display: "block",
-                        background: "var(--surface-card)",
-                        border: "1px solid var(--border-default)",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        boxShadow: "var(--shadow-sm)",
-                      }}
-                    >
-                      <div className="relative" style={{ height: "152px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {post.coverImageUrl ? (
-                          <Image src={post.coverImageUrl} alt={post.title} fill className="object-cover" sizes="(max-width:760px) 100vw, 33vw" />
-                        ) : (
-                          <BlogCardIcon type={meta.icon} color={meta.color} />
-                        )}
-                      </div>
-                      <div style={{ padding: "22px" }}>
-                        <span style={{ font: "var(--fw-bold) 11px/1 var(--font-sans)", letterSpacing: "0.05em", textTransform: "uppercase", color: meta.color }}>
-                          {post.category?.name ?? "Статья"}
-                        </span>
-                        <h3 style={{ marginTop: "10px", font: "var(--fw-bold) 1.1rem/1.35 var(--font-display)", color: "var(--text-strong)" }}>
-                          {post.title}
-                        </h3>
-                        {post.excerpt && (
-                          <p style={{ marginTop: "8px", font: "var(--fw-regular) 0.9rem/1.55 var(--font-sans)", color: "var(--text-muted)" }}>
-                            {post.excerpt}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section style={{ padding: "4px 0 var(--section-y)" }}>
-          <div className="fk-container">
-            <div
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: "24px",
-                background: "linear-gradient(135deg, var(--blue-700), var(--color-primary) 60%, var(--blue-500))",
-                padding: "clamp(40px, 7vw, 72px) clamp(24px, 5vw, 64px)",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ position: "absolute", inset: "auto -60px -80px auto", width: "320px", height: "320px", borderRadius: "50%", background: "radial-gradient(circle, rgba(52,211,153,0.35), transparent 65%)" }} />
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <h2 style={{ font: "var(--fw-extra) clamp(1.8rem, 4vw, 2.6rem)/1.15 var(--font-display)", color: "#fff", letterSpacing: "-0.02em" }}>
-                  Готовы создать первый QR-код?
-                </h2>
-                <p style={{ margin: "14px auto 0", maxWidth: "34em", font: "var(--fw-regular) 1.1rem/1.6 var(--font-sans)", color: "rgba(255,255,255,0.85)" }}>
-                  Регистрация занимает 30 секунд. Кредитная карта не нужна.
-                </p>
-                <div style={{ marginTop: "30px", display: "flex", justifyContent: "center", gap: "14px", flexWrap: "wrap" }}>
-                  <Button href={session ? "/dashboard/create" : "/register"} variant="accent" size="lg">
-                    Начать бесплатно
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </Button>
-                  <Link
-                    href="#pricing"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: "52px",
-                      padding: "0 24px",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(255,255,255,0.4)",
-                      color: "#fff",
-                      font: "var(--fw-semibold) 15px/1 var(--font-sans)",
-                    }}
-                  >
-                    Смотреть тарифы
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
-      <SiteFooter session={session} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <SiteFooter session={session}><HomeFooterExperience types={enabledTypes} signedIn={Boolean(session)} /></SiteFooter>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }} />
     </div>
   );
 }

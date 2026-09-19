@@ -1,18 +1,18 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
 };
 
 export function LocationForm({ payload, onChange }: Props) {
-  const set = (field: string, value: string) =>
-    onChange({ ...payload, [field]: value });
+  const set = (field: string, value: string) => onChange({ ...payload, [field]: value });
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <div>
-        <label className="label">Широта</label>
+      <FormField label="Широта">
         <input
           className="input"
           type="number"
@@ -21,9 +21,8 @@ export function LocationForm({ payload, onChange }: Props) {
           onChange={(e) => set("latitude", e.target.value)}
           placeholder="55.7558"
         />
-      </div>
-      <div>
-        <label className="label">Долгота</label>
+      </FormField>
+      <FormField label="Долгота">
         <input
           className="input"
           type="number"
@@ -32,7 +31,7 @@ export function LocationForm({ payload, onChange }: Props) {
           onChange={(e) => set("longitude", e.target.value)}
           placeholder="37.6173"
         />
-      </div>
+      </FormField>
     </div>
   );
 }

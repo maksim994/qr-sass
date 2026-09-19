@@ -1,34 +1,39 @@
-import { getDb } from "@/lib/db";
-import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
-import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
-
+import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";
+import {
+  adminRoleSchema,
+  changeAdminRole,
+  AdminOperationError,
+} from "@/lib/admin-operations";
+import { MSG } from "@/lib/user-messages";
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ userId: string }> },
 ) {
-  const { userId } = await params;
-  const requestId = getRequestId(req);
-  const admin = await getAdminOrNull();
-  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
-
-  const data = await readJsonBody<{ isAdmin: boolean }>(req);
-  if (!data || typeof data.isAdmin !== "boolean") {
-    return apiError(MSG.IS_ADMIN_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
-  }
-
+  const actor = await getAdminOrNull();
+  if (!actor) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401);
+  const input = adminRoleSchema.safeParse(await readJsonBody(req));
+  if (!input.success)
+    return apiError(MSG.ADMIN_CHANGE_INVALID, "VALIDATION_ERROR", 400);
   try {
-    const db = getDb();
-    const user = await db.user.update({
-      where: { id: userId },
-      data: { isAdmin: data.isAdmin },
-    });
-    return apiSuccess(user);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Database error";
-    if (msg.includes("Record to update not found") || msg.includes("record to update not found")) {
-      return apiError(MSG.USER_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
-    }
-    return apiError(msg, "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiSuccess(
+      await changeAdminRole(actor, (await params).userId, input.data),
+    );
+  } catch (error) {
+    return apiError(
+      error instanceof AdminOperationError
+        ? error.message
+        : MSG.ADMIN_CHANGE_FAILED,
+      error instanceof AdminOperationError
+        ? error.status === 409
+          ? "CONFLICT"
+          : error.status === 404
+            ? "NOT_FOUND"
+            : error.status === 403
+              ? "FORBIDDEN"
+              : "BAD_REQUEST"
+        : "INTERNAL_ERROR",
+      error instanceof AdminOperationError ? error.status : 500,
+    );
   }
 }

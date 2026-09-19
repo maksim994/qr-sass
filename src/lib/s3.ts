@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
 const endpoint = process.env.S3_ENDPOINT;
 const region = process.env.S3_REGION || "ru1";
@@ -52,6 +52,7 @@ export async function uploadFile(
   buffer: Buffer,
   key: string,
   mimeType: string,
+  access: "private" | "public" = "private",
 ): Promise<string> {
   const client = getClient();
   await client.send(
@@ -60,10 +61,22 @@ export async function uploadFile(
       Key: key,
       Body: buffer,
       ContentType: mimeType,
-      ACL: "public-read",
+      ...(access === "public" ? { ACL: "public-read" as const } : {}),
     }),
   );
   return getPublicFileUrl(key);
+}
+
+export async function getFileObject(key: string): Promise<{ body: Buffer; contentType: string } | null> {
+  const client = getClient();
+  try {
+    const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const bytes = await response.Body?.transformToByteArray();
+    if (!bytes) return null;
+    return { body: Buffer.from(bytes), contentType: response.ContentType || "application/octet-stream" };
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteFile(key: string) {

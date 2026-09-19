@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { isSafeUrl } from "@/lib/url";
+import { assertAllowsDynamic } from "@/lib/entitlements";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -51,6 +52,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
+
+    const gate = await assertAllowsDynamic(qr.workspaceId);
+    if (!gate.ok) {
+      return apiError(MSG.PLAN_DYNAMIC_REQUIRED, "FORBIDDEN", 403, undefined, requestId);
+    }
 
     const currentPayload = (qr.payload as Record<string, unknown>) ?? {};
     const newPayload = { ...currentPayload };

@@ -69,14 +69,20 @@ export async function PATCH(req: Request) {
   const db = getDb();
   const existing = await db.user.findUnique({
     where: { id: session.sub },
-    select: { id: true, email: true, name: true, passwordHash: true },
+    select: { id: true, email: true, name: true, passwordHash: true, sessionVersion: true },
   });
 
   if (!existing) {
     return apiError(MSG.USER_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
   }
 
-  const updates: { name?: string; email?: string; passwordHash?: string } = {};
+  const updates: {
+    name?: string;
+    email?: string;
+    emailVerifiedAt?: Date | null;
+    passwordHash?: string;
+    sessionVersion?: { increment: number };
+  } = {};
 
   if (data.name !== undefined) {
     updates.name = data.name.trim();
@@ -84,11 +90,29 @@ export async function PATCH(req: Request) {
   if (data.email !== undefined) {
     const email = data.email.trim().toLowerCase();
     if (email !== existing.email) {
+      if (existing.passwordHash === "telegram-auth") {
+        return apiError(
+          "Смена email недоступна для аккаунтов, созданных через Telegram.",
+          "FORBIDDEN",
+          403,
+          undefined,
+          requestId
+        );
+      }
+      if (!data.currentPassword) {
+        return apiError("Укажите текущий пароль, чтобы сменить email.", "VALIDATION_ERROR", 400, undefined, requestId);
+      }
+      const valid = await verifyPassword(data.currentPassword, existing.passwordHash);
+      if (!valid) {
+        return apiError("Неверный текущий пароль.", "VALIDATION_ERROR", 400, undefined, requestId);
+      }
       const conflict = await db.user.findUnique({ where: { email } });
       if (conflict) {
         return apiError("Такой email уже используется.", "CONFLICT", 409, undefined, requestId);
       }
       updates.email = email;
+      updates.emailVerifiedAt = null;
+      updates.sessionVersion = { increment: 1 };
     }
   }
 
@@ -110,6 +134,7 @@ export async function PATCH(req: Request) {
     }
 
     updates.passwordHash = await hashPassword(data.newPassword);
+    updates.sessionVersion = { increment: 1 };
   }
 
   if (Object.keys(updates).length === 0) {
@@ -123,13 +148,17 @@ export async function PATCH(req: Request) {
   const updated = await db.user.update({
     where: { id: session.sub },
     data: updates,
-    select: { id: true, email: true, name: true },
+    select: { id: true, email: true, name: true, sessionVersion: true },
   });
 
-  if (updates.email) {
-    const token = await createSessionToken({ sub: updated.id, email: updated.email });
+  if (updates.email || updates.passwordHash) {
+    const token = await createSessionToken({ sub: updated.id, email: updated.email, sv: updated.sessionVersion });
     await setAuthCookie(token);
   }
 
-  return apiSuccess({ user: updated }, 200, requestId);
+  return apiSuccess(
+    { user: { id: updated.id, email: updated.email, name: updated.name } },
+    200,
+    requestId
+  );
 }

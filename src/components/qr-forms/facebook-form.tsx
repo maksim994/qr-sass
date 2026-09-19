@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type Props = {
   payload: Record<string, unknown>;
   onChange: (p: Record<string, unknown>) => void;
@@ -7,8 +9,7 @@ type Props = {
 
 export function FacebookForm({ payload, onChange }: Props) {
   return (
-    <div>
-      <label className="label">URL страницы Facebook</label>
+    <FormField label="URL страницы Facebook">
       <input
         className="input"
         type="url"
@@ -16,6 +17,6 @@ export function FacebookForm({ payload, onChange }: Props) {
         onChange={(e) => onChange({ ...payload, pageUrl: e.target.value })}
         placeholder="https://facebook.com/yourpage"
       />
-    </div>
+    </FormField>
   );
 }

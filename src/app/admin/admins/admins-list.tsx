@@ -1,92 +1,140 @@
 "use client";
-
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchApi } from "@/lib/client-api";
-import { Alert, Badge } from "@/components/ui";
-
-type User = { id: string; email: string; name: string | null; isAdmin: boolean };
-
-type Props = { initialUsers: User[] };
-
-export function AdminsList({ initialUsers }: Props) {
-  const router = useRouter();
-  const [updating, setUpdating] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  async function toggleAdmin(user: User) {
-    setUpdating(user.id);
-    setError(null);
+import Link from "next/link";
+import { fetchApi, parseApiResponse } from "@/lib/client-api";
+import { Alert, Button, Field, Input, Modal } from "@/components/ui";
+import { MSG } from "@/lib/user-messages";
+import styles from "@/components/admin/admin.module.css";
+type User = {
+  id: string;
+  email: string;
+  name: string | null;
+  isAdmin: boolean;
+};
+export function AdminsList({ initialUsers }: { initialUsers: User[] }) {
+  const router = useRouter(),
+    pending = useRef(false);
+  const [selected, setSelected] = useState<User | null>(null),
+    [reason, setReason] = useState(""),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState("");
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!selected || pending.current) return;
+    pending.current = true;
+    setBusy(true);
+    setError("");
     try {
-      const res = await fetchApi(`/api/admin/users/${user.id}/admin`, {
+      const response = await fetchApi(`/api/admin/users/${selected.id}/admin`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isAdmin: !user.isAdmin }),
-        credentials: "include",
+        body: JSON.stringify({ isAdmin: !selected.isAdmin, reason }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as { error?: string })?.error ?? "Ошибка");
+      const parsed = await parseApiResponse(response);
+      if (!parsed.ok) {
+        setError(parsed.error ?? MSG.ADMIN_CHANGE_FAILED);
+        return;
       }
+      setSelected(null);
+      setNotice("Права обновлены. Изменение записано в журнал.");
       router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Не удалось изменить");
+    } catch {
+      setError(MSG.ADMIN_CHANGE_FAILED);
     } finally {
-      setUpdating(null);
+      pending.current = false;
+      setBusy(false);
     }
   }
-
-  if (initialUsers.length === 0) {
-    return <p className="qrs-data-empty">Пользователей пока нет.</p>;
-  }
-
   return (
-    <div>
-      {error ? (
-        <div style={{ padding: "16px 24px 0" }}>
-          <Alert variant="danger" onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        </div>
-      ) : null}
-      <div className="qrs-scroll qrs-data-table-wrap">
-        <table className="qrs-data-table">
+    <>
+      {notice && <Alert variant="success">{notice}</Alert>}
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
           <thead>
             <tr>
-              <th>Email</th>
-              <th>Имя</th>
-              <th>Статус</th>
-              <th aria-label="Действия" />
+              <th>Пользователь</th>
+              <th>Права</th>
+              <th>Действия</th>
             </tr>
           </thead>
           <tbody>
-            {initialUsers.map((u) => (
-              <tr key={u.id}>
-                <td>{u.email}</td>
-                <td style={{ color: "var(--text-default)", fontWeight: "var(--fw-medium)" }}>{u.name ?? "—"}</td>
-                <td>
-                  {u.isAdmin ? (
-                    <Badge variant="success">Администратор</Badge>
-                  ) : (
-                    <Badge variant="info">Пользователь</Badge>
-                  )}
+            {initialUsers.map((user) => (
+              <tr key={user.id}>
+                <td data-label="Пользователь">
+                  <Link href={`/admin/users/${user.id}`}>{user.email}</Link>
+                  <small>{user.name}</small>
                 </td>
-                <td style={{ textAlign: "right" }}>
-                  <button
-                    type="button"
-                    onClick={() => toggleAdmin(u)}
-                    disabled={updating === u.id}
-                    className={`qrs-data-action${u.isAdmin ? " qrs-data-action--danger" : ""}`}
-                    style={u.isAdmin ? undefined : { color: "var(--color-primary)" }}
+                <td data-label="Права">
+                  {user.isAdmin ? "Администратор" : "Пользователь"}
+                </td>
+                <td data-label="Действия">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setSelected(user);
+                      setReason("");
+                      setError("");
+                      setNotice("");
+                    }}
                   >
-                    {updating === u.id ? "…" : u.isAdmin ? "Снять права" : "Назначить админом"}
-                  </button>
+                    {user.isAdmin ? "Снять права" : "Назначить администратором"}
+                  </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {!initialUsers.length && (
+          <p className={styles.empty}>Пользователи не найдены.</p>
+        )}
       </div>
-    </div>
+      <Modal
+        open={!!selected}
+        onClose={() => {
+          if (!pending.current) setSelected(null);
+        }}
+        closeDisabled={busy}
+        title={
+          selected?.isAdmin
+            ? "Снять права администратора"
+            : "Назначить администратора"
+        }
+        subtitle={selected?.email}
+      >
+        <form className={styles.form} onSubmit={submit}>
+          <p className={styles.note}>
+            {selected?.isAdmin
+              ? "Пользователь потеряет доступ к управлению сервисом. Последнего администратора удалить из этой роли нельзя."
+              : "Пользователь получит доступ ко всем клиентам, тарифам и настройкам сервиса."}
+          </p>
+          <Field label="Причина изменения">
+            <Input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              required
+              minLength={3}
+              maxLength={500}
+              disabled={busy}
+            />
+          </Field>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <div className={styles.actions}>
+            <Button type="submit" disabled={busy}>
+              {busy ? "Сохранение…" : "Подтвердить изменение"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => setSelected(null)}
+            >
+              Отмена
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </>
   );
 }

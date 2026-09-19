@@ -6,6 +6,7 @@ alwaysApply: true
 # qr-saas core
 
 ## Prefer
+- Уже выпущенные пользовательские QR — постоянный публичный контракт. Для любого релиза соблюдать @docs/QR-COMPATIBILITY.md и pre-deploy checklist из @DEPLOY.md.
 - Стек: Next.js 16 App Router, React 19, Prisma 6, Tailwind 4, Zod; импорты через `@/*`.
 - UX/API ошибки пользователю — только через `MSG` из @src/lib/user-messages.ts (русский текст).
 - Секреты: не коммитить `.env`; канон — @src/lib/env.ts; `S3_*` / `YOOKASSA_*` — через domain libs (`process.env`), не размазывать по UI.

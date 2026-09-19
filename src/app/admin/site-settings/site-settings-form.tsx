@@ -1,4 +1,5 @@
 "use client";
+import styles from "@/components/admin/admin.module.css";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +8,8 @@ import { FaviconUpload } from "@/components/admin/favicon-upload";
 import { Alert, Button, Field, Input } from "@/components/ui";
 
 function generateIndexNowKey(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-";
   let key = "";
   for (let i = 0; i < 32; i++) {
     key += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -41,9 +43,13 @@ export function SiteSettingsForm({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [yandexMetrikaId, setYandexMetrikaId] = useState(initialYandexMetrikaId);
+  const [yandexMetrikaId, setYandexMetrikaId] = useState(
+    initialYandexMetrikaId,
+  );
   const [customHeadCode, setCustomHeadCode] = useState(initialCustomHeadCode);
-  const [robotsTxtContent, setRobotsTxtContent] = useState(initialRobotsTxtContent);
+  const [robotsTxtContent, setRobotsTxtContent] = useState(
+    initialRobotsTxtContent,
+  );
   const [faviconUrl, setFaviconUrl] = useState(initialFaviconUrl);
   const [indexNowKey, setIndexNowKey] = useState(initialIndexNowKey);
   const [contactEmail, setContactEmail] = useState(initialContactEmail);
@@ -73,7 +79,9 @@ export function SiteSettingsForm({
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error((err as { error?: string })?.error ?? "Ошибка сохранения");
+        throw new Error(
+          (err as { error?: string })?.error ?? "Ошибка сохранения",
+        );
       }
       router.refresh();
     } catch (e) {
@@ -84,14 +92,18 @@ export function SiteSettingsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className={styles.stack}>
       {error ? (
         <Alert variant="danger" onClose={() => setError(null)}>
           {error}
         </Alert>
       ) : null}
 
-      <Field label="ID счётчика Яндекс Метрики" htmlFor="yandexMetrikaId" hint="Числовой ID из личного кабинета. Оставьте пустым, чтобы отключить.">
+      <Field
+        label="ID счётчика Яндекс Метрики"
+        htmlFor="yandexMetrikaId"
+        hint="Числовой ID из личного кабинета. Оставьте пустым, чтобы отключить."
+      >
         <Input
           id="yandexMetrikaId"
           type="text"
@@ -104,23 +116,35 @@ export function SiteSettingsForm({
         />
       </Field>
 
-      <Field label="robots.txt" htmlFor="robotsTxtContent" hint="Полный текст robots.txt. Пусто — дефолт (disallow /dashboard, /admin, sitemap).">
+      <Field
+        label="robots.txt"
+        htmlFor="robotsTxtContent"
+        hint="Полный текст robots.txt. Пусто — дефолт: закрыть /dashboard, /admin, /api. login/register не закрываем, чтобы робот прочитал noindex."
+      >
         <textarea
           id="robotsTxtContent"
           rows={10}
           className="fk-input font-mono text-sm"
-          placeholder={"User-agent: *\nAllow: /\nDisallow: /dashboard\nDisallow: /admin\n\nSitemap: https://example.com/sitemap.xml"}
+          placeholder={
+            "User-agent: *\nAllow: /\nDisallow: /dashboard\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://qr-s.ru/sitemap.xml"
+          }
           value={robotsTxtContent}
           onChange={(e) => setRobotsTxtContent(e.target.value)}
         />
       </Field>
 
-      <Field label="Дополнительный код в <head>" htmlFor="customHeadCode" hint="HTML-код для вставки в <head> на всех страницах.">
+      <Field
+        label="Дополнительный код в <head>"
+        htmlFor="customHeadCode"
+        hint="HTML в &lt;head&gt; на всех страницах. Сюда же мета Вебмастера: yandex-verification и google-site-verification."
+      >
         <textarea
           id="customHeadCode"
           rows={8}
           className="fk-input font-mono text-sm"
-          placeholder={'<meta name="custom" content="value" />\n<script src="..."></script>'}
+          placeholder={
+            '<meta name="custom" content="value" />\n<script src="..."></script>'
+          }
           value={customHeadCode}
           onChange={(e) => setCustomHeadCode(e.target.value)}
         />
@@ -132,13 +156,18 @@ export function SiteSettingsForm({
         hint={
           <>
             Файл ключа: site.ru/{indexNowKey || "ключ"}.txt.{" "}
-            <a href="https://yandex.ru/support/webmaster/ru/indexing-options/index-now" target="_blank" rel="noopener noreferrer" className="qrs-navlink">
+            <a
+              href="https://yandex.ru/support/webmaster/ru/indexing-options/index-now"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="qrs-navlink"
+            >
               Документация
             </a>
           </>
         }
       >
-        <div className="flex gap-2">
+        <div className={styles.actions}>
           <Input
             id="indexNowKey"
             type="text"
@@ -147,7 +176,12 @@ export function SiteSettingsForm({
             value={indexNowKey}
             onChange={(e) => setIndexNowKey(e.target.value)}
           />
-          <Button type="button" variant="secondary" className="shrink-0" onClick={() => setIndexNowKey(generateIndexNowKey())}>
+          <Button
+            type="button"
+            variant="secondary"
+            className="shrink-0"
+            onClick={() => setIndexNowKey(generateIndexNowKey())}
+          >
             Сгенерировать
           </Button>
         </div>
@@ -163,14 +197,27 @@ export function SiteSettingsForm({
       </Field>
 
       <div className="qrs-admin-form-section" style={{ marginTop: 8 }}>
-        <h3 style={{ font: "var(--fw-bold) 1.1rem/1.2 var(--font-display)", color: "var(--text-strong)", marginBottom: 8 }}>
+        <h3
+          style={{
+            font: "var(--fw-bold) 1.1rem/1.2 var(--font-display)",
+            color: "var(--text-strong)",
+            marginBottom: 8,
+          }}
+        >
           Реквизиты и контакты
         </h3>
-        <p style={{ marginBottom: 16, font: "var(--fw-regular) 14px/1.55 var(--font-sans)", color: "var(--text-muted)" }}>
-          Эти данные отображаются в подвале сайта и юридических документах для модерации платежных систем.
+        <p
+          style={{
+            marginBottom: 16,
+            font: "var(--fw-regular) 14px/1.55 var(--font-sans)",
+            color: "var(--text-muted)",
+          }}
+        >
+          Эти данные отображаются в подвале сайта и юридических документах для
+          модерации платежных систем.
         </p>
 
-        <div className="space-y-4">
+        <div className={styles.form}>
           <Field label="ФИО / Название организации" htmlFor="requisitesName">
             <Input
               id="requisitesName"

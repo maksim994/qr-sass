@@ -2,22 +2,60 @@ import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
+import { publicSiteUrl } from "@/lib/public-url";
 
 export const metadata: Metadata = {
   title: "История изменений",
-  description: "Последние обновления и новые возможности qr-s.ru — генератора QR-кодов для бизнеса.",
+  description: "Последние обновления qr-s.ru: динамические QR, честные тарифы и исправления публичных текстов.",
+  alternates: { canonical: publicSiteUrl("/changelog") },
   openGraph: {
     title: "История изменений | qr-s.ru",
-    description: "Последние обновления и новые возможности qr-s.ru.",
-    url: "/changelog",
+    description: "Последние обновления qr-s.ru.",
+    url: publicSiteUrl("/changelog"),
   },
 };
 
 const changelog: {
   date: string;
-  version?: string;
+  version: string;
   items: { type: "feature" | "improvement" | "fix"; text: string }[];
 }[] = [
+  {
+    date: "2026-09-18",
+    version: "1.6",
+    items: [
+      { type: "feature", text: "Серверная воронка: регистрация → QR → скачивание → первое внешнее открытие → оплата SUCCEEDED" },
+      { type: "fix", text: "Клик виджета ЮKassa больше не считается оплатой; боты и просмотры из кабинета не входят в отчёт" },
+      { type: "improvement", text: "Админка /admin/funnel и когорты по ISO-неделе (Москва)" },
+    ],
+  },
+  {
+    date: "2026-09-18",
+    version: "1.5",
+    items: [
+      { type: "fix", text: "Sitemap без login/register; служебные и клиентские QR не индексируются" },
+      { type: "improvement", text: "Canonical на блоге, политике и соглашении; пагинация блога с noindex" },
+      { type: "improvement", text: "robots.txt не блокирует login — робот может прочитать noindex и убрать страницу из выдачи" },
+    ],
+  },
+  {
+    date: "2026-09-18",
+    version: "1.4",
+    items: [
+      { type: "improvement", text: "Главная: H1 про смену ссылки после печати; бесплатный тариф — статика, Про — проба динамики 14 дней" },
+      { type: "feature", text: "Посадочные /qr-menu и /qr-for-packaging с формой динамической ссылки, без подстановки чужого URL" },
+      { type: "improvement", text: "Шапка гостя ведёт в создание QR, не в пустой кабинет" },
+    ],
+  },
+  {
+    date: "2026-09-18",
+    version: "1.3",
+    items: [
+      { type: "improvement", text: "Публичные тексты: бренд QR-S.ru, без чужих доменов и служебных пометок в статьях" },
+      { type: "improvement", text: "Тарифы и аналитика без географии, белой метки и гарантии сканирования" },
+      { type: "fix", text: "Canonical без двойного слэша; login/register не попадают в sitemap" },
+    ],
+  },
   {
     date: "2026-03-10",
     version: "1.2.1",
@@ -59,8 +97,8 @@ const changelog: {
       { type: "feature", text: "Пароль на QR — ввод пароля перед показом контента" },
       { type: "feature", text: "Срок действия — ограничение по дате или количеству сканов" },
       { type: "feature", text: "GDPR-gate — экран согласия с политикой конфиденциальности для EU" },
-      { type: "feature", text: "Расширенные форматы экспорта: JPG, EPS, PDF для печати" },
-      { type: "feature", text: "Bulk-создание QR — загрузка CSV/Excel, генерация сотен кодов, ZIP-выгрузка" },
+      { type: "feature", text: "Расширенные форматы экспорта: JPG, EPS и PDF как растровая картинка QR, не вектор" },
+      { type: "feature", text: "Пакетное создание QR из CSV в пределах лимита тарифа, выгрузка ZIP" },
       { type: "feature", text: "Smart redirect по устройству — разные URL для iOS, Android и Desktop" },
     ],
   },
@@ -95,7 +133,7 @@ export default async function ChangelogPage() {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
         {changelog.map((release) => (
-          <article key={release.date} style={{ paddingLeft: "24px", borderLeft: "2px solid var(--border-default)" }}>
+          <article key={release.version} style={{ paddingLeft: "24px", borderLeft: "2px solid var(--border-default)" }}>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "12px" }}>
               <time dateTime={release.date} style={{ font: "var(--fw-semibold) var(--fs-sm)/1 var(--font-sans)", color: "var(--text-strong)" }}>
                 {new Date(release.date).toLocaleDateString("ru-RU", {

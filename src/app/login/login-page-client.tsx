@@ -15,12 +15,15 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { parseApiResponse, fetchApi } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
+import { MSG } from "@/lib/user-messages";
+import { destinationAfterAuth } from "@/lib/qr-draft";
 
 type Props = {
   initialError?: string;
+  nextPath?: string;
 };
 
-export function LoginPageClient({ initialError = "" }: Props) {
+export function LoginPageClient({ initialError = "", nextPath = "/dashboard" }: Props) {
   const router = useRouter();
   const emailId = useId();
   const rememberId = useId();
@@ -32,37 +35,48 @@ export function LoginPageClient({ initialError = "" }: Props) {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
 
-    const response = await fetchApi("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const parsed = await parseApiResponse<{ userId?: string }>(response);
-    setLoading(false);
-    if (!parsed.ok) {
-      logger.warn({
-        area: "ui",
-        route: "/login",
-        message: "Login request failed",
-        code: parsed.code ?? "REQUEST_ERROR",
-        status: parsed.status,
-        details: { email },
+    try {
+      const response = await fetchApi("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, remember }),
       });
-      setError(parsed.error ?? "Не удалось войти. Проверьте данные.");
-      return;
+      const parsed = await parseApiResponse<{ userId?: string }>(response);
+      if (!parsed.ok) {
+        logger.warn({
+          area: "ui",
+          route: "/login",
+          message: "Login request failed",
+          code: parsed.code ?? "REQUEST_ERROR",
+          status: parsed.status,
+          details: { email },
+        });
+        setError(parsed.error ?? MSG.COULD_NOT_SIGN_IN);
+        return;
+      }
+      router.push(destinationAfterAuth(nextPath));
+      router.refresh();
+    } catch {
+      setError(MSG.AUTH_NETWORK_ERROR);
+    } finally {
+      setLoading(false);
     }
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
     <AuthShell
       mode="login"
       title="С возвращением"
-      subtitle="Войдите, чтобы управлять своими QR-кодами."
+      subtitle={
+        nextPath.startsWith("/dashboard/create")
+          ? "После входа продолжим создание вашего QR-кода."
+          : "Войдите, чтобы управлять своими QR-кодами."
+      }
+      nextPath={nextPath}
     >
       <form onSubmit={onSubmit} className="qrs-auth-form">
         {error ? (
@@ -79,6 +93,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="email@example.com"
             autoComplete="email"
+            disabled={loading}
             required
           />
         </Field>
@@ -87,6 +102,8 @@ export function LoginPageClient({ initialError = "" }: Props) {
           value={password}
           onChange={setPassword}
           showForgotLink
+          disabled={loading}
+          placeholder="Введите пароль"
           autoComplete="current-password"
         />
 
@@ -95,6 +112,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
             id={rememberId}
             type="checkbox"
             className="fk-choice__input"
+            disabled={loading}
             checked={remember}
             onChange={(event) => setRemember(event.target.checked)}
           />
@@ -108,27 +126,27 @@ export function LoginPageClient({ initialError = "" }: Props) {
 
         <Button
           type="submit"
-          variant="accent"
+          variant="primary"
           size="lg"
           block
           disabled={loading}
           className={loading ? "fk-button--loading" : ""}
           aria-busy={loading}
         >
-          Войти
+          {loading ? "Входим…" : "Войти"}
         </Button>
       </form>
 
       <AuthDivider />
 
       <div className="qrs-auth-social">
-        <YandexAuthButton mode="login" />
+        <YandexAuthButton mode="login" nextPath={nextPath} />
         <p className="qrs-auth-social-note">
           Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
         </p>
       </div>
 
-      <AuthSwitchLink mode="login" />
+      <AuthSwitchLink mode="login" nextPath={nextPath} />
     </AuthShell>
   );
 }

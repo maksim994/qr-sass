@@ -1,8 +1,7 @@
 "use client";
 import { fetchApi } from "@/lib/client-api";
-
-
 import { useState } from "react";
+import { FormField } from "@/components/qr-forms/form-field";
 
 type AbTest = {
   urlA?: string;
@@ -68,8 +67,7 @@ export default function AbTestForm({ qrId, abTest, scanCountA, scanCountB, onSav
           </div>
         </div>
       )}
-      <div>
-        <label className="label">URL вариант A</label>
+      <FormField label="URL вариант A">
         <input
           type="url"
           value={urlA}
@@ -77,9 +75,8 @@ export default function AbTestForm({ qrId, abTest, scanCountA, scanCountB, onSav
           placeholder="https://example.com/a"
           className="input"
         />
-      </div>
-      <div>
-        <label className="label">URL вариант B</label>
+      </FormField>
+      <FormField label="URL вариант B">
         <input
           type="url"
           value={urlB}
@@ -87,7 +84,7 @@ export default function AbTestForm({ qrId, abTest, scanCountA, scanCountB, onSav
           placeholder="https://example.com/b"
           className="input"
         />
-      </div>
+      </FormField>
       <button type="submit" disabled={loading} className="btn btn-primary btn-sm">
         {loading ? "Сохранение…" : "Сохранить"}
       </button>

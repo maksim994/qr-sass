@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { FileUploadField } from "./file-upload-field";
+import { FormField } from "./form-field";
 
 type Props = {
   payload: Record<string, unknown>;
@@ -19,31 +20,30 @@ export function Mp3Form({ payload, onChange, workspaceId }: Props) {
 
   return (
     <div className="grid gap-4">
-      <div>
-        <label className="label">Название трека</label>
+      <FormField label="Название трека">
         <input
           className="input"
           value={String(payload.title || "")}
           onChange={(e) => onChange({ ...payload, title: e.target.value })}
           placeholder="Название"
         />
-      </div>
-      <div>
-        <label className="label">Исполнитель</label>
+      </FormField>
+      <FormField label="Исполнитель">
         <input
           className="input"
           value={String(payload.artist || "")}
           onChange={(e) => onChange({ ...payload, artist: e.target.value })}
           placeholder="Имя исполнителя"
         />
-      </div>
+      </FormField>
       <div>
-        <label className="label">Аудиофайл</label>
+        <p className="label" id="mp3-file-label">Аудиофайл</p>
         <FileUploadField
           accept="audio/*"
           workspaceId={workspaceId}
           onUploaded={handleUploaded}
           currentFilename={String(payload.filename || "")}
+          labelledBy="mp3-file-label"
         />
       </div>
     </div>

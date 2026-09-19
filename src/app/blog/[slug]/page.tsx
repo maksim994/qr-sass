@@ -9,6 +9,8 @@ import { Breadcrumbs } from "@/components/blog/breadcrumbs";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ArticleShare } from "@/components/blog/article-share";
 import { buildDefaultArticleJsonLd, parseStructuredDataForPage } from "@/lib/blog-structured-data";
+import { publicSiteUrl } from "@/lib/public-url";
+import { sanitizeBlogFields } from "@/lib/blog-sanitize";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -30,13 +32,19 @@ function authorInitials(name: string): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const db = getDb();
-  const post = await db.blogPost.findUnique({
+  const raw = await db.blogPost.findUnique({
     where: { slug, publishedAt: { not: null } },
   });
-  if (!post) return { title: "Статья не найдена" };
+  if (!raw) return { title: "Статья не найдена" };
 
-  const base = process.env.APP_URL ?? "http://localhost:3000";
-  const url = `${base}/blog/${post.slug}`;
+  const post = sanitizeBlogFields({
+    slug: raw.slug,
+    title: raw.title,
+    excerpt: raw.excerpt,
+    metaTitle: raw.metaTitle,
+    metaDescription: raw.metaDescription,
+  });
+  const url = publicSiteUrl(`/blog/${raw.slug}`);
   const seoTitle = post.metaTitle?.trim() || `${post.title} — Блог qr-s.ru`;
   const seoDescription = post.metaDescription?.trim() || (post.excerpt ?? post.title);
 
@@ -47,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: seoTitle,
       description: seoDescription,
-      images: post.coverImageUrl ? [{ url: post.coverImageUrl }] : undefined,
+      images: raw.coverImageUrl ? [{ url: raw.coverImageUrl }] : undefined,
       url,
     },
   };
@@ -79,6 +87,22 @@ export default async function BlogPostPage({ params }: Props) {
     },
   });
   if (!post) notFound();
+
+  const copy = sanitizeBlogFields({
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    metaTitle: post.metaTitle,
+    metaDescription: post.metaDescription,
+    content: post.content,
+    structuredData: post.structuredData,
+  });
+  const title = copy.title ?? post.title;
+  const excerpt = copy.excerpt ?? post.excerpt;
+  const content = copy.content ?? post.content;
+  const structuredData = copy.structuredData ?? post.structuredData;
+  const seoTitle = copy.metaTitle?.trim() || `${title} — Блог qr-s.ru`;
+  const seoDescription = copy.metaDescription?.trim() || (excerpt ?? title);
 
   const relatedWhere = {
     publishedAt: { not: null },
@@ -135,18 +159,14 @@ export default async function BlogPostPage({ params }: Props) {
     relatedPosts = fallback;
   }
 
-  const base = process.env.APP_URL ?? "http://localhost:3000";
-  const articleUrl = `${base}/blog/${post.slug}`;
-  const seoTitle = post.metaTitle?.trim() || `${post.title} — Блог qr-s.ru`;
-  const seoDescription = post.metaDescription?.trim() || (post.excerpt ?? post.title);
-
-  const customJsonLd = parseStructuredDataForPage(post.structuredData);
+  const articleUrl = publicSiteUrl(`/blog/${post.slug}`);
+  const customJsonLd = parseStructuredDataForPage(structuredData);
   const jsonLd =
     customJsonLd ??
     buildDefaultArticleJsonLd({
-      base,
+      base: publicSiteUrl(),
       articleUrl,
-      title: post.title,
+      title,
       seoTitle,
       seoDescription,
       coverImageUrl: post.coverImageUrl,
@@ -158,6 +178,9 @@ export default async function BlogPostPage({ params }: Props) {
 
   const publishedDate = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric" })
+    : null;
+  const updatedDate = post.updatedAt
+    ? new Date(post.updatedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric" })
     : null;
 
   return (
@@ -175,7 +198,7 @@ export default async function BlogPostPage({ params }: Props) {
             items={[
               { label: "Главная", href: "/" },
               { label: "Блог", href: "/blog" },
-              { label: post.title },
+              { label: title },
             ]}
           />
           <header style={{ marginTop: "22px" }}>
@@ -190,11 +213,11 @@ export default async function BlogPostPage({ params }: Props) {
               )}
             </div>
             <h1 style={{ font: "var(--fw-extra) clamp(2rem, 4.6vw, 3rem)/1.1 var(--font-display)", color: "var(--text-strong)", letterSpacing: "-0.03em", textWrap: "balance" }}>
-              {post.title}
+              {title}
             </h1>
-            {post.excerpt && (
+            {excerpt && (
               <p style={{ marginTop: "18px", font: "var(--fw-regular) clamp(1.05rem, 2vw, 1.2rem)/1.6 var(--font-sans)", color: "var(--text-muted)" }}>
-                {post.excerpt}
+                {excerpt}
               </p>
             )}
             <div style={{ marginTop: "26px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap", paddingTop: "22px", borderTop: "1px solid var(--border-subtle)" }}>
@@ -209,12 +232,13 @@ export default async function BlogPostPage({ params }: Props) {
                     <span style={{ display: "block", font: "var(--fw-semibold) 14px/1.2 var(--font-sans)", color: "var(--text-strong)" }}>{post.authorName}</span>
                     <span style={{ display: "block", marginTop: "3px", font: "var(--fw-regular) 12px/1.2 var(--font-sans)", color: "var(--text-muted)" }}>
                       {publishedDate ?? "Блог QR-S.ru"}
+                      {updatedDate && updatedDate !== publishedDate ? ` · обновлено ${updatedDate}` : ""}
                     </span>
                   </span>
                 </span>
               ) : null}
               <span style={{ font: "var(--fw-medium) 13px/1 var(--font-sans)", color: "var(--text-muted)" }}>{formatViews(post.views)} просмотров</span>
-              <ArticleShare url={articleUrl} title={post.title} />
+              <ArticleShare url={articleUrl} title={title} />
             </div>
           </header>
         </div>
@@ -227,7 +251,7 @@ export default async function BlogPostPage({ params }: Props) {
             style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-accent) 16%, transparent))", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {post.coverImageUrl ? (
-              <Image src={post.coverImageUrl} alt={post.title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
+              <Image src={post.coverImageUrl} alt={title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
             ) : (
               <svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -242,7 +266,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       <section style={{ paddingBottom: "var(--section-y)" }}>
         <div className="fk-container">
-          <BlogPostContent content={post.content} />
+          <BlogPostContent content={content} />
           <div style={{ maxWidth: "720px", margin: "48px auto 0" }}>
             <ArticleUsefulBlock slug={post.slug} initialLikes={post.likes} />
           </div>
@@ -252,10 +276,15 @@ export default async function BlogPostPage({ params }: Props) {
       <section style={{ paddingBottom: "var(--section-y)", borderTop: "1px solid var(--border-subtle)" }}>
         <div className="fk-container" style={{ paddingTop: "clamp(40px, 5vw, 64px)" }}>
           <RelatedPosts
-            posts={relatedPosts.map((p) => ({
-              ...p,
-              publishedAt: p.publishedAt!,
-            }))}
+            posts={relatedPosts.map((p) => {
+              const clean = sanitizeBlogFields({ slug: p.slug, title: p.title, excerpt: p.excerpt });
+              return {
+                ...p,
+                title: clean.title ?? p.title,
+                excerpt: clean.excerpt ?? p.excerpt,
+                publishedAt: p.publishedAt!,
+              };
+            })}
           />
         </div>
       </section>

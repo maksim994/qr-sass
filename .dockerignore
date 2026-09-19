@@ -12,3 +12,7 @@ README.md
 .cursor
 *.md
 terminals
+
+outputs
+temp
+.impeccable

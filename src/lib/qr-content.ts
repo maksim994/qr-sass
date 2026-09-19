@@ -19,22 +19,46 @@ export function needsHostedPage(type: QrContentType): boolean {
   return HOSTED_CONTENT_TYPES.includes(type);
 }
 
+function escapeWifi(value: string) {
+  return value.replace(/([\\;,:])/g, "\\$1");
+}
+
 export function encodeQrContent(type: QrContentType, payload: QrPayload): string {
-  const s = (key: string) => (typeof payload[key] === "string" ? (payload[key] as string) : "");
+  const s = (key: string) => (typeof payload[key] === "string" ? (payload[key] as string).trim() : "");
 
   switch (type) {
     case "URL":
       return s("url");
     case "TEXT":
       return s("text");
-    case "EMAIL":
-      return `mailto:${s("email")}?subject=${encodeURIComponent(s("subject"))}&body=${encodeURIComponent(s("body"))}`;
-    case "PHONE":
-      return `tel:${s("phone")}`;
-    case "SMS":
-      return `smsto:${s("phone")}:${s("message")}`;
-    case "WIFI":
-      return `WIFI:T:${s("encryption") || "WPA"};S:${s("ssid")};P:${s("password")};;`;
+    case "EMAIL": {
+      const email = s("email");
+      if (!email) return "";
+      const subject = s("subject");
+      const body = s("body");
+      const params = new URLSearchParams();
+      if (subject) params.set("subject", subject);
+      if (body) params.set("body", body);
+      const query = params.toString();
+      return query ? `mailto:${email}?${query}` : `mailto:${email}`;
+    }
+    case "PHONE": {
+      const phone = s("phone");
+      return phone ? `tel:${phone}` : "";
+    }
+    case "SMS": {
+      const phone = s("phone");
+      if (!phone) return "";
+      const message = s("message");
+      return message ? `smsto:${phone}:${message}` : `smsto:${phone}`;
+    }
+    case "WIFI": {
+      const ssid = s("ssid");
+      if (!ssid) return "";
+      const encryption = s("encryption") || "WPA";
+      const password = s("password");
+      return `WIFI:T:${escapeWifi(encryption)};S:${escapeWifi(ssid)};P:${escapeWifi(password)};;`;
+    }
     case "VCARD":
       return [
         "BEGIN:VCARD",
@@ -52,12 +76,15 @@ export function encodeQrContent(type: QrContentType, payload: QrPayload): string
     case "LOCATION":
       return `geo:${s("latitude")},${s("longitude")}`;
 
-    case "INSTAGRAM":
-      return `https://instagram.com/${s("username").replace(/^@/, "")}`;
+    case "INSTAGRAM": {
+      const username = s("username").replace(/^@/, "");
+      return username ? `https://instagram.com/${username}` : "";
+    }
     case "FACEBOOK":
-      return s("pageUrl") || `https://facebook.com/${s("username")}`;
+      return s("pageUrl") || (s("username") ? `https://facebook.com/${s("username")}` : "");
     case "WHATSAPP": {
       const phone = s("phone").replace(/[^0-9+]/g, "");
+      if (!phone) return "";
       const msg = s("message");
       return `https://wa.me/${phone}${msg ? `?text=${encodeURIComponent(msg)}` : ""}`;
     }

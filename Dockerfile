@@ -14,9 +14,9 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # Больше памяти для Next.js build (часто падает в Docker из‑за лимитов)
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-# Фиктивные env для build (страницы с БД помечены dynamic, эти значения не используются в runtime)
+# Фиктивные env для build (страницы с БД помечены dynamic). JWT ≥32 символов: next build идёт с NODE_ENV=production.
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public"
-ENV JWT_SECRET="build-time-secret-min-16-chars"
+ENV JWT_SECRET="build-time-jwt-secret-do-not-use-in-runtime"
 ENV APP_URL="http://localhost:3000"
 ENV REDIS_URL="redis://localhost:6379"
 RUN node scripts/copy-ckeditor-css.mjs
@@ -33,6 +33,7 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
@@ -46,5 +47,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Startup: run app (prisma db push выполняется отдельным init-контейнером)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=5 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+# Startup: migrate runs in init-db; this container only serves the app.
 CMD ["node", "server.js"]

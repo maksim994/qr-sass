@@ -3,12 +3,13 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { selectWorkspace } from "@/lib/workspace-select";
 import { getDb } from "@/lib/db";
-import { getPlan } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
 import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
 import { qrTypes } from "@/lib/qr-types";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { Alert } from "@/components/ui";
 import { CreateTypePicker } from "@/components/dashboard/create-type-picker";
+import { ResumeCreateDraft } from "@/components/dashboard/resume-create-draft";
 
 export default async function CreatePage() {
   const user = await requireUser();
@@ -19,10 +20,11 @@ export default async function CreatePage() {
   const enabledTypes = qrTypes.filter((t) => !isQrTypeDisabled(t.type, disabled));
 
   const db = getDb();
-  const [planInfo, totalQr] = await Promise.all([
-    getPlan(workspace.plan),
+  const [entitlements, totalQr] = await Promise.all([
+    getEntitlements(workspace.id),
     db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false } }),
   ]);
+  const planInfo = entitlements.plan;
   const qrLimit = planInfo.limits.maxQrCodes;
   const qrRemaining = qrLimit == null ? null : Math.max(0, qrLimit - totalQr);
   const limitReached = qrLimit != null && totalQr >= qrLimit;
@@ -45,10 +47,12 @@ export default async function CreatePage() {
     <div>
       <DashboardPageHeader
         title="Создать QR-код"
-        description="Выберите тип контента — дальше настроите дизайн, срок действия и аналитику."
+        description="Выберите содержимое, затем настройте оформление кода."
       />
 
-      {(limitReached || (qrRemaining != null && qrRemaining <= 3) || !planInfo.limits.allowsDynamic) ? (
+      <ResumeCreateDraft />
+
+      {(limitReached || (qrRemaining != null && qrRemaining <= 3)) ? (
         <div className="qrs-create-alerts">
           {limitReached ? (
             <Alert variant="warning" title="Лимит тарифа">
@@ -59,7 +63,7 @@ export default async function CreatePage() {
               или удалите ненужные коды в библиотеке.
             </Alert>
           ) : qrRemaining != null && qrRemaining <= 3 ? (
-            <Alert variant="info" title="Осталось мало слотов">
+            <Alert variant="info" title="Доступно на вашем тарифе">
               Можно создать ещё {qrRemaining} QR на текущем тарифе.{" "}
               <Link href="/dashboard/billing" className="qrs-navlink">
                 Смотреть тарифы
@@ -67,14 +71,7 @@ export default async function CreatePage() {
             </Alert>
           ) : null}
 
-          {!planInfo.limits.allowsDynamic ? (
-            <Alert variant="info" title="Бесплатный тариф — только статика">
-              Динамические QR, меню, файлы и аналитика сканов доступны на Про.{" "}
-              <Link href="/dashboard/billing" className="qrs-navlink">
-                Перейти на Про
-              </Link>
-            </Alert>
-          ) : null}
+
         </div>
       ) : null}
 

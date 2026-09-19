@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const ext = EXT_MAP[validated.mime] ?? "png";
     const fileId = nanoid(12);
     const key = getFaviconKey(fileId, ext);
-    const url = await uploadFile(buffer, key, validated.mime);
+    const url = await uploadFile(buffer, key, validated.mime, "public");
 
     return apiSuccess({ url, key });
   } catch (err) {

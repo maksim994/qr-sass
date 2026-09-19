@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
-import { getPlan } from "@/lib/plans";
+import { getEntitlements } from "@/lib/entitlements";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { selectWorkspace } from "@/lib/workspace-select";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
@@ -10,8 +11,8 @@ export default async function ApiKeysPage() {
   const workspace = await selectWorkspace(user.memberships);
   if (!workspace) redirect("/register");
 
-  const planInfo = await getPlan(workspace.plan);
-  const allowsApi = planInfo.id === "BUSINESS";
+  const entitlements = await getEntitlements(workspace.id);
+  const allowsApi = entitlements.allowsApi;
 
   const myMembership = user.memberships.find((m) => m.workspaceId === workspace.id);
   const canManageKeys = myMembership?.role === "OWNER" || myMembership?.role === "ADMIN";
@@ -23,6 +24,7 @@ export default async function ApiKeysPage() {
         description="Ключи для программного доступа к API. Доступны на тарифе Бизнес."
       />
 
+      <div className="mb-6"><Link href="/dashboard/api-docs" className="fk-button fk-button--secondary">Открыть документацию API</Link></div>
       <ApiKeysWorkspaceBar workspaceId={workspace.id} />
 
       {!allowsApi ? (

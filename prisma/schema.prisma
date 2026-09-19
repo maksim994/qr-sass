@@ -50,11 +50,14 @@ model User {
   passwordHash String
   name         String?
   isAdmin      Boolean      @default(false)
+  sessionVersion Int        @default(0)
+  emailVerifiedAt DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   memberships  Membership[]
   qrCodes      QrCode[]     @relation("CreatedByQrCodes")
   blogPosts    BlogPost[]   @relation("CreatedBlogPosts")
+  passwordResets PasswordResetToken[]
 }
 
 model BlogCategory {
@@ -107,6 +110,8 @@ model Workspace {
   name          String
   slug          String         @unique
   plan          WorkspacePlan  @default(FREE)
+  accessMode    String         @default("standard") // standard, archive, friends (admin-only)
+  archivedPlan  Json?          // immutable release snapshot; never supplied by a client
   trialUsedAt   DateTime?      // Триал PRO уже использован
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -117,6 +122,8 @@ model Workspace {
   uploadedFiles UploadedFile[]
   subscription  Subscription?
   payments      Payment[]
+  billingEvents BillingEvent[]
+  funnelEvents  FunnelEvent[]
 }
 
 model Membership {
@@ -180,6 +187,7 @@ model QrCode {
   createdBy        User          @relation("CreatedByQrCodes", fields: [createdById], references: [id], onDelete: Restrict)
   revisions        QrRevision[]
   scanEvents       ScanEvent[]
+  funnelEvents     FunnelEvent[]
 
   @@index([workspaceId, createdAt])
   @@index([workspaceId, kind, contentType])
@@ -225,7 +233,7 @@ model PlanOverride {
 model ScanEvent {
   id           String   @id @default(cuid())
   qrCodeId     String
-  scannedAt    DateTime @default(now())
+  scannedAt    DateTime @default(now()) @db.Timestamptz(3)
   country      String?
   city         String?
   deviceType   String?
@@ -252,6 +260,8 @@ model SiteSettings {
   robotsTxtContent  String?  @db.Text
   faviconUrl        String?
   indexNowKey       String?  // IndexNow: 8–128 символов, a-z A-Z 0-9 -
+  analyticsPurgedAt DateTime?
+  analyticsPurgeUpdated Int @default(0)
   contactEmail      String?
   contactPhone      String?
   requisitesInn     String?
@@ -284,15 +294,133 @@ model Payment {
   id              String        @id @default(cuid())
   workspaceId     String
   subscriptionId  String?
+  paidAt          DateTime?
   providerPaymentId String      @unique // YooKassa payment ID
   amount          Int           // в рублях
   currency        String        @default("RUB")
+  planId          WorkspacePlan?
+  termsMode       String?       // archive/current: choice made when checkout was created
+  isTest          Boolean       @default(false)
   status          PaymentStatus @default(PENDING)
   description     String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   subscription    Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  billingEvents   BillingEvent[]
 
   @@index([workspaceId])
+}
+
+model BillingEvent {
+  id                 String    @id @default(cuid())
+  workspaceId        String?
+  paymentId          String?
+  providerPaymentId  String?
+  type               String
+  message            String?
+  payload            Json?
+  createdAt          DateTime  @default(now())
+  workspace          Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  payment            Payment?   @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([providerPaymentId])
+  @@index([type, createdAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model FunnelEvent {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String?
+  qrCodeId    String?
+  paymentId   String?
+  name        String
+  source      String?
+  isTest      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  qrCode      QrCode?   @relation(fields: [qrCodeId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, name, createdAt])
+  @@index([qrCodeId, name, createdAt])
+  @@index([paymentId, name])
+  @@index([isTest, name, createdAt])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  actorId     String
+  actorEmail  String
+  action      String
+  entityId    String
+  reason      String
+  before      Json
+  after       Json
+  createdAt   DateTime @default(now())
+
+  @@index([entityId, createdAt])
+  @@index([createdAt])
+}
+
+model BusinessEvent {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  workspaceId String?
+  userId      String?
+  paymentId   String?
+  isTest      Boolean  @default(false)
+  payload     Json
+  createdAt   DateTime @default(now())
+  @@index([name, isTest, createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+model TelegramSettings {
+  id          String   @id @default("default")
+  enabled     Boolean  @default(false)
+  tokenCipher String?
+  chatId      String   @default("")
+  events      String[] @default(["registration_completed", "trial_started", "payment_succeeded"])
+  dailyDigest Boolean  @default(true)
+  digestHour  Int      @default(9)
+  revision    Int      @default(1)
+  updatedAt   DateTime @updatedAt
+}
+
+model NotificationOutbox {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  eventName     String
+  text          String
+  chatId        String
+  revision      Int
+  status        String   @default("PENDING")
+  attempts      Int      @default(0)
+  nextAttemptAt DateTime @default(now())
+  leaseUntil    DateTime?
+  leaseToken    String?
+  lastError     String?
+  messageId     String?
+  createdAt     DateTime @default(now())
+  sentAt        DateTime?
+  @@index([status, nextAttemptAt])
+}
+
+model NotificationWorkerState {
+  id          String   @id @default("default")
+  lastSeenAt  DateTime @default(now())
 }

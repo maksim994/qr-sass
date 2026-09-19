@@ -1,10 +1,15 @@
+import styles from "@/components/admin/admin.module.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { contentTypeLabels } from "@/lib/qr-types";
 import { needsHostedPage } from "@/lib/qr";
 import { renderStyledQrSvg } from "@/lib/qr-styled-render";
-import { AdminPageHeader, AdminCard, AdminDataCard } from "@/components/admin/admin-page";
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminDataCard,
+} from "@/components/admin/admin-page";
 import { Badge, Button } from "@/components/ui";
 import { QrTypeIcon } from "@/components/qr-type-icon";
 
@@ -42,15 +47,25 @@ export default async function AdminQrDetailPage({ params }: Props) {
   const svgString = await renderStyledQrSvg(qr.encodedContent, styleRaw, 200);
   const isVcard = qr.contentType === "VCARD";
   const hasShortLink = (qr.kind === "DYNAMIC" || isVcard) && !!qr.shortCode;
-  const shortLinkPrefix = isVcard ? "v" : needsHostedPage(qr.contentType) ? "p" : "r";
+  const shortLinkPrefix = isVcard
+    ? "v"
+    : needsHostedPage(qr.contentType)
+      ? "p"
+      : "r";
 
   const metaRows: { label: string; value: React.ReactNode }[] = [
     { label: "ID", value: <code className="qrs-inline-code">{qr.id}</code> },
     { label: "Workspace", value: qr.workspace.name },
     { label: "Тариф workspace", value: qr.workspace.plan },
     { label: "Создатель", value: qr.createdBy.email },
-    { label: "Тип", value: contentTypeLabels[qr.contentType] ?? qr.contentType },
-    { label: "Вид", value: qr.kind === "DYNAMIC" ? "Динамический" : "Статический" },
+    {
+      label: "Тип",
+      value: contentTypeLabels[qr.contentType] ?? qr.contentType,
+    },
+    {
+      label: "Вид",
+      value: qr.kind === "DYNAMIC" ? "Динамический" : "Статический",
+    },
     { label: "Короткий код", value: qr.shortCode ?? "—" },
     { label: "Создан", value: formatDateTime(qr.createdAt) },
     { label: "Обновлён", value: formatDateTime(qr.updatedAt) },
@@ -79,10 +94,21 @@ export default async function AdminQrDetailPage({ params }: Props) {
       <AdminPageHeader
         title={qr.name}
         description={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap",
+            }}
+          >
             <QrTypeIcon contentType={qr.contentType} variant="blue" />
-            <Badge variant="primary">{contentTypeLabels[qr.contentType] ?? qr.contentType}</Badge>
-            <Badge variant="info">{qr.kind === "DYNAMIC" ? "Динамический" : "Статический"}</Badge>
+            <Badge variant="primary">
+              {contentTypeLabels[qr.contentType] ?? qr.contentType}
+            </Badge>
+            <Badge variant="info">
+              {qr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
+            </Badge>
             {qr.isArchived ? <Badge variant="warning">В архиве</Badge> : null}
           </span>
         }
@@ -93,14 +119,7 @@ export default async function AdminQrDetailPage({ params }: Props) {
         }
       />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) 280px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
+      <div className={styles.grid}>
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div
             style={{
@@ -110,42 +129,74 @@ export default async function AdminQrDetailPage({ params }: Props) {
             }}
           >
             <AdminCard>
-              <div className="tnum" style={{ font: "var(--fw-extra) 1.7rem/1 var(--font-display)", color: "var(--text-strong)" }}>
+              <div
+                className="tnum"
+                style={{
+                  font: "var(--fw-extra) 1.7rem/1 var(--font-display)",
+                  color: "var(--text-strong)",
+                }}
+              >
                 {qr._count.scanEvents}
               </div>
-              <div style={{ marginTop: "6px", font: "var(--fw-medium) 13px/1.2 var(--font-sans)", color: "var(--text-muted)" }}>
+              <div
+                style={{
+                  marginTop: "6px",
+                  font: "var(--fw-medium) 13px/1.2 var(--font-sans)",
+                  color: "var(--text-muted)",
+                }}
+              >
                 {isVcard ? "Скачиваний" : "Сканирований"}
               </div>
             </AdminCard>
             <AdminCard>
-              <div style={{ font: "var(--fw-bold) 1rem/1.2 var(--font-display)", color: "var(--text-strong)" }}>
+              <div
+                style={{
+                  font: "var(--fw-bold) 1rem/1.2 var(--font-display)",
+                  color: "var(--text-strong)",
+                }}
+              >
                 {qr.workspace.name}
               </div>
-              <div style={{ marginTop: "6px", font: "var(--fw-medium) 13px/1.2 var(--font-sans)", color: "var(--text-muted)" }}>
+              <div
+                style={{
+                  marginTop: "6px",
+                  font: "var(--fw-medium) 13px/1.2 var(--font-sans)",
+                  color: "var(--text-muted)",
+                }}
+              >
                 Workspace · {qr.workspace.plan}
               </div>
             </AdminCard>
           </div>
 
           <AdminCard>
-            <h2 style={{ font: "var(--fw-bold) 1.05rem/1.2 var(--font-display)", color: "var(--text-strong)", marginBottom: "16px" }}>
+            <h2
+              style={{
+                font: "var(--fw-bold) 1.05rem/1.2 var(--font-display)",
+                color: "var(--text-strong)",
+                marginBottom: "16px",
+              }}
+            >
               Сведения
             </h2>
             <dl style={{ display: "grid", gap: "12px" }}>
               {metaRows.map((row) => (
-                <div
-                  key={row.label}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "minmax(120px, 180px) minmax(0, 1fr)",
-                    gap: "12px",
-                    alignItems: "start",
-                  }}
-                >
-                  <dt style={{ font: "var(--fw-medium) 13px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>
+                <div key={row.label} className={styles.meta}>
+                  <dt
+                    style={{
+                      font: "var(--fw-medium) 13px/1.4 var(--font-sans)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
                     {row.label}
                   </dt>
-                  <dd style={{ margin: 0, font: "var(--fw-regular) 14px/1.5 var(--font-sans)", color: "var(--text-default)" }}>
+                  <dd
+                    style={{
+                      margin: 0,
+                      font: "var(--fw-regular) 14px/1.5 var(--font-sans)",
+                      color: "var(--text-default)",
+                    }}
+                  >
                     {row.value}
                   </dd>
                 </div>
@@ -155,8 +206,18 @@ export default async function AdminQrDetailPage({ params }: Props) {
 
           {qr.scanEvents.length > 0 ? (
             <AdminDataCard>
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-subtle)" }}>
-                <h2 style={{ font: "var(--fw-bold) 1.05rem/1.2 var(--font-display)", color: "var(--text-strong)" }}>
+              <div
+                style={{
+                  padding: "16px 20px",
+                  borderBottom: "1px solid var(--border-subtle)",
+                }}
+              >
+                <h2
+                  style={{
+                    font: "var(--fw-bold) 1.05rem/1.2 var(--font-display)",
+                    color: "var(--text-strong)",
+                  }}
+                >
                   Последние {isVcard ? "скачивания" : "сканирования"}
                 </h2>
               </div>
@@ -188,7 +249,13 @@ export default async function AdminQrDetailPage({ params }: Props) {
 
         <aside>
           <AdminCard>
-            <h2 style={{ font: "var(--fw-bold) 1rem/1.2 var(--font-display)", color: "var(--text-strong)", marginBottom: "14px" }}>
+            <h2
+              style={{
+                font: "var(--fw-bold) 1rem/1.2 var(--font-display)",
+                color: "var(--text-strong)",
+                marginBottom: "14px",
+              }}
+            >
               Превью
             </h2>
             <div
@@ -206,7 +273,14 @@ export default async function AdminQrDetailPage({ params }: Props) {
 
             {hasShortLink && qr.shortCode ? (
               <div style={{ marginTop: "16px" }}>
-                <p style={{ font: "var(--fw-bold) 11px/1 var(--font-sans)", letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                <p
+                  style={{
+                    font: "var(--fw-bold) 11px/1 var(--font-sans)",
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    color: "var(--text-muted)",
+                  }}
+                >
                   Публичная ссылка
                 </p>
                 <Link
@@ -214,7 +288,11 @@ export default async function AdminQrDetailPage({ params }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="qrs-navlink"
-                  style={{ display: "inline-block", marginTop: "8px", wordBreak: "break-all" }}
+                  style={{
+                    display: "inline-block",
+                    marginTop: "8px",
+                    wordBreak: "break-all",
+                  }}
                 >
                   /{shortLinkPrefix}/{qr.shortCode}
                 </Link>

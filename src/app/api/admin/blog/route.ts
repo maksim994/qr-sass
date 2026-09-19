@@ -4,6 +4,8 @@ import { getAdminOrNullFromSessionOrApiKey } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
 import { normalizeStructuredDataInput } from "@/lib/blog-structured-data";
+import { sanitizeBlogFields } from "@/lib/blog-sanitize";
+import { publicSiteUrl } from "@/lib/public-url";
 
 export async function GET(req: Request) {
   const requestId = getRequestId(req);
@@ -70,7 +72,16 @@ export async function POST(req: Request) {
   if (existing) return apiError(MSG.POST_SLUG_EXISTS, "CONFLICT", 409, undefined, requestId);
 
   const publishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
-  const content = String(data.content);
+  const clean = sanitizeBlogFields({
+    slug,
+    title: data.title.trim(),
+    excerpt: data.excerpt?.trim() ?? null,
+    metaTitle: data.metaTitle?.trim() || null,
+    metaDescription: data.metaDescription?.trim() || null,
+    content: String(data.content),
+    structuredData: structured.data || null,
+  });
+  const content = clean.content ?? String(data.content);
   const readingTimeMinutes =
     data.readingTimeMinutes != null
       ? Math.round(Number(data.readingTimeMinutes))
@@ -78,15 +89,15 @@ export async function POST(req: Request) {
 
   const post = await db.blogPost.create({
     data: {
-      title: data.title.trim(),
+      title: clean.title ?? data.title.trim(),
       slug,
-      metaTitle: data.metaTitle?.trim() || null,
-      metaDescription: data.metaDescription?.trim() || null,
-      excerpt: data.excerpt?.trim() ?? null,
+      metaTitle: clean.metaTitle || null,
+      metaDescription: clean.metaDescription || null,
+      excerpt: clean.excerpt ?? null,
       content,
       coverImageUrl: data.coverImageUrl?.trim() || null,
       authorName: data.authorName?.trim() || null,
-      structuredData: structured.data || null,
+      structuredData: clean.structuredData || null,
       readingTimeMinutes,
       categoryId: data.categoryId?.trim() || null,
       publishedAt,
@@ -95,11 +106,10 @@ export async function POST(req: Request) {
   });
 
   if (publishedAt) {
-    const base = (process.env.APP_URL ?? "https://qr-s.ru").replace(/\/$/, "");
     const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
     if (settings?.indexNowKey) {
       const { notifyIndexNow } = await import("@/lib/indexnow");
-      const url = `${base}/blog/${slug}`;
+      const url = publicSiteUrl(`/blog/${slug}`);
       await notifyIndexNow([url], settings.indexNowKey);
     }
   }

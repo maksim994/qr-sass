@@ -5,6 +5,7 @@ import { UtilityPage } from "@/components/utility/utility-page";
 export const metadata: Metadata = {
   title: "Срок действия истёк — qr-s.ru",
   description: "QR-код больше не действителен",
+  robots: { index: false, follow: false },
 };
 
 export default function ExpiredPage() {

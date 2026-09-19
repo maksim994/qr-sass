@@ -3,15 +3,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { HomeQrPreview } from "@/components/landing/home-qr-preview";
+import styles from "./auth-shell.module.css";
 import { Button } from "@/components/ui/button";
 
-export type AuthMode = "login" | "register";
-
-const DEFAULT_PROMO_FEATURES = [
-  "Первый QR бесплатно, без карты",
-  "Данные на серверах в РФ",
-  "12 000+ компаний уже с нами",
-] as const;
+export type AuthMode = "login" | "register" | "forgot";
 
 type AuthShellProps = {
   mode: AuthMode;
@@ -20,44 +17,21 @@ type AuthShellProps = {
   children: ReactNode;
   planName?: string;
   planFeatures?: string[];
+  nextPath?: string;
 };
+
+function hrefWithNext(path: string, nextPath?: string) {
+  if (!nextPath || nextPath === "/dashboard") return path;
+  const url = new URL(path, "https://qr-s.invalid");
+  url.searchParams.set("next", nextPath);
+  return `${url.pathname}${url.search}`;
+}
 
 function CheckIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M20 6 9 17l-5-5" />
     </svg>
-  );
-}
-
-function StarIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.77 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
-    </svg>
-  );
-}
-
-export function AuthTabs({ mode }: { mode: AuthMode }) {
-  return (
-    <div className="qrs-auth-tabs" role="tablist" aria-label="Вход или регистрация">
-      <Link
-        href="/login"
-        role="tab"
-        aria-selected={mode === "login"}
-        className={`qrs-auth-tabs__btn${mode === "login" ? " qrs-auth-tabs__btn--active" : ""}`}
-      >
-        Вход
-      </Link>
-      <Link
-        href="/register"
-        role="tab"
-        aria-selected={mode === "register"}
-        className={`qrs-auth-tabs__btn${mode === "register" ? " qrs-auth-tabs__btn--active" : ""}`}
-      >
-        Регистрация
-      </Link>
-    </div>
   );
 }
 
@@ -69,11 +43,11 @@ export function AuthDivider() {
   );
 }
 
-export function YandexAuthButton({ mode }: { mode: AuthMode }) {
+export function YandexAuthButton({ mode, nextPath }: { mode: AuthMode; nextPath?: string }) {
   const label = mode === "login" ? "Войти через Яндекс" : "Зарегистрироваться через Яндекс";
 
   return (
-    <Button href="/api/auth/yandex" variant="secondary" block className="qrs-auth-yandex">
+    <Button href={hrefWithNext("/api/auth/yandex", nextPath)} variant="secondary" block className="qrs-auth-yandex">
       <span className="qrs-auth-yandex__icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="12" fill="#FC3F1D" />
@@ -88,12 +62,15 @@ export function YandexAuthButton({ mode }: { mode: AuthMode }) {
   );
 }
 
-export function AuthSwitchLink({ mode }: { mode: AuthMode }) {
+export function AuthSwitchLink({ mode, nextPath }: { mode: AuthMode; nextPath?: string }) {
+  if (mode === "forgot") {
+    return <p className="qrs-auth-switch"><Link href={hrefWithNext("/login", nextPath)} className="qrs-auth-switch__link">Вернуться ко входу</Link></p>;
+  }
   if (mode === "login") {
     return (
       <p className="qrs-auth-switch">
         Ещё нет аккаунта?{" "}
-        <Link href="/register" className="qrs-auth-switch__link">
+        <Link href={hrefWithNext("/register", nextPath)} className="qrs-auth-switch__link">
           Зарегистрируйтесь
         </Link>
       </p>
@@ -103,7 +80,7 @@ export function AuthSwitchLink({ mode }: { mode: AuthMode }) {
   return (
     <p className="qrs-auth-switch">
       Уже есть аккаунт?{" "}
-      <Link href="/login" className="qrs-auth-switch__link">
+      <Link href={hrefWithNext("/login", nextPath)} className="qrs-auth-switch__link">
         Войти
       </Link>
     </p>
@@ -136,73 +113,37 @@ export function AuthShell({
   planName,
   planFeatures,
 }: AuthShellProps) {
-  const promoFeatures =
-    mode === "register" && planFeatures && planFeatures.length > 0
-      ? planFeatures
-      : [...DEFAULT_PROMO_FEATURES];
+  const promoFeatures = mode === "register" && planFeatures?.length
+    ? planFeatures
+    : ["Ссылки, файлы и контакты в QR", "Оформление под ваш бренд", "Все ваши коды в одном кабинете"];
 
   return (
-    <div className="qrs-auth">
-      <aside className="qrs-auth__promo" aria-label="О сервисе QR-S.ru">
-        <div className="qrs-auth__promo-inner">
-          <Logo href="/" size="md" inverted showTagline={false} />
-
-          <div className="qrs-auth__promo-copy">
-            <h2 className="qrs-auth__promo-title">QR-коды, которые работают на вас</h2>
-            <p className="qrs-auth__promo-subtitle">
-              Динамические коды с аналитикой сканирований, кастомизацией дизайна и мгновенным экспортом.
-            </p>
-          </div>
-
-          {mode === "register" && planName ? (
-            <p className="qrs-auth__plan-badge">Тариф «{planName}»</p>
-          ) : null}
-
-          <ul className="qrs-auth__promo-features" aria-label="Преимущества сервиса">
-            {promoFeatures.map((feature) => (
-              <li key={feature}>
-                <span className="qrs-auth__promo-check" aria-hidden="true">
-                  <CheckIcon />
-                </span>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="qrs-auth__rating">
-            <span className="qrs-auth__stars" aria-hidden="true">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <StarIcon key={index} />
-              ))}
-            </span>
-            <span>4,9 из 5 — более 2 100 отзывов</span>
+    <div className={styles.shell}>
+      <header className={styles.header}>
+        <Logo href="/" size="md" showTagline={false} />
+        <div><Link href="/" className={styles.homeLink}><span aria-hidden="true">←</span> На главную</Link><ThemeToggle /></div>
+      </header>
+      <main className={styles.layout}>
+        <div className={styles.formPanel}>
+          <div className={styles.formBody}>
+            <div className={styles.heading}><h1>{title}</h1><p>{subtitle}</p></div>
+            {children}
           </div>
         </div>
-      </aside>
-
-      <div className="qrs-auth__panel">
-        <div className="qrs-auth__panel-top">
-          <Link href="/" className="qrs-auth-home">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            На главную
-          </Link>
-        </div>
-
-        <div className="qrs-auth__panel-body">
-          <div className="qrs-auth__heading">
-            <h1 className="qrs-auth__title">{title}</h1>
-            <p className="qrs-auth__subtitle">{subtitle}</p>
+        <aside className={styles.promo} aria-label="Возможности QR-S.ru">
+          <div className={styles.promoHeading}><h2>Всё, чем вы делитесь.<br />В одном месте.</h2><p>От первой ссылки до материалов всей команды. Создавайте QR-коды и возвращайтесь к ним, когда нужно.</p></div>
+          <div className={styles.productPreview} aria-label="Пример оформления QR-кода">
+            <div className={styles.qrCard}><span>ВАША СЛЕДУЮЩАЯ ИДЕЯ</span><strong>Начинается<br />с одного скана.</strong><HomeQrPreview value="https://qr-s.ru" /><span>qr-s.ru <span aria-hidden="true">↗</span></span></div>
+            <div className={styles.fileStack} aria-hidden="true"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 2v4m8-4v4M3 10h18M3 5h18v16H3V5ZM7 14h3m4 0h3m-10 4h3" /></svg><span>Программа события<small>Материалы для гостей</small></span></div><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM5 21v-2a7 7 0 0 1 14 0v2" /></svg><span>Мои контакты<small>Всегда под рукой</small></span></div></div>
+            <span className={styles.exampleLabel}>Пример · QR ведёт на qr-s.ru</span>
           </div>
-
-          <AuthTabs mode={mode} />
-
-          {children}
-        </div>
-
-        <AuthLegalFooter />
-      </div>
+          <div className={styles.promoFoot}>
+            {mode === "register" && planName && <h3>Начните с тарифа «{planName}»</h3>}
+            <ul>{promoFeatures.map(feature => <li key={feature}><CheckIcon /><span>{feature}</span></li>)}</ul>
+          </div>
+        </aside>
+      </main>
+      <AuthLegalFooter />
     </div>
   );
 }

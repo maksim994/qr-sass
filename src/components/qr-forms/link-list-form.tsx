@@ -1,5 +1,7 @@
 "use client";
 
+import { FormField } from "./form-field";
+
 type LinkItem = { label: string; url: string };
 
 type Props = {
@@ -27,29 +29,26 @@ export function LinkListForm({ payload, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="label">Заголовок</label>
+      <FormField label="Заголовок">
         <input
           className="input"
           value={String(payload.title || "")}
           onChange={(e) => onChange({ ...payload, title: e.target.value })}
           placeholder="Заголовок списка ссылок"
         />
-      </div>
+      </FormField>
 
       {links.map((link, i) => (
         <div key={i} className="card-flat p-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto] items-end">
-          <div>
-            <label className="label">Название</label>
+          <FormField label="Название">
             <input
               className="input"
               value={link.label}
               onChange={(e) => setField(i, "label", e.target.value)}
               placeholder="Текст ссылки"
             />
-          </div>
-          <div>
-            <label className="label">URL</label>
+          </FormField>
+          <FormField label="URL">
             <input
               className="input"
               type="url"
@@ -57,7 +56,7 @@ export function LinkListForm({ payload, onChange }: Props) {
               onChange={(e) => setField(i, "url", e.target.value)}
               placeholder="https://..."
             />
-          </div>
+          </FormField>
           <button
             type="button"
             className="btn btn-sm text-red-600 self-end"

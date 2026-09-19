@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { getApiUser } from "@/lib/api-auth";
 
 /** Для страниц — редирект при отсутствии прав */
 export async function requireAdmin() {
@@ -24,11 +23,10 @@ export async function getAdminOrNull() {
   return user?.isAdmin ? user : null;
 }
 
-/** Возвращает admin если: сессия admin ИЛИ API key принадлежит admin */
+/**
+ * Admin API auth. Workspace API keys never inherit global isAdmin,
+ * even if the workspace owner is a site administrator.
+ */
 export async function getAdminOrNullFromSessionOrApiKey() {
-  const apiUser = await getApiUser();
-  if (!apiUser) return null;
-  const db = getDb();
-  const user = await db.user.findUnique({ where: { id: apiUser.id } });
-  return user?.isAdmin ? user : null;
+  return getAdminOrNull();
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { fetchApi } from "@/lib/client-api";
+import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Field, Input, Button } from "@/components/ui";
+import { PreviewImage } from "@/components/ui/preview-image";
 
 export type QrStyle = {
   dotType: "square" | "dots" | "rounded" | "classy" | "classy-rounded" | "extra-rounded";
@@ -227,6 +228,7 @@ function ColorHexRow({
         disabled={disabled}
         placeholder="#000000"
         className="qrs-color-hex"
+        aria-label={`${ariaLabel}, hex`}
       />
     </div>
   );
@@ -339,12 +341,13 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
       formData.append("file", file);
       formData.append("workspaceId", workspaceId);
       const res = await fetchApi("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) return;
-      const data = await res.json();
+      const parsed = await parseApiResponse<{ fileId?: string; url?: string }>(res);
+      if (!parsed.ok || !parsed.data) return;
       setLogoVisible(true);
+      const fileId = parsed.data.fileId ?? "";
       patch({
-        logoUrl: data.url ?? "",
-        logoFileId: data.fileId ?? "",
+        logoUrl: fileId ? `/api/upload/${fileId}/file` : (parsed.data.url ?? ""),
+        logoFileId: fileId,
         logoScale: style.logoScale > 0 ? style.logoScale : 0.2,
       });
     } finally {
@@ -547,6 +550,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
               type="file"
               accept="image/*"
               hidden
+              aria-label="Загрузить логотип"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) handleLogoUpload(file);
@@ -555,7 +559,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
             />
             {style.logoUrl ? (
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <img
+                <PreviewImage
                   src={style.logoUrl}
                   alt="Логотип"
                   className="qrs-design-logo-thumb"
@@ -623,6 +627,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
             min={0}
             max={8}
             value={style.margin}
+            aria-label="Отступ тихой зоны"
             onChange={(e) => patch({ margin: Number(e.target.value) })}
             style={{ width: "100%", accentColor: "var(--color-primary)" }}
           />
@@ -637,6 +642,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
                 type="button"
                 onClick={() => patch({ errorCorrectionLevel: value })}
                 className={`qrs-design-ec-btn${style.errorCorrectionLevel === value ? " qrs-design-ec-btn--active" : ""}`}
+                aria-pressed={style.errorCorrectionLevel === value}
               >
                 {value}
                 <span>{sub}</span>

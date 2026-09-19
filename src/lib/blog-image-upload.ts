@@ -34,7 +34,7 @@ export async function handleBlogImageUpload(request: Request, kind: BlogImageKin
     const optimized = await optimizeImageForBlog(buffer);
     const fileId = nanoid(12);
     const key = kind === "cover" ? getBlogCoverKey(fileId) : getBlogContentImageKey(fileId);
-    const url = await uploadFile(optimized, key, "image/webp");
+    const url = await uploadFile(optimized, key, "image/webp", "public");
 
     return apiSuccess({ url, key });
   } catch (err) {

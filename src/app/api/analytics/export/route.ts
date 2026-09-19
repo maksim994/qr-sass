@@ -2,16 +2,13 @@ import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { MSG } from "@/lib/user-messages";
 import { apiError, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
+import { csvEscape, csvRow } from "@/lib/csv";
+import { getEntitlements } from "@/lib/entitlements";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { analyticsWindow, isBotDevice, parseAnalyticsDays } from "@/lib/analytics-metrics";
 
-const ALLOWED_DAYS = new Set([7, 30, 90]);
-
-function csvEscape(value: string | number | null | undefined) {
-  const raw = value == null ? "" : String(value);
-  if (/[",\n\r]/.test(raw)) return `"${raw.replace(/"/g, '""')}"`;
-  return raw;
-}
+const MAX_EXPORT_ROWS = 50_000;
 
 export async function GET(request: Request) {
   const requestId = getRequestId(request);
@@ -29,9 +26,13 @@ export async function GET(request: Request) {
     const isMember = user.memberships.some((m) => m.workspaceId === workspaceId);
     if (!isMember) return unauthorized();
 
-    const daysRaw = Number(searchParams.get("days") || "7");
-    const days = ALLOWED_DAYS.has(daysRaw) ? daysRaw : 7;
-    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const entitlements = await getEntitlements(workspaceId);
+    if (!entitlements.allowsAnalytics) {
+      return apiError(MSG.FORBIDDEN, "FORBIDDEN", 403, undefined, requestId);
+    }
+
+    const days = parseAnalyticsDays(searchParams.get("days"));
+    const { start: since } = analyticsWindow(days);
 
     const db = getDb();
     const scans = await db.scanEvent.findMany({
@@ -40,19 +41,23 @@ export async function GET(request: Request) {
         scannedAt: { gte: since },
       },
       orderBy: { scannedAt: "desc" },
-      take: 5000,
+      take: MAX_EXPORT_ROWS + 1,
       include: {
         qrCode: { select: { name: true, contentType: true, shortCode: true, currentTargetUrl: true } },
       },
     });
+
+    const truncated = scans.length > MAX_EXPORT_ROWS;
+    const rows = truncated ? scans.slice(0, MAX_EXPORT_ROWS) : scans;
 
     const header = [
       "scanned_at",
       "qr_name",
       "content_type",
       "short_code",
-      "country",
       "device_type",
+      "os",
+      "is_bot",
       "utm_source",
       "utm_medium",
       "utm_campaign",
@@ -60,20 +65,24 @@ export async function GET(request: Request) {
     ];
 
     const lines = [header.join(",")];
-    for (const scan of scans) {
+    if (truncated) {
+      lines.push(csvEscape(`Экспорт обрезан: показаны первые ${MAX_EXPORT_ROWS} строк за период.`));
+    }
+    for (const scan of rows) {
       lines.push(
-        [
-          csvEscape(scan.scannedAt.toISOString()),
-          csvEscape(scan.qrCode.name),
-          csvEscape(scan.qrCode.contentType),
-          csvEscape(scan.qrCode.shortCode),
-          csvEscape(scan.country),
-          csvEscape(scan.deviceType),
-          csvEscape(scan.utmSource),
-          csvEscape(scan.utmMedium),
-          csvEscape(scan.utmCampaign),
-          csvEscape(scan.qrCode.currentTargetUrl),
-        ].join(",")
+        csvRow([
+          scan.scannedAt.toISOString(),
+          scan.qrCode.name,
+          scan.qrCode.contentType,
+          scan.qrCode.shortCode,
+          scan.deviceType,
+          scan.os,
+          isBotDevice(scan.deviceType) ? "1" : "0",
+          scan.utmSource,
+          scan.utmMedium,
+          scan.utmCampaign,
+          scan.qrCode.currentTargetUrl,
+        ]),
       );
     }
 

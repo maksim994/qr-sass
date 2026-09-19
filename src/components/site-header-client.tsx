@@ -1,51 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import s from "./site-header.module.css";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 const navLinks = [
-  { label: "Возможности", href: "/#features" },
-  { label: "Типы кодов", href: "/#types" },
+  { label: "Как работает", href: "/#how" },
+  { label: "Меню", href: "/qr-menu" },
+  { label: "Упаковка", href: "/qr-for-packaging" },
   { label: "Тарифы", href: "/#pricing" },
-  { label: "FAQ", href: "/#faq" },
-  { label: "Блог", href: "/blog" },
 ];
 
 type Props = {
   session: { sub: string } | null;
   isAdmin?: boolean;
+  minimal?: boolean;
 };
 
-export function SiteHeaderClient({ session, isAdmin }: Props) {
+export function SiteHeaderClient({ session, isAdmin, minimal = false }: Props) {
+  const links = minimal ? [
+    { label: "Возможности", href: "/#features" },
+    { label: "Для кого", href: "/#use-cases" },
+    { label: "Типы QR", href: "/#types" },
+    { label: "Тарифы", href: "/#pricing" },
+  ] : navLinks;
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuId = useId();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  useFocusTrap(menuOpen, menuRef, closeMenu);
 
   return (
     <header
+      className={minimal ? s.header : undefined}
       style={{
         position: "sticky",
         top: 0,
         zIndex: 200,
-        background: "color-mix(in srgb, var(--surface-page) 82%, transparent)",
-        backdropFilter: "saturate(180%) blur(14px)",
-        WebkitBackdropFilter: "saturate(180%) blur(14px)",
+        background: minimal ? "var(--surface-page)" : "color-mix(in srgb, var(--surface-page) 82%, transparent)",
+        backdropFilter: minimal ? undefined : "saturate(180%) blur(14px)",
+        WebkitBackdropFilter: minimal ? undefined : "saturate(180%) blur(14px)",
         borderBottom: "1px solid var(--border-subtle)",
       }}
     >
       <div
-        className="fk-container"
-        style={{ display: "flex", alignItems: "center", gap: "24px", height: "72px" }}
+        className={`fk-container ${minimal ? s.bar : ""}`}
+        style={minimal ? undefined : { display: "flex", alignItems: "center", gap: "24px", height: "72px" }}
       >
-        <Logo href="/" size="md" responsiveTagline className="mr-2 shrink-0" />
+        <Logo href="/" size="md" showTagline={!minimal} responsiveTagline className="mr-2 shrink-0" />
 
         <nav
-          className="qrs-desktop-nav"
+          className={`qrs-desktop-nav ${minimal ? s.nav : ""}`}
           aria-label="Основная навигация"
-          style={{ display: "flex", alignItems: "center", gap: "26px", marginLeft: "8px" }}
+          style={minimal ? undefined : { display: "flex", alignItems: "center", gap: "26px", marginLeft: "8px" }}
         >
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <Link key={link.href} href={link.href} className="qrs-navlink">
               {link.label}
             </Link>
@@ -53,8 +68,8 @@ export function SiteHeaderClient({ session, isAdmin }: Props) {
         </nav>
 
         <div
-          className="qrs-desktop-nav"
-          style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "14px" }}
+          className={`qrs-desktop-nav ${minimal ? s.actions : ""}`}
+          style={minimal ? undefined : { marginLeft: "auto", display: "flex", alignItems: "center", gap: "14px" }}
         >
           <ThemeToggle />
           {session ? (
@@ -78,18 +93,21 @@ export function SiteHeaderClient({ session, isAdmin }: Props) {
               <Link href="/login" className="qrs-navlink">
                 Войти
               </Link>
-              <Button href="/dashboard" variant="primary" size="md">
-                В кабинет
+              <Button href="/#create-qr" variant="primary" size="md">
+                Создать QR
               </Button>
             </>
           )}
         </div>
 
+        {minimal && <div className={s.mobileTheme}><ThemeToggle /></div>}
         <button
+          ref={buttonRef}
           type="button"
           className="qrs-menu-btn fk-icon-button fk-icon-button--outline"
           aria-label="Меню"
           aria-expanded={menuOpen}
+          aria-controls={menuId}
           style={{ marginLeft: "auto" }}
           onClick={() => setMenuOpen((v) => !v)}
         >
@@ -103,6 +121,8 @@ export function SiteHeaderClient({ session, isAdmin }: Props) {
 
       {menuOpen && (
         <nav
+          ref={menuRef}
+          id={menuId}
           className="qrs-mobile-nav"
           aria-label="Мобильная навигация"
           style={{
@@ -114,7 +134,7 @@ export function SiteHeaderClient({ session, isAdmin }: Props) {
             background: "var(--surface-page)",
           }}
         >
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -146,8 +166,8 @@ export function SiteHeaderClient({ session, isAdmin }: Props) {
                 <Button href="/login" variant="secondary" size="md" block className="flex-1">
                   Войти
                 </Button>
-                <Button href="/register" variant="primary" size="md" block className="flex-1">
-                  Начать бесплатно
+                <Button href="/#create-qr" variant="primary" size="md" block className="flex-1" onClick={() => setMenuOpen(false)}>
+                  Создать QR
                 </Button>
               </>
             )}

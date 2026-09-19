@@ -1,8 +1,7 @@
 "use client";
 import { fetchApi } from "@/lib/client-api";
-
-
 import { useState } from "react";
+import { FormField } from "@/components/qr-forms/form-field";
 
 type TrackingPixels = {
   metaPixelId?: string;
@@ -19,9 +18,6 @@ type Props = {
 };
 
 export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Props) {
-  const [metaPixelId, setMetaPixelId] = useState(trackingPixels?.metaPixelId ?? "");
-  const [ga4Id, setGa4Id] = useState(trackingPixels?.ga4Id ?? "");
-  const [gtmId, setGtmId] = useState(trackingPixels?.gtmId ?? "");
   const [ymCounterId, setYmCounterId] = useState(trackingPixels?.ymCounterId ?? "");
   const [vkPixelId, setVkPixelId] = useState(trackingPixels?.vkPixelId ?? "");
   const [loading, setLoading] = useState(false);
@@ -36,9 +32,8 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          metaPixelId: metaPixelId.trim() || null,
-          ga4Id: ga4Id.trim() || null,
-          gtmId: gtmId.trim() || null,
+          metaPixelId: trackingPixels?.metaPixelId?.trim() || null,
+          ga4Id: trackingPixels?.ga4Id?.trim() || null,
           ymCounterId: ymCounterId.trim() || null,
           vkPixelId: vkPixelId.trim() || null,
         }),
@@ -62,40 +57,9 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-3">
       <p className="text-xs qrs-text-muted">
-        Meta Pixel, GA4, GTM, Яндекс Метрика и VK Пиксель будут загружены на странице перед редиректом. Редирект задерживается на 150 мс.
+        Подключите Яндекс Метрику или VK Пиксель для отслеживания переходов из QR-кода.
       </p>
-      <div>
-        <label className="label">Meta Pixel ID</label>
-        <input
-          type="text"
-          value={metaPixelId}
-          onChange={(e) => setMetaPixelId(e.target.value)}
-          placeholder="1234567890123456"
-          className="input"
-        />
-      </div>
-      <div>
-        <label className="label">GA4 Measurement ID</label>
-        <input
-          type="text"
-          value={ga4Id}
-          onChange={(e) => setGa4Id(e.target.value)}
-          placeholder="G-XXXXXXXXXX"
-          className="input"
-        />
-      </div>
-      <div>
-        <label className="label">Google Tag Manager ID</label>
-        <input
-          type="text"
-          value={gtmId}
-          onChange={(e) => setGtmId(e.target.value)}
-          placeholder="GTM-XXXXXXX"
-          className="input"
-        />
-      </div>
-      <div>
-        <label className="label">Яндекс Метрика (ID счётчика)</label>
+      <FormField label="Яндекс Метрика (ID счётчика)">
         <input
           type="text"
           value={ymCounterId}
@@ -103,9 +67,8 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
           placeholder="12345678"
           className="input"
         />
-      </div>
-      <div>
-        <label className="label">VK Пиксель (ID)</label>
+      </FormField>
+      <FormField label="VK Пиксель (ID)" hint="ID из раздела Ретаргетинг → Пиксели в VK Рекламе">
         <input
           type="text"
           value={vkPixelId}
@@ -113,8 +76,7 @@ export default function TrackingPixelsForm({ qrId, trackingPixels, onSaved }: Pr
           placeholder="VK-RTRG-162959-XXXXX"
           className="input"
         />
-        <p className="mt-1 text-xs qrs-text-muted">ID из раздела Ретаргетинг → Пиксели в VK Рекламе</p>
-      </div>
+      </FormField>
       <button type="submit" disabled={loading} className="btn btn-primary btn-sm">
         {loading ? "Сохранение…" : "Сохранить"}
       </button>
