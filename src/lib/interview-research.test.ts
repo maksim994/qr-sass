@@ -1,51 +1,33 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
-import {
-  b32AcceptanceFromRegistry,
-  currentUserCardIsBlank,
-  plannedSegmentCounts,
-  type InterviewRegistry,
-} from "./interview-research.ts";
+import { b32AcceptanceFromRegistry, currentUserCardIsBlank, plannedSegmentCounts, type InterviewRegistry } from "./interview-research.ts";
 
-const researchDir = join(dirname(fileURLToPath(import.meta.url)), "../../docs/research-2026-09-18");
-
-function loadRegistry(): InterviewRegistry {
-  return JSON.parse(readFileSync(join(researchDir, "interviews.json"), "utf8")) as InterviewRegistry;
+// Synthetic fixtures keep repository tests independent of private research notes.
+function registry(): InterviewRegistry {
+  return {
+    version: 1, updated: "2026-09-19",
+    acceptance: { currentUserInterview: false, tenSegmentInterviews: false, note: "fixture" },
+    segments: [],
+    cards: Array.from({ length: 11 }, (_, index) => ({
+      id: `I-${String(index).padStart(2, "0")}`,
+      segment: index === 0 ? "current" : index <= 5 ? "agency_print" : "smb_document",
+      status: "queued", job: null, alternative: null, frequency: null, obstacles: null,
+    })),
+  };
 }
-
-describe("B32 interview registry", () => {
-  const registry = loadRegistry();
-
-  it("plans five agency and five document interviews besides the current user", () => {
-    const counts = plannedSegmentCounts(registry.cards);
-    assert.equal(counts.agency_print, 5);
-    assert.equal(counts.smb_document, 5);
-    assert.equal(registry.cards.some((card) => card.id === "I-00"), true);
-    assert.equal(registry.cards.length, 11);
+describe("interview acceptance", () => {
+  it("counts planned segments independently of the current customer", () => {
+    assert.deepEqual(plannedSegmentCounts(registry().cards), { agency_print: 5, smb_document: 5 });
   });
-
-  it("does not invent current-user jobs, alternatives, frequency or obstacles", () => {
-    const current = registry.cards.find((card) => card.id === "I-00");
-    assert.equal(currentUserCardIsBlank(current), true);
-    assert.equal(registry.acceptance.currentUserInterview, false);
-    assert.equal(registry.acceptance.tenSegmentInterviews, false);
-    const acceptance = b32AcceptanceFromRegistry(registry);
-    assert.equal(acceptance.currentUserInterview, false);
-    assert.equal(acceptance.flagsMatchCards, true);
+  it("does not count blank cards as completed interviews", () => {
+    const data = registry();
+    assert.equal(currentUserCardIsBlank(data.cards[0]), true);
+    assert.deepEqual(b32AcceptanceFromRegistry(data), { currentUserInterview: false, tenSegmentInterviews: false, flagsMatchCards: true });
   });
-});
-
-describe("B32 protocol copy", () => {
-  it("forbids leading product questions", () => {
-    const guide = readFileSync(join(researchDir, "INTERVIEW-GUIDE.md"), "utf8");
-    assert.match(guide, /Запрещено спрашивать первым/);
-    assert.match(guide, /менять ссылку после печати/);
-    assert.match(guide, /Готовы платить/);
-    const findings = readFileSync(join(researchDir, "FINDINGS.md"), "utf8");
-    assert.match(findings, /Пока нет/);
-    assert.doesNotMatch(findings, /собеседник сказал, что ему нужна динамика/i);
+  it("detects stale acceptance flags after substantive interviews", () => {
+    const data = registry();
+    for (const card of data.cards) Object.assign(card, { job: "job", alternative: "alternative", frequency: "weekly", obstacles: "cost", status: "done" });
+    assert.equal(currentUserCardIsBlank(data.cards[0]), false);
+    assert.deepEqual(b32AcceptanceFromRegistry(data), { currentUserInterview: true, tenSegmentInterviews: true, flagsMatchCards: false });
   });
 });
