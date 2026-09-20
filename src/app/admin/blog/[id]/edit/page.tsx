@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { ensureBlogCategories } from "@/lib/blog-categories";
-import { BlogPostForm, formatStructuredDataForEdit } from "../../blog-post-form";
+import { BlogPostForm } from "../../blog-post-form";
+import { formatStructuredDataForEdit } from "@/lib/blog-structured-data";
 import { AdminPageHeader, AdminCard } from "@/components/admin/admin-page";
 import { Button } from "@/components/ui";
 

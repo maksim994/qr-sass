@@ -1,3 +1,13 @@
+/** Форматирует JSON-LD для формы, сохраняя повреждённые данные для исправления. */
+export function formatStructuredDataForEdit(raw: string | null | undefined): string {
+  if (!raw?.trim()) return "";
+  try {
+    return JSON.stringify(JSON.parse(raw), null, 2);
+  } catch {
+    return raw;
+  }
+}
+
 /** Нормализует structuredData из API: объект или JSON-строка → строка для БД */
 export function normalizeStructuredDataInput(
   value: unknown,

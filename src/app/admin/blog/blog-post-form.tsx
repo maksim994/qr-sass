@@ -18,15 +18,6 @@ function slugify(s: string) {
     .replace(/^-|-$/g, "");
 }
 
-function formatStructuredDataForEdit(raw: string | null | undefined): string {
-  if (!raw?.trim()) return "";
-  try {
-    return JSON.stringify(JSON.parse(raw), null, 2);
-  } catch {
-    return raw;
-  }
-}
-
 type BlogPostData = {
   id?: string;
   title: string;
@@ -423,5 +414,3 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
     </form>
   );
 }
-
-export { formatStructuredDataForEdit };
