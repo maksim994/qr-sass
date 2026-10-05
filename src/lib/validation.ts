@@ -3,6 +3,13 @@ import { MSG } from "@/lib/user-messages";
 import { isSafeUrl } from "@/lib/url";
 import { workspaceFileIdFromPath } from "@/lib/workspace-file-path";
 import { z } from "zod";
+import { LEGAL_VERSION } from "@/lib/legal-documents";
+
+export const registrationLegalSchema = z.object({
+  termsAccepted: z.boolean({ error: MSG.TERMS_REQUIRED }).refine(v => v === true, { message: MSG.TERMS_REQUIRED }),
+  consent: z.boolean({ error: MSG.DATA_CONSENT_REQUIRED }).refine(v => v === true, { message: MSG.DATA_CONSENT_REQUIRED }),
+  legalVersion: z.string({ error: MSG.LEGAL_VERSION_CHANGED }).refine(v => v === LEGAL_VERSION, { message: MSG.LEGAL_VERSION_CHANGED }),
+});
 
 export const safeUrlSchema = z.string().refine(isSafeUrl, {
   message: MSG.ONLY_HTTPS_HTTP_URL,
@@ -21,7 +28,7 @@ export function getValidationErrorMessage(error: z.ZodError): string | null {
   return null;
 }
 
-export const registerSchema = z.object({
+export const registerSchema = registrationLegalSchema.extend({
   name: z
     .string()
     .min(2, "Имя должно содержать минимум 2 символа")
@@ -39,9 +46,6 @@ export const registerSchema = z.object({
       const trimmed = (val ?? "").trim();
       return trimmed || DEFAULT_WORKSPACE_NAME;
     }),
-  consent: z.boolean().refine(val => val === true, {
-    message: "Необходимо согласие на обработку персональных данных",
-  }),
 });
 
 export const loginSchema = z.object({

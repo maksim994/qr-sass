@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useId } from "react";
 
 type Props = {
+  kind?: "terms" | "data";
   checked: boolean;
   disabled?: boolean;
   onChange: (checked: boolean) => void;
 };
 
-export function ConsentField({ checked, onChange, disabled = false }: Props) {
+export function ConsentField({ kind = "data", checked, onChange, disabled = false }: Props) {
   const id = useId();
 
   return (
@@ -29,14 +30,11 @@ export function ConsentField({ checked, onChange, disabled = false }: Props) {
         </svg>
       </span>
       <span className="fk-choice__text">
-        Я согласен на{" "}
-        <Link href="/privacy-policy" target="_blank" className="qrs-auth-inline-link">
-          обработку персональных данных
-        </Link>{" "}
-        и принимаю условия{" "}
-        <Link href="/terms-of-service" target="_blank" className="qrs-auth-inline-link">
-          Пользовательского соглашения
-        </Link>
+        {kind === "terms" ? (
+          <>Принимаю <Link href="/terms-of-service" target="_blank" className="qrs-auth-inline-link">пользовательское соглашение</Link></>
+        ) : (
+          <>Даю <Link href="/personal-data-consent" target="_blank" className="qrs-auth-inline-link">согласие на обработку персональных данных</Link> для регистрации и работы аккаунта</>
+        )}
       </span>
     </label>
   );

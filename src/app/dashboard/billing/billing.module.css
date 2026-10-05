@@ -50,6 +50,9 @@
 .paymentStatus[data-status="PENDING"] { color: var(--text-link); background: var(--color-primary-subtle); }
 .support { color: var(--text-muted); font-size: .8125rem; line-height: 1.7; }
 .support a { color: var(--text-link); overflow-wrap: anywhere; }
+.purchaseTerms { color: var(--text-muted); font-size: .8125rem; line-height: 1.7; }
+.purchaseTerms p { margin-bottom: 8px; }
+.purchaseTerms a { color: var(--text-link); }
 .checkout { max-width: 700px; width: 100%; margin-inline: auto; padding: 28px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-page); }
 .backLink { display: inline-flex; align-items: center; min-height: 44px; margin: -8px 0 16px; border: 0; padding: 0; background: transparent; color: var(--text-muted); font-size: .8125rem; cursor: pointer; }
 .backLink:hover { color: var(--text-link); text-decoration: underline; text-underline-offset: 4px; }

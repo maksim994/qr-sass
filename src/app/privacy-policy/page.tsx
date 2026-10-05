@@ -1,78 +1,23 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
-import { getDb } from "@/lib/db";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
+import { LegalDocument } from "@/components/legal/legal-document";
+import { PRIVACY_SECTIONS, LEGAL_VERSION, LEGAL_DATE_LABEL } from "@/lib/legal-documents";
 import { publicSiteUrl } from "@/lib/public-url";
+import { analyticsRetentionDays } from "@/lib/analytics-retention";
+import { CookieSettingsButton } from "@/components/cookie-settings-button";
 
 export const metadata: Metadata = {
-  title: "Политика конфиденциальности",
-  description: "Политика конфиденциальности и обработки персональных данных",
+  title: "Политика конфиденциальности", description: "Политика конфиденциальности QR-S.ru: условия, права пользователя и контакты оператора.",
   alternates: { canonical: publicSiteUrl("/privacy-policy") },
 };
-
-export default async function PrivacyPolicyPage() {
-  const session = await getSession();
-  const db = getDb();
-  const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
-
-  return (
-    <LegalArticleLayout
-      session={session}
-      eyebrow="Правовая информация"
-      title="Политика конфиденциальности"
-      updatedLabel={`Последнее обновление: ${new Date().toLocaleDateString("ru-RU")}`}
-    >
-      <h2>1. Общие положения</h2>
-      <p>
-        Настоящая политика обработки персональных данных составлена в соответствии с требованиями Федерального закона от 27.07.2006. №152-ФЗ «О персональных данных» (далее — Закон о персональных данных) и определяет порядок обработки персональных данных и меры по обеспечению безопасности персональных данных.
-      </p>
-
-      <h2>2. Основные понятия, используемые в Политике</h2>
-      <p>
-        2.1. Автоматизированная обработка персональных данных – обработка персональных данных с помощью средств вычислительной техники.
-        <br />
-        2.2. Блокирование персональных данных – временное прекращение обработки персональных данных (за исключением случаев, если обработка необходима для уточнения персональных данных).
-        <br />
-        2.3. Веб-сайт – совокупность графических и информационных материалов, а также программ для ЭВМ и баз данных, обеспечивающих их доступность в сети интернет.
-      </p>
-
-      <h2>3. Оператор может обрабатывать следующие персональные данные Пользователя</h2>
-      <ul>
-        <li>Электронный адрес;</li>
-        <li>Фамилия, имя, отчество;</li>
-        <li>Данные о пользовательском устройстве (IP-адрес, файлы cookie, данные о браузере).</li>
-      </ul>
-
-      <h2>4. Цели обработки персональных данных</h2>
-      <p>
-        Цель обработки персональных данных Пользователя — информирование Пользователя посредством отправки электронных писем; предоставление доступа Пользователю к сервисам, информации и/или материалам, содержащимся на веб-сайте.
-      </p>
-
-      <h2>5. Правовые основания обработки персональных данных</h2>
-      <p>
-        Оператор обрабатывает персональные данные Пользователя только в случае их заполнения и/или отправки Пользователем самостоятельно через специальные формы, расположенные на сайте. Заполняя соответствующие формы и/или отправляя свои персональные данные Оператору, Пользователь выражает свое согласие с данной Политикой.
-      </p>
-
-      <h2>6. Порядок сбора, хранения, передачи и других видов обработки персональных данных</h2>
-      <p>
-        Безопасность персональных данных, которые обрабатываются Оператором, обеспечивается путем реализации правовых, организационных и технических мер, необходимых для выполнения в полном объеме требований действующего законодательства в области защиты персональных данных.
-      </p>
-
-      <h2>7. Заключительные положения</h2>
-      <p>
-        Пользователь может получить любые разъяснения по интересующим вопросам, касающимся обработки его персональных данных, обратившись к Оператору с помощью электронной почты.
-      </p>
-
-      <h2>8. Реквизиты оператора</h2>
-      <p>
-        {settings?.requisitesName ? settings.requisitesName : "ИП/ООО/Самозанятый"}
-        <br />
-        ИНН: {settings?.requisitesInn ? settings.requisitesInn : "—"}
-        <br />
-        Email: {settings?.contactEmail ? <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a> : "—"}
-        <br />
-        Телефон: {settings?.contactPhone ? <a href={`tel:${settings.contactPhone}`}>{settings.contactPhone}</a> : "—"}
-      </p>
-    </LegalArticleLayout>
-  );
+export default async function Page() {
+  return <LegalArticleLayout session={await getSession()} eyebrow="Правовая информация" title="Политика конфиденциальности"
+    updatedLabel={`Редакция ${LEGAL_VERSION} от ${LEGAL_DATE_LABEL}`}>
+    <LegalDocument sections={PRIVACY_SECTIONS} />
+    <p>Срок хранения технических полей аналитики QR: {analyticsRetentionDays()} дней.</p>
+    <CookieSettingsButton />
+    <p><Link href="/privacy-policy">Политика конфиденциальности</Link> · <Link href="/personal-data-consent">Согласие на обработку данных</Link> · <Link href="/terms-of-service">Условия сервиса</Link> · <Link href="/qr-lifetime">Срок жизни QR</Link></p>
+  </LegalArticleLayout>;
 }

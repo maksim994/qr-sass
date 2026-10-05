@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { MSG } from "@/lib/user-messages";
 import { ConfigError } from "@/lib/errors";
 
-const PRISMA_CLIENT_EPOCH = "workspace-terms-v1";
+const PRISMA_CLIENT_EPOCH = "legal-acceptance-v1";
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
   prismaEpoch?: string;

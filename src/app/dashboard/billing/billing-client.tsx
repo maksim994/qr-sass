@@ -9,6 +9,7 @@ import type { PlanInfo } from "@/lib/plans";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { QrLifetimeNote } from "@/components/qr/qr-lifetime-note";
 import { MSG } from "@/lib/user-messages";
+import { PaymentTermsLinks } from "@/components/legal/payment-terms-links";
 import styles from "./billing.module.css";
 
 export type BillingPaymentRow = { id: string; amount: number; currency: string; planId: string | null; status: string; createdAt: string; description: string | null };
@@ -92,6 +93,7 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
       {archivedOffer.id !== "FREE" && renderPlanAction(archivedOffer)}</div>
     </section>}
     {!canManageBilling && <p className={styles.roleNote}>Оплатить тариф или включить пробный доступ может владелец или администратор кабинета.</p>}
+    {!complimentary && <div className={styles.purchaseTerms}><p>Оплачивая тариф, вы принимаете условия предоставления доступа и возврата денег. Документы откроются в новой вкладке.</p><PaymentTermsLinks newTab /></div>}
     {(error || paymentSuccess) && <div ref={feedbackRef} tabIndex={-1} className={styles.feedback}>
     {error && <Alert variant="danger" title="Не удалось продолжить" onClose={() => setError(null)}>{error}</Alert>}
     {paymentSuccess && <Alert variant="success" title="Оплата завершена"><p>Тариф обновится после подтверждения платежа. Если изменения ещё не появились, проверьте статус чуть позже.</p><Button variant="secondary" size="sm" className="mt-3" onClick={() => window.location.reload()}>Обновить статус</Button></Alert>}

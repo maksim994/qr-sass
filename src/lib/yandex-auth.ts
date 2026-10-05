@@ -1,3 +1,4 @@
+import type { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { DEFAULT_WORKSPACE_NAME } from "@/lib/workspace-name";
 import { nanoid } from "nanoid";
@@ -104,6 +105,7 @@ export async function getYandexProfile(accessToken: string) {
 
 export async function findOrCreateYandexUser(
   profile: Awaited<ReturnType<typeof getYandexProfile>>,
+  receipt?: ReturnType<typeof legalReceipt>,
 ) {
   const db = getDb();
 
@@ -139,6 +141,7 @@ export async function findOrCreateYandexUser(
     });
   }
 
+  if (!receipt) throw new Error(MSG.YANDEX_REGISTRATION_REQUIRED);
   const passwordHash = await hashPassword(crypto.randomUUID());
   const workspaceSlug = `yandex-${profile.yandexId}-${nanoid(6)}`;
 
@@ -149,6 +152,7 @@ export async function findOrCreateYandexUser(
         yandexId: profile.yandexId,
         name: profile.name,
         passwordHash,
+        legalAcceptances: { create: receipt },
         emailVerifiedAt: new Date(),
         memberships: {
           create: {

@@ -153,7 +153,7 @@ export default async function HomePage() {
               <ul>{planFeatures(plan).map(feature => <li key={feature}><Check />{feature}</li>)}</ul>
             </article>)}
           </div>
-          <div className={styles.pricingNotes}><p>Пробный период Про — 14 дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
+          <div className={styles.pricingNotes}><p>Пробный период Про — 14 дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
         </section>
 
         <section id="faq" className={`${styles.container} ${styles.faqSection}`}>

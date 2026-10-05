@@ -47,7 +47,7 @@ export function YandexAuthButton({ mode, nextPath }: { mode: AuthMode; nextPath?
   const label = mode === "login" ? "Войти через Яндекс" : "Зарегистрироваться через Яндекс";
 
   return (
-    <Button href={hrefWithNext("/api/auth/yandex", nextPath)} variant="secondary" block className="qrs-auth-yandex">
+    <Button href={hrefWithNext(mode === "register" ? "/register/yandex" : "/api/auth/yandex", nextPath)} variant="secondary" block className="qrs-auth-yandex">
       <span className="qrs-auth-yandex__icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="12" fill="#FC3F1D" />

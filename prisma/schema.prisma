@@ -58,6 +58,7 @@ model User {
   qrCodes      QrCode[]     @relation("CreatedByQrCodes")
   blogPosts    BlogPost[]   @relation("CreatedBlogPosts")
   passwordResets PasswordResetToken[]
+  legalAcceptances LegalAcceptance[]
 }
 
 model BlogCategory {
@@ -423,4 +424,28 @@ model NotificationOutbox {
 model NotificationWorkerState {
   id          String   @id @default("default")
   lastSeenAt  DateTime @default(now())
+}
+
+// Separate evidence for terms and data consent, captured in the registration transaction.
+model LegalAcceptance {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  version String
+  source String
+  acceptedAt DateTime @default(now())
+  termsAccepted Boolean
+  dataConsent Boolean
+  documents Json
+  @@index([userId, acceptedAt])
+}
+
+// Short-lived, one-use OAuth state, created only by a CSRF-protected explicit POST.
+model OAuthLegalIntent {
+  stateHash String @id
+  version String
+  acceptedAt DateTime @default(now())
+  expiresAt DateTime
+  documents Json
+  @@index([expiresAt])
 }

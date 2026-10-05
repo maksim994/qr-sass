@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { Logo } from "@/components/logo";
 import { getSeoPages } from "@/lib/seo-content";
 import { landingDetails } from "@/lib/landing-details";
+import { LEGAL_OPERATOR } from "@/lib/legal-documents";
 
 type Props = {
   session: { sub: string } | null;
@@ -115,26 +116,23 @@ export async function SiteFooter({ session, children }: Props) {
 
           <div>
             <p style={{ font: "var(--fw-bold) var(--fs-sm)/1 var(--font-sans)", color: "var(--text-strong)" }}>
-              {settings?.contactEmail || settings?.contactPhone || settings?.requisitesName || settings?.requisitesInn ? "Контакты" : "Помощь"}
+              Реквизиты и контакты
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: "12px 0 0", ...linkStyle }}>
-              {!settings?.contactEmail && !settings?.contactPhone && !settings?.requisitesName && !settings?.requisitesInn && <><li style={{ marginBottom: "8px" }}><Link href="/#faq" style={linkStyle}>Вопросы и ответы</Link></li><li><Link href="/qr-lifetime" style={linkStyle}>Срок работы QR-кода</Link></li></>}
-              {settings?.requisitesName && <li style={{ marginBottom: "8px" }}>{settings.requisitesName}</li>}
-              {settings?.requisitesInn && <li style={{ marginBottom: "8px" }}>ИНН: {settings.requisitesInn}</li>}
-              {settings?.contactEmail && (
-                <li style={{ marginBottom: "8px" }}>
-                  <a href={`mailto:${settings.contactEmail}`} className="hover:opacity-80 transition-opacity" style={linkStyle}>
-                    {settings.contactEmail}
+              <li style={{ marginBottom: "8px" }}>{settings?.requisitesName || LEGAL_OPERATOR.name}</li>
+              <li style={{ marginBottom: "8px" }}>{LEGAL_OPERATOR.status}</li>
+              <li style={{ marginBottom: "8px" }}>{LEGAL_OPERATOR.city}</li>
+              <li style={{ marginBottom: "8px" }}>ИНН: {settings?.requisitesInn || LEGAL_OPERATOR.inn}</li>
+              <li style={{ marginBottom: "8px" }}>
+                  <a href={`mailto:${settings?.contactEmail || LEGAL_OPERATOR.email}`} className="hover:opacity-80 transition-opacity" style={linkStyle}>
+                    {settings?.contactEmail || LEGAL_OPERATOR.email}
                   </a>
-                </li>
-              )}
-              {settings?.contactPhone && (
-                <li>
-                  <a href={`tel:${settings.contactPhone}`} className="hover:opacity-80 transition-opacity" style={linkStyle}>
-                    {settings.contactPhone}
+              </li>
+              <li>
+                  <a href={`tel:${(settings?.contactPhone || LEGAL_OPERATOR.phone).replace(/[^+\d]/g, "")}`} className="hover:opacity-80 transition-opacity" style={linkStyle}>
+                    {settings?.contactPhone || LEGAL_OPERATOR.phone}
                   </a>
-                </li>
-              )}
+              </li>
             </ul>
           </div>
         </div>
@@ -143,17 +141,21 @@ export async function SiteFooter({ session, children }: Props) {
           className="mt-12 flex flex-col md:flex-row items-center justify-between pt-8"
           style={{ borderTop: "1px solid var(--border-subtle)", font: "var(--fw-regular) var(--fs-sm)/1.4 var(--font-sans)", color: "var(--text-subtle)" }}
         >
-          <div className="flex gap-4 mb-4 md:mb-0">
+          <nav aria-label="Правовая информация" className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4 md:mb-0">
             <Link href="/privacy-policy" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
               Политика конфиденциальности
             </Link>
+            <Link href="/privacy-policy#cookie-settings" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Настройки cookie</Link>
             <Link href="/terms-of-service" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
               Пользовательское соглашение
             </Link>
+            <Link href="/terms-of-service#payment" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Оплата и доступ</Link>
+            <Link href="/terms-of-service#refund" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Возврат денег</Link>
+            <Link href="/personal-data-consent" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Согласие на обработку данных</Link>
             <Link href="/qr-lifetime" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
               Срок жизни QR
             </Link>
-          </div>
+          </nav>
           <div>&copy; {new Date().getFullYear()} qr-s.ru. Все права защищены.</div>
         </div>
       </div>

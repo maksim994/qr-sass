@@ -1,3 +1,8 @@
+import { getDb } from "@/lib/db";
+import { legalReceipt, oauthStateHash } from "@/lib/legal-acceptance";
+import { registrationLegalSchema, getValidationErrorMessage } from "@/lib/validation";
+import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";
+import { consumeRateLimit, getClientIp, registerRateLimiter } from "@/lib/rate-limit";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
@@ -52,5 +57,42 @@ export async function GET(request: Request) {
     return NextResponse.redirect(authUrl);
   } catch {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(MSG.YANDEX_AUTH_NOT_CONFIGURED)}`, request.url));
+  }
+}
+
+// Separate registration endpoint: CSRF is checked by the shared middleware.
+export async function POST(request: Request) {
+  const limit = await consumeRateLimit(registerRateLimiter, getClientIp(request));
+  if (!limit.success) return apiError(MSG.TOO_MANY_REGISTER_ATTEMPTS, "VALIDATION_ERROR", 429);
+  const raw = await readJsonBody(request);
+  const parsed = registrationLegalSchema.safeParse(raw);
+  if (!parsed.success) return apiError(getValidationErrorMessage(parsed.error) ?? MSG.DATA_CONSENT_REQUIRED, "VALIDATION_ERROR", 400);
+  try {
+    const config = getYandexAuthConfig();
+    const nextPath = safePostAuthPath(
+      typeof raw === "object" && raw !== null && "next" in raw && typeof raw.next === "string" ? raw.next : undefined,
+      "/dashboard",
+    );
+    const state = crypto.randomUUID();
+    const receipt = legalReceipt("yandex");
+    const db = getDb();
+    await db.oAuthLegalIntent.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+    await db.oAuthLegalIntent.create({ data: {
+      stateHash: oauthStateHash(state), version: receipt.version, documents: receipt.documents,
+      acceptedAt: receipt.acceptedAt, expiresAt: new Date(Date.now() + STATE_MAX_AGE * 1000),
+    } });
+    const jar = await cookies();
+    jar.set(STATE_COOKIE, state, oauthCookieOptions);
+    jar.set(MODE_COOKIE, "register", oauthCookieOptions);
+    jar.set(NEXT_COOKIE, encodeURIComponent(nextPath), oauthCookieOptions);
+    const authUrl = new URL("https://oauth.yandex.ru/authorize");
+    authUrl.searchParams.set("response_type", "code");
+    authUrl.searchParams.set("client_id", config.clientId);
+    authUrl.searchParams.set("redirect_uri", config.redirectUri);
+    authUrl.searchParams.set("scope", "login:email");
+    authUrl.searchParams.set("state", state);
+    return apiSuccess({ url: authUrl.toString() });
+  } catch {
+    return apiError(MSG.YANDEX_AUTH_FAILED, "INTERNAL_ERROR", 500);
   }
 }

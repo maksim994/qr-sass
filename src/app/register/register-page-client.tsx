@@ -1,5 +1,7 @@
 "use client";
 
+import { LEGAL_VERSION } from "@/lib/legal-documents";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import {
@@ -33,6 +35,7 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,7 +49,7 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
       const response = await fetchApi("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, consent }),
+        body: JSON.stringify({ name, email, password, consent, termsAccepted, legalVersion: LEGAL_VERSION }),
       });
       const parsed = await parseApiResponse<{ userId?: string }>(response);
       if (!parsed.ok) {
@@ -127,6 +130,7 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
           disabled={loading}
         />
 
+        <ConsentField kind="terms" checked={termsAccepted} onChange={setTermsAccepted} disabled={loading} />
         <ConsentField checked={consent} onChange={setConsent} disabled={loading} />
 
         <Button
@@ -147,7 +151,7 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
       <div className="qrs-auth-social">
         <YandexAuthButton mode="register" nextPath={nextPath} />
         <p className="qrs-auth-social-note">
-          Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
+          Данные обрабатываются по <Link href="/privacy-policy">политике конфиденциальности</Link>. Для регистрации через Яндекс подтвердите условия на следующем шаге.
         </p>
       </div>
 

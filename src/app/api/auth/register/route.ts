@@ -1,3 +1,4 @@
+import { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { nanoid } from "nanoid";
 import { MSG } from "@/lib/user-messages";
@@ -88,6 +89,7 @@ export async function POST(request: Request) {
           email,
           name,
           passwordHash,
+          legalAcceptances: { create: legalReceipt("email") },
           memberships: {
             create: {
               role: "OWNER",

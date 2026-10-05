@@ -1,3 +1,4 @@
+import { readCookieChoice } from "@/lib/cookie-consent";
 /** Client-side product funnel goals for Yandex Metrika reachGoal. */
 
 export const PRODUCT_GOALS = {
@@ -39,7 +40,7 @@ export function setMetrikaCounterId(id: string) {
 
 export function trackGoal(goal: ProductGoal, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  if (goal === PRODUCT_GOALS.subscription_paid) return;
+  if (goal === PRODUCT_GOALS.subscription_paid || readCookieChoice() !== "accepted") return;
   const id = getMetrikaId();
   const ym = (window as YmWindow).ym;
   if (!id || typeof ym !== "function") return;

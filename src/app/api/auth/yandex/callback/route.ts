@@ -1,3 +1,6 @@
+import { getDb } from "@/lib/db";
+import { LEGAL_VERSION } from "@/lib/legal-documents";
+import { oauthStateHash, legalReceipt } from "@/lib/legal-acceptance";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createSessionToken, getSession, setAuthCookie } from "@/lib/auth";
@@ -83,7 +86,15 @@ export async function GET(request: Request) {
       return profileRedirect(request, { yandex: "linked" });
     }
 
-    const user = await findOrCreateYandexUser(profile);
+    // Only a server-side one-use receipt may authorize creation of a new user.
+    const intent = await getDb().$transaction(async tx => {
+      const found = await tx.oAuthLegalIntent.findUnique({ where: { stateHash: oauthStateHash(state) } });
+      if (!found || found.expiresAt <= new Date() || found.version !== LEGAL_VERSION) return null;
+      const consumed = await tx.oAuthLegalIntent.deleteMany({ where: { stateHash: found.stateHash } });
+      return consumed.count === 1 ? found : null;
+    });
+    const receipt = intent ? { ...legalReceipt("yandex", intent.acceptedAt), documents: intent.documents as ReturnType<typeof legalReceipt>["documents"] } : undefined;
+    const user = await findOrCreateYandexUser(profile, receipt);
     const token = await createSessionToken({ sub: user.id, email: user.email, sv: user.sessionVersion });
     await setAuthCookie(token);
     logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex auth success", status: 302 });
@@ -98,6 +109,11 @@ export async function GET(request: Request) {
       status: 302,
       details: authError instanceof Error ? { message: authError.message } : authError,
     });
+    if (authError instanceof Error && authError.message === MSG.YANDEX_REGISTRATION_REQUIRED) {
+      const registration = new URL("/register/yandex", request.url);
+      registration.searchParams.set("next", nextPath);
+      return NextResponse.redirect(registration);
+    }
     const safeMessages = new Set<string>([
       MSG.YANDEX_AUTH_NOT_CONFIGURED,
       MSG.YANDEX_AUTH_FAILED,
