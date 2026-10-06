@@ -147,7 +147,7 @@ export async function SiteFooter({ session, children }: Props) {
             </Link>
             <Link href="/privacy-policy#cookie-settings" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Настройки cookie</Link>
             <Link href="/terms-of-service" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
-              Пользовательское соглашение
+              Публичная оферта и соглашение
             </Link>
             <Link href="/terms-of-service#payment" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Оплата и доступ</Link>
             <Link href="/terms-of-service#refund" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Возврат денег</Link>

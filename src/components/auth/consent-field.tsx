@@ -31,7 +31,7 @@ export function ConsentField({ kind = "data", checked, onChange, disabled = fals
       </span>
       <span className="fk-choice__text">
         {kind === "terms" ? (
-          <>Принимаю <Link href="/terms-of-service" target="_blank" className="qrs-auth-inline-link">пользовательское соглашение</Link></>
+          <>Принимаю <Link href="/terms-of-service" target="_blank" className="qrs-auth-inline-link">оферту и пользовательское соглашение</Link></>
         ) : (
           <>Даю <Link href="/personal-data-consent" target="_blank" className="qrs-auth-inline-link">согласие на обработку персональных данных</Link> для регистрации и работы аккаунта</>
         )}
