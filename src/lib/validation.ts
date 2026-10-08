@@ -1,4 +1,5 @@
 import { QrContentType, QrKind } from "@prisma/client";
+import { isReservedAuthEmail } from "@/lib/reserved-email";
 import { MSG } from "@/lib/user-messages";
 import { isSafeUrl } from "@/lib/url";
 import { workspaceFileIdFromPath } from "@/lib/workspace-file-path";
@@ -33,7 +34,9 @@ export const registerSchema = registrationLegalSchema.extend({
     .string()
     .min(2, "Имя должно содержать минимум 2 символа")
     .max(120, "Имя не должно превышать 120 символов"),
-  email: z.string().email("Укажите корректный email"),
+  email: z.string().email("Укажите корректный email").refine((value) => !isReservedAuthEmail(value), {
+    message: MSG.RESERVED_EMAIL,
+  }),
   password: z
     .string()
     .min(8, "Пароль должен содержать минимум 8 символов")
@@ -69,7 +72,9 @@ export const resetPasswordSchema = z.object({
 export const profileUpdateSchema = z
   .object({
     name: z.string().min(2).max(120).optional(),
-    email: z.string().email().optional(),
+    email: z.string().email().refine((value) => !isReservedAuthEmail(value), {
+      message: MSG.RESERVED_EMAIL,
+    }).optional(),
     currentPassword: z.string().optional(),
     newPassword: z.string().min(8).max(128).optional(),
   })

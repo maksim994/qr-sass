@@ -94,3 +94,27 @@ export function isSafeUrl(url: string): boolean {
     return false;
   }
 }
+
+/** Empty policy link is allowed. Anything else must be a public http(s) URL. */
+export function normalizePolicyUrl(value: unknown): { ok: true; url: string | null } | { ok: false } {
+  if (value == null || value === "") return { ok: true, url: null };
+  if (typeof value !== "string") return { ok: false };
+  const trimmed = value.trim();
+  if (!trimmed) return { ok: true, url: null };
+  if (!isSafeUrl(trimmed)) return { ok: false };
+  return { ok: true, url: trimmed };
+}
+
+export function policyUrlFromPayload(payload: Record<string, unknown> | null | undefined): string | null {
+  const result = normalizePolicyUrl(payload?.gdprPolicyUrl);
+  return result.ok ? result.url : null;
+}
+
+export function applyPolicyUrl(payload: Record<string, unknown>): boolean {
+  if (!Object.prototype.hasOwnProperty.call(payload, "gdprPolicyUrl")) return true;
+  const result = normalizePolicyUrl(payload.gdprPolicyUrl);
+  if (!result.ok) return false;
+  if (result.url) payload.gdprPolicyUrl = result.url;
+  else delete payload.gdprPolicyUrl;
+  return true;
+}

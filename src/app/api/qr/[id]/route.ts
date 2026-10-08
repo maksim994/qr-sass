@@ -11,6 +11,8 @@ import { stampTrackingConsentVersion } from "@/lib/qr-consent";
 import { collectUploadIds, uploadsBelongToWorkspace } from "@/lib/tenant";
 import { updateQrSchema, validatePayloadUrls, payloadMeetsType } from "@/lib/validation";
 import { assertAllowsDynamic, getEntitlements } from "@/lib/entitlements";
+import { toPublicQr } from "@/lib/qr-public-dto";
+import { applyPolicyUrl } from "@/lib/url";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 
@@ -49,7 +51,8 @@ export async function GET(request: Request, context: RouteContext) {
     if (!isMember) return unauthorized();
 
     const entitlements = await getEntitlements(qr.workspaceId);
-    return apiSuccess({ qr: entitlements.allowsAnalytics ? qr : { ...qr, scanEvents: [] } }, 200, requestId);
+    const visible = entitlements.allowsAnalytics ? qr : { ...qr, scanEvents: [] };
+    return apiSuccess({ qr: toPublicQr(visible) }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
@@ -101,6 +104,16 @@ export async function PATCH(request: Request, context: RouteContext) {
         return apiError(pixels.error, "VALIDATION_ERROR", 400, undefined, requestId);
       }
       nextPayload = stampTrackingConsentVersion(existingPayload, pixels.payload);
+      const incomingPolicy = Object.prototype.hasOwnProperty.call(data.payload, "gdprPolicyUrl");
+      if (Object.prototype.hasOwnProperty.call(nextPayload, "gdprPolicyUrl")) {
+        const draft = { gdprPolicyUrl: nextPayload.gdprPolicyUrl };
+        const policyOk = applyPolicyUrl(draft);
+        if (!policyOk && incomingPolicy) {
+          return apiError(MSG.ONLY_HTTPS_HTTP_URL, "VALIDATION_ERROR", 400, undefined, requestId);
+        }
+        if (policyOk && typeof draft.gdprPolicyUrl === "string") nextPayload.gdprPolicyUrl = draft.gdprPolicyUrl;
+        else delete nextPayload.gdprPolicyUrl;
+      }
     }
 
     const isHosted = needsHostedPage(qr.contentType);

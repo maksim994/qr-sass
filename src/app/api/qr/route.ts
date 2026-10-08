@@ -17,7 +17,9 @@ import { createQrSchema } from "@/lib/validation";
 import { getDisabledQrTypes, isQrTypeDisabled } from "@/lib/disabled-qr-types";
 import { supportsDynamicKind } from "@/lib/qr-types";
 import { FUNNEL_EVENTS, isPrivateOrLocalIp, recordFunnelEvent } from "@/lib/funnel";
+import { toPublicQr } from "@/lib/qr-public-dto";
 import { getClientIp } from "@/lib/rate-limit";
+import { applyPolicyUrl } from "@/lib/url";
 
 export async function GET(request: Request) {
   const requestId = getRequestId(request);
@@ -55,7 +57,7 @@ export async function GET(request: Request) {
       take: 100,
     });
 
-    return apiSuccess({ items: qrs }, 200, requestId);
+    return apiSuccess({ items: qrs.map(toPublicQr) }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
@@ -97,6 +99,9 @@ export async function POST(request: Request) {
       return apiError(pixels.error, "VALIDATION_ERROR", 400, undefined, requestId);
     }
     const payload = stampTrackingConsentVersion({}, pixels.payload);
+    if (!applyPolicyUrl(payload)) {
+      return apiError(MSG.ONLY_HTTPS_HTTP_URL, "VALIDATION_ERROR", 400, undefined, requestId);
+    }
     const membership = user.memberships.find((m) => m.workspaceId === data.workspaceId);
     if (!membership) return unauthorized();
     if (!(await projectBelongsToWorkspace(db, data.projectId, data.workspaceId))) {

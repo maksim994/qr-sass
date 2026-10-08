@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { assertAllowsDynamic } from "@/lib/entitlements";
+import { applyPolicyUrl } from "@/lib/url";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -92,7 +93,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         payloadUpdate.gdprRequired = raw.gdprRequired === true || raw.gdprRequired === "true";
       }
       if (raw.gdprPolicyUrl !== undefined) {
-        payloadUpdate.gdprPolicyUrl = typeof raw.gdprPolicyUrl === "string" ? raw.gdprPolicyUrl : null;
+        const draft = { gdprPolicyUrl: raw.gdprPolicyUrl };
+        if (!applyPolicyUrl(draft)) {
+          return apiError(MSG.ONLY_HTTPS_HTTP_URL, "VALIDATION_ERROR", 400, undefined, requestId);
+        }
+        if (typeof draft.gdprPolicyUrl === "string") payloadUpdate.gdprPolicyUrl = draft.gdprPolicyUrl;
+        else delete payloadUpdate.gdprPolicyUrl;
       }
     }
 

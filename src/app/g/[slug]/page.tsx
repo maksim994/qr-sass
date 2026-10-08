@@ -8,6 +8,7 @@ import { UtilityPage } from "@/components/utility/utility-page";
 import { qrUnavailablePath } from "@/lib/qr-lifetime-policy";
 import { hasQrConsent, qrConsentCookieName, requiredConsentVersion } from "@/lib/qr-consent";
 import { NOINDEX_ROBOTS } from "@/lib/seo-hygiene";
+import { policyUrlFromPayload } from "@/lib/url";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -34,7 +35,7 @@ export default async function GdprGatePage({ params, searchParams }: Props) {
 
   const payload = (qr.payload as Record<string, unknown>) ?? {};
   const version = requiredConsentVersion(payload);
-  const policyUrl = (typeof sp?.policy === "string" ? sp.policy : null) ?? (typeof payload.gdprPolicyUrl === "string" ? payload.gdprPolicyUrl : undefined);
+  const policyUrl = policyUrlFromPayload(payload);
   if (version <= 0) {
     redirect(targetPath);
   }

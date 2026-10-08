@@ -13,6 +13,13 @@ enum MembershipRole {
   MEMBER
 }
 
+enum WorkspaceInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  REVOKED
+}
+
 enum QrKind {
   STATIC
   DYNAMIC
@@ -59,6 +66,7 @@ model User {
   blogPosts    BlogPost[]   @relation("CreatedBlogPosts")
   passwordResets PasswordResetToken[]
   legalAcceptances LegalAcceptance[]
+  sentInvites WorkspaceInvite[] @relation("WorkspaceInvitesSent")
 }
 
 model BlogCategory {
@@ -125,6 +133,7 @@ model Workspace {
   payments      Payment[]
   billingEvents BillingEvent[]
   funnelEvents  FunnelEvent[]
+  invites WorkspaceInvite[]
 }
 
 model Membership {
@@ -138,6 +147,22 @@ model Membership {
 
   @@unique([userId, workspaceId])
   @@index([workspaceId, role])
+}
+
+model WorkspaceInvite {
+  id              String                @id @default(cuid())
+  workspaceId     String
+  email           String
+  invitedByUserId String
+  status          WorkspaceInviteStatus @default(PENDING)
+  expiresAt       DateTime
+  createdAt       DateTime              @default(now())
+  respondedAt     DateTime?
+  workspace       Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy       User                  @relation("WorkspaceInvitesSent", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
+  @@index([email, status])
 }
 
 model Project {

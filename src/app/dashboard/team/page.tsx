@@ -12,13 +12,24 @@ export default async function TeamPage() {
   if (!workspace) redirect("/register");
 
   const db = getDb();
-  const [members, entitlements] = await Promise.all([
+  const now = new Date();
+  const [members, entitlements, outgoing, incoming] = await Promise.all([
     db.membership.findMany({
       where: { workspaceId: workspace.id },
       include: { user: { select: { id: true, email: true, name: true } } },
       orderBy: [{ role: "asc" }, { createdAt: "asc" }],
     }),
     getEntitlements(workspace.id),
+    db.workspaceInvite.findMany({
+      where: { workspaceId: workspace.id, status: "PENDING", expiresAt: { gt: now } },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, email: true, expiresAt: true },
+    }),
+    db.workspaceInvite.findMany({
+      where: { email: user.email.trim().toLowerCase(), status: "PENDING", expiresAt: { gt: now } },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, expiresAt: true, workspace: { select: { name: true } } },
+    }),
   ]);
   const planInfo = entitlements.plan;
 
@@ -27,7 +38,8 @@ export default async function TeamPage() {
     ADMIN: "Администратор",
     MEMBER: "Участник",
   };
-  const canInvite = planInfo.limits.maxUsers === null || members.length < planInfo.limits.maxUsers;
+  const occupied = members.length + outgoing.length;
+  const canInvite = planInfo.limits.maxUsers === null || occupied < planInfo.limits.maxUsers;
   const myRole = members.find((m) => m.userId === user.id)?.role;
   const isAdmin = myRole === "OWNER" || myRole === "ADMIN";
 
@@ -49,6 +61,16 @@ export default async function TeamPage() {
         canInvite={canInvite && isAdmin}
         isAdmin={!!isAdmin}
         planLabel={planInfo.name}
+        outgoing={outgoing.map((invite) => ({
+          id: invite.id,
+          email: invite.email,
+          expiresAt: invite.expiresAt.toISOString(),
+        }))}
+        incoming={incoming.map((invite) => ({
+          id: invite.id,
+          workspaceName: invite.workspace.name,
+          expiresAt: invite.expiresAt.toISOString(),
+        }))}
       />
     </div>
   );

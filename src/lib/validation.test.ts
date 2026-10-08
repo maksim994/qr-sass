@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createQrSchema, validatePayloadUrls } from "./validation.ts";
+import { createQrSchema, profileUpdateSchema, registerSchema, validatePayloadUrls } from "./validation.ts";
+import { LEGAL_VERSION } from "./legal-documents.ts";
 import { workspaceFilePath } from "./workspace-file-path.ts";
 
 function createBody(contentType: string, payload: Record<string, unknown>) {
@@ -13,6 +14,19 @@ function createBody(contentType: string, payload: Record<string, unknown>) {
     style: {},
   };
 }
+
+test("registration and email changes cannot claim a Telegram identity", () => {
+  const registration = {
+    name: "Пользователь", password: "SyntheticPassword123!",
+    termsAccepted: true, consent: true, legalVersion: LEGAL_VERSION,
+  };
+  for (const email of ["tg-123@telegram.local", "TG-123@Telegram.Local"]) {
+    assert.equal(registerSchema.safeParse({ ...registration, email }).success, false);
+    assert.equal(profileUpdateSchema.safeParse({ email, currentPassword: "SyntheticPassword123!" }).success, false);
+  }
+  assert.equal(registerSchema.safeParse({ ...registration, email: "owner@example.org" }).success, true);
+  assert.equal(profileUpdateSchema.safeParse({ email: "owner@example.org", currentPassword: "SyntheticPassword123!" }).success, true);
+});
 
 test("workspace upload path is accepted for PDF IMAGE MP3 VIDEO create and patch checks", () => {
   const fileUrl = workspaceFilePath("test123");

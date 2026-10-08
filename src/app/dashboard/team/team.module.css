@@ -30,6 +30,14 @@
 .remove { color: var(--color-danger); cursor: pointer; font-size: .8125rem; background: none; border: 0; min-height: 44px; }
 .remove:hover { text-decoration: underline; } .remove:disabled { opacity: .5; cursor: wait; }
 .empty { padding: 0 24px 24px; color: var(--text-muted); }
+.pendingList { display: grid; gap: 12px; margin-top: 18px; }
+.pendingRow { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.pendingRow p { color: var(--text-muted); font-size: .8125rem; margin-top: 4px; }
+.pendingActions { display: flex; gap: 8px; flex: none; }
+@media (max-width: 600px) {
+  .pendingRow { align-items: flex-start; flex-direction: column; }
+  .pendingActions { flex-wrap: wrap; }
+}
 .roles { color: var(--text-muted); font-size: .8125rem; }
 .roles summary { cursor: pointer; padding: 10px 0; }
 .roles dl { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 14px; line-height: 1.7; }

@@ -23,6 +23,7 @@ function createLimiter(keyPrefix: string, points: number, duration: number): Rat
 }
 
 export const loginRateLimiter = createLimiter("rl_login", 5, 60); // 5 attempts per minute
+export const inviteRateLimiter = createLimiter("rl_invite", 10, 3600); // 10 invites per hour per admin
 export const registerRateLimiter = createLimiter("rl_register", 3, 60); // 3 per minute
 export const forgotPasswordRateLimiter = createLimiter("rl_forgot", 5, 3600); // 5 per hour per IP
 export const resetPasswordRateLimiter = createLimiter("rl_reset", 8, 3600);

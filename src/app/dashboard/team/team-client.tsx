@@ -13,12 +13,15 @@ type Member = {
   id: string; userId: string; email: string; name: string | null;
   role: string; roleLabel: string; isCurrentUser: boolean;
 };
+type PendingInvite = { id: string; email: string; expiresAt: string };
+type IncomingInvite = { id: string; workspaceName: string; expiresAt: string };
 type Props = {
   workspaceId: string; members: Member[]; canInvite: boolean;
   isAdmin: boolean; planLabel: string; maxUsers: number | null;
+  outgoing: PendingInvite[]; incoming: IncomingInvite[];
 };
 
-export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planLabel, maxUsers }: Props) {
+export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planLabel, maxUsers, outgoing, incoming }: Props) {
   const router = useRouter();
   const emailId = useId();
   const pending = useRef(false);
@@ -46,10 +49,41 @@ export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planL
       });
       const result = await parseApiResponse(res);
       if (!result.ok) { setError(result.error ?? MSG.TEAM_ADD_FAILED); return; }
-      setEmail(""); setSuccess("Участник добавлен в команду.");
+      setEmail(""); setSuccess("Приглашение создано. Доступ появится только после принятия в кабинете приглашённого.");
       trackGoal(PRODUCT_GOALS.member_invited);
       router.refresh();
     } catch { setError(MSG.TEAM_ADD_FAILED); }
+    finally { pending.current = false; setLoading(false); }
+  }
+
+  async function respond(inviteId: string, action: "accept" | "decline") {
+    if (pending.current) return;
+    pending.current = true;
+    setLoading(true); setError(null); setSuccess(null);
+    try {
+      const res = await fetchApi(`/api/invites/${inviteId}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const result = await parseApiResponse(res);
+      if (!result.ok) { setError(result.error ?? MSG.TEAM_INVITE_FAILED); return; }
+      setSuccess(action === "accept" ? "Приглашение принято. Кабинет доступен в переключателе пространств." : "Приглашение отклонено.");
+      router.refresh();
+    } catch { setError(MSG.TEAM_INVITE_FAILED); }
+    finally { pending.current = false; setLoading(false); }
+  }
+
+  async function revoke(inviteId: string) {
+    if (pending.current) return;
+    pending.current = true;
+    setLoading(true); setError(null); setSuccess(null);
+    try {
+      const res = await fetchApi(`/api/workspaces/${workspaceId}/invites/${inviteId}`, { method: "DELETE" });
+      const result = await parseApiResponse(res);
+      if (!result.ok) { setError(result.error ?? MSG.TEAM_INVITE_FAILED); return; }
+      setSuccess("Приглашение отозвано.");
+      router.refresh();
+    } catch { setError(MSG.TEAM_INVITE_FAILED); }
     finally { pending.current = false; setLoading(false); }
   }
 
@@ -69,14 +103,22 @@ export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planL
   return <div className={styles.team}>
     <section className={styles.summary} aria-label="Участники и тариф">
       <div><h2>Доступ к кабинету</h2><p>Тариф «{planLabel}»</p></div>
-      <p className={styles.capacity}><strong>{members.length.toLocaleString("ru-RU")}{maxUsers !== null ? ` из ${maxUsers.toLocaleString("ru-RU")}` : ""}</strong><span>{maxUsers === null ? "участников · без лимита" : "мест занято"}</span></p>
+      <p className={styles.capacity}><strong>{members.length.toLocaleString("ru-RU")}{maxUsers !== null ? ` из ${maxUsers.toLocaleString("ru-RU")}` : ""}</strong><span>{maxUsers === null ? "участников · без лимита" : "мест занято"}{outgoing.length > 0 ? ` · приглашений: ${outgoing.length.toLocaleString("ru-RU")}` : ""}</span></p>
     </section>
     {(error || success) && <div ref={feedbackRef} tabIndex={-1} className={styles.feedback}><Alert variant={error ? "danger" : "success"} onClose={() => { setError(null); setSuccess(null); }}>{error || success}</Alert></div>}
+    {incoming.length > 0 && <section className={styles.panel} aria-labelledby="team-incoming-title">
+      <h2 id="team-incoming-title">Приглашения вам</h2>
+      <ul className={styles.pendingList}>{incoming.map((invite) => <li key={invite.id} className={styles.pendingRow}>
+        <div><strong>{invite.workspaceName}</strong><p>Доступ появится после принятия. Срок до {new Date(invite.expiresAt).toLocaleDateString("ru-RU")}.</p></div>
+        <div className={styles.pendingActions}><Button type="button" disabled={busy} onClick={() => respond(invite.id, "accept")}>Принять</Button><Button type="button" variant="secondary" disabled={busy} onClick={() => respond(invite.id, "decline")}>Отклонить</Button></div>
+      </li>)}</ul>
+    </section>}
     {isAdmin ? <section className={styles.panel} aria-labelledby="team-add-title">
-      <h2 id="team-add-title">Добавить участника</h2>
-      {canInvite ? <><p className={styles.description}>Укажите email пользователя, который уже зарегистрирован в QR-S.ru. Он сразу получит доступ к этому кабинету с ролью «Участник». Письмо не отправляется.</p>
-        <form onSubmit={invite} className={styles.addForm}><div><label htmlFor={emailId}>Email участника</label><Input id={emailId} type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={busy} required autoComplete="off"/></div><Button type="submit" disabled={busy || !email.trim()}>{loading ? "Добавление…" : "Добавить участника"}</Button></form>
+      <h2 id="team-add-title">Пригласить участника</h2>
+      {canInvite ? <><p className={styles.description}>Укажите email пользователя, который уже зарегистрирован в QR-S.ru. Он увидит приглашение в своём кабинете и получит доступ только после принятия. Письмо не отправляется.</p>
+        <form onSubmit={invite} className={styles.addForm}><div><label htmlFor={emailId}>Email участника</label><Input id={emailId} type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={busy} required autoComplete="off"/></div><Button type="submit" disabled={busy || !email.trim()}>{loading ? "Отправка…" : "Пригласить"}</Button></form>
       </> : <div className={styles.limit}><p>Все места на текущем тарифе заняты. Чтобы добавить человека, освободите место или выберите тариф с большим лимитом.</p><Link href="/dashboard/billing" className="fk-button fk-button--secondary">Посмотреть тарифы</Link></div>}
+      {outgoing.length > 0 && <ul className={styles.pendingList}>{outgoing.map((invite) => <li key={invite.id} className={styles.pendingRow}><div><strong>{invite.email}</strong><p>Ожидает принятия до {new Date(invite.expiresAt).toLocaleDateString("ru-RU")}</p></div><button type="button" className={styles.remove} disabled={busy} onClick={() => revoke(invite.id)}>Отозвать</button></li>)}</ul>}
     </section> : <p className={styles.notice}>Добавлять и исключать участников могут владелец и администраторы кабинета.</p>}
     <section className={styles.members} aria-labelledby="team-members-title"><h2 id="team-members-title">Участники кабинета <span>{members.length}</span></h2>
       {members.length === 0 ? <p className={styles.empty}>Участников пока нет.</p> : <table className={styles.table}><caption className="sr-only">Состав команды и роли участников</caption><thead><tr><th scope="col">Участник</th><th scope="col">Роль</th>{isAdmin && <th scope="col"><span className="sr-only">Действия</span></th>}</tr></thead><tbody>{members.map(member => <tr key={member.id}>

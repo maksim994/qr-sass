@@ -163,14 +163,20 @@ export async function POST(request: Request) {
         requestId,
       );
     }
-    logger.warn({
+    logger.error({
       area: "api",
       route,
       requestId,
-      message: "Telegram fallback auth path used",
-      code: "FALLBACK_AUTH",
-      status: 200,
+      message: "Telegram auth did not create a session",
+      code: "AUTH_INCOMPLETE",
+      status: 500,
     });
-    return apiSuccess({ fallback: true }, 200, requestId);
+    return apiError(
+      MSG.TELEGRAM_AUTH_FAILED,
+      "INTERNAL_ERROR",
+      500,
+      undefined,
+      requestId,
+    );
   }
 }
