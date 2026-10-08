@@ -24,6 +24,7 @@ function createLimiter(keyPrefix: string, points: number, duration: number): Rat
 
 export const uploadRateLimiter = createLimiter("rl_upload", 20, 60);
 export const bulkRateLimiter = createLimiter("rl_bulk", 6, 60);
+export const telegramAuthRateLimiter = createLimiter("rl_telegram_auth", 12, 60);
 export const loginRateLimiter = createLimiter("rl_login", 5, 60); // 5 attempts per minute
 export const inviteRateLimiter = createLimiter("rl_invite", 10, 3600); // 10 invites per hour per admin
 export const registerRateLimiter = createLimiter("rl_register", 3, 60); // 3 per minute

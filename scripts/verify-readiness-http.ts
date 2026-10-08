@@ -134,15 +134,16 @@ try {
   assert.match(logout.headers.get("set-cookie") ?? "", /Max-Age=0/);
   passed("team interface renders and logout returns to public APP_URL with cleared session");
 
-  // A valid signed Telegram payload followed by a DB failure used to return fake success.
+  // A signed Telegram identity must not take over an email account or claim fake success.
   const telegramId = 900000000 + Math.floor(Math.random() * 100000000);
-  await workspace(`tg-${telegramId}`);
-  const init = new URLSearchParams({ auth_date: String(Math.floor(Date.now() / 1000)), user: JSON.stringify({ id: telegramId, first_name: "Fixture" }) });
+  const collision = await db.user.create({ data: { email: `tg-${telegramId}@telegram.local`, passwordHash: "synthetic-local-password-hash" } });
+  userIds.push(collision.id);
+  const init = new URLSearchParams({ signature: "synthetic-provider-signature", auth_date: String(Math.floor(Date.now() / 1000)), user: JSON.stringify({ id: telegramId, first_name: "Fixture" }) });
   const dataCheck = [...init].sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}=${v}`).join("\n");
   const secret = createHmac("sha256", "WebAppData").update(telegramToken).digest();
   init.set("hash", createHmac("sha256", secret).update(dataCheck).digest("hex"));
   const auth = await request("/api/telegram/auth", oh, { initDataRaw: init.toString() });
-  assert.equal(auth.status, 500);
+  assert.equal(auth.status, 409);
   assert.equal((await auth.json()).ok, false);
   assert.ok(!auth.headers.get("set-cookie")?.includes("qr_saas_session="));
   passed("Telegram failure cannot claim successful authentication without a session");

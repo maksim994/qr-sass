@@ -144,6 +144,7 @@ export const MSG = {
   TELEGRAM_NOT_CONFIGURED: "Telegram-бот не настроен.",
   TELEGRAM_INIT_DATA_REQUIRED: "Не переданы данные авторизации Telegram.",
   TELEGRAM_USER_MISSING: "Не получены данные пользователя Telegram.",
+  TELEGRAM_IDENTITY_CONFLICT: "Не удалось безопасно связать аккаунт Telegram. Обратитесь в поддержку.",
   TELEGRAM_AUTH_FAILED: "Не удалось авторизоваться через Telegram.",
   TELEGRAM_INVALID_SIGNATURE: "Недействительная подпись данных Telegram.",
   YANDEX_AUTH_NOT_CONFIGURED: "Авторизация через Яндекс не настроена.",

@@ -68,6 +68,20 @@ model User {
   passwordResets PasswordResetToken[]
   legalAcceptances LegalAcceptance[]
   sentInvites WorkspaceInvite[] @relation("WorkspaceInvitesSent")
+  authIdentities AuthIdentity[]
+}
+
+// Provider-owned subject, never inferred from a user-editable email address.
+model AuthIdentity {
+  id        String   @id @default(cuid())
+  provider  String
+  subject   String
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, subject])
+  @@index([userId])
 }
 
 model BlogCategory {
