@@ -14,10 +14,11 @@ type Props = {
   qrId: string;
   qrName?: string;
   kind: "STATIC" | "DYNAMIC";
+  managed?: boolean;
   exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
 };
 
-export function QrLibraryCardMenu({ qrId, qrName, kind, exportFormats }: Props) {
+export function QrLibraryCardMenu({ qrId, qrName, kind, managed = kind === "DYNAMIC", exportFormats }: Props) {
   const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -143,7 +144,7 @@ export function QrLibraryCardMenu({ qrId, qrName, kind, exportFormats }: Props) 
           <Link href={`/dashboard/qr/${qrId}`} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>
             Открыть
           </Link>
-          <Link href={`/dashboard/qr/${qrId}/edit`} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>Редактировать</Link>
+          <Link href={`/dashboard/qr/${qrId}/edit`} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>{managed ? "Редактировать" : "Создать новую версию"}</Link>
           {exportFormats.map((format) => (
             <TrackedDownloadLink key={format}
               href={`/api/qr/${qrId}/download?format=${format.toLowerCase()}`}

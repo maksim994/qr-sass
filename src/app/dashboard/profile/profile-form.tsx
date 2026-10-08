@@ -56,6 +56,8 @@ export function ProfileForm({
     const yandexStatus = searchParams.get("yandex");
     const message = searchParams.get("message");
     if (yandexStatus === "linked") {
+      // Consume the external OAuth callback once, then remove its query parameters.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setYandexLinked(true);
       setFlash({ variant: "success", message: "Аккаунт Яндекса успешно привязан." });
       router.replace("/dashboard/profile");

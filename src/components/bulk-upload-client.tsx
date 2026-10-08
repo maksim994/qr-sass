@@ -23,6 +23,7 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
   const [download, setDownload] = useState<{url:string;count:number} | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const pending = useRef(false);
+  const batchKey = useRef<string | null>(null);
   const fileVersion = useRef(0);
   const feedbackRef = useRef<HTMLDivElement>(null);
   useEffect(() => { if (error || download) feedbackRef.current?.focus(); }, [error, download]);
@@ -31,6 +32,7 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
   async function pickFile(next: File | null) {
     if (pending.current) return;
     const version = ++fileVersion.current;
+    batchKey.current = null;
     setFile(next); setPreview(null); setError(""); setUncertain(false); setDownload(null); setReading(false);
     if (!next) { if (inputRef.current) inputRef.current.value = ""; return; }
     if (!next.name.toLowerCase().endsWith(".csv") && next.type !== "text/csv") { setError(MSG.UNSUPPORTED_BULK_FORMAT); return; }
@@ -49,7 +51,8 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
     if (pending.current || !file || !preview || reading || preview.issues.length || preview.rows.length === 0 || preview.rows.length > bulkLimit || download) return;
     pending.current = true; setLoading(true); setError(""); setUncertain(false);
     try {
-      const fd = new FormData(); fd.append("file", file); fd.append("workspaceId", workspaceId);
+      batchKey.current ??= crypto.randomUUID();
+      const fd = new FormData(); fd.append("batchKey", batchKey.current); fd.append("file", file); fd.append("workspaceId", workspaceId);
       const res = await fetchApi("/api/qr/bulk", { method: "POST", body: fd });
       if (!res.ok) {
         const parsed = await parseApiResponse(res);
@@ -82,7 +85,7 @@ export function BulkUploadClient({ workspaceId, bulkLimit }: Props) {
           <p className={styles.hint}>Предпросмотр записей: {Math.min(5,preview.rows.length)}. UTM-параметры уже включены в ссылки.</p><div className={styles.tableWrap}><table><thead><tr><th scope="col">Название</th><th scope="col">Ссылка назначения</th></tr></thead><tbody>{preview.rows.slice(0,5).map((row,i)=><tr key={i}><td>{row.name}</td><td>{row.url}</td></tr>)}</tbody></table></div>
         </>}
       </div>}
-      {(error || download) && <div ref={feedbackRef} tabIndex={-1} className={styles.feedback}>{error ? <Alert variant="danger">{error}{uncertain && <p>Часть кодов могла сохраниться. <Link href="/dashboard/library">Проверьте библиотеку</Link> перед повторной попыткой.</p>}</Alert> : download && <div className={styles.result}><h3>Создано QR-кодов: {download.count}</h3><p>Скачивание ZIP началось. Коды доступны в библиотеке.</p><div><a href={download.url} download="qr-codes.zip" className="fk-button fk-button--secondary">Скачать ZIP ещё раз</a><Link href="/dashboard/library" className="fk-button fk-button--ghost">Открыть библиотеку</Link></div></div>}</div>}
+      {(error || download) && <div ref={feedbackRef} tabIndex={-1} className={styles.feedback}>{error ? <Alert variant="danger">{error}{uncertain && <p>Повторная отправка этого файла вернёт ту же партию без дубликатов. <Link href="/dashboard/library">Проверьте библиотеку</Link>.</p>}</Alert> : download && <div className={styles.result}><h3>Создано QR-кодов: {download.count}</h3><p>Скачивание ZIP началось. Коды доступны в библиотеке.</p><div><a href={download.url} download="qr-codes.zip" className="fk-button fk-button--secondary">Скачать ZIP ещё раз</a><Link href="/dashboard/library" className="fk-button fk-button--ghost">Открыть библиотеку</Link></div></div>}</div>}
       {!download && <div className={styles.actions}><button type="submit" disabled={loading || reading || !ready} className="fk-button fk-button--primary">{loading ? "Создаём коды и собираем ZIP…" : "Создать и скачать ZIP"}</button><p>{loading ? "Дождитесь завершения и не закрывайте страницу." : "В архиве будут PNG-файлы. Коды сохранятся в библиотеке."}</p></div>}
     </form>
     <details className={styles.format}><summary>Формат файла и дополнительные колонки</summary><p>Сохраните таблицу Excel как CSV в кодировке UTF-8. Поддерживаются разделители запятая и точка с запятой.</p><pre>url,name{`\n`}https://example.com/menu,Меню кафе</pre><p>Обязательно: <code>url</code>. По желанию: <code>name</code>, <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_term</code>, <code>utm_content</code>.</p></details>

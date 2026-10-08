@@ -24,6 +24,7 @@ export type QrStyle = {
   logoScale: number;
   logoMargin: number;
   margin: number;
+  quietZoneModules?: number;
   errorCorrectionLevel: "L" | "M" | "Q" | "H";
 };
 

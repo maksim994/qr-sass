@@ -76,7 +76,7 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.redirect(new URL(qrUnavailablePath("missing"), env.APP_URL));
     }
 
-    const scanCount = await db.scanEvent.count({ where: { qrCodeId: qr.id } });
+    const scanCount = qr.maxScans === null ? 0 : await db.scanEvent.count({ where: { qrCodeId: qr.id } });
     const cookieStore = await cookies();
     const access = await evaluateQrPublicAccess({
       qr,

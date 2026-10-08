@@ -10,7 +10,7 @@ import { downloadQrPreview, downloadSavedQr } from "@/lib/qr-preview-download";
 import styles from "@/components/dashboard/create-flow.module.css";
 import navigationStyles from "./qr-wizard-shared.module.css";
 import { MSG } from "@/lib/user-messages";
-import { markOnboardingDownloaded } from "@/lib/product-analytics";
+import { PRODUCT_GOALS, trackGoal, markOnboardingDownloaded } from "@/lib/product-analytics";
 
 const WIZARD_SUBTITLES: Partial<Record<string, string>> = {
   URL: "Редирект на любой URL с аналитикой и защитой.",
@@ -281,7 +281,8 @@ export function QrWizardPreview({
       } else {
         return;
       }
-      markOnboardingDownloaded();
+      if (qrId) markOnboardingDownloaded({ source: "editor", format });
+      else trackGoal(PRODUCT_GOALS.qr_preview_downloaded, { source: "editor", format });
     } catch {
       setDownloadError(MSG.COULD_NOT_DOWNLOAD);
     } finally {

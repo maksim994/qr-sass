@@ -18,7 +18,7 @@ type Props = {
   periodEnd: string | null;
   canTrackOpens: boolean;
   activation: { hasQr: boolean; hasDownload: boolean; hasFirstExternalOpen: boolean };
-  recentQrs: Array<{ id: string; name: string; kind: "STATIC" | "DYNAMIC"; contentType: string; createdAt: string; scanCount: number }>;
+  recentQrs: Array<{ id: string; name: string; kind: "STATIC" | "DYNAMIC"; contentType: string; managed: boolean; createdAt: string; scanCount: number }>;
 };
 
 function Arrow() {
@@ -70,7 +70,7 @@ export function DashboardOverview({ totalQr, dynamicCount, scanCount7d, memberCo
           <span className={styles.emptyNote}>Вы сможете настроить оформление перед скачиванием.</span>
         </div> : <ul className={styles.recentList}>
           {recentQrs.map((qr) => {
-            const tracked = canTrackOpens && (qr.kind === "DYNAMIC" || qr.contentType === "VCARD");
+            const tracked = canTrackOpens && qr.managed;
             return <li key={qr.id}><Link href={`/dashboard/qr/${qr.id}`} className={styles.qrRow}>
               <QrTypeIcon contentType={qr.contentType} variant="slate" />
               <div className={styles.qrInfo}><h3>{qr.name}</h3><p>{contentTypeLabels[qr.contentType] || qr.contentType}<span aria-hidden="true"> · </span>{qr.kind === "DYNAMIC" ? "Динамический" : "Статический"}</p></div>

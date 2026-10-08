@@ -1,7 +1,10 @@
 import { nanoid } from "nanoid";
 import { MSG } from "@/lib/user-messages";
 import archiver from "archiver";
-import Papa from "papaparse";
+import { createHash } from "node:crypto";
+import { previewBulkCsv } from "@/lib/bulk-preview";
+import { QrQuotaError } from "@/lib/qr-create-transaction";
+import { bulkRateLimiter, consumeRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { apiError, getRequestId } from "@/lib/api-response";
@@ -11,7 +14,6 @@ import { logger } from "@/lib/logger";
 import { getBulkBatchLimit, assertCanCreateQrCodes } from "@/lib/plans";
 import { getEntitlements } from "@/lib/entitlements";
 import { defaultStyle, renderQrPng } from "@/lib/qr";
-import { isSafeUrl } from "@/lib/url";
 import { projectBelongsToWorkspace } from "@/lib/tenant";
 import { FUNNEL_EVENTS, recordFunnelEvent } from "@/lib/funnel";
 import { BodyTooLargeError, MAX_BULK_BYTES, formDataWithinLimit } from "@/lib/request-body-limit";
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
     const workspaceId = formData.get("workspaceId") as string | null;
     const projectId = (formData.get("projectId") as string) || undefined;
 
-    if (!file || !workspaceId) {
+    if (!(file instanceof File) || typeof workspaceId !== "string" || !workspaceId) {
       return apiError(MSG.FILE_AND_WORKSPACE_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
     if (file.size > MAX_BULK_BYTES) {
@@ -48,6 +50,7 @@ export async function POST(request: Request) {
 
     const membership = user.memberships.find((m) => m.workspaceId === workspaceId);
     if (!membership) return unauthorized();
+    if (!(await consumeRateLimit(bulkRateLimiter, workspaceId)).success) return apiError(MSG.TOO_MANY_REQUESTS, "FORBIDDEN", 429, undefined, requestId);
 
     const db = getDb();
     if (!(await projectBelongsToWorkspace(db, projectId, workspaceId))) {
@@ -67,50 +70,13 @@ export async function POST(request: Request) {
     if (!isCsv) {
       return apiError(MSG.UNSUPPORTED_BULK_FORMAT, "BAD_REQUEST", 400, undefined, requestId);
     }
-    const text = buffer.toString("utf-8");
-    const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
-    const rows = parsed.data?.filter((r) => Object.keys(r).length > 0) ?? [];
-
-    const normalizeKey = (key: string) => key.trim().toLowerCase().replace(/\s+/g, "_");
-    const normalizedRows = rows.map((r) => {
-      const out: Record<string, string> = {};
-      for (const [k, v] of Object.entries(r)) {
-        if (v != null) out[normalizeKey(k)] = String(v).trim();
-      }
-      return out;
-    });
-
-    const items: Array<{
-      url: string;
-      name: string;
-      utm_source?: string;
-      utm_medium?: string;
-      utm_campaign?: string;
-      utm_term?: string;
-      utm_content?: string;
-    }> = [];
-
-    for (let i = 0; i < normalizedRows.length; i++) {
-      const r = normalizedRows[i];
-      const url = r.url || r.url_link || r.link;
-      if (!url || !isSafeUrl(url)) continue;
-      const name = r.name || r.title || r.label || `QR ${i + 1}`;
-      const targetUrl = new URL(url);
-      if (r.utm_source) targetUrl.searchParams.set("utm_source", r.utm_source);
-      if (r.utm_medium) targetUrl.searchParams.set("utm_medium", r.utm_medium || "qr");
-      if (r.utm_campaign) targetUrl.searchParams.set("utm_campaign", r.utm_campaign);
-      if (r.utm_term) targetUrl.searchParams.set("utm_term", r.utm_term);
-      if (r.utm_content) targetUrl.searchParams.set("utm_content", r.utm_content);
-      items.push({
-        url: targetUrl.toString(),
-        name: name.slice(0, 120),
-        utm_source: r.utm_source,
-        utm_medium: r.utm_medium,
-        utm_campaign: r.utm_campaign,
-        utm_term: r.utm_term,
-        utm_content: r.utm_content,
-      });
-    }
+    const preview = previewBulkCsv(buffer.toString("utf-8"));
+    if (preview.issues.length) return apiError(MSG.BULK_INVALID_ROWS, "VALIDATION_ERROR", 400, { issues: preview.issues.slice(0, 10), count: preview.issues.length }, requestId);
+    const items = preview.rows;
+    const digest = createHash("sha256").update(buffer).update(`:${projectId ?? ""}`).digest("hex");
+    const suppliedKey = formData.get("batchKey");
+    if (suppliedKey !== null && (typeof suppliedKey !== "string" || !/^[a-zA-Z0-9_-]{8,128}$/.test(suppliedKey))) return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
+    const key = typeof suppliedKey === "string" ? suppliedKey : digest;
 
     if (items.length === 0) {
       return apiError(MSG.NO_VALID_BULK_ROWS, "VALIDATION_ERROR", 400, undefined, requestId);
@@ -125,62 +91,34 @@ export async function POST(request: Request) {
       );
     }
 
-    const quota = await assertCanCreateQrCodes({
-      workspaceId,
-      planId: entitlements.planId,
-      plan: entitlements.plan,
-      count: items.length,
-      needsDynamic: true,
-    });
-    if (!quota.ok) {
-      return apiError(quota.message, "FORBIDDEN", 403, { code: quota.code }, requestId);
-    }
-
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const styleConfig = defaultStyle;
-
-    const qrRecords: Array<{ id: string; shortCode: string; name: string; encodedContent: string }> = [];
-
-    for (const item of items) {
-      const shortCode = nanoid(8);
-      const qrData = `${appUrl}/r/${shortCode}`;
-      const qr = await db.qrCode.create({
-        data: {
-          workspaceId,
-          projectId: projectId || null,
-          createdById: user.id,
-          kind: "DYNAMIC",
-          contentType: "URL",
-          name: item.name,
-          shortCode,
-          encodedContent: qrData,
-          currentTargetUrl: item.url,
-          payload: { url: item.url },
-          styleConfig: styleConfig as object,
-          revisions: {
-            create: {
-              changedById: user.id,
-              destinationUrl: item.url,
-              encodedContent: qrData,
-            },
-          },
-        },
-      });
-      qrRecords.push({
-        id: qr.id,
-        shortCode: qr.shortCode!,
-        name: qr.name,
-        encodedContent: qr.encodedContent,
-      });
-      await recordFunnelEvent({
-        name: FUNNEL_EVENTS.qr_created,
-        workspaceId,
-        userId: user.id,
-        qrCodeId: qr.id,
-        source: "bulk",
-        oncePerQr: true,
-      });
-    }
+    type Record = { id: string; shortCode: string; name: string; encodedContent: string };
+    const qrRecords = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Workspace" WHERE id = ${workspaceId} FOR UPDATE`;
+      const previous = await tx.qrBulkBatch.findUnique({ where: { workspaceId_key: { workspaceId, key } } });
+      if (previous) {
+        if (previous.digest !== digest) throw Object.assign(new Error(MSG.BULK_KEY_CONFLICT), { bulkConflict: true });
+        return previous.records as Record[];
+      }
+      const quota = await assertCanCreateQrCodes({ workspaceId, planId: entitlements.planId, plan, count: items.length, needsDynamic: true, db: tx });
+      if (!quota.ok) throw new QrQuotaError(quota);
+      const records: Record[] = [];
+      for (const item of items) {
+        const shortCode = nanoid(8), qrData = `${appUrl}/r/${shortCode}`;
+        const qr = await tx.qrCode.create({ data: {
+          workspaceId, projectId: projectId || null, createdById: user.id,
+          kind: "DYNAMIC", contentType: "URL", name: item.name, shortCode,
+          encodedContent: qrData, currentTargetUrl: item.url, payload: { url: item.url }, styleConfig: styleConfig as object,
+          revisions: { create: { changedById: user.id, destinationUrl: item.url, encodedContent: qrData } },
+        } });
+        records.push({ id: qr.id, shortCode, name: qr.name, encodedContent: qrData });
+      }
+      await tx.qrBulkBatch.create({ data: { workspaceId, key, digest, records } });
+      return records;
+    }, { timeout: 20000 });
+    // Replay also repairs an interrupted analytics write; oncePerQr prevents duplicates.
+    for (const rec of qrRecords) await recordFunnelEvent({ name: FUNNEL_EVENTS.qr_created, workspaceId, userId: user.id, qrCodeId: rec.id, source: "bulk", oncePerQr: true });
 
     const archive = archiver("zip", { zlib: { level: 6 } });
     const chunks: Buffer[] = [];
@@ -209,6 +147,8 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code }, requestId);
+    if ((error as { bulkConflict?: boolean }).bulkConflict) return apiError(MSG.BULK_KEY_CONFLICT, "CONFLICT", 409, undefined, requestId);
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);

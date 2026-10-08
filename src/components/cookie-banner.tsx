@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { fetchApi } from "@/lib/client-api";
 import { Button } from "@/components/ui/button";
-import { setMetrikaCounterId } from "@/lib/product-analytics";
+import { METRIKA_READY_EVENT, setMetrikaCounterId } from "@/lib/product-analytics";
 import { COOKIE_CHANGE_EVENT, COOKIE_SETTINGS_EVENT, readCookieChoice, saveCookieChoice } from "@/lib/cookie-consent";
 
 type Ym = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
@@ -20,12 +21,13 @@ function startMetrika(id: string) {
     const queue: Ym = (...args) => { (queue.a ??= []).push(args); };
     queue.l = Date.now(); w.ym = queue;
   }
-  setMetrikaCounterId(id);
   const script = document.createElement("script");
   script.src = "https://mc.yandex.ru/metrika/tag.js";
   script.async = true; script.dataset.qrsAnalytics = "true";
   document.head.appendChild(script);
   w.ym(id, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false });
+  setMetrikaCounterId(id);
+  window.dispatchEvent(new Event(METRIKA_READY_EVENT));
 }
 function stopMetrika() {
   const w = window as AnalyticsWindow;
@@ -46,6 +48,7 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
   const consent = useSyncExternalStore(subscribe, readCookieChoice, () => "ssr" as const);
   const [open, setOpen] = useState(false);
   const dialog = useRef<HTMLDivElement>(null);
+  const revocation = useRef<Promise<unknown> | null>(null);
   const visible = consent === "none" || open;
   useEffect(() => {
     const show = () => { setOpen(true); };
@@ -59,15 +62,23 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
   }, [visible]);
   useEffect(() => {
     if (consent === "accepted" && yandexMetrikaId) startMetrika(yandexMetrikaId);
-    else if (consent !== "ssr" && stopMetrika()) window.location.reload();
+    else if (consent !== "ssr" && stopMetrika()) {
+      void (revocation.current ?? Promise.resolve()).finally(() => window.location.reload());
+    }
   }, [consent, yandexMetrikaId]);
-  function choose(choice: "accepted" | "declined") { saveCookieChoice(choice); setOpen(false); }
+  function choose(choice: "accepted" | "declined") {
+    if (choice === "declined") {
+      // Local refusal is immediate; allow a bounded revoke request before reload.
+      revocation.current = fetchApi("/api/analytics/revoke", { method: "POST", signal: AbortSignal.timeout(2000) }).catch(() => undefined);
+    }
+    saveCookieChoice(choice); setOpen(false);
+  }
   if (!visible) return null;
   return <div ref={dialog} tabIndex={-1} className="qrs-cookie-banner" role="region" aria-label="Настройки cookie">
     <div className="fk-container py-3 sm:py-4">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm qrs-text-default">
-          Технические cookie нужны для входа и безопасности. Яндекс Метрика включается только с вашего разрешения, без записи сеансов Вебвизором. Выбор можно изменить в <Link href="/privacy-policy#cookie-settings" className="underline">настройках cookie</Link>.
+          Технические cookie нужны для входа и безопасности. Аналитика и учёт партнёрских переходов включаются только с вашего разрешения. Яндекс Метрика работает без записи сеансов Вебвизором. Выбор можно изменить в <Link href="/privacy-policy#cookie-settings" className="underline">настройках cookie</Link>.
         </p>
         <div className="flex shrink-0 flex-wrap gap-3">
           <Button type="button" variant="secondary" size="sm" onClick={() => choose("declined")}>Только необходимые</Button>

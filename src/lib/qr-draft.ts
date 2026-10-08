@@ -1,5 +1,6 @@
 import { isSafeUrl } from "@/lib/url";
 import { safePostAuthPath } from "@/lib/safe-redirect";
+import { parseStaticQrDraft, readStaticDraftSnapshot } from "@/lib/static-qr-draft";
 
 export const QR_DRAFT_STORAGE_KEY = "qrs-create-draft";
 export const QR_DRAFT_EVENT = "qrs-create-draft";
@@ -121,6 +122,7 @@ export function destinationAfterAuth(nextFromQuery?: string | null): string {
 }
 
 function fallbackFromDraft(): string {
+  if (parseStaticQrDraft(readStaticDraftSnapshot())) return "/dashboard/create";
   const draft = readQrCreateDraft();
   return draft ? createQrContinuePath(draft) : "/dashboard";
 }

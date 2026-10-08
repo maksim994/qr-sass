@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { MSG } from "@/lib/user-messages";
 
@@ -180,8 +181,8 @@ export function formatUsage(current: number, limit: number | null): string {
 /** Per-batch row caps for CSV/XLSX mass create (independent of maxQrCodes quota). */
 export const BULK_BATCH_LIMITS: Record<PlanId, number> = {
   FREE: 50,
-  PRO: 1000,
-  BUSINESS: 5000,
+  PRO: 50,
+  BUSINESS: 50,
 };
 
 export function getBulkBatchLimit(planId: PlanId | string | null | undefined): number {
@@ -213,11 +214,12 @@ export async function assertCanCreateQrCodes(options: {
   plan: PlanInfo;
   count?: number;
   needsDynamic?: boolean;
+  db?: Pick<Prisma.TransactionClient, "qrCode">;
 }): Promise<QrCreateQuotaCheck> {
   const count = Math.max(1, options.count ?? 1);
   const needsDynamic = options.needsDynamic ?? false;
   const plan = options.plan;
-  const currentCount = await getDb().qrCode.count({
+  const currentCount = await (options.db ?? getDb()).qrCode.count({
     where: { workspaceId: options.workspaceId, isArchived: false },
   });
   const remaining =

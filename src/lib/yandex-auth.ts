@@ -1,3 +1,4 @@
+import { readRegistrationPartner, registrationPartnerData } from "@/lib/partners";
 import type { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { DEFAULT_WORKSPACE_NAME } from "@/lib/workspace-name";
@@ -145,7 +146,9 @@ export async function findOrCreateYandexUser(
   const passwordHash = await hashPassword(crypto.randomUUID());
   const workspaceSlug = `yandex-${profile.yandexId}-${nanoid(6)}`;
 
+  const partnerVisitId = await readRegistrationPartner();
   const user = await db.$transaction(async (tx) => {
+    const partnerData = await registrationPartnerData(tx, partnerVisitId);
     const user = await tx.user.create({
       data: {
         email: profile.email,
@@ -153,6 +156,7 @@ export async function findOrCreateYandexUser(
         name: profile.name,
         passwordHash,
         legalAcceptances: { create: receipt },
+        metrikaRegistrationPending: true,
         emailVerifiedAt: new Date(),
         memberships: {
           create: {
@@ -161,6 +165,7 @@ export async function findOrCreateYandexUser(
               create: {
                 name: DEFAULT_WORKSPACE_NAME,
                 slug: workspaceSlug,
+                ...partnerData,
               },
             },
           },

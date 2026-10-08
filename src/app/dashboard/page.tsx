@@ -20,11 +20,11 @@ export default async function DashboardPage() {
     db.qrCode.count({ where: active }),
     db.qrCode.findMany({ where: active, orderBy: { createdAt: "desc" }, take: 5, include: { _count: { select: { scanEvents: true } } } }),
     db.qrCode.count({ where: { ...active, kind: "DYNAMIC" } }),
-    db.qrCode.count({ where: { ...active, OR: [{ kind: "DYNAMIC" }, { contentType: "VCARD" }] } }),
+    db.qrCode.count({ where: { ...active, OR: [{ kind: "DYNAMIC" }, { contentType: "VCARD", shortCode: { not: null } }] } }),
     db.membership.count({ where: { workspaceId: workspace.id } }),
   ]);
   const scanCount7d = entitlements.allowsAnalytics && trackedCount > 0
-    ? await db.scanEvent.count({ where: { qrCode: { ...active, OR: [{ kind: "DYNAMIC" }, { contentType: "VCARD" }] }, scannedAt: { gte: start }, ...humanDevicePrismaWhere() } })
+    ? await db.scanEvent.count({ where: { qrCode: { ...active, OR: [{ kind: "DYNAMIC" }, { contentType: "VCARD", shortCode: { not: null } }] }, scannedAt: { gte: start }, ...humanDevicePrismaWhere() } })
     : null;
 
   return <DashboardOverview
@@ -37,6 +37,6 @@ export default async function DashboardPage() {
     periodEnd={entitlements.periodEnd?.toISOString() ?? null}
     activation={{ ...activation, hasQr: activation.hasQr || totalQr > 0 }}
     canTrackOpens={entitlements.allowsAnalytics && trackedCount > 0}
-    recentQrs={recentQrs.map((qr) => ({ id: qr.id, name: qr.name, kind: qr.kind, contentType: qr.contentType, createdAt: qr.createdAt.toISOString(), scanCount: qr._count.scanEvents }))}
+    recentQrs={recentQrs.map((qr) => ({ id: qr.id, name: qr.name, kind: qr.kind, contentType: qr.contentType, managed: qr.kind === "DYNAMIC" || Boolean(qr.shortCode), createdAt: qr.createdAt.toISOString(), scanCount: qr._count.scanEvents }))}
   />;
 }

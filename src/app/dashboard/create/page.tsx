@@ -10,6 +10,7 @@ import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-heade
 import { Alert } from "@/components/ui";
 import { CreateTypePicker } from "@/components/dashboard/create-type-picker";
 import { ResumeCreateDraft } from "@/components/dashboard/resume-create-draft";
+import { ResumeStaticDraft } from "@/components/dashboard/resume-static-draft";
 
 export default async function CreatePage() {
   const user = await requireUser();
@@ -47,15 +48,17 @@ export default async function CreatePage() {
     <div>
       <DashboardPageHeader
         title="Создать QR-код"
-        description="Выберите содержимое, затем настройте оформление кода."
+        description="Сохраняйте QR в кабинете. Бесплатное создание и скачивание статики доступно на главной без лимита."
       />
 
+      <p><Link href="/#create-qr" className="qrs-navlink">Создать и скачать статический QR бесплатно →</Link></p>
       <ResumeCreateDraft />
+      <ResumeStaticDraft workspaceId={workspace.id} limitReached={limitReached} />
 
       {(limitReached || (qrRemaining != null && qrRemaining <= 3)) ? (
         <div className="qrs-create-alerts">
           {limitReached ? (
-            <Alert variant="warning" title="Лимит тарифа">
+            <Alert variant="warning" title="Лимит облачного архива">
               Создано {totalQr} из {qrLimit} QR.{" "}
               <Link href="/dashboard/billing" className="qrs-navlink">
                 Обновите тариф
@@ -64,7 +67,7 @@ export default async function CreatePage() {
             </Alert>
           ) : qrRemaining != null && qrRemaining <= 3 ? (
             <Alert variant="info" title="Доступно на вашем тарифе">
-              Можно создать ещё {qrRemaining} QR на текущем тарифе.{" "}
+              В облачном архиве осталось мест: {qrRemaining}.{" "}
               <Link href="/dashboard/billing" className="qrs-navlink">
                 Смотреть тарифы
               </Link>

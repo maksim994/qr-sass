@@ -6,6 +6,7 @@ import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-resp
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { createQrWithinQuota, QrQuotaError } from "@/lib/qr-create-transaction";
 import { assertCanCreateQrCodes } from "@/lib/plans";
 import { getEntitlements } from "@/lib/entitlements";
 import { encodeQrContent, needsHostedPage } from "@/lib/qr";
@@ -20,6 +21,7 @@ import { FUNNEL_EVENTS, isPrivateOrLocalIp, recordFunnelEvent } from "@/lib/funn
 import { toPublicQr } from "@/lib/qr-public-dto";
 import { getClientIp } from "@/lib/rate-limit";
 import { applyPolicyUrl } from "@/lib/url";
+import { prepareStaticQr } from "@/lib/static-qr";
 
 export async function GET(request: Request) {
   const requestId = getRequestId(request);
@@ -98,7 +100,15 @@ export async function POST(request: Request) {
     if (!pixels.ok) {
       return apiError(pixels.error, "VALIDATION_ERROR", 400, undefined, requestId);
     }
-    const payload = stampTrackingConsentVersion({}, pixels.payload);
+    let payload = stampTrackingConsentVersion({}, pixels.payload);
+    const directStatic = data.kind === "STATIC" && payload.staticDirect === true;
+    let directData = "";
+    if (payload.staticDirect === true) {
+      const prepared = prepareStaticQr(data.contentType, payload);
+      if (!directStatic || !prepared.ok) return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
+      payload = prepared.payload;
+      directData = prepared.data;
+    }
     if (!applyPolicyUrl(payload)) {
       return apiError(MSG.ONLY_HTTPS_HTTP_URL, "VALIDATION_ERROR", 400, undefined, requestId);
     }
@@ -124,7 +134,7 @@ export async function POST(request: Request) {
 
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const isHosted = needsHostedPage(data.contentType);
-    const usesVcardDownload = data.contentType === "VCARD";
+    const usesVcardDownload = data.contentType === "VCARD" && !directStatic;
     if (data.kind === "DYNAMIC" && !isHosted && !supportsDynamicKind(data.contentType)) {
       return apiError(MSG.QR_KIND_NOT_SUPPORTED, "BAD_REQUEST", 400, undefined, requestId);
     }
@@ -151,7 +161,7 @@ export async function POST(request: Request) {
 
     let encodedContent = "";
     if (!isHosted && !usesVcardDownload) {
-      encodedContent = encodeQrContent(data.contentType, payload);
+      encodedContent = directData || encodeQrContent(data.contentType, payload);
       if (!encodedContent) {
         return apiError(MSG.COULD_NOT_ENCODE_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
       }
@@ -194,7 +204,7 @@ export async function POST(request: Request) {
         ? await bcrypt.hash(data.password, 10)
         : undefined;
 
-    const qr = await db.qrCode.create({
+    const qr = await createQrWithinQuota({ workspaceId: data.workspaceId, planId: entitlements.planId, plan: entitlements.plan, needsDynamic: isDynamic || usesVcardDownload }, tx => tx.qrCode.create({
       data: {
         workspaceId: data.workspaceId,
         projectId: data.projectId,
@@ -218,7 +228,7 @@ export async function POST(request: Request) {
           },
         },
       },
-    });
+    }));
 
     logger.info({
       area: "api",
@@ -239,6 +249,7 @@ export async function POST(request: Request) {
     });
     return apiSuccess({ score, qrId: qr.id, shortCode: qr.shortCode }, 200, requestId);
   } catch (error) {
+    if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code }, requestId);
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);

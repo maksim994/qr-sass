@@ -5,8 +5,10 @@ import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { createQrWithinQuota, QrQuotaError } from "@/lib/qr-create-transaction";
 import { assertCanCreateQrCodes } from "@/lib/plans";
 import { getEntitlements } from "@/lib/entitlements";
+import { isDirectStaticVcard } from "@/lib/static-qr";
 import { needsHostedPage } from "@/lib/qr";
 import { FUNNEL_EVENTS, recordFunnelEvent } from "@/lib/funnel";
 
@@ -33,7 +35,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const entitlements = await getEntitlements(source.workspaceId);
 
-    const needsDynamic = source.kind === "DYNAMIC" || needsHostedPage(source.contentType) || source.contentType === "VCARD";
+    const needsDynamic = source.kind === "DYNAMIC" || needsHostedPage(source.contentType) || (source.contentType === "VCARD" && !isDirectStaticVcard(source.kind, source.contentType, (source.payload as Record<string, unknown>) ?? {}));
     const quota = await assertCanCreateQrCodes({
       workspaceId: source.workspaceId,
       planId: entitlements.planId,
@@ -47,7 +49,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const isHosted = needsHostedPage(source.contentType);
-    const usesVcardDownload = source.contentType === "VCARD";
+    const usesVcardDownload = source.contentType === "VCARD" && !isDirectStaticVcard(source.kind, source.contentType, (source.payload as Record<string, unknown>) ?? {});
     const isDynamic = source.kind === "DYNAMIC" || isHosted || usesVcardDownload;
     const shortCode = isDynamic || usesVcardDownload ? nanoid(8) : null;
 
@@ -62,7 +64,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const copyName = `${source.name} (копия)`.slice(0, 120);
 
-    const created = await db.qrCode.create({
+    const created = await createQrWithinQuota({ workspaceId: source.workspaceId, planId: entitlements.planId, plan: entitlements.plan, needsDynamic: needsDynamic }, tx => tx.qrCode.create({
       data: {
         workspaceId: source.workspaceId,
         projectId: source.projectId,
@@ -87,7 +89,7 @@ export async function POST(request: Request, context: RouteContext) {
           },
         },
       },
-    });
+    }));
 
     logger.info({
       area: "api",
@@ -108,6 +110,7 @@ export async function POST(request: Request, context: RouteContext) {
     });
     return apiSuccess({ qrId: created.id, shortCode: created.shortCode }, 200, requestId);
   } catch (error) {
+    if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code }, requestId);
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);

@@ -20,6 +20,7 @@ import {
   QrWizardPreview,
   QrWizardTabs,
 } from "@/components/qr/qr-wizard-shared";
+import { useProductPageGoal } from "@/hooks/use-product-page-goal";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { QrLifetimeNote } from "@/components/qr/qr-lifetime-note";
 import {
@@ -81,6 +82,7 @@ export function CreateQrClient({
   const storedDraft = typeParam === "URL" ? parseQrCreateDraft(storedRaw) : null;
   const draft = typeParam === "URL" ? initialDraft ?? storedDraft : null;
 
+  useProductPageGoal(PRODUCT_GOALS.qr_creation_started, "editor", typeParam);
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [kindOverride, setKindOverride] = useState<"STATIC" | "DYNAMIC" | null>(null);
   const [payload, setPayload] = useState<Record<string, unknown>>({});
@@ -106,7 +108,7 @@ export function CreateQrClient({
     : String(payload.url ?? "");
   const formPayload = typeParam === "URL" ? { ...payload, url: resolvedUrl } : payload;
   const requestedKind = kindOverride ?? draft?.kind ?? "STATIC";
-  const kind: "STATIC" | "DYNAMIC" = planGate.allowsDynamic ? requestedKind : "STATIC";
+  const kind: "STATIC" | "DYNAMIC" = requestedKind;
   const wantedDynamic = typeParam === "URL" && requestedKind === "DYNAMIC" && !planGate.allowsDynamic;
   const defaultName = typeInfo?.label ? `${typeInfo.label} QR` : "Новый QR";
   const name = nameOverride ?? (resolvedUrl ? nameFromUrl(resolvedUrl) : defaultName);
@@ -252,14 +254,14 @@ export function CreateQrClient({
               {planGate.qrLimitReached ? (
                 <Alert variant="warning" title="Лимит QR-кодов">
                   На тарифе больше нельзя создать коды.{" "}
-                  <Link href="/dashboard/billing" className="qrs-navlink">
+                  <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })} className="qrs-navlink">
                     Обновить тариф
                   </Link>
                 </Alert>
               ) : planGate.qrRemaining != null && planGate.qrRemaining <= 3 ? (
                 <Alert variant="info" title="Почти у лимита">
                   Осталось {planGate.qrRemaining} QR по тарифу.{" "}
-                  <Link href="/dashboard/billing" className="qrs-navlink">
+                  <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })} className="qrs-navlink">
                     Смотреть тарифы
                   </Link>
                 </Alert>
@@ -268,14 +270,14 @@ export function CreateQrClient({
               {wantedDynamic ? (
                 <Alert variant="warning" title="Нужен тариф Про">
                   Вы выбрали код, который можно менять после печати. На бесплатном тарифе доступна только статика.{" "}
-                  <Link href="/dashboard/billing" className="qrs-navlink">
+                  <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })} className="qrs-navlink">
                     Перейти на Про
                   </Link>
                 </Alert>
               ) : dynamicBlocked ? (
                 <Alert variant="warning" title="Нужен тариф Про">
                   Этот тип создаёт динамический QR с короткой ссылкой. На бесплатном тарифе доступны только статические коды.{" "}
-                  <Link href="/dashboard/billing" className="qrs-navlink">
+                  <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })} className="qrs-navlink">
                     Перейти на Про
                   </Link>
                 </Alert>
@@ -287,7 +289,7 @@ export function CreateQrClient({
             <h2 id="qr-mode-title">Как будет работать ссылка</h2>
             <QrKindSegment value={kind} onChange={setKindOverride} disabled={!planGate.allowsDynamic} />
             <p>{kind === "DYNAMIC" ? "Ссылку можно менять после печати. Открытия будут доступны в аналитике." : "Ссылка записана прямо в QR-код. После печати её нельзя изменить; статистика открытий не собирается."}
-              {!planGate.allowsDynamic && <> Для смены ссылки и аналитики — <Link href="/dashboard/billing">тариф Про</Link>.</>}
+              {!planGate.allowsDynamic && <> Для смены ссылки и аналитики — <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })}>тариф Про</Link>.</>}
             </p>
           </section> : needsDynamicByType ? <div className={styles.mode}><p>Материал откроется по постоянной ссылке QR-S. Готовый QR появится после сохранения.</p></div> : null}
 

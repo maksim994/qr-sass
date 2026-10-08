@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { STATIC_QR_TYPES } from "@/lib/static-qr";
 import type { QrTypeInfo } from "@/lib/qr-types";
 import { HomeQrPreview } from "./home-qr-preview";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export function TypeExplorer({ types, signedIn }: { types: QrTypeInfo[]; signedI
   const activeGroup = groups.some(item => item.id === group) ? group : groups[0]?.id;
   return <div className={s.typeExplorer}>
     <div className={s.filterTabs} role="group" aria-label="Категории QR-кодов">{groups.map(item => <button key={item.id} type="button" aria-pressed={activeGroup === item.id} onClick={() => setGroup(item.id)}>{item.name}</button>)}</div>
-    <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => <Link key={type.type} href={signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`}><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">↗</span></Link>)}</div>
+    <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => <Link key={type.type} href={(STATIC_QR_TYPES as readonly string[]).includes(type.type) ? `/?static=${type.type}#create-qr` : signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`}><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">↗</span></Link>)}</div>
     {types.length === 0 && <p>Новые типы QR-кодов скоро появятся.</p>}
   </div>;
 }
@@ -85,7 +86,7 @@ export function IndustryShowcase({ types, signedIn }: { types: QrTypeInfo[]; sig
   return <div className={s.industries}>
     <div className={s.industryNav} role="group" aria-label="Сценарии по отраслям">{available.map(item => <button type="button" key={item.id} aria-pressed={selected.id === item.id} onClick={() => setSelection(item.id)}><Icon path={item.icon} /><span>{item.name}</span><span aria-hidden="true">↗</span></button>)}</div>
     <div className={s.industryContent}>
-      <div className={s.industryCopy}><h3>{selected.title}</h3><p>{selected.copy}</p><Button href={signedIn ? path : `/register?next=${encodeURIComponent(path)}`} variant="secondary">Создать QR <Icon path={arrow} /></Button><span>Начните с типа «{types.find(type => type.type === selected.type)?.label}»</span></div>
+      <div className={s.industryCopy}><h3>{selected.title}</h3><p>{selected.copy}</p><Button href={(STATIC_QR_TYPES as readonly string[]).includes(selected.type) ? `/?static=${selected.type}#create-qr` : signedIn ? path : `/register?next=${encodeURIComponent(path)}`} variant="secondary">Создать QR <Icon path={arrow} /></Button><span>Начните с типа «{types.find(type => type.type === selected.type)?.label}»</span></div>
       <div className={s.industryArt} data-industry={selected.id}><div className={s.industryDocument}><div className={s.documentBrand}><Icon path={selected.icon} /><span>{selected.label}</span></div><strong>{selected.headline}</strong><div className={s.documentLines}>{selected.lines.map(line => <span key={line}>{line}</span>)}</div><div className={s.documentCode}><HomeQrPreview value="https://qr-s.ru/#use-cases" /><span>Откройте<br />в телефоне ↗</span></div></div><span className={s.industryDisclaimer}>Пример оформления</span></div>
     </div>
   </div>;
@@ -93,11 +94,11 @@ export function IndustryShowcase({ types, signedIn }: { types: QrTypeInfo[]; sig
 
 export function DesignPlayground() {
   const [color, setColor] = useState("ink");
-  const [frame, setFrame] = useState(true);
+
   const colors = [{ id: "ink", name: "Графит" }, { id: "blue", name: "Синий" }, { id: "green", name: "Хвойный" }, { id: "plum", name: "Сливовый" }];
   return <div className={s.designPlayground}>
-    <div className={s.designCanvas} data-color={color}><div className={s.designPaper} data-frame={frame}><HomeQrPreview value="https://qr-s.ru" /><span>Здесь начинается знакомство</span></div><span className={s.canvasCaption}>Пример оформления · QR ведёт на qr-s.ru</span></div>
-    <div className={s.designControls}><div><span>Цвет кода</span><div className={s.swatches} role="group" aria-label="Цвет примера QR">{colors.map(item => <button key={item.id} type="button" data-color={item.id} aria-label={item.name} aria-pressed={color === item.id} onClick={() => setColor(item.id)}>{color === item.id && <span aria-hidden="true">✓</span>}</button>)}</div></div><label className={s.frameToggle}><input type="checkbox" checked={frame} onChange={event => setFrame(event.target.checked)} /><span>Подпись под кодом</span></label></div>
+    <div className={s.designCanvas} data-color={color}><div className={s.designPaper} data-frame={false}><HomeQrPreview value="https://qr-s.ru" /></div><span className={s.canvasCaption}>Пример оформления · QR ведёт на qr-s.ru</span></div>
+    <div className={s.designControls}><div><span>Цвет кода</span><div className={s.swatches} role="group" aria-label="Цвет примера QR">{colors.map(item => <button key={item.id} type="button" data-color={item.id} aria-label={item.name} aria-pressed={color === item.id} onClick={() => setColor(item.id)}>{color === item.id && <span aria-hidden="true">✓</span>}</button>)}</div></div></div>
   </div>;
 }
 
@@ -121,7 +122,7 @@ export function HomeFooterExperience({ types, signedIn }: { types: QrTypeInfo[];
   };
   const hint = hints[selected] ?? hints.URL;
   return <div className={s.footerExperience}>
-    <div className={s.footerStart}><div className={s.footerCopy}><h2>Есть идея?<br />Дайте ей свой QR.</h2><p>Выберите, чем хотите поделиться.<br />Остальное соберём в редакторе.</p><div className={s.footerChoices} role="group" aria-label="Тип нового QR-кода">{choices.map(type => <button key={type.type} type="button" aria-pressed={selected === type.type} onClick={() => setSelected(type.type)}><Icon path={type.icon} />{type.label}</button>)}</div><Button variant="primary" size="lg" href={signedIn ? path : `/register?next=${encodeURIComponent(path)}`}>Перейти к созданию <Icon path={arrow} /></Button></div>
+    <div className={s.footerStart}><div className={s.footerCopy}><h2>Есть идея?<br />Дайте ей свой QR.</h2><p>Выберите, чем хотите поделиться.<br />Остальное соберём в редакторе.</p><div className={s.footerChoices} role="group" aria-label="Тип нового QR-кода">{choices.map(type => <button key={type.type} type="button" aria-pressed={selected === type.type} onClick={() => setSelected(type.type)}><Icon path={type.icon} />{type.label}</button>)}</div><Button variant="primary" size="lg" href={(STATIC_QR_TYPES as readonly string[]).includes(selected) ? `/?static=${selected}#create-qr` : signedIn ? path : `/register?next=${encodeURIComponent(path)}`}>Перейти к созданию <Icon path={arrow} /></Button></div>
       <div className={s.footerPreview} aria-live="polite"><Icon path={selectedType?.icon ?? arrow} /><strong>{hint.title}</strong><p>{hint.text}</p><div className={s.footerPreviewBottom}><span>{selectedType?.label ?? "QR-код"}<small>Выбранный тип</small></span><span aria-hidden="true">↗</span></div></div>
     </div>
     <div className={s.footerSignature}><span>От идеи до первого сканирования.</span><button type="button" onClick={() => { document.getElementById("home-title")?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }); }}>К началу страницы <span aria-hidden="true">↑</span></button></div>

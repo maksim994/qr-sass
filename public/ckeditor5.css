@@ -1097,7 +1097,7 @@ of the component, floating–point numbers have been used which, for the default
 				/* Make sure dropdowns with just an icon have the right inner spacing */
 				padding-right: var(--ck-spacing-small);
 			}
-/* #23 */
+/* https://github.com/ckeditor/ckeditor5/issues/23 */
 .ck.ck-dropdown .ck-button.ck-dropdown__button .ck-button__label {
 			width: 7em;
 			overflow: hidden;
@@ -1747,11 +1747,11 @@ of the component, floating–point numbers have been used which, for the default
 	/* Multiplied by the height of the line in "px" should give SVG "viewport" dimensions */
 	font-size: var(--ck-icon-font-size);
 
-	/* Inherit cursor style (#5). */
+	/* Inherit cursor style (https://github.com/ckeditor/ckeditor5/issues/5). */
 	cursor: inherit;
 }
 .ck.ck-icon * {
-		/* Inherit cursor style (#5). */
+		/* Inherit cursor style (https://github.com/ckeditor/ckeditor5/issues/5). */
 		cursor: inherit;
 	}
 /* Allows dynamic coloring of an icon by inheriting its color from the parent. */
@@ -2913,7 +2913,7 @@ of the component, floating–point numbers have been used which, for the default
 		height: 0;
 	}
 .ck.ck-toolbar > .ck-toolbar__items > *:not(.ck-toolbar__line-break) {
-			/* (#11) Separate toolbar items. */
+			/* (https://github.com/ckeditor/ckeditor5/issues/11) Separate toolbar items. */
 			margin-right: var(--ck-spacing-small);
 		}
 /* Don't display a separator after an empty items container, for instance,
@@ -2989,7 +2989,7 @@ of the component, floating–point numbers have been used which, for the default
 		margin-right: 0;
 	}
 [dir="rtl"] .ck.ck-toolbar:not(.ck-toolbar_compact) > .ck-toolbar__items > .ck, .ck.ck-toolbar[dir="rtl"]:not(.ck-toolbar_compact) > .ck-toolbar__items > .ck {
-		/* (#11) Separate toolbar items. */
+		/* (https://github.com/ckeditor/ckeditor5/issues/11) Separate toolbar items. */
 		margin-left: var(--ck-spacing-small);
 	}
 [dir="rtl"] .ck.ck-toolbar > .ck-toolbar__items > .ck:last-child, .ck.ck-toolbar[dir="rtl"] > .ck-toolbar__items > .ck:last-child {
@@ -3352,7 +3352,7 @@ of the component, floating–point numbers have been used which, for the default
  * Copyright (c) 2003-2026, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-licensing-options
  */
-/* See ckeditor/ckeditor5#936. */
+/* See https://github.com/ckeditor/ckeditor5/issues/936. */
 @media (forced-colors: active) {
 		.ck.ck-placeholder, .ck .ck-placeholder {
 		/*
@@ -3824,7 +3824,7 @@ of the component, floating–point numbers have been used which, for the default
 		animation-delay: 500ms;
 		animation-fill-mode: forwards;
 
-		/* #1095. While reset is not providing proper box-sizing for pseudoelements, we need to handle it. */
+		/* https://github.com/ckeditor/ckeditor5/issues/1095. While reset is not providing proper box-sizing for pseudoelements, we need to handle it. */
 		box-sizing: border-box;
 	}
 @media (prefers-reduced-motion: reduce) {
@@ -5953,7 +5953,7 @@ This way it will be easier to override it in custom themes if needed.
  */
 
 .ck-content blockquote {
-	/* See #12 */
+	/* See https://github.com/ckeditor/ckeditor5-block-quote/issues/12 */
 	overflow: hidden;
 
 	/* https://github.com/ckeditor/ckeditor5-block-quote/issues/15 */
@@ -6319,7 +6319,7 @@ div.ck.ck-balloon-panel.ck-emoji-picker-balloon {
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-licensing-options
  */
 
-/* See ckeditor/ckeditor5#936. */
+/* See https://github.com/ckeditor/ckeditor5/issues/936. */
 .ck.ck-placeholder,
 .ck .ck-placeholder {
 	position: relative;
@@ -6330,11 +6330,11 @@ div.ck.ck-balloon-panel.ck-emoji-picker-balloon {
 		right: 0;
 		content: attr(data-placeholder);
 
-		/* See ckeditor/ckeditor5#469. */
+		/* See https://github.com/ckeditor/ckeditor5/issues/469. */
 		pointer-events: none;
 	}
 
-/* See ckeditor/ckeditor5#1987. */
+/* See https://github.com/ckeditor/ckeditor5/issues/1987. */
 .ck.ck-read-only .ck-placeholder::before {
 		display: none;
 	}
@@ -7207,7 +7207,7 @@ span.ck-widget.html-object-embed {
 	}
 
 .ck-content .image img {
-			/* Prevent unnecessary margins caused by line-height (see #44). */
+			/* Prevent unnecessary margins caused by line-height (see https://github.com/ckeditor/ckeditor5/issues/44). */
 			display: block;
 
 			/* Center the image if its width is smaller than the content's width. */
@@ -7741,7 +7741,7 @@ span.ck-widget.html-object-embed {
 	display: block;
 
 	/* Give the media some minimal width in the content to prevent them
-	from being "squashed" in tight spaces, e.g. in table cells (#44) */
+	from being "squashed" in tight spaces, e.g. in table cells (https://github.com/ckeditor/ckeditor5-media-embed/issues/44) */
 	min-width: 15em;
 }
 
@@ -9662,7 +9662,7 @@ div.ck.ck-balloon-panel.ck-mention-balloon {
 		}
 
 .ck.ck-input-color .ck.ck-input-color__button {
-		/* Resolving issue with misaligned buttons on Safari (see #10589) */
+		/* Resolving issue with misaligned buttons on Safari (see https://github.com/ckeditor/ckeditor5/issues/10589) */
 		display: flex;
 	}
 
@@ -10504,7 +10504,7 @@ a.ck.ck-button {
  */
 
 .ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
-		z-index: var(--ck-z-panel); /* #315 */
+		z-index: var(--ck-z-panel); /* https://github.com/ckeditor/ckeditor5/issues/315 */
 		position: fixed;
 		top: 0;
 	}

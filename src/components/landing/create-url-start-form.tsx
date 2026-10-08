@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ export function CreateUrlStartForm({
     }
     setError("");
     const draft: QrCreateDraft = { v: 1, contentType: "URL", url: normalized, kind };
+    trackGoal(PRODUCT_GOALS.qr_creation_started, { source: "scenario", contentType: "URL", kind });
     writeQrCreateDraft(draft);
     const continuePath = createQrContinuePath(draft);
     if (signedIn) {

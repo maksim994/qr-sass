@@ -1,7 +1,7 @@
 "use client";
 import styles from "@/components/admin/admin.module.css";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
@@ -62,30 +62,7 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
     categoryId: post?.categoryId ?? "",
   });
 
-  useEffect(() => {
-    if (post) {
-      setState({
-        title: post.title,
-        slug: post.slug,
-        metaTitle: post.metaTitle,
-        metaDescription: post.metaDescription,
-        excerpt: post.excerpt,
-        content: post.content,
-        coverImageUrl: post.coverImageUrl,
-        authorName: post.authorName,
-        readingTimeMinutes: post.readingTimeMinutes,
-        structuredData: post.structuredData,
-        published: post.published,
-        categoryId: post.categoryId,
-      });
-    }
-  }, [post]);
-
   const autoSlug = !post || mode === "create";
-  useEffect(() => {
-    if (autoSlug && state.title)
-      setState((s) => ({ ...s, slug: slugify(s.title) }));
-  }, [state.title, autoSlug]);
 
   function insertContentImage(url: string) {
     const img = `<p><img src="${url}" alt="" /></p>`;
@@ -190,7 +167,7 @@ export function BlogPostForm({ post, mode, categories = [] }: Props) {
           id="blog-title"
           type="text"
           value={state.title}
-          onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
+          onChange={(e) => { const title = e.target.value; setState((s) => ({ ...s, title, ...(autoSlug ? { slug: slugify(title) } : {}) })); }}
           required
           placeholder="Название статьи"
         />

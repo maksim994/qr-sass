@@ -1,3 +1,5 @@
+import { parseMetrikaAttribution } from "@/lib/metrika-attribution";
+import { getSiteSettings } from "@/lib/site-settings";
 import { NextRequest, NextResponse } from "next/server";
 import { WorkspacePlan } from "@prisma/client";
 import { MSG } from "@/lib/user-messages";
@@ -28,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     const parsed = z.object({
-      workspaceId: z.string().min(1), planId: z.enum(["PRO", "BUSINESS"]), useCurrentTerms: z.boolean().optional(),
+      workspaceId: z.string().min(1), planId: z.enum(["PRO", "BUSINESS"]), useCurrentTerms: z.boolean().optional(), metrika: z.unknown().optional(),
     }).safeParse(await readJsonBody(req));
     if (!parsed.success) return apiError(MSG.WORKSPACE_ID_OR_PLAN_REQUIRED, "VALIDATION_ERROR", 400);
     const body = parsed.data;
@@ -58,6 +60,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: MSG.INVALID_PLAN }, { status: 400 });
     }
     const amount = plan.priceRub;
+    let counter: string | null = null;
+    try { counter = (await getSiteSettings()).yandexMetrikaId; } catch { /* Optional attribution. */ }
+    const metrika = parseMetrikaAttribution(body.metrika, counter);
+    const attribution = metrika ? { metrikaUserId: user.id, metrikaClientId: metrika.clientId, metrikaCounterId: metrika.counterId, metrikaConsentAt: new Date(), metrikaConsentVersion: metrika.consentVersion } : {};
 
     if (env.BILLING_PROVIDER === "robokassa") {
       const config = getRobokassaConfig();
@@ -65,7 +71,7 @@ export async function POST(req: NextRequest) {
       const name = `Доступ к QR-S.ru: тариф ${plan.name}, 1 месяц`;
       const local = await prisma.payment.create({ data: {
         workspaceId, provider: "robokassa", providerPaymentId: robokassaPaymentId(invoiceId),
-        amount, currency: "RUB", planId, termsMode, isTest: config.isTest,
+        amount, currency: "RUB", planId, termsMode, ...attribution, isTest: config.isTest,
         description: config.isTest ? `Тест: ${name}` : name,
       } });
       const payment = buildRobokassaPayment({ invoiceId, orderId: local.id, amount, name, email: user.email }, config);
@@ -91,6 +97,7 @@ export async function POST(req: NextRequest) {
           currency: "RUB",
           planId,
           termsMode,
+          ...attribution,
           isTest: Boolean(paymentData.test),
           status: "PENDING",
           description: `Оплата тарифа ${planId}`,

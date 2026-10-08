@@ -2,7 +2,7 @@ import QRCode from "qrcode";
 import { MSG } from "@/lib/user-messages";
 
 /** Real QR modules, including a four-module quiet zone, for the landing preview. */
-export function HomeQrPreview({ value, className }: { value: string; className?: string }) {
+export function HomeQrPreview({ value, className, foreground = "#20252c", background = "#fff" }: { value: string; className?: string; foreground?: string; background?: string }) {
   let modules: ReturnType<typeof QRCode.create>["modules"] | null = null;
   try {
     modules = QRCode.create(value, { errorCorrectionLevel: "M" }).modules;
@@ -18,8 +18,8 @@ export function HomeQrPreview({ value, className }: { value: string; className?:
   }
   return (
       <svg className={className} viewBox={`0 0 ${modules.size + 8} ${modules.size + 8}`} role="img" aria-label="Предпросмотр QR-кода" shapeRendering="crispEdges">
-        <rect width="100%" height="100%" fill="#fff" />
-        <path d={paths.join("")} fill="#20252c" />
+        <rect width="100%" height="100%" fill={background} />
+        <path d={paths.join("")} fill={foreground} />
       </svg>
   );
 }

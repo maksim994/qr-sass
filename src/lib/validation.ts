@@ -130,6 +130,7 @@ export const styleSchema = z.object({
   logoMargin: z.number().min(0).max(20).default(0),
 
   margin: z.number().int().min(0).max(16).default(2),
+  quietZoneModules: z.number().int().min(4).max(8).optional(),
   errorCorrectionLevel: z.enum(["L", "M", "Q", "H"]).default("M"),
 });
 

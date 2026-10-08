@@ -56,7 +56,7 @@ try {
   const billing = await fetch(base + "/dashboard/billing", { headers: { Cookie: authCookies } });
   assert.equal(billing.status, 200);
   const billingHtml = await billing.text();
-  assert.match(billingHtml, /Попробовать 14 дней/);
+  assert.match(billingHtml, /Попробовать 7 дней/);
   assert.match(billingHtml, /terms-of-service#payment/);
   assert.match(billingHtml, /terms-of-service#refund/);
   const oauth = await post("/api/auth/yandex", { termsAccepted: true, consent: true, legalVersion: LEGAL_VERSION, next: "/dashboard" });

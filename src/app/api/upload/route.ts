@@ -6,6 +6,8 @@ import { validateFileType } from "@/lib/file-validation";
 import { logger } from "@/lib/logger";
 import { uploadFile, getS3Key } from "@/lib/s3";
 import { workspaceFilePath } from "@/lib/workspace-file-path";
+import { formDataWithinLimit } from "@/lib/request-body-limit";
+import { consumeRateLimit, uploadRateLimiter } from "@/lib/rate-limit";
 import { nanoid } from "nanoid";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -29,11 +31,21 @@ export async function POST(request: Request) {
     const user = await getApiUser();
     if (!user) return unauthorized();
 
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-    const workspaceId = formData.get("workspaceId") as string | null;
+    const rate = await consumeRateLimit(uploadRateLimiter, user.id);
+    if (!rate.success) return apiError(MSG.UPLOAD_RATE_LIMIT, "FORBIDDEN", 429, undefined, requestId);
+    let formData: FormData;
+    try {
+      formData = await formDataWithinLimit(request, MAX_SIZE + 64 * 1024, {
+        requireLength: false, tooLargeMessage: MSG.UPLOAD_TOO_LARGE,
+      });
+    } catch (error) {
+      const status = error && typeof error === "object" && "status" in error ? Number(error.status) : 400;
+      return apiError(status === 413 ? MSG.UPLOAD_TOO_LARGE : MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", status, undefined, requestId);
+    }
+    const file = formData.get("file");
+    const workspaceId = formData.get("workspaceId");
 
-    if (!file || !workspaceId) {
+    if (!(file instanceof File) || typeof workspaceId !== "string" || !workspaceId) {
       return apiError(MSG.FILE_AND_WORKSPACE_REQUIRED, "BAD_REQUEST", 400, undefined, requestId);
     }
 
@@ -41,7 +53,7 @@ export async function POST(request: Request) {
     if (!isMember) return unauthorized();
 
     if (file.size > MAX_SIZE) {
-      return apiError("Файл слишком большой. Максимум 10 МБ.", "VALIDATION_ERROR", 400, undefined, requestId);
+      return apiError(MSG.UPLOAD_TOO_LARGE, "VALIDATION_ERROR", 400, undefined, requestId);
     }
 
     if (!ALLOWED_TYPES.has(file.type)) {

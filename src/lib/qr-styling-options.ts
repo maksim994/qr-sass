@@ -1,3 +1,4 @@
+import QRCode from "qrcode";
 import type { QrStyle } from "@/components/qr-designer";
 
 type GradientConfig = {
@@ -65,7 +66,9 @@ export function buildQrStylingOptions(data: string, style: QrStyle, size = 280) 
     height: size,
     type: "svg" as const,
     data: data || "https://example.com",
-    margin: style.margin,
+    margin: style.quietZoneModules
+      ? Math.ceil(size * style.quietZoneModules / (QRCode.create(data || "https://example.com", { errorCorrectionLevel: style.errorCorrectionLevel }).modules.size + 2 * style.quietZoneModules))
+      : style.margin,
     dotsOptions,
     cornersSquareOptions,
     cornersDotOptions,

@@ -1,3 +1,4 @@
+import { activatedWorkspaces as qrActivation } from "@/lib/qr-activation";
 import { getDb } from "@/lib/db";
 import { funnelTable } from "@/lib/funnel-table";
 import { logger } from "@/lib/logger";
@@ -17,9 +18,9 @@ export type FunnelEventName = (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS]
 
 export const FUNNEL_DEFINITIONS = {
   activation:
-    "Workspace сохранил QR, скачал файл через API и получил первое внешнее открытие. Собственные запросы из кабинета, боты и локальные IP не считаются.",
+    "Статика: сохранение и скачивание одного QR. Динамика: сохранение, скачивание и первое внешнее открытие того же QR. Собственные запросы из кабинета, боты и локальные IP не считаются внешним открытием.",
   payment:
-    "Оплата подтверждена сервером (статус SUCCEEDED). Клик виджета ЮKassa и reachGoal на клиенте оплатой не являются.",
+    "Оплата подтверждена сервером (статус SUCCEEDED). Клик платёжного виджета и reachGoal на клиенте оплатой не являются.",
 } as const;
 
 const BOT_UA = /bot|crawler|spider|slurp|facebookexternalhit|preview|whatsapp|telegram|discord|slackbot/i;
@@ -195,7 +196,7 @@ export async function buildFunnelReport(now = new Date()): Promise<FunnelReport>
   const [events, excludedTestEvents, testRegistrations, totalEventsInWindow] = await Promise.all([
     funnel.findMany({
       where: { isTest: false, createdAt: { gte: since } },
-      select: { workspaceId: true, name: true, createdAt: true },
+      select: { workspaceId: true, qrCodeId: true, name: true, createdAt: true },
     }),
     funnel.count({ where: { isTest: true, createdAt: { gte: since } } }),
     funnel.findMany({
@@ -218,10 +219,9 @@ export async function buildFunnelReport(now = new Date()): Promise<FunnelReport>
   }
 
   const created = byName.get(FUNNEL_EVENTS.qr_created)!;
-  const downloaded = byName.get(FUNNEL_EVENTS.qr_downloaded)!;
-  const opened = byName.get(FUNNEL_EVENTS.first_external_open)!;
   const paid = byName.get(FUNNEL_EVENTS.payment_succeeded)!;
-  const activated = new Set([...created].filter((id) => downloaded.has(id) && opened.has(id)));
+  const qrs = await db.qrCode.findMany({ where: { id: { in: [...new Set(events.flatMap(event => event.qrCodeId ? [event.qrCodeId] : []))] } }, select: { id: true, kind: true, shortCode: true } });
+  const activated = qrActivation(events.filter(event => !testWorkspaceIds.includes(event.workspaceId)), qrs).active;
 
   const workspaces = await db.workspace.findMany({
     where: {
@@ -277,14 +277,17 @@ export async function workspaceActivation(workspaceId: string): Promise<{
   hasQr: boolean;
   hasDownload: boolean;
   hasFirstExternalOpen: boolean;
+  hasStaticDownload: boolean;
   activated: boolean;
   paid: boolean;
 }> {
   const db = getDb();
   const rows = await funnelTable(db).findMany({
     where: { workspaceId, isTest: false },
-    select: { name: true },
+    select: { name: true, qrCodeId: true },
   });
+  const qrs = await db.qrCode.findMany({ where: { workspaceId }, select: { id: true, kind: true, shortCode: true } });
+  const activation = qrActivation(rows.map(row => ({ ...row, workspaceId })), qrs);
   const names = new Set(rows.map((row) => row.name));
   const hasQr = names.has(FUNNEL_EVENTS.qr_created);
   const hasDownload = names.has(FUNNEL_EVENTS.qr_downloaded);
@@ -293,7 +296,8 @@ export async function workspaceActivation(workspaceId: string): Promise<{
     hasQr,
     hasDownload,
     hasFirstExternalOpen,
-    activated: hasQr && hasDownload && hasFirstExternalOpen,
+    hasStaticDownload: activation.staticDownloaded.has(workspaceId),
+    activated: activation.active.has(workspaceId),
     paid: names.has(FUNNEL_EVENTS.payment_succeeded),
   };
 }

@@ -11,6 +11,7 @@ import { stampTrackingConsentVersion } from "@/lib/qr-consent";
 import { collectUploadIds, uploadsBelongToWorkspace } from "@/lib/tenant";
 import { updateQrSchema, validatePayloadUrls, payloadMeetsType } from "@/lib/validation";
 import { assertAllowsDynamic, getEntitlements } from "@/lib/entitlements";
+import { prepareStaticQr } from "@/lib/static-qr";
 import { toPublicQr } from "@/lib/qr-public-dto";
 import { applyPolicyUrl } from "@/lib/url";
 import bcrypt from "bcryptjs";
@@ -117,7 +118,15 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const isHosted = needsHostedPage(qr.contentType);
-    const usesVcardDownload = qr.contentType === "VCARD";
+    const directStatic = qr.kind === "STATIC" && existingPayload.staticDirect === true;
+    const usesVcardDownload = qr.contentType === "VCARD" && !directStatic;
+    if (data.payload != null && directStatic) {
+      const prepared = prepareStaticQr(qr.contentType, nextPayload);
+      if (!prepared.ok) return apiError(prepared.error, "VALIDATION_ERROR", 400, undefined, requestId);
+      nextPayload = prepared.payload;
+    }
+    // The direct/managed variant is fixed at creation; a PATCH cannot convert a legacy code.
+    if (!directStatic && data.payload != null) delete nextPayload.staticDirect;
     const isManaged = qr.kind === "DYNAMIC" || isHosted || usesVcardDownload;
 
     if (
@@ -191,7 +200,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       updateData.shortCode = shortCode;
       updateData.encodedContent = `${process.env.APP_URL ?? "http://localhost:3000"}/v/${shortCode}`;
     } else if (payloadChanged && qr.kind === "STATIC" && !isHosted && !usesVcardDownload) {
-      const encoded = encodeQrContent(qr.contentType, nextPayload);
+      const prepared = directStatic ? prepareStaticQr(qr.contentType, nextPayload) : null;
+      const encoded = prepared?.ok ? prepared.data : encodeQrContent(qr.contentType, nextPayload);
       if (!encoded) {
         return apiError(MSG.COULD_NOT_ENCODE_PAYLOAD, "VALIDATION_ERROR", 400, undefined, requestId);
       }

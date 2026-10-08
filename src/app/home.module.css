@@ -13,7 +13,7 @@
 .generator{max-width:920px;margin:32px auto 0;border:1px solid var(--border-default);border-radius:16px;overflow:hidden;background:var(--surface-card);text-align:left}
 .typeNav{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-subtle);padding:12px 23px;min-height:64px}
 .typeNav a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text-muted);white-space:nowrap;border-radius:6px}
-.typeNav a:hover{color:var(--color-primary);background:var(--color-primary-subtle)}
+.typeNav a:hover,.typeNav button:hover{color:var(--color-primary);background:var(--color-primary-subtle)}
 .typeNav a.selectedType{color:var(--color-primary);background:var(--color-primary-subtle)}
 .typeNav svg{width:17px;height:17px;flex-shrink:0}
 .typeNav a.allTypes{margin-left:auto}
@@ -69,3 +69,20 @@
 @media(max-width:1100px){.featureGrid,.designSection{gap:40px}.featureCopy h2{font-size:36px}.pricingHeading h2{font-size:40px}.plan{padding:23px}.planName>span{font-size:8px}.price{font-size:38px!important}}
 @media(max-width:800px){.featureGrid,.designSection{grid-template-columns:1fr;gap:28px}.designSection .featureCopy{grid-row:1;max-width:540px}.pricingHeading h2{font-size:36px}.pricingHeading{gap:20px}.pricing{gap:12px}.plan{padding:21px 16px}.planDescription{font-size:11px;min-height:37px}.planName>span{display:none}.plan li{font-size:11px}.price{font-size:34px!important}.price>span{font-size:10px}.plan ul{gap:11px;padding-top:20px}.plan :global(.fk-button){font-size:11px;padding-inline:8px}}
 @media(max-width:560px){.featureCopy h2{font-size:32px}.designSection{padding-top:0}.pricingHeading{display:block;margin-bottom:26px}.pricingHeading h2{font-size:34px}.pricingHeading p{font-size:14px}.pricingHeading>span{margin-top:19px;font-size:12px}.pricing{grid-template-columns:1fr;gap:17px}.plan{padding:25px}.planName>span{display:block;font-size:10px}.planDescription{min-height:0;font-size:13px}.price{font-size:40px!important;margin-block:20px}.price>span{font-size:12px}.plan li{font-size:13px}.plan :global(.fk-button){font-size:14px}.pricingNotes{font-size:11px}.plan ul{padding-top:22px}}
+
+/* The public generator extends the existing quick-start surface. */
+.typeNav{flex-wrap:wrap}
+.typeNav button{display:inline-flex;align-items:center;padding:8px 12px;font:inherit;font-size:13px;font-weight:600;color:var(--text-muted);background:none;border:0;border-radius:6px;cursor:pointer;min-height:40px}
+.typeNav button.selectedType{color:var(--color-primary);background:var(--color-primary-subtle)}
+.typeNav button:focus-visible,.staticDesign summary:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
+.generatorAction{flex-wrap:wrap}
+.staticDesign{margin-top:18px;color:var(--text-strong);font-size:13px}
+.staticDesign summary{cursor:pointer;padding-block:8px;font-weight:600}
+.staticDesign>div{display:flex;flex-wrap:wrap;gap:20px;margin-block:12px}
+.staticDesign label{display:grid;gap:8px}
+.staticDesign input{min-width:72px;max-width:100px;padding:4px}
+.staticDesign p,.staticArchive p{color:var(--text-muted);font-size:12px;line-height:1.6}
+.staticArchive{margin-top:20px}
+.staticArchive p{max-width:55ch;margin-top:8px}
+.generatorForm :global(input),.generatorForm :global(textarea),.generatorForm :global(select){max-width:100%;min-width:0}
+.generatorPreview{align-self:start}

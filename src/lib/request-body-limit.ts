@@ -40,6 +40,7 @@ export class BodyTooLargeError extends Error {
 export async function readRequestBodyCapped(
   request: Request,
   maxBytes = MAX_BULK_BYTES,
+  tooLargeMessage?: string,
 ): Promise<Uint8Array> {
   if (!request.body) return new Uint8Array();
   const reader = request.body.getReader();
@@ -51,7 +52,7 @@ export async function readRequestBodyCapped(
       if (done) break;
       total += value.byteLength;
       if (total > maxBytes) {
-        throw new BodyTooLargeError();
+        throw new BodyTooLargeError(tooLargeMessage);
       }
       chunks.push(value);
     }
@@ -70,23 +71,29 @@ export async function readRequestBodyCapped(
 export async function formDataWithinLimit(
   request: Request,
   maxBytes = MAX_BULK_BYTES,
+  options: { requireLength?: boolean; tooLargeMessage?: string } = {},
 ): Promise<FormData> {
-  const declared = inspectDeclaredContentLength(request.headers.get("content-length"), maxBytes);
-  if (!declared.ok) {
-    const error = new Error(declared.message) as Error & { status: 411 | 413 };
+  const length = request.headers.get("content-length");
+  const declared = inspectDeclaredContentLength(length, maxBytes);
+  if (!declared.ok && !(length == null && options.requireLength === false)) {
+    const error = new Error(declared.status === 413 ? options.tooLargeMessage ?? declared.message : declared.message) as Error & { status: 411 | 413 };
     error.status = declared.status;
     throw error;
   }
-  const body = await readRequestBodyCapped(request, maxBytes);
+  const body = await readRequestBodyCapped(request, maxBytes, options.tooLargeMessage);
   const contentType = request.headers.get("content-type");
   if (!contentType) {
     const error = new Error("Некорректный multipart.") as Error & { status: 400 };
     error.status = 400;
     throw error;
   }
-  return new Request("http://bulk.invalid", {
+  try { return await new Request("http://multipart.invalid", {
     method: "POST",
     headers: { "content-type": contentType },
     body: Buffer.from(body),
-  }).formData();
+  }).formData(); } catch {
+    const error = new Error("Некорректный multipart.") as Error & { status: 400 };
+    error.status = 400;
+    throw error;
+  }
 }

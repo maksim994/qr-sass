@@ -1,3 +1,4 @@
+import { TRIAL_DAYS } from "@/lib/trial-policy";
 export const SCENARIO_LANDING_SLUGS = ["qr-menu", "qr-for-packaging"] as const;
 
 export type ScenarioLandingSlug = (typeof SCENARIO_LANDING_SLUGS)[number];
@@ -48,7 +49,7 @@ export const scenarioLandings: Record<ScenarioLandingSlug, ScenarioLanding> = {
     ],
     limits: [
       "Бесплатный тариф — только статический QR: ссылку после печати не сменить.",
-      "Смена адреса и открытия — на Про. Проба динамики 14 дней, карта не нужна.",
+      `Смена адреса и открытия — на Про. Проба динамики ${TRIAL_DAYS} дней, карта не нужна.`,
       "После окончания пробы уже напечатанный динамический код продолжает открываться. Новые коды и смена назначения — после оплаты.",
     ],
     placeholder: "https://cafe.example/menu",
@@ -83,7 +84,7 @@ export const scenarioLandings: Record<ScenarioLandingSlug, ScenarioLanding> = {
     ],
     limits: [
       "Бесплатный тариф — только статика. Для смены ссылки после тиража нужен Про.",
-      "Проба динамики 14 дней. Карта не нужна.",
+      `Проба динамики ${TRIAL_DAYS} дней. Карта не нужна.`,
       "Окончание тарифа не отключает уже напечатанный динамический QR. Удаление кода из библиотеки — отключает.",
     ],
     placeholder: "https://brand.example/instruction",

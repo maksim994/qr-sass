@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS "Partner" (
+ "id" TEXT PRIMARY KEY, "code" TEXT NOT NULL, "name" TEXT NOT NULL,
+ "enabled" BOOLEAN NOT NULL DEFAULT true, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "Partner_code_key" ON "Partner"("code");
+CREATE TABLE IF NOT EXISTS "PartnerVisit" (
+ "id" TEXT PRIMARY KEY, "partnerId" TEXT NOT NULL REFERENCES "Partner"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "expiresAt" TIMESTAMP(3) NOT NULL,
+ "clicks" INTEGER NOT NULL DEFAULT 1, "isTest" BOOLEAN NOT NULL DEFAULT false, "consentVersion" TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "PartnerVisit_partnerId_isTest_idx" ON "PartnerVisit"("partnerId", "isTest");
+ALTER TABLE "Workspace" ADD COLUMN IF NOT EXISTS "partnerId" TEXT REFERENCES "Partner"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Workspace" ADD COLUMN IF NOT EXISTS "partnerIsTest" BOOLEAN NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS "Workspace_partnerId_partnerIsTest_idx" ON "Workspace"("partnerId", "partnerIsTest");

@@ -1,7 +1,10 @@
 "use client";
 import { fetchApi } from "@/lib/client-api";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+
+const subscribeStorage = (notify: () => void) => { window.addEventListener("storage", notify); return () => window.removeEventListener("storage", notify); };
+const serverVoted = () => false;
 
 type Props = { slug: string; initialLikes: number };
 
@@ -9,24 +12,13 @@ export function ArticleUsefulBlock({ slug, initialLikes }: Props) {
   const [likes, setLikes] = useState(initialLikes);
   const [voted, setVoted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    try {
-      const votedList = JSON.parse(sessionStorage.getItem("blog-voted") || "[]");
-      if (votedList.includes(slug)) setVoted(true);
-    } catch {
-      // ignore
-    }
-  }, [slug, mounted]);
+  const storedVote = useSyncExternalStore(subscribeStorage, () => {
+    try { const votes: unknown = JSON.parse(sessionStorage.getItem("blog-voted") || "[]"); return Array.isArray(votes) && votes.includes(slug); }
+    catch { return false; }
+  }, serverVoted);
 
   const handleVote = async () => {
-    if (voted || loading) return;
+    if (voted || storedVote || loading) return;
     setLoading(true);
     try {
       const res = await fetchApi(`/api/blog/${slug}/like`, { method: "POST" });
@@ -49,7 +41,7 @@ export function ArticleUsefulBlock({ slug, initialLikes }: Props) {
     }
   };
 
-  const alreadyVoted = voted;
+  const alreadyVoted = voted || storedVote;
 
   return (
     <div

@@ -5,6 +5,7 @@ import { QrTypeIcon } from "@/components/qr-type-icon";
 import { QrLifetimeNote } from "@/components/qr/qr-lifetime-note";
 import { TrackedDownloadLink } from "./tracked-download-link";
 import { AnalyticsChart } from "./analytics-chart";
+import { RenameQr } from "./rename-qr";
 import UpdateTarget from "@/components/update-target";
 import TrackingPixelsForm from "@/components/tracking-pixels-form";
 import QrExpirySettings from "@/components/qr-expiry-settings";
@@ -30,7 +31,7 @@ function BreakdownList({title,items}:{title:string;items:Breakdown}) {
   return <section className={styles.panel}><h3>{title}</h3><ul className={styles.breakdown}>{items.map(item=><li key={item.label}><div><span>{item.label}</span><strong>{number(item.count)} <small>· {Math.round(item.count/Math.max(total,1)*100)}%</small></strong></div><div className={styles.track} aria-hidden="true"><span style={{width:`${item.count/Math.max(total,1)*100}%`}}/></div></li>)}</ul></section>;
 }
 export function QrDetail({now,qr,svgString,exportFormats,scans7d,scans30d,humanTotal,devices,osList,dailyCounts}:Props) {
-  const isVcard=qr.contentType==="VCARD";
+  const isVcard=qr.contentType==="VCARD"&&!(qr.kind==="STATIC"&&(qr.payload as Record<string,unknown>|null)?.staticDirect===true);
   const tracks=qr.kind==="DYNAMIC"||isVcard;
   const hosted=needsHostedPage(qr.contentType);
   const publicPath=tracks&&qr.shortCode?`/${isVcard?'v':hosted?'p':'r'}/${qr.shortCode}`:null;
@@ -46,7 +47,8 @@ export function QrDetail({now,qr,svgString,exportFormats,scans7d,scans30d,humanT
       <div className={styles.summary}>
         <h2>Готов к скачиванию</h2><p>Сохраните QR-код для печати или публикации.</p>
         <div className={styles.downloads}>{exportFormats.map((format,i)=><TrackedDownloadLink key={format} href={`/api/qr/${qr.id}/download?format=${format.toLowerCase()}`} download className={`fk-button ${i===0?'fk-button--primary':'fk-button--secondary'}`} aria-label={`Скачать ${format}`}>{i===0?`Скачать ${format}`:format}</TrackedDownloadLink>)}</div>
-        <Link className={styles.edit} href={`/dashboard/qr/${qr.id}/edit`}>Редактировать содержимое и оформление</Link>
+        <Link className={styles.edit} href={`/dashboard/qr/${qr.id}/edit`}>{tracks ? "Редактировать содержимое и оформление" : "Создать новую версию — оригинал останется прежним"}</Link>
+        <RenameQr qrId={qr.id} name={qr.name} />
         <dl className={styles.facts}>
           {publicPath&&<div><dt>{isVcard?'Файл визитки':hosted?'Страница QR':'Короткая ссылка'}</dt><dd><a href={publicPath} target="_blank" rel="noopener noreferrer">{publicPath}<span className="sr-only"> — откроется в новой вкладке</span></a></dd></div>}
           {qr.currentTargetUrl&&!hosted&&!isVcard&&<div><dt>Куда ведёт код</dt><dd>{qr.currentTargetUrl}</dd></div>}

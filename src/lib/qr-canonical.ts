@@ -1,5 +1,6 @@
 import { QrContentType } from "@prisma/client";
 import { encodeQrContent, needsHostedPage, type QrPayload } from "@/lib/qr-content";
+import { prepareStaticQr } from "@/lib/static-qr";
 
 export function canonicalQrData(input: {
   contentType: QrContentType;
@@ -8,6 +9,10 @@ export function canonicalQrData(input: {
   shortCode?: string | null;
   appUrl: string;
 }): { data: string; ready: boolean; isDynamic: boolean } {
+  if (input.kind === "STATIC" && input.payload.staticDirect === true) {
+    const qr = prepareStaticQr(input.contentType, input.payload);
+    return { data: qr.ok ? qr.data : "", ready: qr.ok, isDynamic: false };
+  }
   const hosted = needsHostedPage(input.contentType);
   const vcardHosted = input.contentType === "VCARD";
   const isDynamic = input.kind === "DYNAMIC" || hosted || vcardHosted;

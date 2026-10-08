@@ -1,8 +1,11 @@
 "use client";
+import { TRIAL_DAYS } from "@/lib/trial-policy";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
+import { getMetrikaAttribution } from "@/lib/metrika-client-id";
+import { useProductPageGoal } from "@/hooks/use-product-page-goal";
 import { YookassaWidget } from "@/components/yookassa-widget";
 import { Alert, Button } from "@/components/ui";
 import type { PlanInfo } from "@/lib/plans";
@@ -42,7 +45,7 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
   const paidUntil = periodEnd ? dateLabel(periodEnd).replace(/\.$/, "") : null;
   const hasPaidAccess = currentPlanId !== "FREE";
   const busy = pending !== null || paymentSuccess;
-  useEffect(() => { trackGoal(PRODUCT_GOALS.pricing_viewed); }, []);
+  useProductPageGoal(PRODUCT_GOALS.pricing_viewed, "billing");
   useEffect(() => { if (error || paymentSuccess) feedbackRef.current?.focus(); }, [error, paymentSuccess]);
   useEffect(() => { if (token || robokassa) checkoutHeading.current?.focus(); }, [token, robokassa]);
   useEffect(() => {
@@ -64,6 +67,7 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
       const response = await fetchApi("/api/billing/trial", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({workspaceId,useCurrentTerms:!!archivedOffer}) });
       const parsed = await parseApiResponse(response);
       if (!parsed.ok) throw new Error(parsed.error || MSG.BILLING_TRIAL_FAILED);
+      trackGoal(PRODUCT_GOALS.trial_started, { planId: "PRO" });
       router.push("/dashboard"); router.refresh();
     } catch (error) { setError(error instanceof Error ? error.message : MSG.BILLING_TRIAL_FAILED); }
     finally { busyRef.current = false; setPending(null); }
@@ -73,11 +77,12 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
     const useCurrentTerms = !!archivedOffer && plan.accessMode !== "archive";
     if (useCurrentTerms && !window.confirm(`Перейти на тариф «${plan.name}» за ${money(plan.priceRub)} в месяц? После оплаты архивные условия будут заменены. Существующие QR продолжат работать.`)) return;
     busyRef.current = true; setPending(plan.id); setError(null); setSelectedPlan(plan);
-    trackGoal(PRODUCT_GOALS.checkout_started, {planId:plan.id});
     try {
-      const response = await fetchApi("/api/billing/checkout", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({workspaceId,planId:plan.id,useCurrentTerms})});
+      const metrika = await getMetrikaAttribution();
+      const response = await fetchApi("/api/billing/checkout", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({workspaceId,planId:plan.id,useCurrentTerms,...(metrika ? { metrika } : {})})});
       const parsed = await parseApiResponse<{token?:string; provider?:string; payment?:ReturnType<typeof buildRobokassaPayment>}>(response);
       if (!parsed.ok) throw new Error(parsed.error || MSG.BILLING_CHECKOUT_FAILED);
+      if (parsed.data?.payment || parsed.data?.token) trackGoal(PRODUCT_GOALS.checkout_started, { planId: plan.id });
       if (parsed.data?.provider === "robokassa" && parsed.data.payment) setRobokassa(parsed.data.payment);
       else if (parsed.data?.token) setToken(parsed.data.token);
       else throw new Error(MSG.BILLING_CHECKOUT_FAILED);
@@ -89,7 +94,9 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
     const canTrial = plan.accessMode !== "archive" && plan.id === "PRO" && !trialUsedAt && currentPlanId === "FREE";
     const label = archivedOffer && plan.accessMode !== "archive" ? `Перейти на ${plan.name}` : currentPlanId === plan.id && !isTrial ? `Продлить ${plan.name}` : isTrial && currentPlanId === plan.id ? `Оплатить ${plan.name}` : `Выбрать ${plan.name}`;
     return <div className={styles.planActions}>
-      {canTrial && <><Button block disabled={busy} onClick={handleStartTrial}>{pending === "trial" ? "Включаем доступ…" : "Попробовать 14 дней"}</Button><p>Бесплатно, без автоматических списаний</p></>}
+      {canTrial && <><Button block disabled={busy} onClick={handleStartTrial}>{pending === "trial" ? "Включаем доступ…" : `Попробовать ${TRIAL_DAYS} дней`}</Button><p>Бесплатно, без автоматических списаний</p></>}
+      {/* The ref is read only inside the click handler, never while rendering this button. */}
+      {/* eslint-disable-next-line react-hooks/refs */}
       <Button id={`billing-plan-${plan.accessMode ?? "standard"}-${plan.id}`} variant={canTrial ? "secondary" : "primary"} block disabled={busy} onClick={() => handleCheckout(plan)}>{pending === plan.id ? "Готовим оплату…" : `${label} · ${money(plan.priceRub)}`}</Button>
     </div>;
   }

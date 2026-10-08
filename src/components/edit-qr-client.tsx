@@ -22,6 +22,7 @@ import {
   QrWizardTabs,
 } from "@/components/qr/qr-wizard-shared";
 import { QrLifetimeNote } from "@/components/qr/qr-lifetime-note";
+import { trackGoal, PRODUCT_GOALS } from "@/lib/product-analytics";
 import { MSG } from "@/lib/user-messages";
 import { savedQrIdForDownload } from "@/lib/qr-download-gate";
 
@@ -105,7 +106,7 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
   const previewData = canonical.data;
   const qrRef = useQrStylingPreview(previewData, style);
   const scan = evaluateScannability(styleToScannability(style));
-  const isDynamic = initialQr.kind === "DYNAMIC" || !!typeInfo?.needsHostedPage;
+  const isDynamic = canonical.isDynamic;
   const dirty =
     name !== initialQr.name ||
     JSON.stringify(payload) !== JSON.stringify(initialPayload) ||
@@ -183,13 +184,15 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
         if (password.trim()) body.password = password.trim();
       }
 
-      const response = await fetchApi(`/api/qr/${initialQr.id}`, {
-        method: "PATCH",
+      const newVersion = !isDynamic;
+      if (newVersion) Object.assign(body, { workspaceId, kind: "STATIC", contentType: initialQr.contentType });
+      const response = await fetchApi(newVersion ? "/api/qr" : `/api/qr/${initialQr.id}`, {
+        method: newVersion ? "POST" : "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
-      const parsed = await parseApiResponse<{ updated?: boolean }>(response);
+      const parsed = await parseApiResponse<{ updated?: boolean; qrId?: string }>(response);
       if (!parsed.ok) {
         setError(parsed.error ?? MSG.QR_SAVE_FAILED);
         return;
@@ -200,7 +203,8 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
         setPassword("");
       }
 
-      router.push(`/dashboard/qr/${initialQr.id}`);
+      if (newVersion) trackGoal(PRODUCT_GOALS.qr_created, { source: "static_version", kind: "STATIC", contentType: initialQr.contentType });
+      router.push(`/dashboard/qr/${newVersion ? parsed.data?.qrId : initialQr.id}`);
       router.refresh();
     } catch {
       setError(MSG.AUTH_NETWORK_ERROR);
@@ -229,7 +233,7 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
         backHref={`/dashboard/qr/${initialQr.id}`}
         contentType={initialQr.contentType}
         title={typeInfo.description}
-        subtitle={`${getQrWizardSubtitle(initialQr.contentType, typeInfo.label)} · Редактирование`}
+        subtitle={`${getQrWizardSubtitle(initialQr.contentType, typeInfo.label)} · ${isDynamic ? "Редактирование" : "Новая версия: оригинал и старая распечатка сохранят прежнее содержимое"}`}
         kindControl={
           <span className="fk-badge fk-badge--primary">
             {initialQr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
@@ -303,7 +307,7 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
           kindLabel={initialQr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
           qrRef={qrRef}
           hostedPreview={initialQr.contentType === "BUSINESS" ? <BusinessLanding payload={payload} /> : undefined}
-          saveLabel="Сохранить изменения"
+          saveLabel={isDynamic ? "Сохранить изменения" : "Создать новую версию"}
           saving={saving}
           onSave={handleSave}
           error={error}

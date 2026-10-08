@@ -1,3 +1,4 @@
+import { newTrialEnd, TRIAL_DAYS } from "@/lib/trial-policy";
 import { isComplimentary } from "@/lib/workspace-plan";
 import { z } from "zod";
 import { MSG } from "@/lib/user-messages";
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
         ["active", "trial", "canceled"].includes(sub.status)
       )
         return "active";
-      const trialEnd = new Date(now.getTime() + 14 * 86400000);
+      const trialEnd = newTrialEnd(now);
       await tx.workspace.update({
         where: { id: workspaceId },
         data: { plan: "PRO", trialUsedAt: now, accessMode: "standard" },
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
         workspaceId,
         userId: session.sub,
         isTest: process.env.NODE_ENV !== "production",
-        payload: { plan: "PRO", periodEnd: trialEnd.toISOString() },
+        payload: { plan: "PRO", periodEnd: trialEnd.toISOString(), trialDays: TRIAL_DAYS },
       });
       return null;
     });

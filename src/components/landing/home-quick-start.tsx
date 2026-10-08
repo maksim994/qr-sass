@@ -1,70 +1,108 @@
 "use client";
+import { TRIAL_DAYS } from "@/lib/trial-policy";
 
 import Link from "next/link";
-import { useId, useMemo, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@/components/ui";
+import { QrContentForm } from "@/components/qr-forms";
 import { HomeQrPreview } from "@/components/landing/home-qr-preview";
-import { createQrContinuePath, normalizeDraftUrl, QR_DRAFT_MAX_URL, writeQrCreateDraft } from "@/lib/qr-draft";
+import { createQrContinuePath, normalizeDraftUrl, writeQrCreateDraft } from "@/lib/qr-draft";
+import { STATIC_QR_TYPES, prepareStaticQr, type StaticQrType } from "@/lib/static-qr";
+import { writeStaticQrDraft } from "@/lib/static-qr-draft";
+import { downloadStaticQr } from "@/lib/static-qr-download";
+import { defaultQrStyle } from "@/lib/qr-style-config";
+import { evaluateScannability } from "@/lib/scannability";
+import { PRODUCT_GOALS, trackGoal, markOnboardingDownloaded } from "@/lib/product-analytics";
 import { MSG } from "@/lib/user-messages";
 import styles from "@/app/home.module.css";
 
-type Props = {
-  signedIn: boolean;
-  urlEnabled: boolean;
-  otherTypes: { type: string; label: string; icon: string }[];
-};
+type Props = { initialType?: StaticQrType; signedIn: boolean; enabledStaticTypes: StaticQrType[] };
+const labels: Record<StaticQrType, string> = { URL: "Ссылка", TEXT: "Текст", WIFI: "Wi-Fi", VCARD: "Контакты", EMAIL: "Email", PHONE: "Телефон", SMS: "SMS", LOCATION: "Координаты" };
 
-export function HomeQuickStart({ signedIn, urlEnabled, otherTypes }: Props) {
-  const router = useRouter();
-  const id = useId();
-  const [url, setUrl] = useState("");
+export function HomeQuickStart({ initialType, signedIn, enabledStaticTypes }: Props) {
+  const router = useRouter(), id = useId(), busy = useRef(false);
+  const [type, setType] = useState<StaticQrType>(initialType ?? enabledStaticTypes[0] ?? "URL");
+  const [payloads, setPayloads] = useState<Partial<Record<StaticQrType, Record<string, unknown>>>>({});
   const [kind, setKind] = useState<"STATIC" | "DYNAMIC">("STATIC");
+  const [foreground, setForeground] = useState(defaultQrStyle.dotColor);
+  const [background, setBackground] = useState(defaultQrStyle.bgColor);
   const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const normalized = normalizeDraftUrl(url);
-  const preview = useMemo(() => <HomeQrPreview value={normalized ?? "https://qr-s.ru"} />, [normalized]);
+  const [notice, setNotice] = useState("");
+  const [pending, setPending] = useState<"png" | "svg" | "archive" | "dynamic" | null>(null);
+  const payload = payloads[type] ?? {};
+  const prepared = prepareStaticQr(type, payload);
+  const scan = evaluateScannability({ foreground, background, margin: 4, logoScale: 0 });
+  const dynamic = type === "URL" && kind === "DYNAMIC";
+  const style = { ...defaultQrStyle, dotColor: foreground, cornerSquareColor: foreground, cornerDotColor: foreground, bgColor: background, margin: 4, quietZoneModules: 4 };
   const destination = (path: string) => signedIn ? path : `/register?next=${encodeURIComponent(path)}`;
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!normalized) {
-      setError(MSG.INVALID_PAYLOAD_URL);
-      return;
-    }
-    const draft = { v: 1 as const, contentType: "URL" as const, url: normalized, kind };
-    writeQrCreateDraft(draft);
-    setPending(true);
-    router.push(destination(createQrContinuePath(draft)));
+  async function download(format: "png" | "svg") {
+    if (busy.current) return;
+    if (!prepared.ok) { setError(prepared.error); return; }
+    if (!scan.safeToUse) { setError(MSG.SCANNABILITY_TOO_LOW); return; }
+    busy.current = true; setPending(format); setError(""); setNotice("");
+    try {
+      await downloadStaticQr(prepared.data, foreground, background, format);
+      markOnboardingDownloaded({ source: "home", format, contentType: type, kind: "STATIC" }, PRODUCT_GOALS.static_qr_downloaded);
+      setNotice("Скачивание началось. Проверьте QR камерой перед печатью.");
+    } catch { setError(MSG.COULD_NOT_DOWNLOAD); }
+    finally { busy.current = false; setPending(null); }
   }
 
-  return (
-    <div className={styles.generator} id="create-qr">
-      <nav className={styles.typeNav} aria-label="Что будет в QR-коде">
-        {urlEnabled && <a href="#create-qr" className={styles.selectedType} aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m10 13 4-4M8 15l-2 2a3 3 0 0 1-4-4l5-5a3 3 0 0 1 4 0m2 1 2-2a3 3 0 0 1 4 4l-5 5a3 3 0 0 1-4 0" /></svg>Ссылка</a>}
-        {otherTypes.map(type => <Link key={type.type} href={destination(`/dashboard/create/${type.type.toLowerCase()}`)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d={type.icon} /></svg>{type.label}</Link>)}
-        <Link href={destination("/dashboard/create")} className={styles.allTypes}>Все типы <span aria-hidden="true">↗</span></Link>
-      </nav>
-      {urlEnabled ? <div className={styles.generatorBody}>
-        <form onSubmit={submit} className={styles.generatorForm}>
-          <label htmlFor={id}>Куда ведёт ваш QR-код?</label>
-          <Input id={id} value={url} onChange={event => { setUrl(event.target.value); setError(""); }} placeholder="https://ваш-сайт.ru" inputMode="url" autoComplete="url" spellCheck={false} maxLength={QR_DRAFT_MAX_URL} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : `${id}-hint`} required />
-          {error ? <p className={styles.formError} id={`${id}-error`} role="alert">{error}</p> : <p id={`${id}-hint`} className={styles.inputHint}>Добавьте ссылку на сайт, меню или страницу в соцсети.</p>}
-          <fieldset className={styles.kindChoice}>
-            <legend className="sr-only">Тип QR-кода</legend>
-            <label><input type="radio" name={`${id}-kind`} checked={kind === "STATIC"} onChange={() => setKind("STATIC")} />Обычный <span>Бесплатно</span></label>
-            <label><input type="radio" name={`${id}-kind`} checked={kind === "DYNAMIC"} onChange={() => setKind("DYNAMIC")} />Динамический <span>Про</span></label>
-          </fieldset>
-          <p className={styles.kindHint}>{kind === "STATIC" ? "Ссылка сохранится в коде навсегда." : "Меняйте ссылку после печати. Доступно на Про, пробный период — 14 дней."}</p>
-          <div className={styles.generatorAction}><Button type="submit" variant="primary" disabled={pending} aria-busy={pending}>{pending ? "Открываем…" : "Создать QR-код"}<span aria-hidden="true">→</span></Button><span>{signedIn ? "Оформление и скачивание — на следующем шаге" : "Продолжим после регистрации"}</span></div>
-        </form>
-        <div className={styles.generatorPreview}>
-          <div className={styles.previewTop}><span>Ваш QR-код</span><span>{normalized ? "Предпросмотр" : "Пример"}</span></div>
-          {preview}
-          <p>{kind === "DYNAMIC" ? "Готовый динамический код появится после сохранения" : normalized ? "Ссылка готова. Осталось сохранить код." : "Введите ссылку — код обновится"}</p>
+  function archive() {
+    if (!prepared.ok) { setError(prepared.error); return; }
+    if (!scan.safeToUse) { setError(MSG.SCANNABILITY_TOO_LOW); return; }
+    if (!writeStaticQrDraft({ v: 1, createdAt: Date.now(), contentType: type, payload: prepared.payload, style })) {
+      setError(MSG.QR_DRAFT_STORAGE_UNAVAILABLE); return;
+    }
+    setPending("archive"); router.push(destination("/dashboard/create"));
+  }
+
+  function continueDynamic(event: React.FormEvent) {
+    event.preventDefault();
+    const url = normalizeDraftUrl(String(payload.url ?? ""));
+    if (!url) { setError(MSG.INVALID_PAYLOAD_URL); return; }
+    trackGoal(PRODUCT_GOALS.qr_creation_started, { source: "home", contentType: "URL", kind: "DYNAMIC" });
+    const draft = { v: 1 as const, contentType: "URL" as const, url, kind: "DYNAMIC" as const };
+    writeQrCreateDraft(draft); setPending("dynamic"); router.push(destination(createQrContinuePath(draft)));
+  }
+
+  if (!enabledStaticTypes.length) return <div className={styles.generatorUnavailable}><Button href={destination("/dashboard/create")}>Перейти к созданию</Button></div>;
+
+  return <div className={styles.generator} id="create-qr">
+    <nav className={styles.typeNav} aria-label="Содержимое статического QR">
+      {STATIC_QR_TYPES.filter(item => enabledStaticTypes.includes(item)).map(item => <button type="button" key={item} aria-pressed={type === item} className={type === item ? styles.selectedType : undefined} onClick={() => { setType(item); setKind("STATIC"); setError(""); setNotice(""); }}>{labels[item]}</button>)}
+      <Link href={destination("/dashboard/create")} className={styles.allTypes}>Файлы и страницы ↗</Link>
+    </nav>
+    <div className={styles.generatorBody}>
+      <form onSubmit={dynamic ? continueDynamic : event => { event.preventDefault(); void download("png"); }} className={styles.generatorForm}>
+        <QrContentForm type={type} payload={payload} onChange={next => { setPayloads(current => ({ ...current, [type]: next })); setError(""); setNotice(""); }} workspaceId="" />
+        {type === "URL" && <fieldset className={styles.kindChoice}><legend className="sr-only">Тип QR-кода</legend>
+          <label><input type="radio" name={`${id}-kind`} checked={kind === "STATIC"} onChange={() => setKind("STATIC")} />Статический <span>Бесплатно</span></label>
+          <label><input type="radio" name={`${id}-kind`} checked={kind === "DYNAMIC"} onChange={() => setKind("DYNAMIC")} />Динамический <span>Про</span></label>
+        </fieldset>}
+        <p className={styles.kindHint}>{dynamic ? `Меняйте ссылку после печати. Динамический код создаётся в кабинете; пробный период — ${TRIAL_DAYS} дней.` : "Содержимое записано прямо в QR. Бесплатно, без регистрации и лимита на количество. После печати его нельзя изменить; статистика сканов не собирается."}</p>
+        {!dynamic && <details className={styles.staticDesign}><summary>Цвета QR-кода</summary><div>
+          <label htmlFor={`${id}-fg`}>Цвет кода<Input id={`${id}-fg`} type="color" value={foreground} onChange={event => setForeground(event.target.value)} /></label>
+          <label htmlFor={`${id}-bg`}>Фон<Input id={`${id}-bg`} type="color" value={background} onChange={event => setBackground(event.target.value)} /></label>
+        </div><p>Оставлено свободное поле в четыре модуля. Проверьте контраст и сканирование на материале печати.</p></details>}
+        <div className={styles.generatorAction}>
+          {dynamic ? <Button type="submit" disabled={pending !== null}>Продолжить в кабинете →</Button> : <>
+            <Button type="submit" disabled={pending !== null || !prepared.ok || !scan.safeToUse} aria-busy={pending === "png"}>{pending === "png" ? "Подготовка…" : "Скачать PNG"}</Button>
+            <Button type="button" variant="secondary" disabled={pending !== null || !prepared.ok || !scan.safeToUse} onClick={() => void download("svg")} aria-busy={pending === "svg"}>{pending === "svg" ? "Подготовка…" : "SVG"}</Button>
+          </>}
         </div>
-      </div> : <div className={styles.generatorUnavailable}><p>Выберите тип QR-кода, чтобы начать.</p><Button href={destination("/dashboard/create")} variant="primary">Перейти к созданию →</Button></div>}
+        {!dynamic && <div className={styles.staticArchive}><Button type="button" variant="ghost" disabled={pending !== null || !prepared.ok} onClick={archive}>Сохранить копию в кабинете</Button><p>Необязательно. Архив использует лимит вашего тарифа. Черновик хранится в этой вкладке один час после нажатия; Wi-Fi и контакты попадут на сервер только при сохранении в кабинете.</p></div>}
+        {error && <p className={styles.formError} role="alert">{error}</p>}
+        {!error && prepared.ok && !scan.safeToUse && <p className={styles.formError} role="alert">{MSG.SCANNABILITY_TOO_LOW}</p>}
+        <p className={styles.inputHint} role="status">{notice || (!prepared.ok && Object.keys(payload).length ? prepared.error : "")}</p>
+      </form>
+      <div className={styles.generatorPreview}>
+        <div className={styles.previewTop}><span>Ваш QR-код</span><span>{prepared.ok && !dynamic ? "Готов к скачиванию" : "Пример"}</span></div>
+        <HomeQrPreview value={prepared.ok && !dynamic ? prepared.data : "https://qr-s.ru"} foreground={foreground} background={background} />
+        <p>{dynamic ? "Постоянная короткая ссылка появится после сохранения в кабинете." : prepared.ok ? "PNG — 1200 × 1200. SVG масштабируется без потери чёткости." : "Заполните содержимое — появится ваш код."}</p>
+      </div>
     </div>
-  );
+  </div>;
 }

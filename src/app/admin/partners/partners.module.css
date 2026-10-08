@@ -1,0 +1,20 @@
+.page { display: grid; gap: 24px; }
+.page h2 { margin-bottom: 16px; font-size: 1.125rem; font-weight: 700; }
+.form { display: grid; gap: 16px; max-width: 640px; }
+.form > button { justify-self: start; }
+.explanation, .note { color: var(--text-muted); font-size: .875rem; line-height: 1.6; }
+.explanation { display: grid; gap: 8px; }
+.explanation a, .table a { color: var(--text-link); text-decoration: underline; text-underline-offset: 3px; }
+.scroll { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: .8125rem; font-variant-numeric: tabular-nums; }
+.table th, .table td { padding: 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border-subtle); }
+.table thead th { color: var(--text-muted); white-space: nowrap; font-weight: 500; }
+.table tbody th { min-width: 220px; font-weight: 400; }
+.table tbody th strong { font-size: .9375rem; }
+.table span, .table a { display: block; margin-top: 6px; }
+.table a { overflow-wrap: anywhere; }
+.table td { white-space: nowrap; }
+.table td span { font-size: .75rem; color: var(--text-muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; min-width: 180px; }
+.actions span { white-space: normal; max-width: 220px; }
+@media (max-width: 640px) { .page { gap: 16px; } .table th, .table td { padding: 12px; } }

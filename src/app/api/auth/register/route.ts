@@ -1,3 +1,4 @@
+import { readRegistrationPartner, registrationPartnerData } from "@/lib/partners";
 import { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { nanoid } from "nanoid";
@@ -83,7 +84,9 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-")
       .slice(0, 30)}-${nanoid(6)}`;
 
+    const partnerVisitId = await readRegistrationPartner();
     const user = await db.$transaction(async (tx) => {
+      const partnerData = await registrationPartnerData(tx, partnerVisitId);
       const user = await tx.user.create({
         data: {
           email,
@@ -97,6 +100,7 @@ export async function POST(request: Request) {
                 create: {
                   name: workspaceName,
                   slug: workspaceSlug,
+                  ...partnerData,
                 },
               },
             },

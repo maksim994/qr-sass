@@ -35,7 +35,7 @@ type Props = {
 
 const tabs: { key: LibraryKindFilter; label: string }[] = [
   { key: "ALL", label: "Все коды" },
-  { key: "STATIC", label: "Статические" },
+  { key: "STATIC", label: "Архив статических" },
   { key: "DYNAMIC", label: "Динамические" },
 ];
 
@@ -94,7 +94,7 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats, que
             <thead><tr><th scope="col">QR-код</th><th scope="col">Тип</th><th scope="col">Открытия</th><th scope="col">Создан</th><th scope="col"><span className={styles.srOnly}>Действия</span></th></tr></thead>
             <tbody>
               {items.map((qr) => {
-                const tracksScans = qr.kind === "DYNAMIC" || qr.contentType === "VCARD";
+                const tracksScans = qr.kind === "DYNAMIC" || (qr.contentType === "VCARD" && Boolean(qr.shortCode));
                 const destination = libraryDestination(qr);
                 const status = libraryStatus(qr);
                 return (
@@ -109,12 +109,12 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats, que
                       </div>
                     </td>
                     <td className={styles.typeCell}><span className={styles.type}>{contentTypeLabels[qr.contentType] || qr.contentType}</span><span className={`${styles.kind} ${status === "Срок истёк" ? styles.expired : ""}`}>{qr.kind === "DYNAMIC" && status !== "Срок истёк" && <span className={styles.dot} aria-hidden="true" />}{status}</span></td>
-                    <td className={styles.scansCell}><span className={styles.mobileLabel}>Открытия</span><span className={styles.scans} title={!tracksScans ? "Для этого статического кода статистика не собирается" : undefined}>{tracksScans ? qr._count.scanEvents.toLocaleString("ru-RU") : "—"}</span>{qr.contentType === "VCARD" && <span className={styles.kind}>скачиваний vCard</span>}</td>
+                    <td className={styles.scansCell}><span className={styles.mobileLabel}>Открытия</span><span className={styles.scans} title={!tracksScans ? "Для этого статического кода статистика не собирается" : undefined}>{tracksScans ? qr._count.scanEvents.toLocaleString("ru-RU") : "—"}</span>{qr.contentType === "VCARD" && tracksScans && <span className={styles.kind}>скачиваний vCard</span>}</td>
                     <td className={styles.dateCell}><time dateTime={qr.createdAt}>{new Date(qr.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Moscow" })}</time></td>
                     <td className={styles.actionsCell}>
                       <div className={styles.actions}>
                         {exportFormats.includes("PNG") && <TrackedDownloadLink href={`/api/qr/${qr.id}/download?format=png`} className={styles.download} download aria-label={`Скачать PNG: ${qr.name}`}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" /></svg><span>Скачать</span></TrackedDownloadLink>}
-                        <QrLibraryCardMenu qrId={qr.id} qrName={qr.name} kind={qr.kind} exportFormats={exportFormats} />
+                        <QrLibraryCardMenu qrId={qr.id} qrName={qr.name} kind={qr.kind} managed={tracksScans} exportFormats={exportFormats} />
                       </div>
                     </td>
                   </tr>
@@ -123,7 +123,7 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats, que
             </tbody>
           </table>
           <div className={styles.listFoot}>
-            <p>Открытия включают запросы ботов. Для статических кодов, кроме vCard, статистика не собирается.</p>
+            <p>Открытия включают запросы ботов. Для статических кодов, кроме серверных визиток, статистика не собирается.</p>
             {pageCount > 1 && <nav className={styles.pager} aria-label="Страницы библиотеки">
               {page > 1 ? <Link href={libraryHref({ ...query, page: page - 1 })}>Назад</Link> : <span aria-disabled="true">Назад</span>}
               <span className="tnum">{page} из {pageCount}</span>

@@ -18,7 +18,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
       - REDIS_URL=redis://redis:6379
@@ -53,6 +53,7 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-}
+      - METRIKA_OAUTH_TOKEN=${METRIKA_OAUTH_TOKEN:-}
       - TRUST_PROXY=${TRUST_PROXY:-1}
       - ANALYTICS_RETENTION_DAYS=${ANALYTICS_RETENTION_DAYS:-90}
     depends_on:
@@ -86,6 +87,24 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - APP_URL=${APP_URL}
       - ADMIN_INTEGRATIONS_KEY=${ADMIN_INTEGRATIONS_KEY:-}
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  metrika-worker:
+    build:
+      context: .
+      target: runner
+    entrypoint: ["node", "--experimental-strip-types", "--import", "./scripts/register-src-alias.mjs", "scripts/metrika-worker.ts", "--loop"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - METRIKA_OAUTH_TOKEN=${METRIKA_OAUTH_TOKEN:-}
     depends_on:
       init-db:
         condition: service_completed_successfully

@@ -3,8 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone",
+  // Leave room for multipart headers around the allowed 10 MB file.
+  experimental: { proxyClientMaxBodySize: "11mb" },
   serverExternalPackages: ["@prisma/client", "prisma"],
   trailingSlash: false,
+  async headers() {
+    return [{ source: "/:path*", headers: [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+    ] }];
+  },
   async redirects() {
     return [
       {

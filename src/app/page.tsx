@@ -1,3 +1,4 @@
+import { TRIAL_DAYS } from "@/lib/trial-policy";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
@@ -14,6 +15,8 @@ import { HomeHero, IndustryShowcase, TypeExplorer, DynamicDemo, DesignPlayground
 import { HomeQrPreview } from "@/components/landing/home-qr-preview";
 import { publicSiteUrl } from "@/lib/public-url";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
+import { STATIC_QR_TYPES } from "@/lib/static-qr";
+import { PricingGoal } from "@/components/landing/pricing-goal";
 import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 const faqs = [
-  { question: "Можно создать QR-код бесплатно?", answer: "Да. Бесплатный тариф позволяет создавать статические QR-коды и скачивать их в доступных форматах. Лимит кодов и форматы указаны в тарифах выше. Для сохранения кода нужен аккаунт." },
+  { question: "Можно создать QR-код бесплатно?", answer: "Да. Статические QR можно создавать и скачивать в PNG и SVG без регистрации и без ограничения количества. Аккаунт нужен только для необязательного облачного архива; его объём зависит от тарифа." },
   { question: "Чем обычный QR отличается от динамического?", answer: "Обычный, или статический, QR содержит вашу ссылку напрямую — изменить её после печати нельзя. Динамический QR ведёт через короткую ссылку QR-S.ru: её назначение можно менять в кабинете на платном тарифе." },
   { question: "Что будет с кодом после окончания тарифа?", answer: QR_LIFETIME.billing },
   { question: "Подойдёт ли QR для печати?", answer: "Да. SVG сохраняет чёткость при масштабировании, PNG подходит для готовых макетов. Оставьте свободное поле вокруг кода и проверьте его камерой телефона перед тиражом. На платных тарифах доступны дополнительные форматы; PDF и EPS содержат растровое изображение." },
@@ -44,7 +47,7 @@ function Check() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="
 function planFeatures(plan: PlanInfo) {
   const { limits } = plan;
   return [
-    limits.maxQrCodes == null ? "Без лимита на количество QR" : `До ${limits.maxQrCodes} QR-кодов`,
+    limits.maxQrCodes == null ? "Облачный архив без лимита" : `До ${limits.maxQrCodes} QR в облачном архиве`,
     limits.allowsDynamic ? "Смена ссылки после печати" : "Статические QR-коды",
     ...(limits.allowsAnalytics ? ["Статистика открытий"] : []),
     `Экспорт ${limits.exportFormats.join(", ")}`,
@@ -53,7 +56,8 @@ function planFeatures(plan: PlanInfo) {
   ];
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ static?: string }> }) {
+  const requestedType = (await searchParams).static;
   const [session, free, pro, business, disabledTypes] = await Promise.all([
     getSession(), getPlan("FREE"), getPlan("PRO"), getPlan("BUSINESS"), getDisabledQrTypes(),
   ]);
@@ -71,7 +75,8 @@ export default async function HomePage() {
     });
   } catch { /* The generator and default plans remain available without optional content. */ }
   const enabledTypes = qrTypes.filter(type => !disabledTypes.includes(type.type));
-  const otherTypes = ["WIFI", "VCARD", "PDF"].flatMap(type => enabledTypes.filter(item => item.type === type));
+  const enabledStaticTypes = STATIC_QR_TYPES.filter(type => enabledTypes.some(item => item.type === type));
+  const publicType = enabledStaticTypes.find(type => type === requestedType) ?? enabledStaticTypes[0];
   const startPath = session ? "/dashboard/create" : "/register";
   const plans = [free, pro, business];
   const descriptions = { FREE: "Для первых кодов и простых задач", PRO: "Для ссылок, которые меняются", BUSINESS: "Для команды и интеграций" };
@@ -81,21 +86,22 @@ export default async function HomePage() {
     <div className={styles.home}>
       <SiteHeader session={session} isAdmin={isAdmin} minimal />
       <main>
+        <PricingGoal />
         <HomeHero />
         <div className={`${styles.container} ${styles.valueStrip}`} aria-label="Возможности сервиса">
           <span><Check /> От ссылки до электронного меню</span><span><Check /> Дизайн под ваш бренд</span><span><Check /> Смена ссылки после печати</span><span><Check /> Статистика открытий</span>
         </div>
 
         <section className={`${styles.container} ${styles.section} ${styles.quickSection}`} aria-labelledby="quick-title">
-          <div className={styles.quickCopy}><h2 id="quick-title">Первая идея?<br />Превратите её в QR.</h2><p>Вставьте ссылку. Вы увидите код сразу, а оформление и скачивание будут доступны на следующем шаге.</p><a href="#types" className={styles.textLink}>Или выберите другой тип <Arrow /></a></div>
-          <HomeQuickStart signedIn={Boolean(session)} urlEnabled={enabledTypes.some(type => type.type === "URL")} otherTypes={otherTypes} />
+          <div className={styles.quickCopy}><h2 id="quick-title">Первая идея?<br />Превратите её в QR.</h2><p>Добавьте ссылку, контакты или Wi-Fi. Скачайте статический QR в PNG или SVG бесплатно, без регистрации. Сохранение в кабинете — по желанию.</p><a href="#types" className={styles.textLink}>Файлы и управляемые страницы <Arrow /></a></div>
+          <HomeQuickStart key={publicType} initialType={publicType} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} />
         </section>
 
         <section className={`${styles.container} ${styles.how}`} id="how" aria-labelledby="how-title">
           <h2 id="how-title" className="sr-only">Три шага до готового QR-кода</h2>
           {[
             ["1", "Добавьте содержимое", "Ссылку на сайт, меню, файл или контакты."],
-            ["2", "Настройте оформление", "Выберите цвет, добавьте логотип и рамку."],
+            ["2", "Настройте оформление", "Выберите цвет. В кабинете можно добавить логотип."],
             ["3", "Скачайте и поделитесь", "Разместите код на экране или в печатном макете."],
           ].map(([step, title, text]) => <div key={step} className={styles.step}><span>{step}</span><div><h3>{title}</h3><p>{text}</p></div></div>)}
         </section>
@@ -107,7 +113,7 @@ export default async function HomePage() {
 
         <section id="features" className={styles.featureSection}>
           <div className={`${styles.container} ${styles.featureGrid}`}>
-            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>Доступно на Про · пробный период 14 дней</p></div>
+            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>Доступно на Про · пробный период {TRIAL_DAYS} дней</p></div>
             <DynamicDemo />
           </div>
         </section>
@@ -119,7 +125,7 @@ export default async function HomePage() {
 
         <section className={`${styles.container} ${styles.designSection}`}>
           <DesignPlayground />
-          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет, добавьте логотип и выберите рамку в редакторе.</p><p>Попробуйте цвет и подпись в примере. Свой код вы настроите в редакторе.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />Рамка с призывом к действию</li></ul><Button href={startPath} variant="secondary">Открыть редактор <Arrow /></Button></div>
+          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет и добавьте логотип в редакторе кабинета.</p><p>Попробуйте цвет в примере. Свой код вы настроите в редакторе.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />PNG и SVG для макетов</li></ul><Button href={startPath} variant="secondary">Открыть редактор <Arrow /></Button></div>
         </section>
 
         <section className={styles.printSection}>
@@ -144,16 +150,16 @@ export default async function HomePage() {
         </section>
 
         <section id="pricing" className={`${styles.container} ${styles.section} ${styles.pricingSection}`}>
-          <div className={styles.pricingHeading}><div><h2>Ваши задачи.<br />Ваш тариф.</h2><p>Начните бесплатно. Подключайте больше возможностей по мере роста.</p></div><span><Check /> Про: 14 дней без карты</span></div>
+          <div className={styles.pricingHeading}><div><h2>Ваши задачи.<br />Ваш тариф.</h2><p>Начните бесплатно. Подключайте больше возможностей по мере роста.</p></div><span><Check /> Про: {TRIAL_DAYS} дней без карты</span></div>
           <div className={styles.pricing}>
             {plans.map(plan => <article key={plan.id} className={`${styles.plan} ${plan.id === "PRO" ? styles.featuredPlan : ""}`}>
               <div className={styles.planName}><h3>{plan.name}</h3>{plan.id === "PRO" && <span>Для регулярной работы</span>}</div><p className={styles.planDescription}>{descriptions[plan.id]}</p>
               <p className={styles.price}>{plan.priceRub.toLocaleString("ru-RU")} <span>₽ / месяц</span></p>
-              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/#create-qr" : "/register"} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? "Попробовать 14 дней" : "Выбрать Бизнес"}</Button>
+              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/#create-qr" : "/register"} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать ${TRIAL_DAYS} дней` : "Выбрать Бизнес"}</Button>
               <ul>{planFeatures(plan).map(feature => <li key={feature}><Check />{feature}</li>)}</ul>
             </article>)}
           </div>
-          <div className={styles.pricingNotes}><p>Пробный период Про — 14 дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
+          <div className={styles.pricingNotes}><p>Пробный период Про — {TRIAL_DAYS} дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
         </section>
 
         <section id="faq" className={`${styles.container} ${styles.faqSection}`}>

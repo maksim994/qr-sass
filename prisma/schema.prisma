@@ -50,6 +50,7 @@ enum QrContentType {
 }
 
 model User {
+  metrikaRegistrationPending Boolean @default(false)
   id           String       @id @default(cuid())
   email        String       @unique
   yandexId     String?      @unique
@@ -114,7 +115,24 @@ enum WorkspacePlan {
   BUSINESS
 }
 
+model QrBulkBatch {
+  id String @id @default(cuid())
+  workspaceId String
+  key String
+  digest String
+  records Json
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, key])
+}
+
 model Workspace {
+  partnerId String?
+  partnerIsTest Boolean @default(false)
+  partner Partner? @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  @@index([partnerId, partnerIsTest])
+  bulkBatches QrBulkBatch[]
   id            String         @id @default(cuid())
   name          String
   slug          String         @unique
@@ -317,6 +335,15 @@ model Subscription {
 }
 
 model Payment {
+  metrikaUserId String?
+  metrikaClientId String?
+  metrikaCounterId String?
+  metrikaConsentAt DateTime?
+  metrikaConsentVersion String?
+  metrikaState String @default("PENDING") // PENDING, SENDING, UPLOADED, PROCESSED, REVIEW, EXPIRED, REVOKED
+  metrikaUploadId String?
+  metrikaAttemptAt DateTime?
+  metrikaLastError String?
   id              String        @id @default(cuid())
   workspaceId     String
   subscriptionId  String?
@@ -474,4 +501,26 @@ model OAuthLegalIntent {
   expiresAt DateTime
   documents Json
   @@index([expiresAt])
+}
+
+model Partner {
+  id String @id @default(cuid())
+  code String @unique
+  name String
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now())
+  visits PartnerVisit[]
+  workspaces Workspace[]
+}
+
+model PartnerVisit {
+  id String @id @default(uuid())
+  partnerId String
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  clicks Int @default(1)
+  isTest Boolean @default(false)
+  consentVersion String
+  @@index([partnerId, isTest])
 }

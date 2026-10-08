@@ -104,6 +104,7 @@ export function AdminShell({ children, user }: Props) {
               "/admin/qr",
               "/admin/payments",
               "/admin/business",
+              "/admin/partners",
               "/admin/funnel",
             ],
           },

@@ -14,7 +14,7 @@ function smtpConfigured() {
 
 /**
  * Sends email when SMTP_* is set. Without SMTP the caller still succeeds:
- * the reset link is only logged server-side (never returned to the client).
+ * no reset token or reset URL is logged or returned to the client.
  */
 export async function sendMail(payload: MailPayload): Promise<{ sent: boolean }> {
   if (!smtpConfigured()) {
@@ -32,6 +32,9 @@ export async function sendMail(payload: MailPayload): Promise<{ sent: boolean }>
     host: process.env.SMTP_HOST,
     port,
     secure: port === 465,
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
     auth:
       process.env.SMTP_USER && process.env.SMTP_PASS
         ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }

@@ -10,11 +10,12 @@ type Props = {
   hasDownload: boolean;
   hasFirstExternalOpen: boolean;
   canTrackOpens: boolean;
+  hasStaticDownload?: boolean;
 };
 
 function subscribeNoop() { return () => undefined; }
 
-export function OnboardingChecklist({ hasQr, hasDownload, hasFirstExternalOpen, canTrackOpens }: Props) {
+export function OnboardingChecklist({ hasQr, hasDownload, hasFirstExternalOpen, canTrackOpens, hasStaticDownload }: Props) {
   const dismissedStored = useSyncExternalStore(subscribeNoop, isOnboardingDismissed, () => false);
   const downloaded = useSyncExternalStore(subscribeNoop, hasOnboardingDownloaded, () => false);
   const [dismissedLocal, setDismissedLocal] = useState(false);
@@ -23,7 +24,7 @@ export function OnboardingChecklist({ hasQr, hasDownload, hasFirstExternalOpen, 
   const steps = [
     { id: "create", title: "Создайте первый QR-код", description: "Начните со ссылки или выберите другой тип содержимого.", href: "/dashboard/create", cta: "Создать", done: hasQr },
     { id: "download", title: "Скачайте готовый код", description: "Выберите формат в библиотеке и проверьте код камерой телефона перед печатью.", href: hasQr ? "/dashboard/library" : "/dashboard/create", cta: hasQr ? "К моим кодам" : "Создать", done: downloaded || hasDownload },
-    ...(canTrackOpens ? [{ id: "scan", title: "Посмотрите первые открытия", description: "После перехода по вашему динамическому QR появится статистика. Открытия в режиме проверки не учитываются.", href: "/dashboard/analytics", cta: "Аналитика", done: hasFirstExternalOpen }] : []),
+    ...(canTrackOpens && !hasStaticDownload ? [{ id: "scan", title: "Посмотрите первые открытия", description: "После перехода по вашему динамическому QR появится статистика. Открытия в режиме проверки не учитываются.", href: "/dashboard/analytics", cta: "Аналитика", done: hasFirstExternalOpen }] : []),
   ];
   const doneCount = steps.filter((step) => step.done).length;
   const current = steps.find((step) => !step.done);

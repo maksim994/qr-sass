@@ -1,3 +1,5 @@
+import { ReferralCapture } from "@/components/referral-capture";
+import { RegistrationGoal } from "@/components/registration-goal";
 import type { Metadata } from "next";
 import React from "react";
 import { Manrope } from "next/font/google";
@@ -72,6 +74,8 @@ export default async function RootLayout({
       <body className="antialiased">
         <ThemeProvider>
           {children}
+          <React.Suspense fallback={null}><ReferralCapture /></React.Suspense>
+          <RegistrationGoal />
           <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
         </ThemeProvider>
       </body>

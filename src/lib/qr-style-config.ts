@@ -47,6 +47,7 @@ export function parseStyleConfig(raw: Record<string, unknown> | null | undefined
     logoFileId: (raw.logoFileId as string) ?? defaultQrStyle.logoFileId,
     logoScale: typeof raw.logoScale === "number" ? raw.logoScale : defaultQrStyle.logoScale,
     logoMargin: typeof raw.logoMargin === "number" ? raw.logoMargin : defaultQrStyle.logoMargin,
+    quietZoneModules: typeof raw.quietZoneModules === "number" ? raw.quietZoneModules : undefined,
     margin: typeof raw.margin === "number" ? raw.margin : defaultQrStyle.margin,
     errorCorrectionLevel:
       (raw.errorCorrectionLevel as QrStyle["errorCorrectionLevel"]) ?? defaultQrStyle.errorCorrectionLevel,

@@ -21,11 +21,12 @@ export function previewBulkCsv(text: string): BulkPreview {
     const item: Record<string, string> = {};
     Object.entries(raw).forEach(([key,value]) => { if (value != null) item[normalize(key)] = String(value).trim(); });
     const url = item.url || item.url_link || item.link;
-    if (!url || !isSafeUrl(url)) { issues.push({ record: index + 1, message: MSG.BULK_ROW_URL }); return; }
+    if (!url || url.length > 2000 || !isSafeUrl(url)) { issues.push({ record: index + 1, message: MSG.BULK_ROW_URL }); return; }
     const target = new URL(url);
     for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
       if (item[key]) target.searchParams.set(key, item[key]);
     }
+    if (target.toString().length > 2000) { issues.push({ record: index + 1, message: MSG.BULK_ROW_URL }); return; }
     rows.push({ name: (item.name || item.title || item.label || `QR ${index + 1}`).slice(0,120), url: target.toString() });
   });
   return { rows, issues, total: parsed.data.length };

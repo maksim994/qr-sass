@@ -2,6 +2,12 @@ import { readCookieChoice } from "@/lib/cookie-consent";
 /** Client-side product funnel goals for Yandex Metrika reachGoal. */
 
 export const PRODUCT_GOALS = {
+  static_qr_downloaded: "static_qr_downloaded",
+  qr_creation_started: "qr_creation_started",
+  trial_started: "trial_started",
+  paid_feature_requested: "paid_feature_requested",
+  qr_preview_downloaded: "qr_preview_downloaded",
+  qr_download_requested: "qr_download_requested",
   registration_completed: "registration_completed",
   qr_type_selected: "qr_type_selected",
   qr_created: "qr_created",
@@ -14,6 +20,8 @@ export const PRODUCT_GOALS = {
   member_invited: "member_invited",
   api_key_created: "api_key_created",
 } as const;
+
+export const METRIKA_READY_EVENT = "qrs:metrika-ready";
 
 export type ProductGoal = (typeof PRODUCT_GOALS)[keyof typeof PRODUCT_GOALS];
 
@@ -39,30 +47,31 @@ export function setMetrikaCounterId(id: string) {
 }
 
 export function trackGoal(goal: ProductGoal, params?: Record<string, unknown>) {
-  if (typeof window === "undefined") return;
-  if (goal === PRODUCT_GOALS.subscription_paid || readCookieChoice() !== "accepted") return;
+  if (typeof window === "undefined") return false;
+  if (goal === PRODUCT_GOALS.subscription_paid || readCookieChoice() !== "accepted") return false;
   const id = getMetrikaId();
   const ym = (window as YmWindow).ym;
-  if (!id || typeof ym !== "function") return;
+  if (!id || typeof ym !== "function") return false;
   try {
     if (params && Object.keys(params).length > 0) {
       ym(id, "reachGoal", goal, params);
     } else {
       ym(id, "reachGoal", goal);
     }
+    return true;
   } catch {
-    /* ignore analytics failures */
+    return false;
   }
 }
 
-export function markOnboardingDownloaded() {
+export function markOnboardingDownloaded(params?: Record<string, unknown>, goal: ProductGoal = PRODUCT_GOALS.qr_downloaded) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(ONBOARDING_DOWNLOADED_KEY, "1");
   } catch {
     /* ignore */
   }
-  trackGoal(PRODUCT_GOALS.qr_downloaded);
+  trackGoal(goal, params);
 }
 
 export function hasOnboardingDownloaded(): boolean {

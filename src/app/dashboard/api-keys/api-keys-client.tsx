@@ -49,6 +49,8 @@ export function ApiKeysClient({ workspaceId }: { workspaceId: string }) {
   }, [endpoint]);
   useEffect(() => {
     const controller = new AbortController();
+    // Synchronize the list with the external API; loadKeys also owns the loading state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadKeys(controller.signal);
     return () => controller.abort();
   }, [loadKeys]);
