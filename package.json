@@ -24,7 +24,7 @@
     "@aws-sdk/client-s3": "^3.995.0",
     "@aws-sdk/s3-request-presigner": "^3.995.0",
     "@ckeditor/ckeditor5-react": "^11.0.1",
-    "@prisma/client": "^6.19.2",
+    "@prisma/client": "^6.19.3",
     "@tma.js/init-data-node": "^2.0.6",
     "archiver": "^7.0.1",
     "bcryptjs": "^3.0.3",
