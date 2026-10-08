@@ -296,7 +296,8 @@ model Payment {
   workspaceId     String
   subscriptionId  String?
   paidAt          DateTime?
-  providerPaymentId String      @unique // YooKassa payment ID
+  provider        String        @default("yookassa")
+  providerPaymentId String      @unique // YooKassa ID or robokassa:<InvId>
   amount          Int           // в рублях
   currency        String        @default("RUB")
   planId          WorkspacePlan?

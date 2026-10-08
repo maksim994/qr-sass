@@ -20,6 +20,14 @@ const envSchema = z.object({
   YANDEX_CLIENT_ID: z.string().optional(),
   YANDEX_CLIENT_SECRET: z.string().optional(),
   YANDEX_REDIRECT_URI: z.string().url().optional(),
+  BILLING_PROVIDER: z.enum(["yookassa", "robokassa"]).default("yookassa"),
+  ROBOKASSA_MERCHANT_LOGIN: z.string().optional(),
+  ROBOKASSA_PASSWORD1: z.string().optional(),
+  ROBOKASSA_PASSWORD2: z.string().optional(),
+  ROBOKASSA_TEST_PASSWORD1: z.string().optional(),
+  ROBOKASSA_TEST_PASSWORD2: z.string().optional(),
+  ROBOKASSA_TEST_MODE: z.enum(["true", "false"]).default("true").transform(value => value === "true"),
+  ROBOKASSA_HASH_ALGORITHM: z.enum(["MD5", "SHA256", "SHA512"]).default("SHA256"),
 }).refine(value => Boolean(value.JWT_PREVIOUS_SECRET) === Boolean(value.JWT_ROTATED_AT), {
   message: "JWT_PREVIOUS_SECRET and JWT_ROTATED_AT must be configured together",
 });
@@ -36,4 +44,12 @@ export const env = envSchema.parse({
   YANDEX_CLIENT_ID: process.env.YANDEX_CLIENT_ID,
   YANDEX_CLIENT_SECRET: process.env.YANDEX_CLIENT_SECRET,
   YANDEX_REDIRECT_URI: process.env.YANDEX_REDIRECT_URI,
+  BILLING_PROVIDER: process.env.BILLING_PROVIDER,
+  ROBOKASSA_MERCHANT_LOGIN: process.env.ROBOKASSA_MERCHANT_LOGIN,
+  ROBOKASSA_PASSWORD1: process.env.ROBOKASSA_PASSWORD1,
+  ROBOKASSA_PASSWORD2: process.env.ROBOKASSA_PASSWORD2,
+  ROBOKASSA_TEST_PASSWORD1: process.env.ROBOKASSA_TEST_PASSWORD1,
+  ROBOKASSA_TEST_PASSWORD2: process.env.ROBOKASSA_TEST_PASSWORD2,
+  ROBOKASSA_TEST_MODE: process.env.ROBOKASSA_TEST_MODE,
+  ROBOKASSA_HASH_ALGORITHM: process.env.ROBOKASSA_HASH_ALGORITHM,
 });

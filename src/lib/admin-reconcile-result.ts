@@ -1,6 +1,7 @@
 import { MSG } from "@/lib/user-messages";
 type Result = { ok: boolean; reason: string; applied?: boolean };
 export function describeReconciliation(result: Result | undefined): { error?: string; notice?: string } {
+  if (result?.reason === "robokassa_result_required") return { notice: "Для Robokassa требуется серверное уведомление. Повторите его отправку из личного кабинета Robokassa." };
   if (!result?.ok) return { error: MSG.ADMIN_RECONCILE_UNAVAILABLE };
   if (result.applied) return { notice: "Оплата подтверждена, доступ кабинета обновлён." };
   const notices: Record<string, string> = {

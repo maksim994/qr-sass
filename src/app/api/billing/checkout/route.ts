@@ -9,6 +9,10 @@ import { getPlan } from "@/lib/plans";
 import { createYookassaPayment } from "@/lib/yookassa";
 import { FUNNEL_EVENTS, isPrivateOrLocalIp, recordFunnelEvent } from "@/lib/funnel";
 import { getClientIp } from "@/lib/rate-limit";
+import { z } from "zod";
+import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";
+import { env } from "@/lib/env";
+import { buildRobokassaPayment, getRobokassaConfig, newRobokassaInvoiceId, robokassaPaymentId } from "@/lib/robokassa";
 
 const PAID_PLANS: WorkspacePlan[] = ["PRO", "BUSINESS"];
 
@@ -23,7 +27,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: MSG.CHECKOUT_SESSION_REQUIRED }, { status: 403 });
     }
 
-    const body = await req.json();
+    const parsed = z.object({
+      workspaceId: z.string().min(1), planId: z.enum(["PRO", "BUSINESS"]), useCurrentTerms: z.boolean().optional(),
+    }).safeParse(await readJsonBody(req));
+    if (!parsed.success) return apiError(MSG.WORKSPACE_ID_OR_PLAN_REQUIRED, "VALIDATION_ERROR", 400);
+    const body = parsed.data;
     const workspaceId = typeof body.workspaceId === "string" ? body.workspaceId : "";
     const planId = PAID_PLANS.includes(body.planId) ? (body.planId as WorkspacePlan) : null;
 
@@ -50,6 +58,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: MSG.INVALID_PLAN }, { status: 400 });
     }
     const amount = plan.priceRub;
+
+    if (env.BILLING_PROVIDER === "robokassa") {
+      const config = getRobokassaConfig();
+      const invoiceId = newRobokassaInvoiceId();
+      const name = `Доступ к QR-S.ru: тариф ${plan.name}, 1 месяц`;
+      const local = await prisma.payment.create({ data: {
+        workspaceId, provider: "robokassa", providerPaymentId: robokassaPaymentId(invoiceId),
+        amount, currency: "RUB", planId, termsMode, isTest: config.isTest,
+        description: config.isTest ? `Тест: ${name}` : name,
+      } });
+      const payment = buildRobokassaPayment({ invoiceId, orderId: local.id, amount, name, email: user.email }, config);
+      await recordFunnelEvent({
+        name: FUNNEL_EVENTS.checkout_started, workspaceId, userId: user.id, source: planId,
+        isTest: config.isTest || isPrivateOrLocalIp(getClientIp(req)),
+      });
+      return apiSuccess({ provider: "robokassa" as const, paymentId: local.id, payment });
+    }
 
     const paymentData = await createYookassaPayment(
       amount,
@@ -102,14 +127,13 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ token: paymentData.confirmation?.confirmation_token });
-  } catch (error) {
+  } catch {
     logger.error({
       area: "api",
       route: "/api/billing/checkout",
       message: "Checkout error",
       code: "INTERNAL_ERROR",
       status: 500,
-      details: error instanceof Error ? { message: error.message } : error,
     });
     return NextResponse.json({ error: MSG.INTERNAL_ERROR }, { status: 500 });
   }

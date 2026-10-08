@@ -59,7 +59,7 @@ export async function applySucceededPayment(
         type: "payment.duplicate_ignored",
         message: "Платёж уже применён, период не продлевается повторно.",
       });
-      await recordFunnelEvent({
+      if (!(local.provider === "robokassa" && local.isTest)) await recordFunnelEvent({
         name: FUNNEL_EVENTS.payment_succeeded,
         workspaceId: local.workspaceId,
         paymentId: local.id,
@@ -100,6 +100,14 @@ export async function applySucceededPayment(
     const locked = await tx.payment.findUnique({ where: { id: local.id } });
     if (!locked?.planId || locked.planId === WorkspacePlan.FREE) {
       return { applied: false, reason: "plan" };
+    }
+
+    if (locked.provider === "robokassa" && locked.isTest) {
+      await recordEvent(tx, {
+        workspaceId: locked.workspaceId, paymentId: locked.id, providerPaymentId: locked.providerPaymentId,
+        type: "payment.test_confirmed", message: "Тест Robokassa подтверждён. Реальный доступ не изменён.",
+      });
+      return { applied: false, reason: "test_confirmed" };
     }
 
     const workspace = await tx.workspace.findUniqueOrThrow({ where: { id: local.workspaceId }, include: { subscription: true } });
@@ -331,6 +339,8 @@ export async function fulfillYookassaPayment(
     local = await db.payment.findUnique({ where: { id: recovered.id } });
   }
   if (!local) return { applied: false, reason: "missing" };
+
+  if (local.provider !== "yookassa") return { applied: false, reason: "provider" };
 
   if (Boolean(remote.test) !== local.isTest) {
     await db.payment.update({

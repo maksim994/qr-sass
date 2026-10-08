@@ -15,6 +15,7 @@ export default async function PaymentPage({
     select: {
       id: true,
       providerPaymentId: true,
+      provider: true,
       amount: true,
       currency: true,
       status: true,
@@ -70,10 +71,10 @@ export default async function PaymentPage({
           </dl>
           <div className={styles.form} style={{ marginTop: 24 }}>
             <p className={styles.note}>
-              Сверка запрашивает актуальный статус у ЮKassa. Подтверждённая
+              {payment.provider === "robokassa" ? "Robokassa подтверждает оплату серверным уведомлением. Для повторной отправки используйте личный кабинет Robokassa. " : "Сверка запрашивает актуальный статус у ЮKassa. "}Подтверждённая
               оплата может активировать доступ кабинета.
             </p>
-            <ReconcilePayment providerPaymentId={payment.providerPaymentId} />
+            {payment.provider === "yookassa" && <ReconcilePayment providerPaymentId={payment.providerPaymentId} />}
           </div>
         </section>
         <section className={styles.panel}>

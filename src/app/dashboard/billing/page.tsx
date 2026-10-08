@@ -8,7 +8,7 @@ import { getEntitlements } from "@/lib/entitlements";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { BillingClient, type BillingPaymentRow } from "./billing-client";
 
-export default async function BillingPage() {
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ paymentId?: string }> }) {
   const user = await requireUser();
   const workspace = await selectWorkspace(user.memberships);
   if (!workspace) redirect("/register");
@@ -16,6 +16,11 @@ export default async function BillingPage() {
   const entitlements = await getEntitlements(workspace.id);
 
   const db = getDb();
+  const { paymentId } = await searchParams;
+  const returned = typeof paymentId === "string" ? await db.payment.findFirst({
+    where: { id: paymentId, workspaceId: workspace.id },
+    select: { status: true, isTest: true, subscriptionId: true },
+  }) : null;
   const [planFree, planPro, planBusiness, payments, settings, qrCount, memberCount] = await Promise.all([
     getPlan("FREE"),
     getPlan("PRO"),
@@ -32,6 +37,7 @@ export default async function BillingPage() {
         status: true,
         createdAt: true,
         description: true,
+        isTest: true,
       },
     }),
     db.siteSettings.findUnique({
@@ -50,6 +56,7 @@ export default async function BillingPage() {
     status: payment.status,
     createdAt: payment.createdAt.toISOString(),
     description: payment.description,
+    isTest: payment.isTest,
   }));
 
   const terms = await db.workspace.findUniqueOrThrow({ where: { id: workspace.id }, include: { subscription: true } });
@@ -66,6 +73,7 @@ export default async function BillingPage() {
       />
 
       <BillingClient
+        returnPayment={returned ? { status: returned.status, isTest: returned.isTest, fulfilled: !!returned.subscriptionId } : null}
         workspaceId={workspace.id}
         currentPlanId={entitlements.planId}
         currentPlan={entitlements.plan}

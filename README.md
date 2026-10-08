@@ -5,7 +5,9 @@ Web-first QR SaaS (QR-S.ru):
 - статические и динамические QR
 - скачивание PNG/SVG (+ JPG/EPS/PDF по тарифу)
 - редирект `/r/{shortCode}` с редактируемым URL
-- аналитика сканов, bulk CSV, API, биллинг YooKassa
+- аналитика сканов, bulk CSV, API, биллинг YooKassa / Robokassa
+
+Robokassa подключается через `BILLING_PROVIDER=robokassa`; по умолчанию новые оплаты идут через ЮKassa. Настройки, адреса уведомлений и проверка запуска: [ROBOKASSA-INTEGRATION-2026-10-08.md](docs/ROBOKASSA-INTEGRATION-2026-10-08.md).
 - стиль-студия с проверкой scannability
 - SEO-лендинги по отраслям, блог, Telegram Mini App
 
