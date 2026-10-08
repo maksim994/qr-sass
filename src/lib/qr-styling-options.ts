@@ -21,6 +21,13 @@ function buildGradient(
 }
 
 export function buildQrStylingOptions(data: string, style: QrStyle, size = 280) {
+  const content = data || "https://example.com";
+  // qr-code-styling 1.9.2 bundles qrcode-generator's Latin-1 byte writer.
+  // Pass UTF-8 bytes at that boundary; keep stored content and ASCII grids unchanged.
+  const unicode = /[^\x00-\x7f]/.test(content);
+  const encoded = unicode
+    ? Array.from(new TextEncoder().encode(content), (byte) => String.fromCharCode(byte)).join("")
+    : content;
   const dotsOptions: {
     type: QrStyle["dotType"];
     color: string;
@@ -65,7 +72,7 @@ export function buildQrStylingOptions(data: string, style: QrStyle, size = 280) 
     width: size,
     height: size,
     type: "svg" as const,
-    data: data || "https://example.com",
+    data: encoded,
     margin: style.quietZoneModules
       ? Math.ceil(size * style.quietZoneModules / (QRCode.create(data || "https://example.com", { errorCorrectionLevel: style.errorCorrectionLevel }).modules.size + 2 * style.quietZoneModules))
       : style.margin,
@@ -73,7 +80,7 @@ export function buildQrStylingOptions(data: string, style: QrStyle, size = 280) 
     cornersSquareOptions,
     cornersDotOptions,
     backgroundOptions,
-    qrOptions: { errorCorrectionLevel: style.errorCorrectionLevel },
+    qrOptions: { errorCorrectionLevel: style.errorCorrectionLevel, ...(unicode ? { mode: "Byte" as const } : {}) },
     ...(style.logoUrl
       ? {
           image: style.logoUrl,

@@ -9,6 +9,23 @@ import { buildQrStylingOptions } from "./qr-styling-options.ts";
 import { parseStyleConfig } from "./qr-style-config.ts";
 import dns from "node:dns";
 import dnsPromises from "node:dns/promises";
+import jsQR from "jsqr";
+
+test("styled exports round-trip UTF-8 text, emoji, Wi-Fi and contacts", async () => {
+  for (const content of [
+    "Проверка QR-S.ru — 8 октября 2026",
+    "Hello 👋 café 東京",
+    "WIFI:T:WPA;S:Кафе;P:пароль;;",
+    "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Иван Иванов\r\nEND:VCARD",
+    "https://qr-s.ru/r/existing-code",
+  ]) {
+    const png = await renderStyledQrPng(content, { quietZoneModules: 4 }, 1200);
+    const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const decoded = jsQR(new Uint8ClampedArray(data), info.width, info.height);
+    assert.equal(decoded?.data, content);
+    assert.deepEqual(decoded?.binaryData, Array.from(new TextEncoder().encode(content)));
+  }
+});
 
 function imageTag(svg: string) {
   const geom = svgImageGeometry(svg);
