@@ -4,6 +4,8 @@ import { SignJWT } from "jose";
 import { getDb } from "../src/lib/db.ts";
 import { defaultQrStyle } from "../src/lib/qr-style-config.ts";
 import { prepareStaticQr } from "../src/lib/static-qr.ts";
+import sharp from "sharp";
+import jsQR from "jsqr";
 
 const base = "http://localhost:3108";
 const database = new URL(process.env.DATABASE_URL ?? "http://invalid");
@@ -32,6 +34,15 @@ try {
   const saved = [];
   for (const [type, payload] of Object.entries(examples)) saved.push(await create(type, payload));
   passed("FREE archive stores all 8 independent static formats without managed paths");
+  const textQr = saved.find(qr => qr.contentType === "TEXT")!;
+  for (const format of ["png", "svg"]) {
+    const response = await fetch(`${base}/api/qr/${textQr.id}/download?format=${format}`, { headers: headers() });
+    assert.equal(response.status, 200);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const { data, info } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    assert.equal(jsQR(new Uint8ClampedArray(data), info.width, info.height)?.data, examples.TEXT.text);
+  }
+  passed("saved Russian text and emoji round-trip through actual PNG and SVG downloads");
   const vcard = saved.find(qr => qr.contentType === "VCARD")!;
   const page = await fetch(`${base}/dashboard/qr/${vcard.id}`, { headers: headers() }); assert.equal(page.status, 200); assert.match(await page.text(), /Статический код работает без отслеживания/);
   assert.equal((await api(`/api/qr/${vcard.id}`, { name: "Контакты переименованы" }, "PATCH")).status, 200);
