@@ -1,3 +1,4 @@
+import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -35,8 +36,8 @@ export const metadata: Metadata = {
 
 const faqs = [
   { question: "Можно создать QR-код бесплатно?", answer: "Да. Статические QR можно создавать и скачивать в PNG и SVG без регистрации и без ограничения количества. Аккаунт нужен только для необязательного облачного архива; его объём зависит от тарифа." },
-  { question: "Чем обычный QR отличается от динамического?", answer: "Обычный, или статический, QR содержит вашу ссылку напрямую — изменить её после печати нельзя. Динамический QR ведёт через короткую ссылку QR-S.ru: её назначение можно менять в кабинете на платном тарифе." },
-  { question: "Что будет с кодом после окончания тарифа?", answer: QR_LIFETIME.billing },
+  { question: "Чем обычный QR отличается от динамического?", answer: "Обычный, или статический, QR содержит вашу ссылку напрямую — изменить её после печати нельзя. Динамический QR ведёт через короткую ссылку QR-S.ru: её назначение можно менять в кабинете. Два динамических кода бесплатны." },
+  { question: "Что будет с кодом после окончания тарифа?", answer: PRINTED_QR_COPY },
   { question: "Подойдёт ли QR для печати?", answer: "Да. SVG сохраняет чёткость при масштабировании, PNG подходит для готовых макетов. Оставьте свободное поле вокруг кода и проверьте его камерой телефона перед тиражом. На платных тарифах доступны дополнительные форматы; PDF и EPS содержат растровое изображение." },
   { question: "Какую статистику можно посмотреть?", answer: "Для динамических QR на тарифе с аналитикой доступны открытия по дням и типу устройства. Боты учитываются отдельно. География и уникальные посетители не определяются." },
 ];
@@ -113,7 +114,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         <section id="features" className={styles.featureSection}>
           <div className={`${styles.container} ${styles.featureGrid}`}>
-            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>Доступно на Про · пробный период {TRIAL_DAYS} дней</p></div>
+            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>2 динамических бесплатно · Про: {TRIAL_DAYS} дней</p></div>
             <DynamicDemo />
           </div>
         </section>
@@ -160,7 +161,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </article>)}
           </div>
           <p><Link href="/pricing" className={styles.textLink}>Подробное сравнение тарифов →</Link></p>
-          <div className={styles.pricingNotes}><p>Пробный период Про — {TRIAL_DAYS} дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
+          <div className={styles.pricingNotes}><p>Пробный период Про — {TRIAL_DAYS} дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Два бесплатных динамических кода можно менять без оплаты. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
         </section>
 
         <section id="faq" className={`${styles.container} ${styles.faqSection}`}>

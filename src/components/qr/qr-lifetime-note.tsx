@@ -1,3 +1,4 @@
+import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import Link from "next/link";
 import { QR_LIFETIME, QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
 
@@ -6,10 +7,10 @@ type Props = {
 };
 
 const TEXT: Record<Props["variant"], string> = {
-  "download-dynamic": QR_LIFETIME.downloadDynamic,
+  "download-dynamic": PRINTED_QR_COPY,
   "download-static": QR_LIFETIME.downloadStatic,
-  billing: QR_LIFETIME.billing,
-  "detail-dynamic": QR_LIFETIME.downloadDynamic,
+  billing: PRINTED_QR_COPY,
+  "detail-dynamic": PRINTED_QR_COPY,
 };
 
 export function QrLifetimeNote({ variant }: Props) {

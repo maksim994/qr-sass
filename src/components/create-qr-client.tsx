@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradePrompt, type UpgradePlace } from "@/components/upgrade-prompt";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { useParams, useRouter } from "next/navigation";
 import { useId, useState, useSyncExternalStore } from "react";
@@ -37,6 +38,8 @@ import { MSG } from "@/lib/user-messages";
 
 type PlanGate = {
   allowsDynamic: boolean;
+  dynamicRemaining?: number | null;
+  trialUsed?: boolean;
   qrRemaining: number | null;
   qrLimitReached: boolean;
 };
@@ -89,6 +92,7 @@ export function CreateQrClient({
   const [style, setStyle] = useState<QrStyle>(defaultStyle);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [upgrade, setUpgrade] = useState<UpgradePlace | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "design">("content");
   const contentPanelId = useId();
   const designPanelId = useId();
@@ -138,16 +142,16 @@ export function CreateQrClient({
 
     if (planGate.qrLimitReached) {
       setSaving(false);
-      setError(MSG.QR_CREATE_LIMIT);
+      setUpgrade("archive_limit");
       return;
     }
 
     const isHosted = typeInfo?.needsHostedPage;
     const actualKind = isHosted ? "DYNAMIC" : canChooseKind ? kind : "STATIC";
 
-    if ((actualKind === "DYNAMIC" || typeParam === "VCARD") && !planGate.allowsDynamic) {
+    if ((actualKind === "DYNAMIC" || typeParam === "VCARD") && (!planGate.allowsDynamic || planGate.dynamicRemaining === 0)) {
       setSaving(false);
-      setError(MSG.QR_CREATE_DYNAMIC_PLAN);
+      setUpgrade("dynamic_limit");
       return;
     }
 
@@ -203,6 +207,7 @@ export function CreateQrClient({
       setSaving(false);
 
       if (!parsed.ok) {
+        if (response.status === 403) setUpgrade(planGate.qrLimitReached ? "archive_limit" : "dynamic_limit");
         setError(parsed.error ?? MSG.COULD_NOT_CREATE_QR);
         return;
       }
@@ -236,6 +241,7 @@ export function CreateQrClient({
 
   return (
     <div className={styles.editor}>
+      {upgrade && <UpgradePrompt place={upgrade} trialUsed={planGate.trialUsed} onClose={() => setUpgrade(null)} />}
       <QrWizardPageHead
         backHref="/dashboard/create"
         backLabel="К выбору типа QR"
@@ -287,7 +293,7 @@ export function CreateQrClient({
 
           {canChooseKind ? <section className={styles.mode} aria-labelledby="qr-mode-title">
             <h2 id="qr-mode-title">Как будет работать ссылка</h2>
-            <QrKindSegment value={kind} onChange={setKindOverride} disabled={!planGate.allowsDynamic} />
+            <QrKindSegment value={kind} onChange={next => { if (next === "DYNAMIC" && planGate.dynamicRemaining === 0) setUpgrade("dynamic_limit"); else setKindOverride(next); }} />
             <p>{kind === "DYNAMIC" ? "Ссылку можно менять после печати. Открытия будут доступны в аналитике." : "Ссылка записана прямо в QR-код. После печати её нельзя изменить; статистика открытий не собирается."}
               {!planGate.allowsDynamic && <> Для смены ссылки и аналитики — <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })}>тариф Про</Link>.</>}
             </p>

@@ -25,6 +25,7 @@ export default async function CreatePage() {
     getEntitlements(workspace.id),
     db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false } }),
   ]);
+  const dynamicCount = await db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false, OR: [{ kind: "DYNAMIC" }, { shortCode: { not: null } }] } });
   const planInfo = entitlements.plan;
   const qrLimit = planInfo.limits.maxQrCodes;
   const qrRemaining = qrLimit == null ? null : Math.max(0, qrLimit - totalQr);
@@ -51,6 +52,7 @@ export default async function CreatePage() {
         description="Сохраняйте QR в кабинете. Бесплатное создание и скачивание статики доступно на главной без лимита."
       />
 
+      <p>Динамических: {dynamicCount} {planInfo.limits.maxDynamicQr == null ? "— без лимита" : `из ${planInfo.limits.maxDynamicQr}`}</p>
       <p><Link href="/#create-qr" className="qrs-navlink">Создать и скачать статический QR бесплатно →</Link></p>
       <ResumeCreateDraft />
       <ResumeStaticDraft workspaceId={workspace.id} limitReached={limitReached} />

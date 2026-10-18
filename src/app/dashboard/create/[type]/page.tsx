@@ -35,12 +35,15 @@ export default async function CreateTypePage({
   const planInfo = entitlements.plan;
   const qrLimit = planInfo.limits.maxQrCodes;
   const qrRemaining = qrLimit == null ? null : Math.max(0, qrLimit - totalQr);
+  const dynamicCount = await db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false, OR: [{ kind: "DYNAMIC" }, { shortCode: { not: null } }] } });
   const initialDraft = typeUpper === "URL" ? parseCreatePrefill(await searchParams) : null;
 
   return (
     <CreateQrClient
       workspaceId={workspace.id}
       planGate={{
+        dynamicRemaining: planInfo.limits.maxDynamicQr == null ? null : Math.max(0, planInfo.limits.maxDynamicQr - dynamicCount),
+        trialUsed: !!workspace.trialUsedAt,
         allowsDynamic: planInfo.limits.allowsDynamic,
         qrRemaining,
         qrLimitReached: qrLimit != null && totalQr >= qrLimit,

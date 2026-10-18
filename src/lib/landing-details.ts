@@ -1,3 +1,4 @@
+import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import { scenarioLandings } from "@/lib/scenario-landings";
 import { QR_LIFETIME } from "@/lib/qr-lifetime-policy";
 
@@ -12,7 +13,7 @@ export type LandingDetails = {
   next: string;
 };
 
-const lifetime = { question: "Что будет после окончания тарифа?", answer: QR_LIFETIME.billing };
+const lifetime = { question: "Что будет после окончания тарифа?", answer: PRINTED_QR_COPY };
 const printing = { question: "Как подготовить QR-код к печати?", answer: "Скачайте SVG для масштабирования или PNG для готового макета. Сохраните свободное поле вокруг кода и контраст с фоном. Перед тиражом проверьте камерой телефона именно печатный образец, включая ссылку, которая открывается." };
 
 export const landingDetails: Record<string, LandingDetails> = {
@@ -110,7 +111,7 @@ export const landingDetails: Record<string, LandingDetails> = {
     ],
     faqs: [
       { question: "Можно загрузить Excel-файл?", answer: "Загрузка работает с CSV. Сначала экспортируйте лист Excel или Google Sheets в CSV, сохранив названия колонок из шаблона в кабинете." },
-      { question: "Какие коды создаются из таблицы?", answer: "Пакетное создание формирует динамические QR. Для него нужен тариф с динамическими кодами и достаточным лимитом строк. Бесплатный тариф не даёт право создавать динамические QR." },
+      { question: "Какие коды создаются из таблицы?", answer: "Пакетное создание формирует динамические QR. Для него нужен тариф с динамическими кодами и достаточным лимитом строк. На бесплатном тарифе их 2, поэтому для загрузки CSV нужен Про или Бизнес." },
       { question: "В каком формате скачивается пакет?", answer: "Готовые коды можно скачать архивом PNG. Перед размещением большого тиража проверьте адреса и качество сканирования каждого вида макета." }, lifetime,
     ],
   },

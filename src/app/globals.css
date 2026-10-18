@@ -4512,3 +4512,9 @@ html.has-cookie-banner .qrs-hero {
     text-align: center;
   }
 }
+
+.qrs-upgrade-dialog { margin: auto; max-width: min(540px, calc(100vw - 32px)); padding: 28px; border: 1px solid var(--border-default); border-radius: 16px; color: var(--text-strong); background: var(--surface-card); }
+.qrs-upgrade-dialog::backdrop { background: rgb(0 0 0 / .35); }
+.qrs-upgrade-dialog h2 { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+.qrs-upgrade-dialog p { margin-bottom: 24px; line-height: 1.6; }
+.qrs-upgrade-dialog .fk-button { margin: 6px 8px 0 0; }

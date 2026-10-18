@@ -1,3 +1,4 @@
+import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -48,7 +49,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
               <Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">↗</span></Button>
               <a href="#how-it-works" className={s.textLink}>Как это работает <span aria-hidden="true">↓</span></a>
             </div>
-            <p className={s.note}>Статические QR — бесплатно. Динамические — на платном тарифе или в пробном периоде.</p>
+            <p className={s.note}>{`Статические QR — бесплатно и без лимита. ${COMMERCIAL.free.dynamic} динамических кода тоже бесплатно, больше — на Про за ${COMMERCIAL.pro.priceRub} ₽ в месяц.`}</p>
           </div>
           <figure className={s.demo}>
             <div className={s.demoTop}><span>{detail.label}</span><span>Пример применения</span></div>
@@ -74,7 +75,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
         </section>
         <section className={s.terms} aria-labelledby="terms-title"><div className={`${s.container} ${s.termsInner}`}>
           <div><h2 id="terms-title">Печатайте надолго.<br />Учитывайте условия.</h2><Link href="/#pricing" className={s.textLink}>Сравнить тарифы <span aria-hidden="true">↗</span></Link></div>
-          <div>{scenario ? <ul>{scenario.limits.map(item => <li key={item}>{item}</li>)}</ul> : <p>Бесплатный тариф подходит для статических QR. Смена назначения и аналитика требуют динамического кода и соответствующего тарифа. Возможности команды, массового создания и API зависят от плана.</p>}<p>{QR_LIFETIME.billing}</p><Link href={QR_LIFETIME_PATH} className={s.textLink}>Как долго работает напечатанный QR <span aria-hidden="true">↗</span></Link></div>
+          <div>{scenario ? <ul>{scenario.limits.map(item => <li key={item}>{item}</li>)}</ul> : <p>На бесплатном тарифе — статические коды и 2 динамических. Менять ссылку и смотреть статистику можно у динамических. Команда, загрузка из CSV и API зависят от тарифа — сравните тарифы.</p>}<p>{PRINTED_QR_COPY}</p><Link href={QR_LIFETIME_PATH} className={s.textLink}>Как долго работает напечатанный QR <span aria-hidden="true">↗</span></Link></div>
         </div></section>
         <section className={`${s.container} ${s.faq}`} aria-labelledby="faq-title"><div><h2 id="faq-title">Вопросы<br />перед стартом.</h2><p>О возможностях и ограничениях<br />без мелкого шрифта.</p></div><div>{detail.faqs.map(faq => <details key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div></section>
         <nav className={`${s.container} ${s.related}`} aria-label="Другие сценарии QR"><h2>Ещё задачи для вашего QR.</h2><div>{getSeoPages().filter(item => item.slug !== page.slug).map(item => <Link href={`/${item.slug}`} key={item.slug}>{landingDetails[item.slug].label}<span aria-hidden="true">↗</span></Link>)}</div></nav>

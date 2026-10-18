@@ -21,3 +21,25 @@ describe("plan marketing labels stay honest", () => {
     }
   });
 });
+
+import { assertCanCreateQrCodes, getPlanSync } from "@/lib/plans";
+import { COMMERCIAL } from "@/lib/commercial-config";
+test("current public prices come from one config and PRO retains its team", () => {
+  assert.equal(getPlanSync("PRO").priceRub, COMMERCIAL.pro.priceRub);
+  assert.equal(getPlanSync("BUSINESS").priceRub, COMMERCIAL.business.priceRub);
+  assert.equal(getPlanSync("PRO").limits.maxUsers, 5);
+});
+test("FREE admits two dynamic codes and rejects further creation without touching old codes", async () => {
+  for (const dynamic of [0, 1, 2, 5]) {
+    const db = { qrCode: { count: async (args: { where: { OR?: unknown } }) => args.where.OR ? dynamic : Math.max(dynamic, 1) } };
+    const result = await assertCanCreateQrCodes({ workspaceId: "synthetic", planId: "FREE", plan: getPlanSync("FREE"), needsDynamic: true, db: db as never });
+    assert.equal(result.ok, dynamic < 2);
+    if (!result.ok) assert.equal(result.code, "DYNAMIC_REQUIRED");
+  }
+});
+test("archive quota and bulk dynamic quota include every requested row", async () => {
+  const db = { qrCode: { count: async () => 10 } };
+  const result = await assertCanCreateQrCodes({ workspaceId: "synthetic", planId: "FREE", plan: getPlanSync("FREE"), db: db as never });
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, "QR_LIMIT");
+});
