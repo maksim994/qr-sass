@@ -78,11 +78,11 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
     <div className="fk-container py-3 sm:py-4">
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm qrs-text-default">
-          Технические cookie нужны для входа и безопасности. Аналитика и учёт партнёрских переходов включаются только с вашего разрешения. Яндекс Метрика работает без записи сеансов Вебвизором. Выбор можно изменить в <Link href="/privacy-policy#cookie-settings" className="underline">настройках cookie</Link>.
+          Аналитику включаем только с вашего согласия. <Link href="/privacy-policy#cookie-settings" className="underline">Подробнее</Link>.
         </p>
-        <div className="flex shrink-0 flex-wrap gap-3">
-          <Button type="button" variant="secondary" size="sm" onClick={() => choose("declined")}>Только необходимые</Button>
-          <Button type="button" variant="primary" size="sm" onClick={() => choose("accepted")}>Разрешить аналитику</Button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button type="button" variant="secondary" size="sm" onClick={() => choose("declined")}>Без аналитики</Button>
+          <Button type="button" variant="primary" size="sm" onClick={() => choose("accepted")}>Разрешить</Button>
           {open && consent !== "none" && <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(false)}>Закрыть</Button>}
         </div>
       </div>

@@ -57,8 +57,8 @@ function planFeatures(plan: PlanInfo) {
   ];
 }
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ static?: string }> }) {
-  const requestedType = (await searchParams).static;
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ static?: string; url?: string }> }) {
+  const { static: requestedType, url: initialUrl } = await searchParams;
   const [session, free, pro, business, disabledTypes] = await Promise.all([
     getSession(), getPlan("FREE"), getPlan("PRO"), getPlan("BUSINESS"), getDisabledQrTypes(),
   ]);
@@ -88,15 +88,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <SiteHeader session={session} isAdmin={isAdmin} minimal />
       <main>
         <PricingGoal />
-        <HomeHero />
+        <HomeHero><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} /></HomeHero>
         <div className={`${styles.container} ${styles.valueStrip}`} aria-label="Возможности сервиса">
           <span><Check /> От ссылки до электронного меню</span><span><Check /> Дизайн под ваш бренд</span><span><Check /> Смена ссылки после печати</span><span><Check /> Статистика открытий</span>
         </div>
-
-        <section className={`${styles.container} ${styles.section} ${styles.quickSection}`} aria-labelledby="quick-title">
-          <div className={styles.quickCopy}><h2 id="quick-title">Первая идея?<br />Превратите её в QR.</h2><p>Добавьте ссылку, контакты или Wi-Fi. Скачайте статический QR в PNG или SVG бесплатно, без регистрации. Сохранение в кабинете — по желанию.</p><a href="#types" className={styles.textLink}>Файлы и управляемые страницы <Arrow /></a></div>
-          <HomeQuickStart key={publicType} initialType={publicType} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} />
-        </section>
 
         <section className={`${styles.container} ${styles.how}`} id="how" aria-labelledby="how-title">
           <h2 id="how-title" className="sr-only">Три шага до готового QR-кода</h2>
@@ -114,7 +109,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         <section id="features" className={styles.featureSection}>
           <div className={`${styles.container} ${styles.featureGrid}`}>
-            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>2 динамических бесплатно · Про: {TRIAL_DAYS} дней</p></div>
+            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/register?plan=pro" className={styles.textLink}>Попробовать Про 7 дней — без карты</Link><p className={styles.paidNote}>2 динамических бесплатно · Про: {TRIAL_DAYS} дней</p></div>
             <DynamicDemo />
           </div>
         </section>
@@ -126,7 +121,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         <section className={`${styles.container} ${styles.designSection}`}>
           <DesignPlayground />
-          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет и добавьте логотип в редакторе кабинета.</p><p>Попробуйте цвет в примере. Свой код вы настроите в редакторе.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />PNG и SVG для макетов</li></ul><Button href={startPath} variant="secondary">Открыть редактор <Arrow /></Button></div>
+          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет и добавьте логотип в редакторе кабинета.</p><p>Попробуйте цвет в примере. Свой код вы настроите в редакторе.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />PNG и SVG для макетов</li></ul><Button href={startPath} variant="secondary">Добавить логотип — бесплатно после регистрации</Button></div>
         </section>
 
         <section className={styles.printSection}>

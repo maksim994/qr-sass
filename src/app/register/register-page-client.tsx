@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMERCIAL } from "@/lib/commercial-config";
 import { LEGAL_VERSION } from "@/lib/legal-documents";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,12 +24,13 @@ import { MSG } from "@/lib/user-messages";
 import { destinationAfterAuth } from "@/lib/qr-draft";
 
 type Props = {
+  dynamicIntent?: boolean; staticIntent?: boolean;
   planName: string;
   features: string[];
   nextPath: string;
 };
 
-export function RegisterPageClient({ planName, features, nextPath }: Props) {
+export function RegisterPageClient({ planName, features, nextPath, dynamicIntent, staticIntent }: Props) {
   const router = useRouter();
   const nameId = useId();
   const emailId = useId();
@@ -65,7 +67,7 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
         return;
       }
 
-      trackGoal(PRODUCT_GOALS.registration_completed);
+      // Registration receipt is claimed after navigation, including consent/counter readiness.
       router.push(destinationAfterAuth(nextPath));
       router.refresh();
     } catch {
@@ -78,16 +80,25 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
   return (
     <AuthShell
       mode="register"
-      title="Создать аккаунт"
+      title={dynamicIntent ? "Сохраните динамический код" : staticIntent ? "Сохраните код в архиве" : "Создать аккаунт"}
       subtitle={
-        nextPath.startsWith("/dashboard/create")
+        dynamicIntent ? `${COMMERCIAL.free.dynamic} динамических кода бесплатно, Про — ${COMMERCIAL.trialDays} дней без карты. Автосписаний нет` : staticIntent ? "Бесплатно, до 10 кодов, доступ с любого устройства" : nextPath.startsWith("/dashboard/create")
           ? "После регистрации продолжим создание вашего QR-кода."
           : `Начните с тарифа «${planName}». Банковская карта не нужна.`
       }
       planName={planName}
-      planFeatures={features}
+      planFeatures={dynamicIntent ? ["Код сохранится с вашей ссылкой", "Скачаете и напечатаете", "Ссылку можно менять в кабинете"] : features}
       nextPath={nextPath}
     >
+      <AuthDivider />
+
+      <div className="qrs-auth-social">
+        <YandexAuthButton mode="register" nextPath={nextPath} />
+        <p className="qrs-auth-social-note">
+          Данные обрабатываются по <Link href="/privacy-policy">политике конфиденциальности</Link>. Для регистрации через Яндекс подтвердите условия на следующем шаге.
+        </p>
+      </div>
+
       <form onSubmit={onSubmit} className="qrs-auth-form">
         {error ? (
           <Alert variant="danger" size="sm" onClose={() => setError("")}>
@@ -146,14 +157,6 @@ export function RegisterPageClient({ planName, features, nextPath }: Props) {
         </Button>
       </form>
 
-      <AuthDivider />
-
-      <div className="qrs-auth-social">
-        <YandexAuthButton mode="register" nextPath={nextPath} />
-        <p className="qrs-auth-social-note">
-          Данные обрабатываются по <Link href="/privacy-policy">политике конфиденциальности</Link>. Для регистрации через Яндекс подтвердите условия на следующем шаге.
-        </p>
-      </div>
 
       <AuthSwitchLink mode="register" nextPath={nextPath} />
     </AuthShell>

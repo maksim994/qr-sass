@@ -46,6 +46,7 @@ export function CreateUrlStartForm({
       return;
     }
     setError("");
+    if (kind === "STATIC") { router.push(`/?static=URL&url=${encodeURIComponent(normalized)}#create-qr`); return; }
     const draft: QrCreateDraft = { v: 1, contentType: "URL", url: normalized, kind };
     trackGoal(PRODUCT_GOALS.qr_creation_started, { source: "scenario", contentType: "URL", kind });
     writeQrCreateDraft(draft);
@@ -82,9 +83,7 @@ export function CreateUrlStartForm({
             aria-describedby={error ? `${urlId}-error` : `${urlId}-hint`}
             inputSize="lg"
           />
-          <Button type="submit" variant={onAccent ? "secondary" : "accent"} size="lg">
-            {submitLabel}
-          </Button>
+
         </div>
         <p id={`${urlId}-hint`} className="fk-field__hint">
           {hint}
@@ -109,7 +108,7 @@ export function CreateUrlStartForm({
             />
             <span className="qrs-start-kind__title">Можно менять после печати</span>
             <span className="qrs-start-kind__text">
-              В коде — короткая ссылка QR-S. Адрес меню или акции меняете в кабинете, макет тот же.
+              В коде — короткая ссылка QR-S. Адрес назначения меняете в кабинете, печатный материал остаётся тем же.
             </span>
           </label>
           <label className={`qrs-start-kind__card${kind === "STATIC" ? " qrs-start-kind__card--active" : ""}`}>
@@ -120,13 +119,14 @@ export function CreateUrlStartForm({
               checked={kind === "STATIC"}
               onChange={() => setKind("STATIC")}
             />
-            <span className="qrs-start-kind__title">Содержимое навсегда</span>
+            <span className="qrs-start-kind__title">Не меняется после печати</span>
             <span className="qrs-start-kind__text">
               В коде сразу ваш адрес. Проще, но после печати ссылку уже не сменить.
             </span>
           </label>
         </div>
       </fieldset>
+      <Button type="submit" variant={onAccent ? "secondary" : "accent"} size="lg">{submitLabel}</Button>
     </form>
   );
 }

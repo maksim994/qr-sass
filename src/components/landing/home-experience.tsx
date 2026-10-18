@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { STATIC_QR_TYPES } from "@/lib/static-qr";
 import type { QrTypeInfo } from "@/lib/qr-types";
 import { HomeQrPreview } from "./home-qr-preview";
@@ -19,16 +19,15 @@ function Icon({ path, className }: { path: string; className?: string }) {
 }
 const arrow = "M5 12h14m-6-6 6 6-6 6";
 
-export function HomeHero() {
+export function HomeHero({ children }: { children?: ReactNode }) {
   const [selected, setSelected] = useState(2);
   const scene = scenes[selected];
-  return <section className={s.hero} aria-labelledby="home-title">
+  return <><section className={s.hero} aria-labelledby="home-title">
     <div className={s.heroCopy}>
       <h1 id="home-title" tabIndex={-1}>Маленький код.<br /><span>Большие<br className={s.heroBreak} /> возможности.</span></h1>
       <p>Соедините то, что рядом, с тем, что онлайн. Сайт, контакты, программа события или история вашего бренда — в одном QR-коде.</p>
-      <div className={s.heroActions}><Button href="#create-qr" variant="primary" size="lg">Создать QR-код <Icon path={arrow} /></Button><a href="#use-cases">Посмотреть возможности <span aria-hidden="true">↘</span></a></div>
-      <div className={s.heroNote}><span aria-hidden="true">✓</span> Есть бесплатный тариф <i /> Без карты для старта</div>
-    </div>
+    </div><div className={s.heroGenerator}>{children}</div></section>
+    <section className={s.heroExamples} aria-label="Примеры использования QR">
     <div className={s.heroExperience}>
       <div className={s.sceneTabs} role="group" aria-label="Пример использования QR">{scenes.map((item, index) => <button type="button" key={item.name} aria-pressed={selected === index} onClick={() => setSelected(index)}>{item.name}</button>)}</div>
       <div className={s.scene} data-scene={scene.kind}>
@@ -39,7 +38,7 @@ export function HomeHero() {
       </div>
       <p className={s.sceneCaption}>Выберите сценарий — посмотрите, как оживает QR <span aria-hidden="true">↑</span></p>
     </div>
-  </section>;
+  </section></>;
 }
 
 export function TypeExplorer({ types, signedIn }: { types: QrTypeInfo[]; signedIn: boolean }) {
