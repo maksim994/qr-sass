@@ -4518,3 +4518,8 @@ html.has-cookie-banner .qrs-hero {
 .qrs-upgrade-dialog h2 { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
 .qrs-upgrade-dialog p { margin-bottom: 24px; line-height: 1.6; }
 .qrs-upgrade-dialog .fk-button { margin: 6px 8px 0 0; }
+.qrs-frame-controls { border: 0; margin-block: 16px; padding: 0; display: grid; gap: 12px; }
+.qrs-frame-controls legend { font-weight: 600; margin-bottom: 12px; }
+.qrs-frame-controls label { display: flex; gap: 12px; align-items: center; justify-content: space-between; font-size: 14px; }
+.qrs-frame-controls select, .qrs-frame-controls input:not([type=color]) { width: min(210px,65%); padding: 8px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-card); color: var(--text-strong); }
+.qrs-frame-captions { display:flex; flex-wrap:wrap; gap:8px; }.qrs-frame-captions button { border:1px solid var(--border-default); padding:6px 8px; border-radius:8px; font-size:12px; }

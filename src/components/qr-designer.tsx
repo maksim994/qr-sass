@@ -1,5 +1,6 @@
 "use client";
 
+import { FrameControls } from "@/components/qr/frame-controls";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Field, Input, Button } from "@/components/ui";
@@ -19,6 +20,7 @@ export type QrStyle = {
   frameStyle: string;
   frameColor: string;
   frameText: string;
+  frameTextColor?: string;
   logoUrl: string;
   logoFileId: string;
   logoScale: number;
@@ -384,6 +386,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
         </div>
       </DesignCard>
 
+      <FrameControls value={style} onChange={patch} />
       <DesignCard
         title="Цвет кода"
         icon={

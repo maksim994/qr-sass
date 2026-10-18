@@ -42,6 +42,7 @@ export function parseStyleConfig(raw: Record<string, unknown> | null | undefined
       (raw.cornerDotColor as string) ?? legacyForeground ?? defaultQrStyle.cornerDotColor,
     frameStyle: (raw.frameStyle as string) ?? defaultQrStyle.frameStyle,
     frameColor: (raw.frameColor as string) ?? defaultQrStyle.frameColor,
+    frameTextColor: typeof raw.frameTextColor === "string" ? raw.frameTextColor : undefined,
     frameText: (raw.frameText as string) ?? defaultQrStyle.frameText,
     logoUrl: (raw.logoUrl as string) ?? defaultQrStyle.logoUrl,
     logoFileId: (raw.logoFileId as string) ?? defaultQrStyle.logoFileId,

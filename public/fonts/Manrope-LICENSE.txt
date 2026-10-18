@@ -1,0 +1,4 @@
+Manrope, Copyright 2018 The Manrope Project Authors (https://github.com/sharanda/manrope)
+
+See https://openfontlicense.org for the SIL Open Font License 1.1.
+Glyph outlines used solely for QR caption rendering.

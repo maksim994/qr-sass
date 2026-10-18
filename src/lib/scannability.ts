@@ -1,6 +1,9 @@
 type Gradient = { colors?: [string, string] | string[] } | null | undefined;
 
 export type ScannabilityStyle = {
+  frameStyle?: string;
+  frameTextColor?: string;
+  frameColor?: string;
   foreground?: string;
   background?: string;
   margin?: number;
@@ -109,6 +112,10 @@ export function evaluateScannability(style: ScannabilityStyle) {
   }
 
   let score = 100;
+  if (style.frameStyle && style.frameStyle !== "none") {
+    const text = parseHexColor(style.frameTextColor ?? style.frameColor ?? "#111111");
+    if (!text || contrastRatio(text, "ffffff") < 4.5) { score -= 40; warnings.push("Увеличьте контраст подписи на белой рамке."); }
+  }
   const margin = style.margin ?? 2;
   const logoScale = style.logoScale ?? 0;
   const contrast = minContrast(foregrounds, backgrounds.colors);
@@ -143,6 +150,7 @@ export function evaluateScannability(style: ScannabilityStyle) {
 
 export function styleToScannability(style: ScannabilityStyle & Record<string, unknown>): ScannabilityStyle {
   return {
+    frameStyle: style.frameStyle, frameColor: style.frameColor, frameTextColor: style.frameTextColor,
     foreground: typeof style.dotColor === "string" ? style.dotColor : style.foreground,
     background: typeof style.bgColor === "string" ? style.bgColor : style.background,
     transparent: Boolean(style.transparent || style.bgTransparent),

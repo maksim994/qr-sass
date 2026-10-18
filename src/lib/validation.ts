@@ -116,7 +116,8 @@ export const styleSchema = z.object({
 
   frameStyle: z.string().optional(),
   frameColor: z.string().optional(),
-  frameText: z.string().optional(),
+  frameText: z.string().max(24).optional(),
+  frameTextColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
 
   logoFileId: z.string().max(64).optional(),
   logoUrl: z

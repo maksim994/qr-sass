@@ -1,3 +1,4 @@
+import { withQrFrame } from "@/lib/qr-frame";
 import QRCodeStyling from "qr-code-styling";
 import { JSDOM } from "jsdom";
 import { PDFDocument } from "pdf-lib";
@@ -195,11 +196,11 @@ async function styledSvgBuffer(content: string, styleRaw: Record<string, unknown
   const qr = await createStyledQr(content, styleRaw, size);
   const raw = await qr.getRawData("svg");
   if (!raw) throw new Error("Could not render styled QR SVG");
-  if (Buffer.isBuffer(raw)) return raw;
+  if (Buffer.isBuffer(raw)) return Buffer.from(withQrFrame(raw.toString("utf8"), parseStyleConfig(styleRaw), size));
   if (typeof Blob !== "undefined" && raw instanceof Blob) {
-    return Buffer.from(await raw.arrayBuffer());
+    return Buffer.from(withQrFrame(await raw.text(), parseStyleConfig(styleRaw), size));
   }
-  return Buffer.from(String(raw));
+  return Buffer.from(withQrFrame(String(raw), parseStyleConfig(styleRaw), size));
 }
 
 export async function renderStyledQrSvg(

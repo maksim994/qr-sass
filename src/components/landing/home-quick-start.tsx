@@ -1,4 +1,6 @@
 "use client";
+import { FrameControls } from "@/components/qr/frame-controls";
+import type { FrameConfig } from "@/lib/qr-frame";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 
 import Link from "next/link";
@@ -27,14 +29,15 @@ export function HomeQuickStart({ initialType, signedIn, enabledStaticTypes }: Pr
   const [kind, setKind] = useState<"STATIC" | "DYNAMIC">("STATIC");
   const [foreground, setForeground] = useState(defaultQrStyle.dotColor);
   const [background, setBackground] = useState(defaultQrStyle.bgColor);
+  const [frame, setFrame] = useState<FrameConfig>({ frameStyle: "none", frameText: "Сканируй меня", frameColor: "#111111" });
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState<"png" | "svg" | "archive" | "dynamic" | null>(null);
   const payload = payloads[type] ?? {};
   const prepared = prepareStaticQr(type, payload);
-  const scan = evaluateScannability({ foreground, background, margin: 4, logoScale: 0 });
+  const scan = evaluateScannability({ ...frame, foreground, background, margin: 4, logoScale: 0 });
   const dynamic = type === "URL" && kind === "DYNAMIC";
-  const style = { ...defaultQrStyle, dotColor: foreground, cornerSquareColor: foreground, cornerDotColor: foreground, bgColor: background, margin: 4, quietZoneModules: 4 };
+  const style = { ...defaultQrStyle, ...frame, dotColor: foreground, cornerSquareColor: foreground, cornerDotColor: foreground, bgColor: background, margin: 4, quietZoneModules: 4 };
   const destination = (path: string) => signedIn ? path : `/register?next=${encodeURIComponent(path)}`;
 
   async function download(format: "png" | "svg") {
@@ -43,7 +46,7 @@ export function HomeQuickStart({ initialType, signedIn, enabledStaticTypes }: Pr
     if (!scan.safeToUse) { setError(MSG.SCANNABILITY_TOO_LOW); return; }
     busy.current = true; setPending(format); setError(""); setNotice("");
     try {
-      await downloadStaticQr(prepared.data, foreground, background, format);
+      await downloadStaticQr(prepared.data, foreground, background, format, frame);
       markOnboardingDownloaded({ source: "home", format, contentType: type, kind: "STATIC" }, PRODUCT_GOALS.static_qr_downloaded);
       setNotice("Скачивание началось. Проверьте QR камерой перед печатью.");
     } catch { setError(MSG.COULD_NOT_DOWNLOAD); }
@@ -83,10 +86,10 @@ export function HomeQuickStart({ initialType, signedIn, enabledStaticTypes }: Pr
           <label><input type="radio" name={`${id}-kind`} checked={kind === "DYNAMIC"} onChange={() => setKind("DYNAMIC")} />Динамический <span>Про</span></label>
         </fieldset>}
         <p className={styles.kindHint}>{dynamic ? `Меняйте ссылку после печати. Динамический код создаётся в кабинете; пробный период — ${TRIAL_DAYS} дней.` : "Содержимое записано прямо в QR. Бесплатно, без регистрации и лимита на количество. После печати его нельзя изменить; статистика сканов не собирается."}</p>
-        {!dynamic && <details className={styles.staticDesign}><summary>Цвета QR-кода</summary><div>
+        {!dynamic && <details className={styles.staticDesign}><summary>Цвета и рамка QR-кода</summary><div>
           <label htmlFor={`${id}-fg`}>Цвет кода<Input id={`${id}-fg`} type="color" value={foreground} onChange={event => setForeground(event.target.value)} /></label>
           <label htmlFor={`${id}-bg`}>Фон<Input id={`${id}-bg`} type="color" value={background} onChange={event => setBackground(event.target.value)} /></label>
-        </div><p>Оставлено свободное поле в четыре модуля. Проверьте контраст и сканирование на материале печати.</p></details>}
+        </div><FrameControls value={frame} onChange={patch => setFrame(current => ({ ...current, ...patch }))} /><p>Оставлено свободное поле в четыре модуля. Проверьте контраст и сканирование на материале печати.</p></details>}
         <div className={styles.generatorAction}>
           {dynamic ? <Button type="submit" disabled={pending !== null}>Продолжить в кабинете →</Button> : <>
             <Button type="submit" disabled={pending !== null || !prepared.ok || !scan.safeToUse} aria-busy={pending === "png"}>{pending === "png" ? "Подготовка…" : "Скачать PNG"}</Button>
@@ -100,7 +103,7 @@ export function HomeQuickStart({ initialType, signedIn, enabledStaticTypes }: Pr
       </form>
       <div className={styles.generatorPreview}>
         <div className={styles.previewTop}><span>Ваш QR-код</span><span>{prepared.ok && !dynamic ? "Готов к скачиванию" : "Пример"}</span></div>
-        <HomeQrPreview value={prepared.ok && !dynamic ? prepared.data : "https://qr-s.ru"} foreground={foreground} background={background} />
+        <HomeQrPreview value={prepared.ok && !dynamic ? prepared.data : "https://qr-s.ru"} foreground={foreground} background={background} frame={frame} />
         <p>{dynamic ? "Постоянная короткая ссылка появится после сохранения в кабинете." : prepared.ok ? "PNG — 1200 × 1200. SVG масштабируется без потери чёткости." : "Заполните содержимое — появится ваш код."}</p>
       </div>
     </div>

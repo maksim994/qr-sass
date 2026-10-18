@@ -1,5 +1,6 @@
 "use client";
 
+import { withQrFrame, frameEnabled } from "@/lib/qr-frame";
 import { useEffect, useRef } from "react";
 import QRCodeStyling from "qr-code-styling";
 import type { QrStyle } from "@/components/qr-designer";
@@ -21,7 +22,12 @@ export function useQrStylingPreview(data: string, style: QrStyle, size = 280) {
       container.replaceChildren();
       if (!data) return;
       const qr = new QRCodeStyling(buildQrStylingOptions(data, { ...style, logoUrl: imageUrl }, size));
-      qr.append(container);
+      if (frameEnabled(style)) {
+        const raw = await qr.getRawData("svg");
+        if (cancelled || !raw) return;
+        const svg = withQrFrame(await (raw as Blob).text(), style, size);
+        if (!cancelled) container.innerHTML = svg;
+      } else qr.append(container);
     }
 
     async function run() {
