@@ -2,7 +2,7 @@ http:
   routers:
     qr-s-http-one-hop:
       entryPoints: [http]
-      rule: 'Host(`qr-s.ru`)'
+      rule: 'Host(`qr-s.ru`) && (Method(`GET`) || Method(`HEAD`))'
       priority: 10000
       service: qr-s-http-one-hop
   services:

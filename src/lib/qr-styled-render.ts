@@ -275,21 +275,24 @@ export async function renderStyledQrEps(
   const sizePt = 72;
   const eps = `%!PS-Adobe-3.0 EPSF-3.0
 %%BoundingBox: 0 0 ${sizePt} ${sizePt}
+%%LanguageLevel: 2
 %%Creator: QR-S.ru
 %%Title: QR Code
 gsave
 0 0 moveto ${sizePt} 0 lineto ${sizePt} ${sizePt} lineto 0 ${sizePt} lineto closepath clip
+/DeviceRGB setcolorspace
+${sizePt} ${sizePt} scale
 <<
   /ImageType 1
   /Width ${w}
   /Height ${h}
-  /ImageMatrix [${sizePt} 0 0 -${sizePt} 0 ${sizePt}]
-  /DataSource currentfile /HexDecode filter /DCTDecode filter
+  /ImageMatrix [${w} 0 0 -${h} 0 ${h}]
+  /DataSource currentfile /ASCIIHexDecode filter /DCTDecode filter
   /BitsPerComponent 8
   /Decode [0 1 0 1 0 1]
-  /ColorSpace /DeviceRGB
 >> image
 ${hexLines.join("\n")}
+>
 grestore
 showpage
 %%EOF`;

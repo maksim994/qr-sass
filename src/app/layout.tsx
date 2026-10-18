@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | qr-s.ru",
   },
   description: "Создавайте статические и динамические QR-коды: смена ссылки после печати, PNG и SVG, открытия по дням и устройству.",
-  openGraph: {
+  openGraph: { type: "website",
     type: "website",
     locale: "ru_RU",
     url: baseUrl,

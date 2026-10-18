@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   description: "Создавайте QR-коды для ссылок, меню и файлов. Настройте оформление, скачайте PNG или SVG. Динамические QR позволяют менять ссылку после печати.",
   keywords: ["генератор qr кодов", "создать qr код", "динамический qr код", "qr код онлайн"],
   alternates: { canonical: baseUrl },
-  openGraph: {
+  openGraph: { type: "website",
     title: "Ваша ссылка. Ваш QR-код. — QR-S.ru",
     description: "QR-коды для сайта, меню и печатных материалов. Создавайте, делитесь и управляйте ссылками в одном кабинете.",
     url: baseUrl,

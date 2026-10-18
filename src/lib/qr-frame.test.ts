@@ -17,7 +17,10 @@ test("every frame retains decodable QR and Cyrillic outlines in all exports", as
       assert.equal(jsQR(new Uint8ClampedArray(raw),info.width,info.height)?.data,data,id);
     }
     assert.equal((await renderStyledQrPdf(data,style,600)).subarray(0,4).toString(),"%PDF");
-    assert.match((await renderStyledQrEps(data,style,600)).toString(),/%!PS-Adobe/);
+    const eps=(await renderStyledQrEps(data,style,600)).toString();
+    assert.match(eps,/%!PS-Adobe/);
+    assert.match(eps,/ASCIIHexDecode/);
+    assert.match(eps,/DeviceRGB setcolorspace/);
   }
 });
 test("caption contrast is included in final image quality",()=>{

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const pro = await getPlan("PRO");
   const title = `Тарифы QR-S: динамические QR-коды от ${rubles(pro.priceRub)} в месяц`;
-  return { title, description: `Статические QR и ${COMMERCIAL.free.dynamic} динамических бесплатно. Про — ${rubles(pro.priceRub)} в месяц, ${COMMERCIAL.trialDays} дней без карты. Сравните тарифы и возможности.`, alternates: { canonical: publicSiteUrl("/pricing") }, openGraph: { title, url: publicSiteUrl("/pricing"), images: [publicSiteUrl("/opengraph-image.png")] } };
+  return { title, description: `Статические QR и ${COMMERCIAL.free.dynamic} динамических бесплатно. Про — ${rubles(pro.priceRub)} в месяц, ${COMMERCIAL.trialDays} дней без карты. Сравните тарифы и возможности.`, alternates: { canonical: publicSiteUrl("/pricing") }, openGraph: { type: "website", title, url: publicSiteUrl("/pricing"), images: [publicSiteUrl("/opengraph-image.png")] } };
 }
 export default async function PricingPage() {
   const [session, free, pro, business] = await Promise.all([getSession(), getPlan("FREE"), getPlan("PRO"), getPlan("BUSINESS")]);

@@ -53,7 +53,7 @@ export function setMetrikaCounterId(id: string) {
 export function goalParams(params: Record<string, unknown> = {}) {
   const out: Record<string, unknown> = {};
   const type = params.type ?? params.contentType;
-  if (typeof type === "string" && /^[A-Z_]{2,24}$/.test(type)) out.type = type;
+  if (typeof type === "string" && /^[A-Z][A-Z0-9_]{1,23}$/.test(type)) out.type = type;
   const plan = params.plan ?? params.planId;
   if (typeof plan === "string" && /^(free|pro|business)$/i.test(plan)) out.plan = plan.toLowerCase();
   const sources: Record<string,string> = {home:"home",editor:"cabinet",library:"cabinet",billing:"cabinet",scenario:"landing",landing:"landing",pricing:"pricing"};

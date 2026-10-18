@@ -47,7 +47,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
       alternates: { canonical },
       robots: indexing.robots,
-      openGraph: {
+      openGraph: { type: "website",
         title: "Блог — qr-s.ru",
         description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
         url: canonical,
@@ -63,7 +63,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     description: `Статьи в категории «${name}»: гайды, кейсы и аналитика по QR-кодам.`,
     alternates: { canonical },
     robots: indexing.robots,
-    openGraph: {
+    openGraph: { type: "website",
       title: `${name} — Блог qr-s.ru`,
       url: canonical,
     },

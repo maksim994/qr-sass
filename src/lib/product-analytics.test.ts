@@ -46,3 +46,5 @@ test("public goal identifiers match the ten configured Metrika events",()=>{
   const goals=new Set(Object.values(PRODUCT_GOALS));
   for(const goal of ["registration_completed","qr_created","qr_downloaded","first_external_open","checkout_started","payment_succeeded","dynamic_enabled","pricing_view","trial_started","upgrade_prompt_click"])assert.equal(goals.has(goal as never),true,goal);
 });
+
+test("media QR type MP3 retains its type dimension",()=>{assert.deepEqual(goalParams({type:"MP3"}),{type:"MP3"});});
