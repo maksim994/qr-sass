@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradePrompt, type UpgradePlace } from "@/components/upgrade-prompt";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -26,6 +27,7 @@ const navGroups = [
 ];
 
 export function DashboardShell({ children, user, workspace, workspaces }: Props) {
+  const [upgrade, setUpgrade] = useState<UpgradePlace | null>(null);
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const overlayNav = useMediaQuery("(max-width: 980px)");
@@ -49,6 +51,7 @@ export function DashboardShell({ children, user, workspace, workspaces }: Props)
 
   return (
     <div className={styles.shell}>
+      {upgrade && <UpgradePrompt place={upgrade} onClose={() => setUpgrade(null)} />}
       <a href={`#${contentId}`} className={styles.skip}>К содержимому</a>
       {overlayNav && sidebarOpen && <div className={styles.scrim} onClick={closeSidebar} aria-hidden="true" />}
       <aside
@@ -88,11 +91,11 @@ export function DashboardShell({ children, user, workspace, workspaces }: Props)
                 const item = dashboardNavItems.find((entry) => entry.href === href)!;
                 const active = current?.href === href || (href === "/dashboard/library" && pathname.startsWith("/dashboard/qr/"));
                 return (
-                  <Link key={href} href={href} className={styles.navLink} aria-current={active ? "page" : undefined} onClick={closeSidebar}>
+                  <Link key={href} href={href} className={styles.navLink} aria-current={active ? "page" : undefined} onClick={event => { const locked = href.includes("api-") && workspace.plan !== "BUSINESS" || href === "/dashboard/team" && workspace.plan === "FREE"; if (locked) { event.preventDefault(); setUpgrade(href.includes("api-") ? "api" : "team"); } else closeSidebar(); }}>
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       {(Array.isArray(item.icon) ? item.icon : [item.icon]).map((d, i) => <path key={i} d={d} />)}
                     </svg>
-                    {item.label}
+                    {item.label}{(href.includes("api-") && workspace.plan !== "BUSINESS" || href === "/dashboard/team" && workspace.plan === "FREE") && <small className="fk-badge">Бизнес</small>}
                   </Link>
                 );
               })}

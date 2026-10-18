@@ -155,8 +155,8 @@ export function QrAdvancedSettingsBlock({
   onTrackingPixelsChange: (value: TrackingPixels) => void;
 }) {
   return (
-    <div style={{ marginTop: "24px" }}>
-      <div className="qrs-wizard-section-label">Дополнительные настройки</div>
+    <details style={{ marginTop: "24px" }} open={!!(expiry.expireAt || expiry.maxScans || expiry.password || expiry.passwordHint || expiry.gdprRequired || Object.values(trackingPixels).some(Boolean))}>
+      <summary className="qrs-wizard-section-label">Расширенные настройки {(() => { const n = [expiry.expireAt, expiry.maxScans, expiry.password || expiry.passwordHint, expiry.gdprRequired, ...Object.values(trackingPixels)].filter(Boolean).length; return n ? `· включено: ${n}` : ""; })()}</summary>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         <QrExpiryAccordion {...expiry} />
         {showUrlExtras ? (
@@ -165,6 +165,6 @@ export function QrAdvancedSettingsBlock({
           </>
         ) : null}
       </div>
-    </div>
+    </details>
   );
 }
