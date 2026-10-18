@@ -1,6 +1,6 @@
 /** Shared analytics window: calendar days in Europe/Moscow, no silent row cap. */
 
-export const ANALYTICS_PERIODS = [7, 30, 90] as const;
+export const ANALYTICS_PERIODS = [7, 14, 30, 90] as const;
 export type AnalyticsDays = (typeof ANALYTICS_PERIODS)[number];
 export const ANALYTICS_TIMEZONE = "Europe/Moscow";
 export const QR_DETAIL_CHART_DAYS = 30;

@@ -10,6 +10,7 @@ import { selectWorkspace } from "@/lib/workspace-select";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { LIBRARY_PAGE_SIZE, parseLibraryQuery } from "@/lib/library-query";
 import { qrPublicPath } from "@/lib/safe-redirect";
+import { humanDevicePrismaWhere } from "@/lib/analytics-metrics";
 
 type Props = {
   searchParams: Promise<{ q?: string; kind?: string; page?: string }>;
@@ -49,7 +50,7 @@ export default async function LibraryPage({ searchParams }: Props) {
     orderBy: { createdAt: "desc" },
     skip: (page - 1) * LIBRARY_PAGE_SIZE,
     take: LIBRARY_PAGE_SIZE,
-    include: { _count: { select: { scanEvents: true } } },
+    include: { _count: { select: { scanEvents: { where: humanDevicePrismaWhere() } } } },
   });
 
   const items = qrCodes.map((qr) => ({

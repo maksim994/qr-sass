@@ -1,8 +1,9 @@
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { ApiDocsClient } from "./api-docs-client";
+import { publicOrigin } from "@/lib/public-url";
 
 export default function ApiDocsPage() {
-  const baseUrl = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  const baseUrl = publicOrigin();
 
   return (
     <div className="qrs-api-docs-page">

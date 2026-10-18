@@ -19,7 +19,7 @@ export function OnboardingChecklist({ hasQr, hasDownload, hasFirstExternalOpen, 
   const dismissedStored = useSyncExternalStore(subscribeNoop, isOnboardingDismissed, () => false);
   const downloaded = useSyncExternalStore(subscribeNoop, hasOnboardingDownloaded, () => false);
   const [dismissedLocal, setDismissedLocal] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const listId = useId();
   const steps = [
     { id: "create", title: "Создайте первый QR-код", description: "Начните со ссылки или выберите другой тип содержимого.", href: "/dashboard/create", cta: "Создать", done: hasQr },
