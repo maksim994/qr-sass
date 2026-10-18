@@ -180,4 +180,10 @@
 - `src/lib/qr-frame.test.ts`
 - `src/lib/qr-styled-render.ts`
 
-Завершающее исправление root metadata и отчёты отмечены в последнем коммите ветки.
+## 3d159b5 chore: finalize verified QR-S production candidate and release evidence
+
+- `src/app/layout.tsx` — удалён повторный type в root metadata.
+- `docs/TZ-01-RELEASE-2026-10-18.md`
+- `docs/TZ-01-CHANGED-FILES.md`
+
+После деплоя обновлены только эти два отчёта с итоговыми результатами. Production остаётся закреплён на 3d159b5.
