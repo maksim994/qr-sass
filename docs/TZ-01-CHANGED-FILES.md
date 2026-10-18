@@ -186,4 +186,13 @@
 - `docs/TZ-01-RELEASE-2026-10-18.md`
 - `docs/TZ-01-CHANGED-FILES.md`
 
-После деплоя обновлены только эти два отчёта с итоговыми результатами. Production остаётся закреплён на 3d159b5.
+После первого деплоя обновлены только эти два отчёта с итоговыми результатами.
+
+## c07fbc7 fix: publish owner-approved free dynamic QR lifetime policy
+
+После отдельного согласования владельца по п.2.1:
+
+- `src/app/qr-lifetime/page.tsx` — согласованный текст и description.
+- `src/lib/qr-lifetime-policy.ts` — общие пояснения о двух бесплатных динамических кодах.
+- `src/lib/scenario-landings.test.ts` — существующая проверка обновлённого текста.
+- `docs/TZ-01-RELEASE-2026-10-18.md` — согласование и новая проверка backup/restore.
