@@ -12,21 +12,22 @@ const navLinks = [
   { label: "Как работает", href: "/#how" },
   { label: "Меню", href: "/qr-menu" },
   { label: "Упаковка", href: "/qr-for-packaging" },
-  { label: "Тарифы", href: "/#pricing" },
+  { label: "Тарифы", href: "/pricing" },
 ];
 
 type Props = {
   session: { sub: string } | null;
   isAdmin?: boolean;
   minimal?: boolean;
+  createHref?: string;
 };
 
-export function SiteHeaderClient({ session, isAdmin, minimal = false }: Props) {
+export function SiteHeaderClient({ session, isAdmin, minimal = false, createHref = "/#create-qr" }: Props) {
   const links = minimal ? [
     { label: "Возможности", href: "/#features" },
     { label: "Для кого", href: "/#use-cases" },
     { label: "Типы QR", href: "/#types" },
-    { label: "Тарифы", href: "/#pricing" },
+    { label: "Тарифы", href: "/pricing" },
   ] : navLinks;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -93,7 +94,7 @@ export function SiteHeaderClient({ session, isAdmin, minimal = false }: Props) {
               <Link href="/login" className="qrs-navlink">
                 Войти
               </Link>
-              <Button href="/#create-qr" variant="primary" size="md">
+              <Button href={createHref} variant="primary" size="md">
                 Создать QR
               </Button>
             </>
@@ -166,7 +167,7 @@ export function SiteHeaderClient({ session, isAdmin, minimal = false }: Props) {
                 <Button href="/login" variant="secondary" size="md" block className="flex-1">
                   Войти
                 </Button>
-                <Button href="/#create-qr" variant="primary" size="md" block className="flex-1" onClick={() => setMenuOpen(false)}>
+                <Button href={createHref} variant="primary" size="md" block className="flex-1" onClick={() => setMenuOpen(false)}>
                   Создать QR
                 </Button>
               </>

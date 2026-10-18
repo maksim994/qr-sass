@@ -12,8 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((path) => !isDeniedSitemapPath(path))
     .map((path) => ({
       url: path === "/" ? base : `${base}${path}`,
-      changeFrequency: "weekly" as const,
-      priority: path === "/" ? 1 : path === "/blog" ? 0.8 : 0.7,
+      lastModified: new Date("2026-10-18T00:00:00Z"),
     }));
 
   let blogEntries: MetadataRoute.Sitemap = [];
@@ -28,8 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((post) => ({
         url: `${base}/blog/${post.slug}`,
         lastModified: post.updatedAt,
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
+
       }));
   } catch {
     blogEntries = [];

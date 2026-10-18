@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -267,6 +268,7 @@ export default async function BlogPostPage({ params }: Props) {
       <section style={{ paddingBottom: "var(--section-y)" }}>
         <div className="fk-container">
           <BlogPostContent content={content} />
+          {/telegram|max|instagram|vizit/i.test(post.slug) && <p style={{maxWidth:"720px",margin:"24px auto"}}>Для другой социальной сети: <Link href="/blog/qr-kod-dlya-vkontakte">как создать QR-код для ВКонтакте</Link>.</p>}
           <div style={{ maxWidth: "720px", margin: "48px auto 0" }}>
             <ArticleUsefulBlock slug={post.slug} initialLikes={post.likes} />
           </div>

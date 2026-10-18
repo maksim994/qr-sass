@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -19,12 +21,22 @@ const PAGE_SIZE = 9;
 
 type Props = { searchParams: Promise<{ page?: string; category?: string }> };
 
+const validateBlogQuery = cache(async (category: string | undefined, page: string | undefined) => {
+  if (page !== undefined && (typeof page !== "string" || !/^[1-9][0-9]*$/.test(page) || !Number.isSafeInteger(Number(page)))) notFound();
+  if (category !== undefined && (typeof category !== "string" || !category.trim())) notFound();
+  const active = category ? await getBlogCategoryBySlug(category) : null;
+  if (category !== undefined && !active) notFound();
+  const count = await getDb().blogPost.count({where:{publishedAt:{not:null},...(active ? {categoryId:active.id} : {})}});
+  if (Number(page ?? 1) > Math.max(1, Math.ceil(count / PAGE_SIZE))) notFound();
+});
+
 function formatPostDate(date: Date) {
   return date.toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { category: categorySlug, page: pageParam } = await searchParams;
+  await validateBlogQuery(categorySlug, pageParam);
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const indexing = blogListIndexing(currentPage, categorySlug);
   const canonical = publicSiteUrl(indexing.canonicalPath);
@@ -44,7 +56,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 
   const category = await getBlogCategoryBySlug(categorySlug);
-  const name = category?.name ?? categorySlug;
+  if (!category) notFound();
+  const name = category.name;
   return {
     title: `${name} — Блог qr-s.ru`,
     description: `Статьи в категории «${name}»: гайды, кейсы и аналитика по QR-кодам.`,
@@ -59,6 +72,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default async function BlogListPage({ searchParams }: Props) {
   const { page: pageParam, category: categorySlug } = await searchParams;
+  await validateBlogQuery(categorySlug, pageParam);
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
 
   const [categories, activeCategory] = await Promise.all([

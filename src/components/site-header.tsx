@@ -4,8 +4,9 @@ type Props = {
   session: { sub: string } | null;
   isAdmin?: boolean;
   minimal?: boolean;
+  createHref?: string;
 };
 
-export function SiteHeader({ session, isAdmin, minimal }: Props) {
-  return <SiteHeaderClient session={session} isAdmin={isAdmin} minimal={minimal} />;
+export function SiteHeader({ session, isAdmin, minimal, createHref }: Props) {
+  return <SiteHeaderClient session={session} isAdmin={isAdmin} minimal={minimal} createHref={createHref} />;
 }

@@ -17,11 +17,12 @@ export function landingMetadata(page: LandingIdentity): Metadata {
   };
 }
 
-export function landingStructuredData(page: LandingIdentity, label: string) {
+export function landingStructuredData(page: LandingIdentity, label: string, faqs: {question:string;answer:string}[] = []) {
   const url = publicSiteUrl(`/${page.slug}`);
   return {
     "@context": "https://schema.org",
     "@graph": [
+      ...(faqs.length ? [{"@type":"FAQPage", mainEntity:faqs.map(faq=>({"@type":"Question",name:faq.question,acceptedAnswer:{"@type":"Answer",text:faq.answer}}))}] : []),
       { "@type": "WebPage", "@id": `${url}#webpage`, url, name: page.title, description: page.description, inLanguage: "ru-RU", breadcrumb: { "@id": `${url}#breadcrumb` } },
       { "@type": "BreadcrumbList", "@id": `${url}#breadcrumb`, itemListElement: [
         { "@type": "ListItem", position: 1, name: "Главная", item: publicSiteUrl() },

@@ -1,6 +1,6 @@
 /** Public origin without a trailing slash. Avoids `https://qr-s.ru//blog/...` canonicals. */
 export function publicOrigin(): string {
-  return (process.env.APP_URL ?? "https://qr-s.ru").replace(/\/$/, "");
+  return (process.env.APP_URL ?? "https://qr-s.ru").replace(/\/+$/, "");
 }
 
 export function publicSiteUrl(path = ""): string {

@@ -1,4 +1,5 @@
-import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
+import { PRINTED_QR_COPY } from "@/lib/commercial-config";
+import { LEGAL_OPERATOR } from "@/lib/legal-documents";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -6,7 +7,7 @@ import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { getPlan, type PlanInfo } from "@/lib/plans";
 import { qrTypes } from "@/lib/qr-types";
-import { QR_LIFETIME, QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
+import { QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
 import { getDisabledQrTypes } from "@/lib/disabled-qr-types";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -67,10 +68,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   try {
     const [user, latestPosts] = await Promise.all([
       session?.sub ? getDb().user.findUnique({ where: { id: session.sub }, select: { isAdmin: true } }) : Promise.resolve(null),
-      getDb().blogPost.findMany({ where: { publishedAt: { not: null } }, orderBy: { publishedAt: "desc" }, take: 3, select: { slug: true, title: true, excerpt: true } }),
+      getDb().blogPost.findMany({ where: { publishedAt: { not: null } }, orderBy: { publishedAt: "desc" }, take: 100, select: { slug: true, title: true, excerpt: true } }),
     ]);
     isAdmin = user?.isAdmin ?? false;
-    posts = latestPosts.map(post => {
+    const themes = [/otzyv|otzivy|kart/, /razmer|pechat/, /wi-?fi/, /vizit/, /dinam/, /vkontakte/];
+    const selected = themes.flatMap(re=>latestPosts.find(post=>re.test(post.slug)) ?? []);
+    const unique = [...new Map([...selected,...latestPosts].map(p=>[p.slug,p])).values()].slice(0,6);
+    posts = unique.map(post => {
       const clean = sanitizeBlogFields(post);
       return { ...post, title: clean.title ?? post.title, excerpt: clean.excerpt ?? post.excerpt };
     });
@@ -81,6 +85,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const startPath = session ? "/dashboard/create" : "/register";
   const plans = [free, pro, business];
   const descriptions = { FREE: "Для первых кодов и простых задач", PRO: "Для ссылок, которые меняются", BUSINESS: "Для команды и интеграций" };
+  const siteSettings = await getDb().siteSettings.findUnique({where:{id:"default"},select:{contactEmail:true,contactPhone:true}});
+  const organization = { "@context":"https://schema.org", "@graph":[{"@type":"WebSite",name:"QR-S.ru",url:baseUrl},{"@type":"Organization",name:"QR-S.ru",url:baseUrl,logo:publicSiteUrl("/icon.svg"),email:siteSettings?.contactEmail || LEGAL_OPERATOR.email,telephone:siteSettings?.contactPhone || LEGAL_OPERATOR.phone}] };
   const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(faq => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) };
 
   return (
@@ -169,6 +175,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       </main>
       <SiteFooter session={session}><HomeFooterExperience types={enabledTypes} signedIn={Boolean(session)} /></SiteFooter>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization).replace(/</g,"\\u003c") }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }} />
     </div>
   );

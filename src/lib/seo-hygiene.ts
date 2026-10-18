@@ -20,6 +20,8 @@ export const SITEMAP_DENY_PATHS = [
 export const INDEXABLE_STATIC_PATHS = [
   "/",
   "/blog",
+  "/pricing",
+  "/personal-data-consent",
   "/changelog",
   "/qr-lifetime",
   "/privacy-policy",

@@ -1,3 +1,4 @@
+import { getPlan } from "@/lib/plans";
 import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
@@ -12,7 +13,7 @@ import { landingDetails } from "@/lib/landing-details";
 import { landingStructuredData } from "@/lib/landing-seo";
 import { jsonForHtmlScript } from "@/lib/html-script";
 import { publicSiteUrl } from "@/lib/public-url";
-import { QR_LIFETIME, QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
+import { QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
 import type { ScenarioLanding } from "@/lib/scenario-landings";
 import s from "./marketing-landing.module.css";
 
@@ -21,7 +22,7 @@ import s from "./marketing-landing.module.css";
  * The first viewport pairs a large task-specific heading and CTA with a printable QR and its destination.
  */
 export async function MarketingLanding({ page, scenario }: { page: SeoPage; scenario?: ScenarioLanding }) {
-  const session = await getSession();
+  const [session,pro] = await Promise.all([getSession(),getPlan("PRO")]);
   const detail = landingDetails[page.slug];
   let isAdmin = false;
   if (session?.sub) {
@@ -36,7 +37,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
   return (
     <div className={s.page}>
       <a className={s.skip} href="#landing-main">Перейти к содержимому</a>
-      <SiteHeader session={session} isAdmin={isAdmin} minimal />
+      <SiteHeader session={session} isAdmin={isAdmin} minimal createHref={scenario ? "#create" : "/#create-qr"} />
       <main id="landing-main" tabIndex={-1}>
         <nav className={`${s.container} ${s.breadcrumb}`} aria-label="Хлебные крошки">
           <ol><li><Link href="/">Главная</Link></li><li aria-current="page">{detail.label}</li></ol>
@@ -46,10 +47,10 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
             <h1 id="landing-title">{detail.headline}</h1>
             <p>{scenario?.lead ?? page.description}</p>
             <div className={s.actions}>
-              <Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">↗</span></Button>
+              <Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">→</span></Button>
               <a href="#how-it-works" className={s.textLink}>Как это работает <span aria-hidden="true">↓</span></a>
             </div>
-            <p className={s.note}>{`Статические QR — бесплатно и без лимита. ${COMMERCIAL.free.dynamic} динамических кода тоже бесплатно, больше — на Про за ${COMMERCIAL.pro.priceRub} ₽ в месяц.`}</p>
+            <p className={s.note}>{`Статические QR — бесплатно и без лимита. ${COMMERCIAL.free.dynamic} динамических кода тоже бесплатно, больше — на Про за ${pro.priceRub.toLocaleString("ru-RU")} ₽ в месяц.`}</p>
           </div>
           <figure className={s.demo}>
             <div className={s.demoTop}><span>{detail.label}</span><span>Пример применения</span></div>
@@ -63,24 +64,24 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
         </section>
         <section className={`${s.container} ${s.benefits}`} aria-labelledby="benefits-title">
           <h2 id="benefits-title">{page.heading}</h2>
-          <ul>{page.bullets.map(bullet => <li key={bullet}><span aria-hidden="true">↗</span>{bullet}</li>)}</ul>
+          <ul>{page.bullets.map(bullet => <li key={bullet}><span aria-hidden="true">→</span>{bullet}</li>)}</ul>
         </section>
         {scenario && <section id="create" className={`${s.container} ${s.create}`} aria-labelledby="create-title">
           <div><h2 id="create-title">Начните<br />с вашей ссылки.</h2><p>Добавьте адрес страницы, которую откроет посетитель. Выбор и ссылка сохранятся при переходе к регистрации.</p></div>
-          <div className={s.form}><CreateUrlStartForm signedIn={signedIn} placeholder={scenario.placeholder} defaultKind={scenario.defaultKind} hint={scenario.hint} submitLabel={scenario.submitLabel} formId={`${page.slug}-start`} /><Link className={s.textLink} href={secondaryHref!}>{scenario.secondary.label} <span aria-hidden="true">↗</span></Link></div>
+          <div className={s.form}><CreateUrlStartForm signedIn={signedIn} placeholder={scenario.placeholder} defaultKind={scenario.defaultKind} hint={scenario.hint} submitLabel={scenario.submitLabel} formId={`${page.slug}-start`} /><Link className={s.textLink} href={secondaryHref!}>{scenario.secondary.label} <span aria-hidden="true">→</span></Link></div>
         </section>}
         <section id="how-it-works" className={`${s.container} ${s.how}`} aria-labelledby="how-title">
           <div className={s.sectionHeading}><h2 id="how-title">От идеи<br />до первого открытия.</h2><p>Три шага для сценария «{detail.label}».</p></div>
           <ol className={s.steps}>{detail.steps.map((step, index) => <li key={step.title}><span className={s.stepNumber}>{String(index + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.text}</p></li>)}</ol>
         </section>
         <section className={s.terms} aria-labelledby="terms-title"><div className={`${s.container} ${s.termsInner}`}>
-          <div><h2 id="terms-title">Печатайте надолго.<br />Учитывайте условия.</h2><Link href="/#pricing" className={s.textLink}>Сравнить тарифы <span aria-hidden="true">↗</span></Link></div>
-          <div>{scenario ? <ul>{scenario.limits.map(item => <li key={item}>{item}</li>)}</ul> : <p>На бесплатном тарифе — статические коды и 2 динамических. Менять ссылку и смотреть статистику можно у динамических. Команда, загрузка из CSV и API зависят от тарифа — сравните тарифы.</p>}<p>{PRINTED_QR_COPY}</p><Link href={QR_LIFETIME_PATH} className={s.textLink}>Как долго работает напечатанный QR <span aria-hidden="true">↗</span></Link></div>
+          <div><h2 id="terms-title">Печатайте надолго.<br />Учитывайте условия.</h2><Link href="/pricing" className={s.textLink}>Сравнить тарифы <span aria-hidden="true">→</span></Link></div>
+          <div>{scenario ? <ul>{scenario.limits.map(item => <li key={item}>{item}</li>)}</ul> : <p>На бесплатном тарифе — статические коды и 2 динамических. Менять ссылку и смотреть статистику можно у динамических. Команда, загрузка из CSV и API зависят от тарифа — сравните тарифы.</p>}<p>{PRINTED_QR_COPY}</p><Link href={QR_LIFETIME_PATH} className={s.textLink}>Как долго работает напечатанный QR <span aria-hidden="true">→</span></Link></div>
         </div></section>
         <section className={`${s.container} ${s.faq}`} aria-labelledby="faq-title"><div><h2 id="faq-title">Вопросы<br />перед стартом.</h2><p>О возможностях и ограничениях<br />без мелкого шрифта.</p></div><div>{detail.faqs.map(faq => <details key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div></section>
-        <nav className={`${s.container} ${s.related}`} aria-label="Другие сценарии QR"><h2>Ещё задачи для вашего QR.</h2><div>{getSeoPages().filter(item => item.slug !== page.slug).map(item => <Link href={`/${item.slug}`} key={item.slug}>{landingDetails[item.slug].label}<span aria-hidden="true">↗</span></Link>)}</div></nav>
-        <section className={`${s.container} ${s.closing}`} aria-labelledby="closing-title"><div><h2 id="closing-title">Теперь — ваш QR.</h2><p>Выберите содержимое, настройте оформление и проверьте перед печатью.</p></div><Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">↗</span></Button></section>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForHtmlScript(landingStructuredData(page, detail.label)) }} />
+        <nav className={`${s.container} ${s.related}`} aria-label="Другие сценарии QR"><h2>Ещё задачи для вашего QR.</h2><div>{getSeoPages().filter(item => item.slug !== page.slug).map(item => <Link href={`/${item.slug}`} key={item.slug}>{landingDetails[item.slug].label}<span aria-hidden="true">→</span></Link>)}</div></nav>
+        <section className={`${s.container} ${s.closing}`} aria-labelledby="closing-title"><div><h2 id="closing-title">Теперь — ваш QR.</h2><p>Выберите содержимое, настройте оформление и проверьте перед печатью.</p></div><Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">→</span></Button></section>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForHtmlScript(landingStructuredData(page, detail.label, detail.faqs)) }} />
       </main>
       <SiteFooter session={session} />
     </div>

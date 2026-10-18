@@ -17,7 +17,7 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Фиктивные env для build (страницы с БД помечены dynamic). JWT ≥32 символов: next build идёт с NODE_ENV=production.
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public"
 ENV JWT_SECRET="build-time-jwt-secret-do-not-use-in-runtime"
-ENV APP_URL="http://localhost:3000"
+ENV APP_URL="https://qr-s.ru"
 ENV REDIS_URL="redis://localhost:6379"
 RUN node scripts/copy-ckeditor-css.mjs
 RUN npx prisma generate
