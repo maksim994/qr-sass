@@ -92,9 +92,9 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
   function renderPlanAction(plan: PlanInfo) {
     if (!canManageBilling || complimentary || plan.id === "FREE" || (plan.id === "PRO" && currentPlanId === "BUSINESS" && !isTrial)) return null;
     const canTrial = plan.accessMode !== "archive" && plan.id === "PRO" && !trialUsedAt && currentPlanId === "FREE";
-    const label = archivedOffer && plan.accessMode !== "archive" ? `Перейти на ${plan.name}` : currentPlanId === plan.id && !isTrial ? `Продлить ${plan.name}` : isTrial && currentPlanId === plan.id ? `Оплатить ${plan.name}` : `Выбрать ${plan.name}`;
+    const label = archivedOffer && plan.accessMode !== "archive" ? `Перейти на ${plan.name}` : currentPlanId === plan.id && !isTrial ? `Продлить ${plan.name}` : isTrial && currentPlanId === plan.id ? `Оплатить ${plan.name}` : `Перейти на ${plan.name}`;
     return <div className={styles.planActions}>
-      {canTrial && <><Button block disabled={busy} onClick={handleStartTrial}>{pending === "trial" ? "Включаем доступ…" : `Попробовать ${TRIAL_DAYS} дней`}</Button><p>Бесплатно, без автоматических списаний</p></>}
+      {canTrial && <><Button block disabled={busy} onClick={handleStartTrial}>{pending === "trial" ? "Включаем доступ…" : `Попробовать Про ${TRIAL_DAYS} дней, без карты`}</Button><p>Бесплатно, без автоматических списаний</p></>}
       {/* The ref is read only inside the click handler, never while rendering this button. */}
       {/* eslint-disable-next-line react-hooks/refs */}
       <Button id={`billing-plan-${plan.accessMode ?? "standard"}-${plan.id}`} variant={canTrial ? "secondary" : "primary"} block disabled={busy} onClick={() => handleCheckout(plan)}>{pending === plan.id ? "Готовим оплату…" : `${label} · ${money(plan.priceRub)}`}</Button>

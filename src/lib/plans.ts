@@ -1,3 +1,4 @@
+import { COMMERCIAL } from "@/lib/commercial-config";
 import type { Prisma } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { MSG } from "@/lib/user-messages";
@@ -8,6 +9,7 @@ export const PLAN_IDS: PlanId[] = ["FREE", "PRO", "BUSINESS"];
 export type PlanLimits = {
   maxQrCodes: number | null;
   maxUsers: number | null;
+  maxDynamicQr?: number | null;
   allowsDynamic: boolean;
   allowsAnalytics: boolean;
   exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
@@ -35,7 +37,8 @@ function exportLimitLabel(formats: PlanLimits["exportFormats"]): string {
 }
 
 function analyticsLimitLabel(limits: PlanLimits): string {
-  if (!limits.allowsDynamic) return "Только статические";
+  if (!limits.allowsDynamic) return "Статические QR";
+  if (limits.maxDynamicQr != null) return `Статические + ${limits.maxDynamicQr} динамических`;
   return "Динамика: смена ссылки и открытия по дням";
 }
 
@@ -61,18 +64,19 @@ export function buildLimitLabels(limits: PlanLimits, planId: PlanId): string[] {
 export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   FREE: {
     name: "Бесплатный",
-    description: "Попробовать сервис и создать несколько статических QR",
-    priceRub: 0,
+    description: "Статические QR и два динамических кода бесплатно",
+    priceRub: COMMERCIAL.free.priceRub,
     limits: {
-      maxQrCodes: 10,
-      maxUsers: 1,
-      allowsDynamic: false,
-      allowsAnalytics: false,
+      maxQrCodes: COMMERCIAL.free.archive,
+      maxDynamicQr: COMMERCIAL.free.dynamic,
+      maxUsers: COMMERCIAL.free.members,
+      allowsDynamic: true,
+      allowsAnalytics: true,
       exportFormats: ["PNG", "SVG"],
     },
     limitLabels: [
-      "До 10 QR-кодов",
-      "Только статические",
+      `До ${COMMERCIAL.free.archive} QR в архиве кабинета`,
+      `Статические + ${COMMERCIAL.free.dynamic} динамических`,
       "Экспорт PNG и SVG",
       "1 пользователь",
     ],
@@ -80,10 +84,10 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   PRO: {
     name: "Про",
     description: "Динамика, открытия по дням и устройству, смена ссылки после печати",
-    priceRub: 990,
+    priceRub: COMMERCIAL.pro.priceRub,
     limits: {
       maxQrCodes: null,
-      maxUsers: 5,
+      maxUsers: COMMERCIAL.pro.members,
       allowsDynamic: true,
       allowsAnalytics: true,
       exportFormats: ["PNG", "SVG", "JPG", "EPS", "PDF"],
@@ -98,7 +102,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
   BUSINESS: {
     name: "Бизнес",
     description: "То же, что Про, плюс API-ключи workspace. Белой метки нет",
-    priceRub: 2990,
+    priceRub: COMMERCIAL.business.priceRub,
     limits: {
       maxQrCodes: null,
       maxUsers: null,
@@ -133,8 +137,8 @@ export async function getPlan(planId: PlanId | string | null | undefined, option
     const maxQrCodes = override.maxQrCodes ?? base.limits.maxQrCodes;
     const maxUsers = override.maxUsers ?? base.limits.maxUsers;
     const priceRub = override.priceRub ?? base.priceRub;
-    const allowsDynamic = override.allowsDynamic ?? base.limits.allowsDynamic;
-    const allowsAnalytics = override.allowsAnalytics ?? base.limits.allowsAnalytics;
+    const allowsDynamic = id === "FREE" ? true : override.allowsDynamic ?? base.limits.allowsDynamic;
+    const allowsAnalytics = id === "FREE" ? true : override.allowsAnalytics ?? base.limits.allowsAnalytics;
     let exportFormats = base.limits.exportFormats;
     if (override.exportFormats) {
       try {
@@ -147,6 +151,7 @@ export async function getPlan(planId: PlanId | string | null | undefined, option
 
     const limits: PlanLimits = {
       maxQrCodes,
+      maxDynamicQr: base.limits.maxDynamicQr,
       maxUsers,
       allowsDynamic,
       allowsAnalytics,
@@ -180,9 +185,9 @@ export function formatUsage(current: number, limit: number | null): string {
 
 /** Per-batch row caps for CSV/XLSX mass create (independent of maxQrCodes quota). */
 export const BULK_BATCH_LIMITS: Record<PlanId, number> = {
-  FREE: 50,
-  PRO: 50,
-  BUSINESS: 50,
+  FREE: COMMERCIAL.free.csvRows,
+  PRO: COMMERCIAL.pro.csvRows,
+  BUSINESS: COMMERCIAL.business.csvRows,
 };
 
 export function getBulkBatchLimit(planId: PlanId | string | null | undefined): number {
@@ -225,7 +230,9 @@ export async function assertCanCreateQrCodes(options: {
   const remaining =
     plan.limits.maxQrCodes == null ? null : Math.max(0, plan.limits.maxQrCodes - currentCount);
 
-  if (needsDynamic && !plan.limits.allowsDynamic) {
+  const dynamicCount = needsDynamic && plan.limits.maxDynamicQr != null
+    ? await (options.db ?? getDb()).qrCode.count({ where: { workspaceId: options.workspaceId, isArchived: false, OR: [{ kind: "DYNAMIC" }, { shortCode: { not: null } }] } }) : 0;
+  if (needsDynamic && (!plan.limits.allowsDynamic || (plan.limits.maxDynamicQr != null && dynamicCount + count > plan.limits.maxDynamicQr))) {
     return {
       ok: false,
       plan,

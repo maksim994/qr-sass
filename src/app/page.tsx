@@ -155,10 +155,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             {plans.map(plan => <article key={plan.id} className={`${styles.plan} ${plan.id === "PRO" ? styles.featuredPlan : ""}`}>
               <div className={styles.planName}><h3>{plan.name}</h3>{plan.id === "PRO" && <span>Для регулярной работы</span>}</div><p className={styles.planDescription}>{descriptions[plan.id]}</p>
               <p className={styles.price}>{plan.priceRub.toLocaleString("ru-RU")} <span>₽ / месяц</span></p>
-              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/#create-qr" : "/register"} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать ${TRIAL_DAYS} дней` : "Выбрать Бизнес"}</Button>
+              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/register" : `/register?plan=${plan.id.toLowerCase()}`} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать ${TRIAL_DAYS} дней` : "Выбрать Бизнес"}</Button>
               <ul>{planFeatures(plan).map(feature => <li key={feature}><Check />{feature}</li>)}</ul>
             </article>)}
           </div>
+          <p><Link href="/pricing" className={styles.textLink}>Подробное сравнение тарифов →</Link></p>
           <div className={styles.pricingNotes}><p>Пробный период Про — {TRIAL_DAYS} дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Изменение ссылок доступно при оплате. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
         </section>
 

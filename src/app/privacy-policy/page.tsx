@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
 import { LegalDocument } from "@/components/legal/legal-document";
-import { PRIVACY_SECTIONS, LEGAL_VERSION, LEGAL_DATE_LABEL } from "@/lib/legal-documents";
+import { PRIVACY_SECTIONS } from "@/lib/legal-documents";
 import { publicSiteUrl } from "@/lib/public-url";
 import { analyticsRetentionDays } from "@/lib/analytics-retention";
 import { CookieSettingsButton } from "@/components/cookie-settings-button";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 export default async function Page() {
   return <LegalArticleLayout session={await getSession()} eyebrow="Правовая информация" title="Политика конфиденциальности"
-    updatedLabel={`Редакция ${LEGAL_VERSION} от ${LEGAL_DATE_LABEL}`}>
+    updatedLabel="Редакция от 18 октября 2026 г.">
     <LegalDocument sections={PRIVACY_SECTIONS} />
     <p>Срок хранения технических полей аналитики QR: {analyticsRetentionDays()} дней.</p>
     <CookieSettingsButton />

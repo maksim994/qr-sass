@@ -36,8 +36,9 @@ export function applyWorkspaceTerms(workspace: WorkspaceTerms, base: PlanInfo): 
   if (!archive) return base;
   const saved = base.id === archive.plan.id ? archive.plan : base.id === "FREE" ? archive.freePlan : null;
   if (!saved) throw new Error("Archived plan requires an explicit change of terms");
-  return { ...base, ...saved, accessMode: "archive", name: `${base.name} (архивный)`,
-    limitLabels: buildLimitLabels(saved.limits, saved.id) };
+  const limits = base.id === "FREE" ? { ...saved.limits, allowsDynamic: true, allowsAnalytics: true, maxDynamicQr: base.limits.maxDynamicQr } : saved.limits;
+  return { ...base, ...saved, limits, accessMode: "archive", name: `${base.name} (архивный)`,
+    limitLabels: buildLimitLabels(limits, saved.id) };
 }
 
 export function archivedPlanId(workspace: WorkspaceTerms): PlanId | null {
