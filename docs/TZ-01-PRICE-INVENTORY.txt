@@ -1,0 +1,126 @@
+scripts/verify-legal-release.mjs:31:  await db.planOverride.upsert({ where: { planId: "PRO" }, create: { planId: "PRO", priceRub: 299 }, update: { priceRub: 299 } });
+scripts/verify-legal-release.mjs:59:  assert.match(billingHtml, /Попробовать 7 дней/);
+scripts/verify-legal-release.mjs:91:      assert.match(html, /14 дней/);
+scripts/verify-legal-release.mjs:95:  console.log("PASS: CSRF, separate required consent, stale edition rejection, stored receipt, email login, authenticated billing links, 14-day trial, OAuth intent, new/existing OAuth user and public documents.");
+scripts/verify-product-http.ts:24:  const trial = await post("/api/billing/trial", { workspaceId: ws.id }, actor.cookie); assert.equal(trial.status, 200, await trial.clone().text());
+scripts/verify-product-http.ts:26:  assert.equal(started.subscription!.currentPeriodEnd.getTime() - started.trialUsedAt!.getTime(), 7 * 86400_000);
+scripts/verify-product-http.ts:27:  assert.equal((await post("/api/billing/trial", { workspaceId: ws.id }, actor.cookie)).status, 409);
+scripts/verify-product-http.ts:30:  assert.equal((await post("/api/billing/trial", { workspaceId: ws.id }, actor.cookie)).status, 409);
+scripts/verify-product-http.ts:32:  pass("new trial is exactly 7 days; repeats rejected; historical 14-day end preserved");
+scripts/verify-product-http.ts:44:  const registered = await post("/api/auth/register", { name: "Synthetic", email: registeredEmail, password: "Synthetic-Qr-2026!", workspaceName: "Synthetic partner trial", termsAccepted: true, consent: true, legalVersion: LEGAL_VERSION }, visitCookie);
+scripts/test-workspace-terms-http.mjs:22:  const old=await fetch(base.origin+'//r/legacy-trial',{redirect:'manual'});
+scripts/test-workspace-terms-http.mjs:25:  assert.ok(old.headers.get('location')?.endsWith('/r/legacy-trial'));
+scripts/test-workspace-terms-http.mjs:26:  const redirect=await fetch(url('/r/legacy-trial'),{redirect:'manual'});
+scripts/test-workspace-terms-http.mjs:36:  for(const endpoint of ['checkout','trial']) {
+scripts/test-workspace-terms-http.mjs:40:  console.log('PASS: health, legacy double-slash redirects, hosted business/coupon/link-list content, public catalog, friends billing/admin, payment/trial blocking, unauthorized assignment');
+prisma/legacy-schema.prisma:110:  trialUsedAt   DateTime?      // Триал PRO уже использован
+scripts/verify-robokassa-integration.ts:46:  const legacy = await db.payment.create({ data: { workspaceId: workspace.id, providerPaymentId: `legacy-${suffix}`, amount: 990, planId: "PRO", status: "SUCCEEDED" } });
+scripts/verify-robokassa-integration.ts:58:    amount: 990, planId: "PRO", isTest, status,
+scripts/verify-robokassa-integration.ts:102:    const forgedYoo = await fulfillYookassaPayment({ id: test.providerPaymentId, status: "succeeded", test: false, amount: { value: "990.00", currency: "RUB" } });
+scripts/fixtures/legacy-workspaces.sql:7:('legacy-trial','Trial Pro','legacy-trial','PRO',NOW());
+scripts/fixtures/legacy-workspaces.sql:11:('sub-trial','legacy-trial','PRO','trial','2099-09-29',NOW());
+scripts/test-workspace-terms.mjs:40:  await db.planOverride.update({ where: { planId: 'PRO' }, data: { priceRub: 9900, maxQrCodes: 1, maxUsers: 1 } });
+scripts/test-workspace-terms.mjs:46:  assert.equal((await getEntitlements('legacy-trial')).isTrial, true);
+scripts/test-workspace-terms.mjs:71:  const switchPayment = await db.payment.create({data:{workspaceId:'legacy-pro',providerPaymentId:'switch-payment',amount:2990,planId:'BUSINESS',termsMode:'current'}});
+prisma/schema.prisma:156:  trialUsedAt   DateTime?      // Триал PRO уже использован
+prisma/schema.prisma:465:  events      String[] @default(["registration_completed", "trial_started", "payment_succeeded"])
+scripts/verify-robokassa-http.ts:36:  assert.equal(fields.OutSum, "990.00");
+scripts/verify-robokassa-http.ts:39:  assert.equal(receipt.items[0].sum, 990);
+scripts/verify-robokassa-http.ts:41:  assert.equal(fields.SignatureValue, createHash("sha256").update(`isolated-shop:990.00:${fields.InvId}:${fields.Receipt}:synthetic-test-one:Shp_order=${checkout.paymentId}:Shp_test=1`).digest("hex"));
+scripts/verify-robokassa-http.ts:44:  const params = new URLSearchParams({ OutSum: "990.000000", InvId: fields.InvId, Shp_order: checkout.paymentId, Shp_test: "1" });
+scripts/verify-robokassa-http.ts:53:  const returnUrl = `${base}/api/billing/robokassa/return?Shp_order=${checkout.paymentId}&OutSum=990&InvId=${fields.InvId}`;
+prisma/migrations/20260919130000_admin_notifications/migration.sql:46:    "events" TEXT[] DEFAULT ARRAY['registration_completed', 'trial_started', 'payment_succeeded']::TEXT[],
+src/lib/user-messages.ts:134:  BILLING_TRIAL_FAILED: "Не удалось включить пробный доступ. Попробуйте ещё раз.",
+src/lib/entitlements.ts:6:export type EntitlementStatus = "free" | "trial" | "active" | "expired" | "canceled";
+src/lib/entitlements.ts:72:  if (snapshot && periodOpen(snapshot.currentPeriodEnd, now) && (snapshot.status === "trial" || snapshot.status === "active" || snapshot.status === "canceled")) {
+src/lib/entitlements.ts:76:      snapshot.status === "trial" ? "trial" : snapshot.status === "canceled" ? "canceled" : "active";
+src/lib/entitlements.ts:77:    return rightsFrom(planId, status, snapshot.status === "trial", snapshot.currentPeriodEnd, plan, workspaceId);
+src/lib/entitlements.ts:88:        if (locked.status === "active" || locked.status === "trial") {
+src/lib/entitlements.ts:115:  const liveStatus = sub?.status === "trial" || sub?.status === "active" || sub?.status === "canceled";
+src/lib/entitlements.ts:120:      sub.status === "trial" ? "trial" : sub.status === "canceled" ? "canceled" : "active";
+src/lib/entitlements.ts:121:    return rightsFrom(planId, status, sub.status === "trial", sub.currentPeriodEnd, plan, workspaceId);
+prisma/migrations/20260919160000_preserve_workspace_terms/migration.sql:13:    ('PRO', 990, NULL::int, 5, true, true, '["PNG","SVG","JPG","EPS","PDF"]'::jsonb),
+prisma/migrations/20260919160000_preserve_workspace_terms/migration.sql:14:    ('BUSINESS', 2990, NULL::int, NULL::int, true, true, '["PNG","SVG","JPG","EPS","PDF"]'::jsonb)
+prisma/migrations/20260722100000_baseline_schema/migration.sql:79:    "trialUsedAt" TIMESTAMP(3),
+src/lib/partners.ts:28:      id: true, trialUsedAt: true,
+src/lib/legal-documents.ts:39:      "При регистрации Пользователь отдельным подтверждением принимает правила использования аккаунта и бесплатных функций сервиса. Регистрация, просмотр сайта и использование бесплатного или пробного доступа сами по себе не создают обязанности оплатить платный тариф.",
+src/lib/legal-documents.ts:49:      "Новый пробный период Про длится 7 дней и не требует банковской карты. Ранее активированный пробный период сохраняет указанную в кабинете дату окончания. Его окончание само по себе не приводит к списанию денег. Оплата выбранного тарифа производится пользователем через Robokassa; текущая интеграция не выполняет автоматических повторных списаний.",
+src/lib/legal-documents.ts:51:      "Расчётный период — один календарный месяц; точные даты отображаются в кабинете. При продлении действующего платного периода следующий месяц добавляется к его окончанию. Оплата во время пробного периода начинает платный месяц с момента оплаты; остаток пробного периода не прибавляется. Продление выполняется отдельной оплатой пользователем.",
+src/lib/legal-documents.ts:69:      "Напечатанные динамические QR продолжают открываться после окончания платного тарифа или пробного периода. Создание новых динамических кодов, смена назначения и другие платные возможности требуют действующего доступа. Удаление кода, архивирование соответствующих данных при удалении аккаунта, собственный срок действия или лимит открытий кода могут прекратить его работу. Подробные правила опубликованы на странице https://qr-s.ru/qr-lifetime.",
+src/lib/product-analytics.ts:7:  trial_started: "trial_started",
+src/lib/business-events.ts:5:  trial_started: "Начало триала",
+src/lib/workspace-select.ts:10:  workspace: { id: string; name: string; plan: string; trialUsedAt?: Date | null };
+src/lib/plans.ts:83:    priceRub: 990,
+src/lib/plans.ts:101:    priceRub: 2990,
+src/lib/business-report.ts:22:      { day: string; registrations: bigint; trials: bigint; payments: bigint }[]
+src/lib/business-report.ts:23:    >`SELECT to_char("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Europe/Moscow','YYYY-MM-DD') AS day, count(*) FILTER (WHERE name='registration_completed') AS registrations, count(*) FILTER (WHERE name='trial_started') AS trials, count(*) FILTER (WHERE name='payment_succeeded') AS payments FROM "BusinessEvent" WHERE "isTest"=${isTest} AND "createdAt">=${since} AND "createdAt"<=${now} GROUP BY day ORDER BY day DESC`,
+src/lib/business-report.ts:32:    >`SELECT to_char(date_trunc('week', t."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE 'Europe/Moscow'),'YYYY-MM-DD') AS week, count(*) AS started, count(*) FILTER (WHERE t."createdAt" + interval '21 days' <= ${now}) AS mature, count(*) FILTER (WHERE t."createdAt" + interval '21 days' > ${now}) AS pending, count(*) FILTER (WHERE t."createdAt" + interval '21 days' <= ${now} AND EXISTS (SELECT 1 FROM "Payment" p WHERE p."workspaceId"=t."workspaceId" AND p."isTest"=${isTest} AND p."paidAt">=t."createdAt" AND p."paidAt"<=t."createdAt" + interval '21 days')) AS converted FROM "BusinessEvent" t WHERE t.name='trial_started' AND t."isTest"=${isTest} AND t."createdAt">=${since} AND t."createdAt"<=${now} GROUP BY week ORDER BY week DESC`,
+src/lib/scenario-landings.ts:1:import { TRIAL_DAYS } from "@/lib/trial-policy";
+src/lib/legal-history/2026-10-06.ts:39:      "При регистрации Пользователь отдельным подтверждением принимает правила использования аккаунта и бесплатных функций сервиса. Регистрация, просмотр сайта и использование бесплатного или пробного доступа сами по себе не создают обязанности оплатить платный тариф.",
+src/lib/legal-history/2026-10-06.ts:49:      "Пробный период Про длится 14 дней и не требует банковской карты. Ранее активированный пробный период сохраняет указанную в кабинете дату окончания. Его окончание само по себе не приводит к списанию денег. Оплата выбранного тарифа производится пользователем через ЮKassa; текущая интеграция не выполняет автоматических повторных списаний.",
+src/lib/legal-history/2026-10-06.ts:51:      "Расчётный период — один календарный месяц; точные даты отображаются в кабинете. При продлении действующего платного периода следующий месяц добавляется к его окончанию. Оплата во время пробного периода начинает платный месяц с момента оплаты; остаток пробного периода не прибавляется. Продление выполняется отдельной оплатой пользователем.",
+src/lib/legal-history/2026-10-06.ts:69:      "Напечатанные динамические QR продолжают открываться после окончания платного тарифа или пробного периода. Создание новых динамических кодов, смена назначения и другие платные возможности требуют действующего доступа. Удаление кода, архивирование соответствующих данных при удалении аккаунта, собственный срок действия или лимит открытий кода могут прекратить его работу. Подробные правила опубликованы на странице https://qr-s.ru/qr-lifetime.",
+src/lib/legal-history/2026-09-20.ts:34:  { title: "3. Оплата и пробный период", paragraphs: [
+src/lib/legal-history/2026-09-20.ts:35:    "Пробный период Про длится 14 дней и не требует банковской карты. Его окончание само по себе не приводит к списанию денег. Оплата выбранного тарифа производится пользователем через ЮKassa; текущая интеграция не выполняет автоматических повторных списаний.",
+src/lib/legal-history/2026-09-20.ts:36:    "Платный доступ предоставляется после подтверждения успешной оплаты платёжным провайдером. Расчётный период — один календарный месяц; точные даты отображаются в кабинете. При продлении действующего платного периода следующий месяц добавляется к его окончанию. Оплата во время пробного периода начинает платный месяц с момента оплаты. Стоимость и состав оплаченного заказа фиксируются при его оформлении.",
+src/lib/legal-history/2026-09-20.ts:41:    "Напечатанные динамические QR продолжают открываться после окончания платного тарифа или пробного периода. Создание новых динамических кодов, смена назначения и другие платные возможности требуют действующего доступа. Удаление кода, архивирование соответствующих данных при удалении аккаунта, собственный срок действия или лимит открытий кода могут прекратить его работу. Подробные правила опубликованы на странице «Срок жизни QR».",
+src/lib/legal-history/2026-10-04.ts:36:    "Для новых активаций пробный период Про длится 7 дней и не требует банковской карты. Ранее активированный пробный период сохраняет указанную в кабинете дату окончания. Его окончание само по себе не приводит к списанию денег. Оплата выбранного тарифа производится пользователем через ЮKassa; текущая интеграция не выполняет автоматических повторных списаний.",
+src/lib/legal-history/2026-10-04.ts:38:    "Расчётный период — один календарный месяц; точные даты отображаются в кабинете. При продлении действующего платного периода следующий месяц добавляется к его окончанию. Оплата во время пробного периода начинает платный месяц с момента оплаты; остаток пробного периода не прибавляется. Продление выполняется отдельной оплатой пользователем. Цена в рублях и функции выбранного тарифа доступны до оплаты на странице тарифов и в кабинете; последующее изменение цены не меняет стоимость уже оплаченного периода.",
+src/lib/legal-history/2026-10-04.ts:43:    "Напечатанные динамические QR продолжают открываться после окончания платного тарифа или пробного периода. Создание новых динамических кодов, смена назначения и другие платные возможности требуют действующего доступа. Удаление кода, архивирование соответствующих данных при удалении аккаунта, собственный срок действия или лимит открытий кода могут прекратить его работу. Подробные правила опубликованы на странице «Срок жизни QR».",
+src/lib/legal-history/2026-10-01.ts:34:  { title: "3. Оплата и пробный период", paragraphs: [
+src/lib/legal-history/2026-10-01.ts:35:    "Для новых активаций пробный период Про длится 7 дней и не требует банковской карты. Ранее активированный пробный период сохраняет указанную в кабинете дату окончания. Его окончание само по себе не приводит к списанию денег. Оплата выбранного тарифа производится пользователем через ЮKassa; текущая интеграция не выполняет автоматических повторных списаний.",
+src/lib/legal-history/2026-10-01.ts:36:    "Платный доступ предоставляется после подтверждения успешной оплаты платёжным провайдером. Расчётный период — один календарный месяц; точные даты отображаются в кабинете. При продлении действующего платного периода следующий месяц добавляется к его окончанию. Оплата во время пробного периода начинает платный месяц с момента оплаты. Стоимость и состав оплаченного заказа фиксируются при его оформлении.",
+src/lib/legal-history/2026-10-01.ts:41:    "Напечатанные динамические QR продолжают открываться после окончания платного тарифа или пробного периода. Создание новых динамических кодов, смена назначения и другие платные возможности требуют действующего доступа. Удаление кода, архивирование соответствующих данных при удалении аккаунта, собственный срок действия или лимит открытий кода могут прекратить его работу. Подробные правила опубликованы на странице «Срок жизни QR».",
+src/app/dashboard/billing/page.tsx:88:        trialUsedAt={!!workspace.trialUsedAt}
+src/lib/legal-history/2026-10-05.ts:36:    "Пробный период Про длится 14 дней и не требует банковской карты. Ранее активированный пробный период сохраняет указанную в кабинете дату окончания. Его окончание само по себе не приводит к списанию денег. Оплата выбранного тарифа производится пользователем через ЮKassa; текущая интеграция не выполняет автоматических повторных списаний.",
+src/lib/legal-history/2026-10-05.ts:38:    "Расчётный период — один календарный месяц; точные даты отображаются в кабинете. При продлении действующего платного периода следующий месяц добавляется к его окончанию. Оплата во время пробного периода начинает платный месяц с момента оплаты; остаток пробного периода не прибавляется. Продление выполняется отдельной оплатой пользователем. Цена в рублях и функции выбранного тарифа доступны до оплаты на странице тарифов и в кабинете; последующее изменение цены не меняет стоимость уже оплаченного периода.",
+src/lib/legal-history/2026-10-05.ts:43:    "Напечатанные динамические QR продолжают открываться после окончания платного тарифа или пробного периода. Создание новых динамических кодов, смена назначения и другие платные возможности требуют действующего доступа. Удаление кода, архивирование соответствующих данных при удалении аккаунта, собственный срок действия или лимит открытий кода могут прекратить его работу. Подробные правила опубликованы на странице «Срок жизни QR».",
+src/lib/access-reminder.ts:9:    ? { title: status === "trial" ? "Пробный период скоро закончится" : "Платный доступ скоро закончится", text: `Доступ действует до ${date}. Продление вручную, автоматических списаний нет.` }
+src/lib/qr-lifetime-policy.ts:7:/** Public policy for printed QR after trial, unpaid period, archive, or delete. */
+src/lib/qr-lifetime-policy.ts:12:    "В файл попадает короткая ссылка. После печати можно сменить адрес без нового тиража, пока код не удалён из библиотеки. Окончание тарифа или пробного периода не отключает уже напечатанный динамический QR; новые динамические коды и смена назначения снова понадобятся после оплаты.",
+src/lib/qr-lifetime-policy.ts:16:    "Короткие ссылки уже скачанных динамических кодов продолжают открываться после окончания тарифа или пробного периода. Новые динамические QR, смена назначения и платные лимиты станут недоступны, пока тариф снова не оплачен. Удаление кода из библиотеки отключает короткую ссылку.",
+src/lib/telegram-notifications.ts:171:    `Начали триал: ${count("trial_started")}`,
+src/app/dashboard/billing/billing-client.tsx:2:import { TRIAL_DAYS } from "@/lib/trial-policy";
+src/app/dashboard/billing/billing-client.tsx:23:  status: "free" | "trial" | "active" | "expired" | "canceled";
+src/app/dashboard/billing/billing-client.tsx:24:  periodEnd: string | null; plans: PlanInfo[]; trialUsedAt: boolean;
+src/app/dashboard/billing/billing-client.tsx:33:export function BillingClient({ currentPlan, archivedOffer, complimentary, workspaceId, currentPlanId, isTrial, status, periodEnd, plans, trialUsedAt, payments, supportEmail, canManageBilling, usage, returnPayment }: Props) {
+src/app/dashboard/billing/billing-client.tsx:64:    if (archivedOffer && !window.confirm("Начать пробный период на текущих публичных условиях? Архивные условия будут заменены, старые QR продолжат работать.")) return;
+src/app/dashboard/billing/billing-client.tsx:65:    busyRef.current = true; setPending("trial"); setError(null);
+src/app/dashboard/billing/billing-client.tsx:67:      const response = await fetchApi("/api/billing/trial", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({workspaceId,useCurrentTerms:!!archivedOffer}) });
+src/app/dashboard/billing/billing-client.tsx:70:      trackGoal(PRODUCT_GOALS.trial_started, { planId: "PRO" });
+src/app/dashboard/billing/billing-client.tsx:94:    const canTrial = plan.accessMode !== "archive" && plan.id === "PRO" && !trialUsedAt && currentPlanId === "FREE";
+src/app/dashboard/billing/billing-client.tsx:97:      {canTrial && <><Button block disabled={busy} onClick={handleStartTrial}>{pending === "trial" ? "Включаем доступ…" : `Попробовать ${TRIAL_DAYS} дней`}</Button><p>Бесплатно, без автоматических списаний</p></>}
+src/app/dashboard/billing/billing-client.tsx:116:    {!canManageBilling && <p className={styles.roleNote}>Оплатить тариф или включить пробный доступ может владелец или администратор кабинета.</p>}
+src/app/dashboard/billing/billing-client.tsx:129:      <p className={styles.checkoutNote}>{hasPaidAccess && !isTrial && (status === "active" || status === "canceled") ? "Месяц добавится к оставшемуся оплаченному сроку." : "Месяц доступа начнётся после оплаты. Остаток пробного периода не прибавляется."} Автоматических списаний нет.</p>
+src/app/page.tsx:1:import { TRIAL_DAYS } from "@/lib/trial-policy";
+src/app/page.tsx:116:            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/dynamic-qr" className={styles.textLink}>Как работает динамический QR <span aria-hidden="true">→</span></Link><p className={styles.paidNote}>Доступно на Про · пробный период {TRIAL_DAYS} дней</p></div>
+src/app/changelog/page.tsx:45:      { type: "improvement", text: "Главная: H1 про смену ссылки после печати; бесплатный тариф — статика, Про — проба динамики 14 дней" },
+src/app/admin/notifications/page.tsx:49:                "trial_started",
+src/app/admin/notifications/page.tsx:81:                        trial_started: "Триал",
+src/app/admin/business/page.tsx:22:        description="Регистрации, пробный доступ и подтверждённые оплаты."
+src/app/admin/business/page.tsx:57:            ["Начали триал · кабинеты", report.count("trial_started")],
+src/app/admin/business/page.tsx:97:                        <td data-label="Триалы">{String(row.trials)}</td>
+src/app/admin/business/page.tsx:114:              Группы по неделе начала триала. Окно наблюдения: до 14 дней ранее выданного триала +
+src/app/admin/business/page.tsx:115:              7 дней на оплату. Конверсия считается только для кабинетов с
+src/app/admin/notifications/settings-client.tsx:10:  trial_started: "Начало триала",
+src/app/admin/partners/page.tsx:33:              <td>{p.visits.reduce((sum, v) => sum + v.clicks, 0)}</td><td>{p.visits.length}</td><td>{p.workspaces.length}</td><td>{p.activated}</td><td>{p.workspaces.filter(w => w.trialUsedAt).length}</td><td>{payments.firstPayments}</td><td>{payments.renewals}</td>
+src/app/qr-lifetime/page.tsx:42:      <h2>Тариф и пробный период</h2>
+src/app/api/billing/trial/route.ts:1:import { newTrialEnd, TRIAL_DAYS } from "@/lib/trial-policy";
+src/app/api/billing/trial/route.ts:34:      if (workspace.trialUsedAt) return "used";
+src/app/api/billing/trial/route.ts:41:        ["active", "trial", "canceled"].includes(sub.status)
+src/app/api/billing/trial/route.ts:44:      const trialEnd = newTrialEnd(now);
+src/app/api/billing/trial/route.ts:47:        data: { plan: "PRO", trialUsedAt: now, accessMode: "standard" },
+src/app/api/billing/trial/route.ts:54:          status: "trial",
+src/app/api/billing/trial/route.ts:55:          currentPeriodEnd: trialEnd,
+src/app/api/billing/trial/route.ts:59:          status: "trial",
+src/app/api/billing/trial/route.ts:60:          currentPeriodEnd: trialEnd,
+src/app/api/billing/trial/route.ts:65:        key: `trial:${workspaceId}`,
+src/app/api/billing/trial/route.ts:66:        name: "trial_started",
+src/app/api/billing/trial/route.ts:70:        payload: { plan: "PRO", periodEnd: trialEnd.toISOString(), trialDays: TRIAL_DAYS },
+src/app/api/admin/notifications/route.ts:24:          "trial_started",
+src/components/dashboard/qr-detail.tsx:72:        <dl className={`${styles.panel} ${styles.stats}`}>{[{label:'За всё время',value:humanTotal},{label:'За 7 дней',value:scans7d},{label:`За ${QR_DETAIL_CHART_DAYS} дней`,value:scans30d}].map(item=><div key={item.label}><dt>{item.label}</dt><dd>{number(item.value)}</dd></div>)}</dl>
+src/components/dashboard/dashboard-overview.tsx:45:    ...(scanCount7d !== null ? [{ id: "opens", label: "Открытий за 7 дней", value: scanCount7d, hint: "Перейти к аналитике", href: "/dashboard/analytics" }] : []),
+src/components/dashboard/dashboard-overview.tsx:86:          {status === "trial" && <p className={styles.planStatus}>Пробный период{dateLabel ? ` до ${dateLabel}` : ""}</p>}
+src/components/landing/marketing-landing.tsx:51:            <p className={s.note}>Статические QR — бесплатно. Динамические — на платном тарифе или в пробном периоде.</p>
+src/components/landing/home-quick-start.tsx:2:import { TRIAL_DAYS } from "@/lib/trial-policy";
+src/components/landing/home-quick-start.tsx:85:        <p className={styles.kindHint}>{dynamic ? `Меняйте ссылку после печати. Динамический код создаётся в кабинете; пробный период — ${TRIAL_DAYS} дней.` : "Содержимое записано прямо в QR. Бесплатно, без регистрации и лимита на количество. После печати его нельзя изменить; статистика сканов не собирается."}</p>
