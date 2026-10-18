@@ -12,7 +12,7 @@ import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import styles from "./dashboard-shell.module.css";
 
-type Workspace = { id: string; name: string; plan: string; planName?: string };
+type Workspace = { id: string; name: string; plan: string; planName?: string; trialUsed?: boolean };
 type Props = {
   children: React.ReactNode;
   user: { email: string; isAdmin: boolean };
@@ -51,7 +51,7 @@ export function DashboardShell({ children, user, workspace, workspaces }: Props)
 
   return (
     <div className={styles.shell}>
-      {upgrade && <UpgradePrompt place={upgrade} onClose={() => setUpgrade(null)} />}
+      {upgrade && <UpgradePrompt place={upgrade} trialUsed={workspace.trialUsed} onClose={() => setUpgrade(null)} />}
       <a href={`#${contentId}`} className={styles.skip}>К содержимому</a>
       {overlayNav && sidebarOpen && <div className={styles.scrim} onClick={closeSidebar} aria-hidden="true" />}
       <aside

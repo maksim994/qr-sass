@@ -11,6 +11,7 @@ import styles from "./qr-library-card-menu.module.css";
 import { MSG } from "@/lib/user-messages";
 
 type Props = {
+  hasFrame?: boolean;
   qrId: string;
   qrName?: string;
   kind: "STATIC" | "DYNAMIC";
@@ -18,7 +19,7 @@ type Props = {
   exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
 };
 
-export function QrLibraryCardMenu({ qrId, qrName, kind, managed = kind === "DYNAMIC", exportFormats }: Props) {
+export function QrLibraryCardMenu({ hasFrame, qrId, qrName, kind, managed = kind === "DYNAMIC", exportFormats }: Props) {
   const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -146,7 +147,7 @@ export function QrLibraryCardMenu({ qrId, qrName, kind, managed = kind === "DYNA
           </Link>
           <Link href={`/dashboard/qr/${qrId}/edit`} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>{managed ? "Редактировать" : "Создать новую версию"}</Link>
           {exportFormats.map((format) => (
-            <TrackedDownloadLink key={format}
+            <TrackedDownloadLink data-frame={String(hasFrame)} key={format}
               href={`/api/qr/${qrId}/download?format=${format.toLowerCase()}`}
               className="qrs-lib-menu-item"
               role="menuitem"

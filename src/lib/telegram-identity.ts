@@ -19,7 +19,7 @@ export async function resolveTelegramIdentity(profile: { id: number; firstName?:
     const legacy = await tx.user.findUnique({ where: { email }, include: { memberships: true } });
     if (legacy && !canBindLegacyTelegram(legacy, subject)) throw new TelegramIdentityConflict();
     const user = legacy ?? await tx.user.create({ data: {
-      email, name, passwordHash: "telegram-auth", emailVerifiedAt: new Date(),
+      metrikaRegistrationPending: true, email, name, passwordHash: "telegram-auth", emailVerifiedAt: new Date(),
       memberships: { create: { role: "OWNER", workspace: { create: { name: DEFAULT_WORKSPACE_NAME, slug: `tg-${subject}-${nanoid(8)}` } } } },
     }, include: { memberships: true } });
     await tx.authIdentity.create({ data: { provider: "telegram", subject, userId: user.id } });

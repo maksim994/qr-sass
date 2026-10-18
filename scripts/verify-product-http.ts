@@ -7,7 +7,7 @@ import { PARTNER_COOKIE } from "../src/lib/partner-rules.ts";
 import { processMetrikaPayments } from "../src/lib/metrika-worker.ts";
 import { workspaceActivation } from "../src/lib/funnel.ts";
 const database = new URL(process.env.DATABASE_URL ?? "http://invalid");
-if (database.hostname !== "127.0.0.1" || database.port !== "55438" || database.pathname !== "/qr_readiness") throw new Error("Requires isolated qr_readiness DB on localhost:55438");
+if (database.hostname !== "127.0.0.1" || !["55438", "55448"].includes(database.port) || database.pathname !== "/qr_readiness") throw new Error("Requires isolated qr_readiness DB on localhost:55438");
 const db = getDb(), run = randomUUID(), base = "http://localhost:3108", users: string[] = [], spaces: string[] = [], partners: string[] = [];
 let checks = 0;
 const pass = (message: string) => { checks++; console.log(`PASS ${message}`); };

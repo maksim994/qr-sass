@@ -1,3 +1,4 @@
+import { COMMERCIAL } from "@/lib/commercial-config";
 /** Пользовательские сообщения об ошибках и уведомлениях (только RU). */
 export const MSG = {
   PARTNER_INVALID: "Укажите имя и код: 3–40 латинских букв, цифр, дефисов или подчёркиваний.",
@@ -103,7 +104,7 @@ export const MSG = {
   COULD_NOT_ENCODE_PAYLOAD: "Не удалось сформировать содержимое QR-кода.",
   SCANNABILITY_TOO_LOW: "QR-код плохо читается. Улучшите контраст или упростите дизайн.",
   QR_CREATE_LIMIT: "Достигнут лимит QR-кодов по тарифу. Обновите тариф или удалите лишние коды.",
-  QR_CREATE_DYNAMIC_PLAN: "Динамические QR доступны на тарифах Про и Бизнес.",
+  QR_CREATE_DYNAMIC_PLAN: `Бесплатные динамические коды (${COMMERCIAL.free.dynamic}) уже использованы. Попробуйте Про ${COMMERCIAL.trialDays} дней без карты.`,
   COULD_NOT_CREATE_QR: "Не удалось создать QR-код.",
   COULD_NOT_DUPLICATE_QR: "Не удалось скопировать QR-код.",
   COULD_NOT_READ_QR: "Не удалось загрузить данные QR-кода.",
@@ -163,7 +164,7 @@ export const MSG = {
   QR_KIND_NOT_SUPPORTED: "Для этого типа QR доступен только статический режим.",
   INVALID_DISABLED_QR_TYPES: "Некорректный список отключённых типов QR-кодов.",
   PLAN_DYNAMIC_REQUIRED:
-    "Бесплатные динамические коды (2) уже использованы. Чтобы создать ещё, попробуйте Про 7 дней без карты.",
+    `Бесплатные динамические коды (${COMMERCIAL.free.dynamic}) уже использованы. Чтобы создать ещё, попробуйте Про ${COMMERCIAL.trialDays} дней без карты.`,
   QR_LIMIT_REACHED: (limit: number, remaining: number, requested: number) =>
     remaining <= 0
       ? `Достигнут лимит тарифа: не более ${limit} QR-кодов. Удалите лишние или обновите тариф.`

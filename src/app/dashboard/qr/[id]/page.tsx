@@ -95,7 +95,8 @@ export default async function QrDetailPage({ params }: Props) {
   const entitlements = await getEntitlements(workspace.id);
   const plan = entitlements.plan;
   const exportFormats = plan.limits.exportFormats;
+  const dynamicCount = await db.qrCode.count({where:{workspaceId:workspace.id,isArchived:false,OR:[{kind:"DYNAMIC"},{shortCode:{not:null}}]}});
   // Dynamic server page: pass one request-time timestamp to the client for hydration.
   // eslint-disable-next-line react-hooks/purity
-  return <QrDetail now={Date.now()} qr={qr} svgString={svgString} exportFormats={exportFormats} scans7d={scans7d} scans30d={scans30d} humanTotal={humanTotal} devices={devices} osList={osList} dailyCounts={dailyCounts} scanCountA={scanCountA} scanCountB={scanCountB}/>;
+  return <QrDetail dynamicAvailable={plan.limits.maxDynamicQr == null || dynamicCount < plan.limits.maxDynamicQr} now={Date.now()} qr={qr} svgString={svgString} exportFormats={exportFormats} scans7d={scans7d} scans30d={scans30d} humanTotal={humanTotal} devices={devices} osList={osList} dailyCounts={dailyCounts} scanCountA={scanCountA} scanCountB={scanCountB}/>;
 }

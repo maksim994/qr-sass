@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { getMetrikaAttribution } from "@/lib/metrika-client-id";
-import { useProductPageGoal } from "@/hooks/use-product-page-goal";
 import { YookassaWidget } from "@/components/yookassa-widget";
 import { Alert, Button } from "@/components/ui";
 import type { PlanInfo } from "@/lib/plans";
@@ -45,7 +44,6 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
   const paidUntil = periodEnd ? dateLabel(periodEnd).replace(/\.$/, "") : null;
   const hasPaidAccess = currentPlanId !== "FREE";
   const busy = pending !== null || paymentSuccess;
-  useProductPageGoal(PRODUCT_GOALS.pricing_viewed, "billing");
   useEffect(() => { if (error || paymentSuccess) feedbackRef.current?.focus(); }, [error, paymentSuccess]);
   useEffect(() => { if (token || robokassa) checkoutHeading.current?.focus(); }, [token, robokassa]);
   useEffect(() => {
@@ -62,12 +60,13 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
     if (!canManageBilling || busyRef.current || paymentSuccess) return;
     if (complimentary) return;
     if (archivedOffer && !window.confirm("Начать пробный период на текущих публичных условиях? Архивные условия будут заменены, старые QR продолжат работать.")) return;
+    trackGoal(PRODUCT_GOALS.upgrade_prompt_click,{place:"billing",plan:"pro"});
     busyRef.current = true; setPending("trial"); setError(null);
     try {
       const response = await fetchApi("/api/billing/trial", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({workspaceId,useCurrentTerms:!!archivedOffer}) });
       const parsed = await parseApiResponse(response);
       if (!parsed.ok) throw new Error(parsed.error || MSG.BILLING_TRIAL_FAILED);
-      trackGoal(PRODUCT_GOALS.trial_started, { planId: "PRO" });
+      trackGoal(PRODUCT_GOALS.trial_started);
       router.push("/dashboard"); router.refresh();
     } catch (error) { setError(error instanceof Error ? error.message : MSG.BILLING_TRIAL_FAILED); }
     finally { busyRef.current = false; setPending(null); }
@@ -76,6 +75,7 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
     if (!canManageBilling || complimentary || busyRef.current || paymentSuccess) return;
     const useCurrentTerms = !!archivedOffer && plan.accessMode !== "archive";
     if (useCurrentTerms && !window.confirm(`Перейти на тариф «${plan.name}» за ${money(plan.priceRub)} в месяц? После оплаты архивные условия будут заменены. Существующие QR продолжат работать.`)) return;
+    trackGoal(PRODUCT_GOALS.upgrade_prompt_click,{place:"billing",plan:plan.id});
     busyRef.current = true; setPending(plan.id); setError(null); setSelectedPlan(plan);
     try {
       const metrika = await getMetrikaAttribution();
@@ -90,7 +90,7 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
     finally { busyRef.current = false; setPending(null); }
   }
   function renderPlanAction(plan: PlanInfo) {
-    if (!canManageBilling || complimentary || plan.id === "FREE" || (plan.id === "PRO" && currentPlanId === "BUSINESS" && !isTrial)) return null;
+    if ((!plan.accessMode && currentPlanId === plan.id && !isTrial) || !canManageBilling || complimentary || plan.id === "FREE" || (plan.id === "PRO" && currentPlanId === "BUSINESS" && !isTrial)) return null;
     const canTrial = plan.accessMode !== "archive" && plan.id === "PRO" && !trialUsedAt && currentPlanId === "FREE";
     const label = archivedOffer && plan.accessMode !== "archive" ? `Перейти на ${plan.name}` : currentPlanId === plan.id && !isTrial ? `Продлить ${plan.name}` : isTrial && currentPlanId === plan.id ? `Оплатить ${plan.name}` : `Перейти на ${plan.name}`;
     return <div className={styles.planActions}>
@@ -107,6 +107,7 @@ export function BillingClient({ currentPlan, archivedOffer, complimentary, works
         <p>{complimentary ? "Доступ без оплаты и без срока окончания." : isTrial ? `Пробный доступ${paidUntil ? ` до ${paidUntil}` : ""}.` : hasPaidAccess ? `Доступ${paidUntil ? ` до ${paidUntil}` : " активен"}.` : status === "expired" || status === "canceled" ? `Платный период завершён${paidUntil ? ` ${paidUntil}` : ""}. Сейчас действует бесплатный тариф.` : "Пользуйтесь базовыми возможностями без оплаты."}</p>
         <span className={styles.renewal}>{complimentary ? "Продление не требуется." : hasPaidAccess ? "Продление вручную. Автоматических списаний нет." : "Выберите платный тариф, когда понадобятся дополнительные возможности."}</span>
       </div>
+      {hasPaidAccess && !isTrial && canManageBilling && !complimentary && <Button variant="secondary" disabled={busy} onClick={() => handleCheckout(current)}>Продлить текущий тариф</Button>}
       <div className={styles.usage}><div><span>QR-коды</span><strong>{usage.qrCount.toLocaleString("ru-RU")}<small>{current?.limits.maxQrCodes == null ? "без лимита" : `из ${current.limits.maxQrCodes}`}</small></strong></div><div><span>Участники</span><strong>{usage.memberCount.toLocaleString("ru-RU")}<small>{current?.limits.maxUsers == null ? "без лимита" : `из ${current.limits.maxUsers}`}</small></strong></div></div>
     </section>
     {archivedOffer && !complimentary && <section className={styles.current} aria-label="Архивные условия">

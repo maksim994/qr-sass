@@ -8,7 +8,7 @@ const base = "http://localhost:3108";
 const database = new URL(process.env.DATABASE_URL ?? "http://invalid");
 const jwtSecret = "synthetic-readiness-secret-at-least-32-characters";
 const telegramToken = "synthetic-readiness-telegram-token";
-if (database.hostname !== "127.0.0.1" || database.port !== "55438" || database.pathname !== "/qr_readiness") {
+if (database.hostname !== "127.0.0.1" || !["55438", "55448"].includes(database.port) || database.pathname !== "/qr_readiness") {
   throw new Error("Requires the isolated qr_readiness database on localhost:55438");
 }
 const db = getDb();

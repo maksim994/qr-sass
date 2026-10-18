@@ -24,8 +24,8 @@ export function HomeHero({ children }: { children?: ReactNode }) {
   const scene = scenes[selected];
   return <><section className={s.hero} aria-labelledby="home-title">
     <div className={s.heroCopy}>
-      <h1 id="home-title" tabIndex={-1}>Маленький код.<br /><span>Большие<br className={s.heroBreak} /> возможности.</span></h1>
-      <p>Соедините то, что рядом, с тем, что онлайн. Сайт, контакты, программа события или история вашего бренда — в одном QR-коде.</p>
+      <h1 id="home-title" tabIndex={-1}>Маленький код. <br /><span>Большие<br className={s.heroBreak} /> возможности.</span></h1>
+      <p>Добавьте ссылку, контакты или Wi-Fi. Скачайте QR бесплатно, без регистрации.</p>
     </div><div className={s.heroGenerator}>{children}</div></section>
     <section className={s.heroExamples} aria-label="Примеры использования QR">
     <div className={s.heroExperience}>

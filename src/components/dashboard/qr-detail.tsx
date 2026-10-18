@@ -1,3 +1,4 @@
+import { UpgradeLink } from "@/components/upgrade-link";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { QrWizardBackLink } from "@/components/qr/qr-wizard-shared";
@@ -18,6 +19,7 @@ import styles from "./qr-detail.module.css";
 type Qr = Prisma.QrCodeGetPayload<{ include: { scanEvents: true; _count: { select: { scanEvents: true } } } }>;
 type Breakdown = { label: string; count: number }[];
 type Props = {
+  dynamicAvailable?: boolean;
   now: number; qr: Qr; svgString: string; exportFormats: string[];
   scans7d: number; scans30d: number; humanTotal: number;
   devices: Breakdown; osList: Breakdown;
@@ -30,7 +32,7 @@ function BreakdownList({title,items}:{title:string;items:Breakdown}) {
   const total = items.reduce((sum,item)=>sum+item.count,0);
   return <section className={styles.panel}><h3>{title}</h3><ul className={styles.breakdown}>{items.map(item=><li key={item.label}><div><span>{item.label}</span><strong>{number(item.count)} <small>· {Math.round(item.count/Math.max(total,1)*100)}%</small></strong></div><div className={styles.track} aria-hidden="true"><span style={{width:`${item.count/Math.max(total,1)*100}%`}}/></div></li>)}</ul></section>;
 }
-export function QrDetail({now,qr,svgString,exportFormats,scans7d,scans30d,humanTotal,devices,osList,dailyCounts}:Props) {
+export function QrDetail({dynamicAvailable=true,now,qr,svgString,exportFormats,scans7d,scans30d,humanTotal,devices,osList,dailyCounts}:Props) {
   const isVcard=qr.contentType==="VCARD"&&!(qr.kind==="STATIC"&&(qr.payload as Record<string,unknown>|null)?.staticDirect===true);
   const tracks=qr.kind==="DYNAMIC"||isVcard;
   const hosted=needsHostedPage(qr.contentType);
@@ -46,7 +48,7 @@ export function QrDetail({now,qr,svgString,exportFormats,scans7d,scans30d,humanT
       <div className={styles.preview} role="img" aria-label={`QR-код: ${qr.name}`} dangerouslySetInnerHTML={{__html:svgString}}/>
       <div className={styles.summary}>
         <h2>Готов к скачиванию</h2><p>Сохраните QR-код для печати или публикации.</p>
-        <div className={styles.downloads}>{exportFormats.map((format,i)=><TrackedDownloadLink key={format} href={`/api/qr/${qr.id}/download?format=${format.toLowerCase()}`} download className={`fk-button ${i===0?'fk-button--primary':'fk-button--secondary'}`} aria-label={`Скачать ${format}`}>{i===0?`Скачать ${format}`:format}</TrackedDownloadLink>)}</div>
+        <div className={styles.downloads}>{exportFormats.map((format,i)=><TrackedDownloadLink data-frame={String(!!(qr.styleConfig as Record<string,unknown> | null)?.frameStyle && (qr.styleConfig as Record<string,unknown> | null)?.frameStyle !== "none")} key={format} href={`/api/qr/${qr.id}/download?format=${format.toLowerCase()}`} download className={`fk-button ${i===0?'fk-button--primary':'fk-button--secondary'}`} aria-label={`Скачать ${format}`}>{i===0?`Скачать ${format}`:format}</TrackedDownloadLink>)}</div>
         <Link className={styles.edit} href={`/dashboard/qr/${qr.id}/edit`}>{tracks ? "Редактировать содержимое и оформление" : "Создать новую версию — оригинал останется прежним"}</Link>
         <RenameQr qrId={qr.id} name={qr.name} />
         <dl className={styles.facts}>
@@ -68,7 +70,7 @@ export function QrDetail({now,qr,svgString,exportFormats,scans7d,scans30d,humanT
     </section>}
 
     <section className={styles.analytics} aria-labelledby="qr-analytics-title"><div className={styles.sectionHead}><h2 id="qr-analytics-title">{isVcard?'Запросы скачивания визитки':'Статистика QR-кода'}</h2>{tracks&&<span>Время по Москве</span>}</div>
-      {!tracks?<div className={styles.panel}><h3>Статический код работает без отслеживания</h3><p>Статический код открывается без нашего сервера, поэтому сканы не считаются. Сделайте код динамическим, чтобы видеть статистику. Внутри будет другая ссылка: напечатанный код потребуется перепечатать.</p><Link className={styles.edit} href={qr.contentType === "URL" ? `/dashboard/create/url?kind=DYNAMIC&url=${encodeURIComponent(qr.encodedContent ?? "")}` : "/dashboard/create"}>Сделать динамическим</Link></div>:qr._count.scanEvents===0?<div className={`${styles.panel} ${styles.empty}`}><h3>{isVcard?'Запросов скачивания пока нет':'Открытий пока нет'}</h3><p>{isVcard?'Поделитесь визиткой. Здесь появится статистика запросов её файла.':'Скачайте код и разместите его на сайте или печатных материалах. Здесь появятся открытия, устройства и история.'}</p></div>:<>
+      {!tracks?<div className={styles.panel}><h3>Статический код работает без отслеживания</h3><p>Статический код открывается без нашего сервера, поэтому сканы не считаются. Сделайте код динамическим, чтобы видеть статистику. Внутри будет другая ссылка: напечатанный код потребуется перепечатать.</p><UpgradeLink place="static_stats" className={styles.edit} href={!dynamicAvailable ? "/dashboard/billing?plan=pro" : qr.contentType === "URL" ? `/dashboard/create/url?kind=DYNAMIC&url=${encodeURIComponent(qr.encodedContent ?? "")}` : "/dashboard/create"}>Сделать динамическим</UpgradeLink></div>:qr._count.scanEvents===0?<div className={`${styles.panel} ${styles.empty}`}><h3>{isVcard?'Запросов скачивания пока нет':'Открытий пока нет'}</h3><p>{isVcard?'Поделитесь визиткой. Здесь появится статистика запросов её файла.':'Скачайте код и разместите его на сайте или печатных материалах. Здесь появятся открытия, устройства и история.'}</p></div>:<>
         <dl className={`${styles.panel} ${styles.stats}`}>{[{label:'За всё время',value:humanTotal},{label:'За 7 дней',value:scans7d},{label:`За ${QR_DETAIL_CHART_DAYS} дней`,value:scans30d}].map(item=><div key={item.label}><dt>{item.label}</dt><dd>{number(item.value)}</dd></div>)}</dl>
         <p className={styles.method}>Без известных ботов. Запросов ботов за всё время: {number(Math.max(0,qr._count.scanEvents-humanTotal))}.</p>
         <section className={styles.panel}><h3>{isVcard?'Запросы по дням':'Открытия по дням'}</h3><p>Последние {QR_DETAIL_CHART_DAYS} дней · без известных ботов</p>{hasChart?<AnalyticsChart rows={dailyCounts} metricLabel={isVcard?"Запросы скачивания":"Открытия"}/>:<p className={styles.periodEmpty}>За этот период событий без известных ботов нет.</p>}</section>

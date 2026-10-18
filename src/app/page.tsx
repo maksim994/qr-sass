@@ -1,4 +1,6 @@
-import { PRINTED_QR_COPY } from "@/lib/commercial-config";
+import { selectWorkspace } from "@/lib/workspace-select";
+import { getEntitlements } from "@/lib/entitlements";
+import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import { LEGAL_OPERATOR } from "@/lib/legal-documents";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 import Link from "next/link";
@@ -50,7 +52,7 @@ function planFeatures(plan: PlanInfo) {
   const { limits } = plan;
   return [
     limits.maxQrCodes == null ? "Облачный архив без лимита" : `До ${limits.maxQrCodes} QR в облачном архиве`,
-    limits.allowsDynamic ? "Смена ссылки после печати" : "Статические QR-коды",
+    limits.maxDynamicQr != null ? `${limits.maxDynamicQr} динамических кода бесплатно` : limits.allowsDynamic ? "Динамические QR без лимита" : "Статические QR-коды",
     ...(limits.allowsAnalytics ? ["Статистика открытий"] : []),
     `Экспорт ${limits.exportFormats.join(", ")}`,
     limits.maxUsers === 1 ? "Для одного пользователя" : limits.maxUsers == null ? "Совместная работа команды" : `Команда до ${limits.maxUsers} человек`,
@@ -79,6 +81,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       return { ...post, title: clean.title ?? post.title, excerpt: clean.excerpt ?? post.excerpt };
     });
   } catch { /* The generator and default plans remain available without optional content. */ }
+  let trialUsed = false;
+  let dynamicRemaining: number | null | undefined;
+  if (session) {
+    const memberships = await getDb().membership.findMany({where:{userId:session.sub},include:{workspace:true}});
+    const workspace = await selectWorkspace(memberships);
+    if(workspace){trialUsed=!!workspace.trialUsedAt;const access=await getEntitlements(workspace.id);const count=await getDb().qrCode.count({where:{workspaceId:workspace.id,isArchived:false,OR:[{kind:"DYNAMIC"},{shortCode:{not:null}}]}});dynamicRemaining=access.plan.limits.maxDynamicQr==null?null:Math.max(0,access.plan.limits.maxDynamicQr-count);}
+  }
   const enabledTypes = qrTypes.filter(type => !disabledTypes.includes(type.type));
   const enabledStaticTypes = STATIC_QR_TYPES.filter(type => enabledTypes.some(item => item.type === type));
   const publicType = enabledStaticTypes.find(type => type === requestedType) ?? enabledStaticTypes[0];
@@ -86,7 +95,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const plans = [free, pro, business];
   const descriptions = { FREE: "Для первых кодов и простых задач", PRO: "Для ссылок, которые меняются", BUSINESS: "Для команды и интеграций" };
   const siteSettings = await getDb().siteSettings.findUnique({where:{id:"default"},select:{contactEmail:true,contactPhone:true}});
-  const organization = { "@context":"https://schema.org", "@graph":[{"@type":"WebSite",name:"QR-S.ru",url:baseUrl},{"@type":"Organization",name:"QR-S.ru",url:baseUrl,logo:publicSiteUrl("/icon.svg"),email:siteSettings?.contactEmail || LEGAL_OPERATOR.email,telephone:siteSettings?.contactPhone || LEGAL_OPERATOR.phone}] };
+  const organization = { "@context":"https://schema.org", "@graph":[{"@type":"WebSite",name:"QR-S.ru",url:baseUrl},{"@type":"Organization",name:"QR-S.ru",url:baseUrl,logo:publicSiteUrl("/favicon.svg"),email:siteSettings?.contactEmail || LEGAL_OPERATOR.email,telephone:siteSettings?.contactPhone || LEGAL_OPERATOR.phone}] };
   const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(faq => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) };
 
   return (
@@ -94,7 +103,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <SiteHeader session={session} isAdmin={isAdmin} minimal />
       <main>
         <PricingGoal />
-        <HomeHero><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} /></HomeHero>
+        <HomeHero><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} dynamicRemaining={dynamicRemaining} trialUsed={trialUsed} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} enabledTypes={enabledTypes.map(item=>item.type)} /></HomeHero>
         <div className={`${styles.container} ${styles.valueStrip}`} aria-label="Возможности сервиса">
           <span><Check /> От ссылки до электронного меню</span><span><Check /> Дизайн под ваш бренд</span><span><Check /> Смена ссылки после печати</span><span><Check /> Статистика открытий</span>
         </div>
@@ -115,7 +124,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         <section id="features" className={styles.featureSection}>
           <div className={`${styles.container} ${styles.featureGrid}`}>
-            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/register?plan=pro" className={styles.textLink}>Попробовать Про 7 дней — без карты</Link><p className={styles.paidNote}>2 динамических бесплатно · Про: {TRIAL_DAYS} дней</p></div>
+            <div className={styles.featureCopy}><h2>Напечатайте один раз. <br />Меняйте ссылку, <br />когда нужно.</h2><p>Новый каталог, программа события или другая страница. Динамический QR остаётся прежним, а вы обновляете его назначение в кабинете.</p><ul><li><Check />Не нужно перепечатывать код</li><li><Check />Все ссылки в одном месте</li><li><Check />Статистика открытий по дням</li></ul><Link href="/register?plan=pro" className={styles.textLink}>Попробовать Про {TRIAL_DAYS} дней — без карты</Link><p className={styles.paidNote}>{COMMERCIAL.free.dynamic} динамических бесплатно · Про: {TRIAL_DAYS} дней</p></div>
             <DynamicDemo />
           </div>
         </section>

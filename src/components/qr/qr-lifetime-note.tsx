@@ -1,4 +1,4 @@
-import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
+import { PRINTED_QR_COPY } from "@/lib/commercial-config";
 import Link from "next/link";
 import { QR_LIFETIME, QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
 

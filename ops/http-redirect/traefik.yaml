@@ -1,0 +1,12 @@
+http:
+  routers:
+    qr-s-http-one-hop:
+      entryPoints: [http]
+      rule: 'Host(`qr-s.ru`)'
+      priority: 10000
+      service: qr-s-http-one-hop
+  services:
+    qr-s-http-one-hop:
+      loadBalancer:
+        servers:
+          - url: 'http://qr-s-http-redirect:8080'

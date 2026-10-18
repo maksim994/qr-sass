@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHmac, randomInt, randomUUID } from "node:crypto";
 import { getDb } from "../src/lib/db.ts";
 const url = new URL(process.env.DATABASE_URL ?? "http://invalid");
-if (url.hostname !== "127.0.0.1" || url.port !== "55438" || url.pathname !== "/qr_readiness") throw new Error("Requires isolated qr_readiness DB on localhost:55438");
+if (url.hostname !== "127.0.0.1" || !["55438", "55448"].includes(url.port) || url.pathname !== "/qr_readiness") throw new Error("Requires isolated qr_readiness DB on localhost:55438");
 const db = getDb(), base = "http://localhost:3108", run = randomUUID(), token = "synthetic-readiness-telegram-token", userIds: string[] = [], spaces: string[] = [];
 const first = 2_000_000_000 + randomInt(1_000_000), legacyId = first + 1, collisionId = first + 2;
 function signed(id: number, age = 0) {

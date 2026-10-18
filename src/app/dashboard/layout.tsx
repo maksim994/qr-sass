@@ -33,7 +33,7 @@ export default async function DashboardLayout({
   return (
     <DashboardShell
       user={{ email: user.email, isAdmin: !!user.isAdmin }}
-      workspace={{ id: workspace.id, name: workspace.name, plan: entitlements.planId, planName: entitlements.plan.name }}
+      workspace={{ id: workspace.id, name: workspace.name, plan: entitlements.planId, planName: entitlements.plan.name, trialUsed: !!workspace.trialUsedAt }}
       workspaces={user.memberships.map((m) => m.workspace)}
     >
       <OwnerOpenGoals />

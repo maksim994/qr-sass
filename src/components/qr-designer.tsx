@@ -1,5 +1,6 @@
 "use client";
 
+import { evaluateScannability, styleToScannability } from "@/lib/scannability";
 import { FrameControls } from "@/components/qr/frame-controls";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -45,25 +46,6 @@ const EC_LEVELS: { value: QrStyle["errorCorrectionLevel"]; sub: string }[] = [
   { value: "Q", sub: "25%" },
   { value: "H", sub: "30%" },
 ];
-
-function hexLuminance(hex: string) {
-  const n = hex.replace("#", "");
-  const f = n.length === 3 ? n.split("").map((x) => x + x).join("") : n;
-  const rgb = [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16) / 255);
-  const lin = rgb.map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
-}
-
-function scoreScannability(fg: string, bg: string, margin: number, logoScale: number): number {
-  const l1 = hexLuminance(fg);
-  const l2 = hexLuminance(bg);
-  const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-  let score = 100;
-  if (ratio < 4.5) score -= 35;
-  if (margin < 2) score -= 15;
-  if (logoScale > 0.25) score -= 30;
-  return Math.max(0, score);
-}
 
 function normalizeHex(value: string) {
   return value.toUpperCase();
@@ -324,10 +306,7 @@ export function QrDesigner({ style, onChange, workspaceId }: Props) {
     [style, onChange],
   );
 
-  const scannability = useMemo(
-    () => scoreScannability(style.dotColor, style.bgTransparent ? "#ffffff" : style.bgColor, style.margin, style.logoScale),
-    [style.dotColor, style.bgColor, style.bgTransparent, style.margin, style.logoScale],
-  );
+  const scannability = useMemo(() => evaluateScannability(styleToScannability(style)).score, [style]);
 
   const scoreTone =
     scannability >= 85 ? "var(--color-success)" : scannability >= 70 ? "var(--color-warning)" : "var(--color-danger)";

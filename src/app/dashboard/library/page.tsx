@@ -25,6 +25,7 @@ export default async function LibraryPage({ searchParams }: Props) {
   const db = getDb();
   const entitlements = await getEntitlements(workspace.id);
   const plan = entitlements.plan;
+  const dynamicCount = await db.qrCode.count({where:{workspaceId:workspace.id,isArchived:false,OR:[{kind:"DYNAMIC"},{shortCode:{not:null}}]}});
 
   const where: Prisma.QrCodeWhereInput = {
     workspaceId: workspace.id,
@@ -65,6 +66,7 @@ export default async function LibraryPage({ searchParams }: Props) {
     encodedContent: qr.encodedContent,
     publicPath: qr.shortCode ? qrPublicPath({ shortCode: qr.shortCode, contentType: qr.contentType }) : null,
     _count: qr._count,
+    hasFrame: !!(qr.styleConfig as Record<string,unknown> | null)?.frameStyle && (qr.styleConfig as Record<string,unknown> | null)?.frameStyle !== "none",
   }));
 
   return (
@@ -80,6 +82,7 @@ export default async function LibraryPage({ searchParams }: Props) {
       />
 
       <QrLibrary
+        dynamicAvailable={plan.limits.maxDynamicQr == null || dynamicCount < plan.limits.maxDynamicQr}
         items={items}
         contentTypeLabels={contentTypeLabels}
         exportFormats={plan.limits.exportFormats}

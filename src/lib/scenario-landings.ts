@@ -1,4 +1,4 @@
-import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
+import { COMMERCIAL } from "@/lib/commercial-config";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 export const SCENARIO_LANDING_SLUGS = ["qr-menu", "qr-for-packaging"] as const;
 
@@ -49,7 +49,7 @@ export const scenarioLandings: Record<ScenarioLandingSlug, ScenarioLanding> = {
       { title: "Проверьте камерой и наклейте", text: "Когда обновили блюда — смените URL в кабинете. Макет тот же." },
     ],
     limits: [
-      "Статические QR и 2 динамических кода бесплатно.",
+      `Статические QR и ${COMMERCIAL.free.dynamic} динамических кода бесплатно.`,
       `Два динамических кода со сменой адреса и статистикой бесплатно. Про — ${TRIAL_DAYS} дней, карта не нужна.`,
       "После окончания пробы уже напечатанный динамический код продолжает открываться. Два бесплатных динамических кода можно менять без оплаты.",
     ],
@@ -84,7 +84,7 @@ export const scenarioLandings: Record<ScenarioLandingSlug, ScenarioLanding> = {
       { title: "Проверьте камерой, затем в макет", text: "Когда обновили инструкцию — смените URL. Упаковка та же." },
     ],
     limits: [
-      "На бесплатном тарифе 2 динамических кода. Нужно больше — переходите на Про.",
+      `На бесплатном тарифе ${COMMERCIAL.free.dynamic} динамических кода. Нужно больше — переходите на Про.`,
       `Проба динамики ${TRIAL_DAYS} дней. Карта не нужна.`,
       "Окончание тарифа не отключает уже напечатанный динамический QR. Удаление кода из библиотеки — отключает.",
     ],

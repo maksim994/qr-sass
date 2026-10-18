@@ -1,5 +1,7 @@
 /** Versioned legal text. Never edit a released version: retain its snapshot in receipts. */
 export const LEGAL_VERSION = "2026-10-08.1";
+export const PRIVACY_VERSION = "2026-10-18.1";
+export const PRIVACY_DATE_LABEL = "18 октября 2026 года";
 export const LEGAL_DATE_LABEL = "8 октября 2026 года";
 export const LEGAL_OPERATOR = {
   name: "Мольков Максим Владимирович",
@@ -140,5 +142,5 @@ export const PRIVACY_SECTIONS: readonly LegalSection[] = [
   ] },
 ];
 export function legalSnapshot() {
-  return { version: LEGAL_VERSION, operator: LEGAL_OPERATOR, terms: TERMS_SECTIONS, consent: CONSENT_SECTIONS, privacy: PRIVACY_SECTIONS };
+  return { version: LEGAL_VERSION, privacyVersion: PRIVACY_VERSION, operator: LEGAL_OPERATOR, terms: TERMS_SECTIONS, consent: CONSENT_SECTIONS, privacy: PRIVACY_SECTIONS };
 }

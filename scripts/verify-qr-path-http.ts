@@ -9,7 +9,7 @@ import jsQR from "jsqr";
 
 const base = "http://localhost:3108";
 const database = new URL(process.env.DATABASE_URL ?? "http://invalid");
-if (database.hostname !== "127.0.0.1" || database.port !== "55438" || database.pathname !== "/qr_readiness") throw new Error("Requires isolated qr_readiness DB on localhost:55438");
+if (database.hostname !== "127.0.0.1" || !["55438", "55448"].includes(database.port) || database.pathname !== "/qr_readiness") throw new Error("Requires isolated qr_readiness DB on localhost:55438");
 const db = getDb(), run = randomUUID(), workspaceIds: string[] = [];
 let userId = "", checks = 0;
 function passed(text: string) { checks++; console.log(`PASS ${text}`); }
@@ -58,7 +58,7 @@ try {
   assert.equal((await api("/api/qr", { workspaceId: free.id, kind: "STATIC", contentType: "TEXT", name: "over quota", payload: { text: "extra", staticDirect: true }, style: defaultQrStyle })).status, 403);
   passed("new static version keeps original; archive quota remains unchanged");
   const freeDynamic = await api("/api/qr", { workspaceId: free.id, kind: "DYNAMIC", contentType: "URL", name: "must not downgrade", payload: { url: "https://example.com" }, style: defaultQrStyle }); assert.equal(freeDynamic.status, 403);
-  passed("FREE dynamic request fails explicitly instead of creating static");
+  passed("full FREE archive rejects dynamic creation without silently downgrading");
   const r = await api("/api/qr", { workspaceId: pro.id, kind: "DYNAMIC", contentType: "URL", name: "Dynamic path", payload: { url: "https://example.com/before" }, style: defaultQrStyle }, "POST", pro.id); assert.equal(r.status, 200);
   const dynamicId = (await r.json()).data.qrId;
   const dynamic = await db.qrCode.findUniqueOrThrow({ where: { id: dynamicId } });

@@ -9,7 +9,7 @@ export const PRODUCT_GOALS = {
   qr_creation_started: "qr_creation_started",
   trial_started: "trial_started",
   paid_feature_requested: "paid_feature_requested",
-  qr_preview_downloaded: "qr_preview_downloaded",
+  qr_preview_downloaded: "qr_downloaded",
   qr_download_requested: "qr_download_requested",
   registration_completed: "registration_completed",
   qr_type_selected: "qr_type_selected",

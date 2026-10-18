@@ -49,3 +49,11 @@ test("optional analytics permission expires and rejects old, malformed and futur
     assert.equal(parseCookieChoice(raw, now), "none");
   }
 });
+
+import { TERMS_SECTIONS as PREVIOUS_TERMS, CONSENT_SECTIONS as PREVIOUS_CONSENT, PRIVACY_SECTIONS as PREVIOUS_PRIVACY } from "./legal-history/2026-10-08.ts";
+import { TERMS_SECTIONS as CURRENT_TERMS, CONSENT_SECTIONS as CURRENT_CONSENT, PRIVACY_SECTIONS as CURRENT_PRIVACY } from "./legal-documents.ts";
+test("TZ01 only corrects the payment recipient in privacy; terms and consent are unchanged",()=>{
+  assert.deepEqual(CURRENT_TERMS,PREVIOUS_TERMS);
+  assert.deepEqual(CURRENT_CONSENT,PREVIOUS_CONSENT);
+  assert.equal(JSON.stringify(CURRENT_PRIVACY),JSON.stringify(PREVIOUS_PRIVACY).replace("и ЮKassa при оплате","и Robokassa при оплате"));
+});

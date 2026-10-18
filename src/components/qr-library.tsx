@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradeLink } from "@/components/upgrade-link";
 import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -21,12 +22,14 @@ type QrItem = {
   shortCode: string | null;
   encodedContent: string | null;
   publicPath: string | null;
+  hasFrame?: boolean;
   _count: { scanEvents: number };
 };
 
 type Props = {
   items: QrItem[];
   contentTypeLabels: Record<string, string>;
+  dynamicAvailable?: boolean;
   exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
   query: LibraryQuery;
   total: number;
@@ -43,7 +46,7 @@ function SearchIcon() {
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>;
 }
 
-export default function QrLibrary({ items, contentTypeLabels, exportFormats, query, total, pageSize }: Props) {
+export default function QrLibrary({ items, contentTypeLabels, exportFormats, query, total, pageSize, dynamicAvailable = true }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -109,12 +112,12 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats, que
                       </div>
                     </td>
                     <td className={styles.typeCell}><span className={styles.type}>{contentTypeLabels[qr.contentType] || qr.contentType}</span><span className={`${styles.kind} ${status === "Срок истёк" ? styles.expired : ""}`}>{qr.kind === "DYNAMIC" && status !== "Срок истёк" && <span className={styles.dot} aria-hidden="true" />}{status}</span></td>
-                    <td className={styles.scansCell}><span className={styles.mobileLabel}>Открытия</span><span className={styles.scans} title={!tracksScans ? "Статический код открывается без нашего сервера, поэтому сканы не считаются" : "Открытия людей за всё время, без известных ботов"}>{tracksScans ? qr._count.scanEvents.toLocaleString("ru-RU") : "Сканы не считаются"}</span>{!tracksScans && <Link href={qr.contentType === "URL" ? `/dashboard/create/url?kind=DYNAMIC&url=${encodeURIComponent(qr.encodedContent ?? "")}` : "/dashboard/create"}>Сделать динамическим · нужна новая печать</Link>}{qr.contentType === "VCARD" && tracksScans && <span className={styles.kind}>скачиваний vCard</span>}</td>
+                    <td className={styles.scansCell}><span className={styles.mobileLabel}>Открытия</span><span className={styles.scans} title={!tracksScans ? "Статический код открывается без нашего сервера, поэтому сканы не считаются" : "Открытия людей за всё время, без известных ботов"}>{tracksScans ? qr._count.scanEvents.toLocaleString("ru-RU") : "Сканы не считаются"}</span>{!tracksScans && <UpgradeLink place="static_stats" href={!dynamicAvailable ? "/dashboard/billing?plan=pro" : qr.contentType === "URL" ? `/dashboard/create/url?kind=DYNAMIC&url=${encodeURIComponent(qr.encodedContent ?? "")}` : "/dashboard/create"}>Сделать динамическим · нужна новая печать</UpgradeLink>}{qr.contentType === "VCARD" && tracksScans && <span className={styles.kind}>скачиваний vCard</span>}</td>
                     <td className={styles.dateCell}><time dateTime={qr.createdAt}>{new Date(qr.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Moscow" })}</time></td>
                     <td className={styles.actionsCell}>
                       <div className={styles.actions}>
-                        {exportFormats.includes("PNG") && <TrackedDownloadLink href={`/api/qr/${qr.id}/download?format=png`} className={styles.download} download aria-label={`Скачать PNG: ${qr.name}`}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" /></svg><span>Скачать</span></TrackedDownloadLink>}
-                        <QrLibraryCardMenu qrId={qr.id} qrName={qr.name} kind={qr.kind} managed={tracksScans} exportFormats={exportFormats} />
+                        {exportFormats.includes("PNG") && <TrackedDownloadLink data-frame={String(qr.hasFrame)} href={`/api/qr/${qr.id}/download?format=png`} className={styles.download} download aria-label={`Скачать PNG: ${qr.name}`}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" /></svg><span>Скачать</span></TrackedDownloadLink>}
+                        <QrLibraryCardMenu hasFrame={qr.hasFrame} qrId={qr.id} qrName={qr.name} kind={qr.kind} managed={tracksScans} exportFormats={exportFormats} />
                       </div>
                     </td>
                   </tr>

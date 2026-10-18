@@ -1,4 +1,5 @@
 "use client";
+import { usePublicOffer } from "@/components/public-offer-provider";
 import { FrameControls } from "@/components/qr/frame-controls";
 import type { FrameConfig } from "@/lib/qr-frame";
 import { COMMERCIAL, rubles } from "@/lib/commercial-config";
@@ -20,11 +21,13 @@ import { PRODUCT_GOALS, trackGoal, markOnboardingDownloaded } from "@/lib/produc
 import { MSG } from "@/lib/user-messages";
 import styles from "@/app/home.module.css";
 
-type Props = { initialUrl?: string; dynamicRemaining?: number | null; initialType?: StaticQrType; signedIn: boolean; enabledStaticTypes: StaticQrType[] };
+type Props = { trialUsed?: boolean; enabledTypes?: string[]; initialUrl?: string; dynamicRemaining?: number | null; initialType?: StaticQrType; signedIn: boolean; enabledStaticTypes: StaticQrType[] };
 const labels: Record<StaticQrType, string> = { URL: "Ссылка", TEXT: "Текст", WIFI: "Wi-Fi", VCARD: "Контакты", EMAIL: "Email", PHONE: "Телефон", SMS: "SMS", LOCATION: "Координаты" };
 
-export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, signedIn, enabledStaticTypes }: Props) {
+export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, signedIn, enabledStaticTypes, enabledTypes, trialUsed }: Props) {
+  const {proPrice}=usePublicOffer();
   const router = useRouter(), id = useId(), busy = useRef(false);
+  const [moreTypes, setMoreTypes] = useState(false);
   const [type, setType] = useState<StaticQrType>(initialType ?? enabledStaticTypes[0] ?? "URL");
   const [payloads, setPayloads] = useState<Partial<Record<StaticQrType, Record<string, unknown>>>>(initialUrl ? { URL: { url: initialUrl } } : {});
   const [kind, setKind] = useState<"STATIC" | "DYNAMIC">("STATIC");
@@ -33,6 +36,7 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
   const [frame, setFrame] = useState<FrameConfig>({ frameStyle: "none", frameText: "Сканируй меня", frameColor: "#111111" });
   const [error, setError] = useState("");
   const [afterDownload, setAfterDownload] = useState(false);
+  const generated = useRef("");
   const upgradeClicked = useRef(false);
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState<"png" | "svg" | "archive" | "dynamic" | null>(null);
@@ -50,7 +54,8 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
     busy.current = true; setPending(format); setError(""); setNotice("");
     try {
       await downloadStaticQr(prepared.data, foreground, background, format, frame);
-      markOnboardingDownloaded({ source: "home", format, contentType: type, kind: "STATIC" }, PRODUCT_GOALS.static_qr_downloaded);
+      if (generated.current !== prepared.data) { trackGoal(PRODUCT_GOALS.qr_created, {type,dynamic:false,where:"home"}); generated.current=prepared.data; }
+      markOnboardingDownloaded({ source: "home", frame: frame.frameStyle !== "none", format, contentType: type, kind: "STATIC" }, PRODUCT_GOALS.static_qr_downloaded);
       try { if (!sessionStorage.getItem("qrs_after_download_seen")) { sessionStorage.setItem("qrs_after_download_seen", "1"); setAfterDownload(true); } } catch { setAfterDownload(true); }
       setNotice("Код скачан. Проверьте QR камерой перед печатью.");
     } catch { setError(MSG.COULD_NOT_DOWNLOAD); }
@@ -79,15 +84,20 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
 
   return <div className={styles.generator} id="create-qr">
     <nav className={styles.typeNav} aria-label="Содержимое статического QR">
-      {STATIC_QR_TYPES.filter(item => enabledStaticTypes.includes(item)).map(item => <button type="button" key={item} aria-pressed={type === item} className={type === item ? styles.selectedType : undefined} onClick={() => { setType(item); setKind("STATIC"); setError(""); setNotice(""); }}>{labels[item]}</button>)}
-      <Link href={destination("/dashboard/create")} className={styles.allTypes}>Ещё типы</Link>
+      {["URL","WIFI","VCARD","PDF","MENU","URL_REVIEW","SOCIAL_LINKS","TEXT"].filter(item => item === "URL_REVIEW" ? enabledStaticTypes.includes("URL") : enabledTypes ? enabledTypes.includes(item) : true).map(item => <button type="button" key={item} aria-pressed={item === type} onClick={() => {
+        if (["PDF","MENU","SOCIAL_LINKS"].includes(item)) { router.push(destination(`/dashboard/create/${item.toLowerCase()}`)); return; }
+        setType(item === "URL_REVIEW" ? "URL" : item as StaticQrType); setKind(item === "URL_REVIEW" ? "DYNAMIC" : "STATIC"); setError(""); setNotice("");
+      }}>{item === "URL_REVIEW" ? "Ссылка на отзывы" : item === "SOCIAL_LINKS" ? "Соцсети" : item === "PDF" ? "PDF" : item === "MENU" ? "Меню" : labels[item as StaticQrType]}</button>)}
+      <button type="button" aria-expanded={moreTypes} onClick={()=>setMoreTypes(!moreTypes)}>Ещё типы</button>
     </nav>
+    {moreTypes && <nav className={styles.typeNav} aria-label="Другие типы QR">{STATIC_QR_TYPES.filter(item=>!["URL","WIFI","VCARD","TEXT"].includes(item)&&enabledStaticTypes.includes(item)).map(item=><button type="button" key={item} onClick={()=>{setType(item);setKind("STATIC");}}>{labels[item]}</button>)}<Link href={destination("/dashboard/create")}>Все типы</Link>
+    </nav>}
     <div className={styles.generatorBody}>
       <form onSubmit={dynamic ? continueDynamic : event => { event.preventDefault(); void download("png"); }} className={styles.generatorForm}>
         <QrContentForm type={type} payload={payload} onChange={next => { setPayloads(current => ({ ...current, [type]: next })); setError(""); setNotice(""); }} workspaceId="" />
         {type === "URL" && <fieldset className={styles.kindChoice}><legend className="sr-only">Тип QR-кода</legend>
           <label><input type="radio" name={`${id}-kind`} checked={kind === "STATIC"} onChange={() => setKind("STATIC")} />Статический <span>Бесплатно</span></label>
-          <label><input type="radio" name={`${id}-kind`} checked={kind === "DYNAMIC"} onChange={() => setKind("DYNAMIC")} />Динамический <span>2 бесплатно</span></label>
+          <label><input type="radio" name={`${id}-kind`} checked={kind === "DYNAMIC"} onChange={() => setKind("DYNAMIC")} />Динамический <span>{COMMERCIAL.free.dynamic} бесплатно</span></label>
         </fieldset>}
         <p className={styles.kindHint}>{dynamic ? `Меняйте ссылку после печати. Динамический код создаётся в кабинете; пробный период — ${TRIAL_DAYS} дней.` : "Не меняется после печати. Сканы не считаются."}</p>
         {!dynamic && <details className={styles.staticDesign}><summary>Цвета и рамка QR-кода</summary><div>
@@ -105,15 +115,15 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
             <Button type="button" variant="secondary" disabled={pending !== null || !prepared.ok || !scan.safeToUse} onClick={() => void download("svg")} aria-busy={pending === "svg"}>{pending === "svg" ? "Подготовка…" : "SVG"}</Button>
           </>}
         </div>
-        {!dynamic && <div className={styles.staticArchive}><Button type="button" variant="ghost" disabled={pending !== null || !prepared.ok} onClick={archive}>Сохранить код, чтобы не потерять</Button><p>Бесплатно, до 10 кодов в архиве. Черновик хранится в этой вкладке один час; данные попадут на сервер только после сохранения.</p></div>}
+        {!dynamic && <div className={styles.staticArchive}><Button type="button" variant="ghost" disabled={pending !== null || !prepared.ok} onClick={archive}>Сохранить код, чтобы не потерять</Button><p>Бесплатно, до {COMMERCIAL.free.archive} кодов в архиве. Черновик хранится в этой вкладке один час; данные попадут на сервер только после сохранения.</p></div>}
         {error && <p className={styles.formError} role="alert">{error}</p>}
         {!error && prepared.ok && !scan.safeToUse && <p className={styles.formError} role="alert">{MSG.SCANNABILITY_TOO_LOW}</p>}
         {afterDownload && type === "URL" && <aside className={styles.afterDownload} aria-label="Менять ссылку после печати">
           <strong>Код скачан. Он пойдёт в печать?</strong><p>Если ссылка поменяется, статический код придётся перепечатать. У динамического кода ссылку вы поменяете в кабинете.</p>
-          <Button type="button" onClick={() => { if (!upgradeClicked.current) { trackGoal(PRODUCT_GOALS.upgrade_prompt_click, {place:"after_download",plan:"pro"}); upgradeClicked.current = true; } continueDynamic(); }}>Сделать этот код динамическим — {dynamicRemaining === 0 ? "7 дней Про бесплатно" : "бесплатно"}</Button>
+          <Button type="button" onClick={() => { if (!upgradeClicked.current) { trackGoal(PRODUCT_GOALS.upgrade_prompt_click, {place:"after_download",plan:"pro"}); upgradeClicked.current = true; } continueDynamic(); }}>{dynamicRemaining === 0 && trialUsed ? "Перейти на Про и создать динамический код" : `Сделать этот код динамическим — ${dynamicRemaining === 0 ? `${TRIAL_DAYS} дней Про бесплатно` : "бесплатно"}`}</Button>
           <Button variant="ghost" onClick={()=>setAfterDownload(false)}>Нет, мне хватит обычного</Button><p>{COMMERCIAL.free.dynamic} динамических кода бесплатно. Напечатанные коды продолжают открываться и после окончания тарифа.</p>
         </aside>}
-        <p className={styles.inputHint}>Без регистрации · PNG и SVG · Динамические коды от {rubles(COMMERCIAL.pro.priceRub)} в месяц</p>
+        <p className={styles.inputHint}>Без регистрации · PNG и SVG · Динамические коды от {rubles(proPrice)} в месяц</p>
         <p className={styles.inputHint} role="status">{notice || (!prepared.ok && Object.keys(payload).length ? prepared.error : "")}</p>
       </form>
 

@@ -19,7 +19,6 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { parseApiResponse, fetchApi } from "@/lib/client-api";
 import { logger } from "@/lib/logger";
-import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { MSG } from "@/lib/user-messages";
 import { destinationAfterAuth } from "@/lib/qr-draft";
 
