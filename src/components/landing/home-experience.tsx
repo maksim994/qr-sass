@@ -23,10 +23,7 @@ export function HomeHero({ children }: { children?: ReactNode }) {
   const [selected, setSelected] = useState(2);
   const scene = scenes[selected];
   return <><section className={s.hero} aria-labelledby="home-title">
-    <div className={s.heroCopy}>
-      <h1 id="home-title" tabIndex={-1}>Маленький код. <br /><span>Большие<br className={s.heroBreak} /> возможности.</span></h1>
-      <p>Добавьте ссылку, контакты или Wi-Fi. Скачайте QR бесплатно, без регистрации.</p>
-    </div><div className={s.heroGenerator}>{children}</div></section>
+    {children}</section>
     <section className={s.heroExamples} aria-label="Примеры использования QR">
     <div className={s.heroExperience}>
       <div className={s.sceneTabs} role="group" aria-label="Пример использования QR">{scenes.map((item, index) => <button type="button" key={item.name} aria-pressed={selected === index} onClick={() => setSelected(index)}>{item.name}</button>)}</div>

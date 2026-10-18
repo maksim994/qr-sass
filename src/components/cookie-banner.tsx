@@ -58,7 +58,12 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
   useEffect(() => { if (open) dialog.current?.focus(); }, [open]);
   useEffect(() => {
     document.documentElement.classList.toggle("has-cookie-banner", visible);
-    return () => document.documentElement.classList.remove("has-cookie-banner");
+    // Presentation only: keep the mobile download above the actual banner height.
+    const node = dialog.current;
+    const measure = () => document.documentElement.style.setProperty("--qrs-cookie-height", `${node?.getBoundingClientRect().height ?? 0}px`);
+    const observer = new ResizeObserver(measure);
+    if (node && visible) { observer.observe(node); measure(); }
+    return () => { observer.disconnect(); document.documentElement.classList.remove("has-cookie-banner"); document.documentElement.style.removeProperty("--qrs-cookie-height"); };
   }, [visible]);
   useEffect(() => {
     if (consent === "accepted" && yandexMetrikaId) startMetrika(yandexMetrikaId);

@@ -1,0 +1,98 @@
+.heading {text-align:center; margin:0 auto 28px; width:100%;}
+.heading h1 {font-size:clamp(32px,3.05vw,44px); line-height:1.2; font-weight:750; letter-spacing:-.035em; text-wrap:balance;}
+.heading p {margin-top:12px; font-size:18px; color:var(--text-muted);}
+.heading button {display:inline-flex; align-items:center; min-height:44px; color:var(--text-link); font:inherit; cursor:pointer; text-underline-offset:4px;}
+.heading button:hover {text-decoration:underline;}
+.generator {display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); grid-template-rows:min-content 1fr; column-gap:48px; row-gap:20px; width:100%; padding:32px 40px; border:1px solid var(--border-default); border-radius:16px; background:var(--surface-card); scroll-margin-top:100px; text-align:left;}
+.inputPanel {min-width:0; display:flex; flex-direction:column; gap:20px;}
+.contentFields {min-width:0;}
+.contentFields>label {display:grid; gap:10px; color:var(--text-strong); font-size:16px; font-weight:650;}
+.contentFields :global(input:not([type=checkbox]):not([type=radio]):not([type=color])),.contentFields :global(select) {min-height:52px; width:100%; font-size:16px;}
+.contentFields :global(input),.contentFields :global(textarea),.contentFields :global(select) {min-width:0; max-width:100%;}
+.contentFields :global(input::placeholder) {color:var(--text-muted); opacity:1;}
+.typeGrid {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+.typeGrid button {display:flex; align-items:center; justify-content:center; gap:10px; min-height:68px; padding:12px 8px; border:1px solid var(--border-default); border-radius:8px; color:var(--text-default); background:var(--surface-card); font-size:14px; font-weight:650; cursor:pointer;}
+.typeGrid svg {flex-shrink:0;}
+.typeGrid button[aria-pressed=true] {border-color:var(--text-link); color:var(--text-link); background:var(--color-primary-subtle);}
+.typeGrid button:hover {border-color:var(--text-link);}
+.moreButton {min-height:44px; display:flex; justify-content:space-between; align-items:center; margin-top:-12px; color:var(--text-muted); cursor:pointer; font-size:14px;}
+.moreButton>span {font-size:22px; color:var(--text-link);}
+.moreTypes {display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:-12px;}
+.moreTypes button,.moreTypes a {min-height:44px; display:inline-flex; align-items:center; color:var(--text-link); font-size:14px; cursor:pointer;}
+.kindChoice {display:grid; grid-template-columns:1fr 1fr; gap:4px; border:0; padding:4px; min-width:0; border-radius:10px; background:var(--surface-subtle);}
+.kindChoice label {display:flex; align-items:flex-start; gap:8px; min-height:92px; border:1px solid transparent; border-radius:7px; padding:12px 10px; cursor:pointer; color:var(--text-default);}
+.kindChoice .kindSelected {background:var(--surface-card); border-color:var(--border-default);}
+.kindChoice input {width:16px; height:16px; margin-top:3px; accent-color:var(--text-link); flex-shrink:0;}
+.kindChoice label>span {display:flex; flex-direction:column; gap:4px;}
+.kindChoice strong {font-size:14px; font-weight:700; line-height:1.3;}
+.kindChoice span>span {font-size:12px; color:var(--text-link); line-height:1.4;}
+.kindChoice small {font-size:11px; color:var(--text-muted); line-height:1.45;}
+.outputPanel {grid-column:2; grid-row:1 / 3; min-width:0; display:flex; flex-direction:column; align-items:stretch; gap:12px;}
+.preview {position:relative; width:340px; height:340px; max-width:100%; margin-inline:auto; flex-shrink:0;}
+.qrImage,.qrImage>svg {display:block; width:100%; height:100%;}
+.example {position:absolute; z-index:1; top:4px; right:4px; padding:4px 9px; background:var(--surface-subtle); color:var(--text-default); border-radius:4px; font-size:11px; font-weight:650;}
+.frameChips {display:flex; flex-wrap:wrap; justify-content:center; gap:6px;}
+.frameChips button {min-height:36px; padding:6px 10px; font-size:12px; line-height:1.3; border:1px solid var(--border-default); border-radius:6px; color:var(--text-default); background:var(--surface-card); cursor:pointer;}
+.frameChips button[aria-pressed=true] {color:var(--text-link); border-color:var(--text-link); background:var(--color-primary-subtle);}
+.downloadArea {margin-top:4px;}
+.downloadArea :global(.fk-button),.stickyDownload :global(.fk-button) {min-height:52px; font-size:17px; border-radius:8px; width:100%;}
+.downloadArea :global(.fk-button--primary:disabled) {background:var(--surface-subtle); border-color:var(--border-default); color:var(--text-muted); opacity:1; cursor:not-allowed;}
+.hint {font-size:12px; color:var(--text-muted); text-align:center; min-height:20px; margin-top:6px; line-height:1.5;}
+.secondaryActions {display:flex; align-items:center; justify-content:center; gap:8px; margin-top:-8px; min-height:44px; color:var(--text-muted);}
+.secondaryActions :global(.fk-button) {min-width:44px; min-height:44px; padding:8px; font-size:13px; gap:0; white-space:normal; text-align:center;}
+.secondaryActions :global(.fk-button:disabled) {opacity:1; color:var(--text-muted);}
+.design {grid-column:1; grid-row:2; align-self:start; min-width:0; color:var(--text-strong); font-size:14px;}
+.design summary {min-height:44px; cursor:pointer; padding-block:12px; font-weight:650;}
+.colorFields {display:flex; gap:24px; padding-block:12px;}
+.colorFields label {display:grid; gap:8px;}
+.colorFields input {width:80px; height:44px; padding:4px;}
+.design :global(.qrs-frame-controls) {max-width:100%;}
+.design :global(.qrs-frame-controls input),.design :global(.qrs-frame-controls select) {min-height:44px; max-width:100%; font-size:16px;}
+.design :global(.qrs-frame-controls button) {min-height:44px;}
+.footnote {text-align:center; color:var(--text-muted); font-size:12px; margin-top:16px; line-height:1.5;}
+.formError {font-size:13px; line-height:1.5; color:var(--color-danger);}
+.notice {font-size:12px; line-height:1.5; color:var(--text-muted);}
+.afterDownload {border-top:1px solid var(--border-default); padding-top:16px; display:grid; gap:10px; font-size:14px;}
+.afterDownload p {font-size:12px; color:var(--text-muted);}
+.afterDownload :global(.fk-button) {white-space:normal; text-align:center; padding:10px 12px; line-height:1.5; height:auto;}
+.generatorUnavailable {padding:32px; text-align:center;}
+.stickyDownload {display:none;}
+.heading button:focus-visible,.generator button:focus-visible,.generator a:focus-visible,.generator summary:focus-visible {outline:3px solid var(--border-focus); outline-offset:3px;}
+@media(max-width:1199px) {
+  .generator {padding:28px; column-gap:28px; grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+  .heading h1 {max-width:900px; margin-inline:auto;}
+  .typeGrid button {flex-direction:column; gap:6px; padding:10px 4px; font-size:14px;}
+  .kindChoice label {padding:10px 6px; gap:6px;}
+  .preview {width:300px; height:300px;}
+}
+@media(max-width:767px) {
+  .heading {margin-bottom:24px;}
+  .heading h1 {font-size:28px; line-height:1.2;}
+  .heading p {font-size:15px; line-height:1.55; margin-top:12px;}
+  .generator {display:flex; flex-direction:column; gap:20px; padding:20px; border-radius:12px;}
+  .inputPanel {gap:16px;}
+  .contentFields>label {font-size:15px;}
+  .typeGrid {gap:8px;}
+  .typeGrid button {min-height:64px;}
+  .moreButton {margin-top:-8px;}
+  .kindChoice label {min-height:92px; padding:10px 8px;}
+  .kindChoice strong {font-size:13px;}
+  .kindChoice small {font-size:11px;}
+  .outputPanel {gap:12px;}
+  .preview {width:288px; height:288px;}
+  .frameChips {gap:6px;}
+  .frameChips button {min-height:44px; padding:8px 9px; font-size:12px;}
+  .downloadArea {margin-top:8px;}
+  .secondaryActions {gap:4px;}
+  .secondaryActions :global(.fk-button) {font-size:13px; padding-inline:8px;}
+  .design {order:3; border-top:1px solid var(--border-subtle);}
+  .footnote {font-size:11px; margin-top:14px;}
+  .stickyDownload {display:block; position:fixed; z-index:45; bottom:calc(var(--qrs-cookie-height, 0px) + 12px + env(safe-area-inset-bottom, 0px)); left:16px; right:16px; padding:4px; border-radius:10px; background:var(--surface-card); box-shadow:var(--shadow-lg);}
+}
+@media(max-width:374px) {
+  .generator {padding:16px;}
+  .heading h1 {font-size:27px;}
+  .typeGrid button {font-size:13px;}
+  .kindChoice label {gap:5px; padding-inline:6px;}
+  .kindChoice small {font-size:11px;}
+}
