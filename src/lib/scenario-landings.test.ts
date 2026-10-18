@@ -51,6 +51,7 @@ describe("popular QR types", () => {
 describe("printed QR after trial", () => {
   it("states that printed dynamic codes keep opening", () => {
     assert.match(QR_LIFETIME.billing, /продолжают открываться/i);
-    assert.match(QR_LIFETIME.billing, /Новые динамические/i);
+    assert.match(QR_LIFETIME.billing, /Два динамических кода и смена их назначения доступны бесплатно/i);
+    assert.match(QR_LIFETIME.billing, /Новые коды сверх двух/i);
   });
 });
