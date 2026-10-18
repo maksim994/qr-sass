@@ -92,6 +92,7 @@ export async function POST(request: Request) {
           email,
           name,
           passwordHash,
+          metrikaRegistrationPending: true,
           legalAcceptances: { create: legalReceipt("email") },
           memberships: {
             create: {

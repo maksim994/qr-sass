@@ -10,5 +10,6 @@ export async function POST() {
     where: { id: actor.id, metrikaRegistrationPending: true, createdAt: { gte: new Date(Date.now() - 15 * 60_000) } },
     data: { metrikaRegistrationPending: false },
   });
-  return apiSuccess({ registration: claimed.count === 1 });
+  const event = claimed.count ? await getDb().funnelEvent.findFirst({where:{userId:actor.id,name:"registration_completed"},select:{source:true}}) : null;
+  return apiSuccess({ registration: claimed.count === 1, method: event?.source === "email" ? "email" : event?.source === "telegram" ? "telegram" : "yandex" });
 }

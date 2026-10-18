@@ -15,8 +15,8 @@ export function RegistrationGoal() {
       busy.current = true;
       try {
         const response = await fetchApi("/api/analytics/registration", { method: "POST" });
-        const parsed = await parseApiResponse<{ registration: boolean }>(response);
-        if (parsed.ok && parsed.data?.registration) trackGoal(PRODUCT_GOALS.registration_completed, { source: "yandex" });
+        const parsed = await parseApiResponse<{ registration: boolean; method?: string }>(response);
+        if (parsed.ok && parsed.data?.registration) trackGoal(PRODUCT_GOALS.registration_completed, { method: parsed.data.method ?? "yandex" });
       } catch { /* Analytics must never interrupt navigation. */ }
       finally { busy.current = false; }
     }

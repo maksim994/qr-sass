@@ -281,8 +281,8 @@ export function QrWizardPreview({
       } else {
         return;
       }
-      if (qrId) markOnboardingDownloaded({ source: "editor", format });
-      else trackGoal(PRODUCT_GOALS.qr_preview_downloaded, { source: "editor", format });
+      if (qrId) markOnboardingDownloaded({ source: "editor", format, frame: style.frameStyle !== "none" });
+      else trackGoal(PRODUCT_GOALS.qr_preview_downloaded, { source: "editor", format, frame: style.frameStyle !== "none" });
     } catch {
       setDownloadError(MSG.COULD_NOT_DOWNLOAD);
     } finally {

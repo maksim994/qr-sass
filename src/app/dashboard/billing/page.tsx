@@ -1,3 +1,4 @@
+import { ConfirmedPaymentGoal } from "@/components/confirmed-payment-goal";
 import { requireUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { selectWorkspace } from "@/lib/workspace-select";
@@ -67,6 +68,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="qrs-billing-page">
+      {paymentId && returned?.status === "SUCCEEDED" && !returned.isTest && <ConfirmedPaymentGoal paymentId={paymentId} />}
       <DashboardPageHeader
         title="Оплата и тарифы"
         description="Ваш тариф, доступные возможности и история платежей."

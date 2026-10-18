@@ -5,7 +5,7 @@ import { markOnboardingDownloaded, PRODUCT_GOALS, trackGoal } from "@/lib/produc
 import { downloadQrFile } from "@/lib/download-qr-file";
 import { MSG } from "@/lib/user-messages";
 
-type Props = AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode };
+type Props = AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode; "data-frame"?: string };
 
 export function TrackedDownloadLink({ children, onClick, ...props }: Props) {
   const busy = useRef(false);
@@ -25,7 +25,7 @@ export function TrackedDownloadLink({ children, onClick, ...props }: Props) {
       try {
         await downloadQrFile(props.href);
         const format = new URL(props.href, window.location.origin).searchParams.get("format");
-        markOnboardingDownloaded({ source: "library", ...(format ? { format } : {}) });
+        markOnboardingDownloaded({ source: "library", frame: props["data-frame"] === "true", ...(format ? { format } : {}) });
         onClick?.(event);
       } catch { setError(true); }
       finally { busy.current = false; }

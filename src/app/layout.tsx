@@ -1,3 +1,5 @@
+import { PublicOfferProvider } from "@/components/public-offer-provider";
+import { getPlan } from "@/lib/plans";
 import { ReferralCapture } from "@/components/referral-capture";
 import { RegistrationGoal } from "@/components/registration-goal";
 import type { Metadata } from "next";
@@ -47,7 +49,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getSiteSettings();
+  const [settings, pro, business] = await Promise.all([getSiteSettings(),getPlan("PRO"),getPlan("BUSINESS")]);
 
   const headContent = [
     settings.faviconUrl && (
@@ -72,12 +74,12 @@ export default async function RootLayout({
         {headContent}
       </head>
       <body className="antialiased">
-        <ThemeProvider>
+        <ThemeProvider><PublicOfferProvider value={{proPrice:pro.priceRub,businessPrice:business.priceRub}}>
           {children}
           <React.Suspense fallback={null}><ReferralCapture /></React.Suspense>
           <RegistrationGoal />
           <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
-        </ThemeProvider>
+        </PublicOfferProvider></ThemeProvider>
       </body>
     </html>
   );

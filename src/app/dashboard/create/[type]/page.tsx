@@ -42,6 +42,7 @@ export default async function CreateTypePage({
     <CreateQrClient
       workspaceId={workspace.id}
       planGate={{
+        planId: entitlements.planId,
         dynamicRemaining: planInfo.limits.maxDynamicQr == null ? null : Math.max(0, planInfo.limits.maxDynamicQr - dynamicCount),
         trialUsed: !!workspace.trialUsedAt,
         allowsDynamic: planInfo.limits.allowsDynamic,

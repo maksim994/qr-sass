@@ -5,7 +5,7 @@ export const PRODUCT_GOALS = {
   upgrade_prompt_click: "upgrade_prompt_click",
   payment_succeeded: "payment_succeeded",
   first_external_open: "first_external_open",
-  static_qr_downloaded: "static_qr_downloaded",
+  static_qr_downloaded: "qr_downloaded",
   qr_creation_started: "qr_creation_started",
   trial_started: "trial_started",
   paid_feature_requested: "paid_feature_requested",
@@ -14,9 +14,9 @@ export const PRODUCT_GOALS = {
   registration_completed: "registration_completed",
   qr_type_selected: "qr_type_selected",
   qr_created: "qr_created",
-  dynamic_qr_created: "dynamic_qr_created",
+  dynamic_qr_created: "dynamic_enabled",
   qr_downloaded: "qr_downloaded",
-  pricing_viewed: "pricing_viewed",
+  pricing_viewed: "pricing_view",
   checkout_started: "checkout_started",
   /** Do not fire from the widget. Payment is FunnelEvent payment_succeeded after SUCCEEDED. */
   subscription_paid: "subscription_paid",
@@ -49,6 +49,24 @@ export function setMetrikaCounterId(id: string) {
   document.documentElement.dataset.ymId = id;
 }
 
+/** Only fixed product dimensions reach Yandex. Content, URLs and identities are discarded. */
+export function goalParams(params: Record<string, unknown> = {}) {
+  const out: Record<string, unknown> = {};
+  const type = params.type ?? params.contentType;
+  if (typeof type === "string" && /^[A-Z_]{2,24}$/.test(type)) out.type = type;
+  const plan = params.plan ?? params.planId;
+  if (typeof plan === "string" && /^(free|pro|business)$/i.test(plan)) out.plan = plan.toLowerCase();
+  const sources: Record<string,string> = {home:"home",editor:"cabinet",library:"cabinet",billing:"cabinet",scenario:"landing",landing:"landing",pricing:"pricing"};
+  const where = params.where ?? sources[String(params.source)];
+  if (typeof where === "string" && ["home","cabinet","landing","pricing"].includes(where)) out.where = where;
+  if (typeof params.dynamic === "boolean") out.dynamic = params.dynamic;
+  else if (params.kind === "DYNAMIC" || params.kind === "STATIC") out.dynamic = params.kind === "DYNAMIC";
+  if (typeof params.format === "string" && ["png","svg","jpg","eps","pdf"].includes(params.format.toLowerCase())) {out.format=params.format.toLowerCase();out.frame=params.frame === true;}
+  if (typeof params.place === "string" && ["archive_limit","dynamic_limit","static_stats","team","api","billing","after_download"].includes(params.place)) out.place=params.place;
+  if (typeof params.method === "string" && ["email","yandex","telegram"].includes(params.method)) out.method=params.method;
+  if (typeof params.revenue === "number" && Number.isFinite(params.revenue) && params.revenue>=0) {out.revenue=params.revenue;out.currency="RUB";}
+  return out;
+}
 export function trackGoal(goal: ProductGoal, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return false;
   if (goal === PRODUCT_GOALS.subscription_paid || readCookieChoice() !== "accepted") return false;
@@ -56,8 +74,9 @@ export function trackGoal(goal: ProductGoal, params?: Record<string, unknown>) {
   const ym = (window as YmWindow).ym;
   if (!id || typeof ym !== "function") return false;
   try {
-    if (params && Object.keys(params).length > 0) {
-      ym(id, "reachGoal", goal, params);
+    const safe = goalParams(params);
+    if (Object.keys(safe).length > 0) {
+      ym(id, "reachGoal", goal, safe);
     } else {
       ym(id, "reachGoal", goal);
     }

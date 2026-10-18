@@ -37,6 +37,7 @@ import styles from "@/components/dashboard/create-flow.module.css";
 import { MSG } from "@/lib/user-messages";
 
 type PlanGate = {
+  planId?: string;
   allowsDynamic: boolean;
   dynamicRemaining?: number | null;
   trialUsed?: boolean;
@@ -212,9 +213,9 @@ export function CreateQrClient({
         return;
       }
 
-      trackGoal(PRODUCT_GOALS.qr_created, { contentType: typeParam, kind: actualKind });
+      trackGoal(PRODUCT_GOALS.qr_created, { contentType: typeParam, kind: actualKind, where:"cabinet" });
       if (actualKind === "DYNAMIC") {
-        trackGoal(PRODUCT_GOALS.dynamic_qr_created, { contentType: typeParam });
+        trackGoal(PRODUCT_GOALS.dynamic_qr_created, { plan: planGate.planId ?? "FREE" });
       }
       clearQrCreateDraft();
 
@@ -282,7 +283,7 @@ export function CreateQrClient({
                 </Alert>
               ) : dynamicBlocked ? (
                 <Alert variant="warning" title="Нужен тариф Про">
-                  Этот тип создаёт динамический QR с короткой ссылкой. На бесплатном тарифе доступны только статические коды.{" "}
+                  Этот тип создаёт динамический QR с короткой ссылкой. На бесплатном тарифе доступны статические и два динамических кода.{" "}
                   <Link href="/dashboard/billing" onClick={() => trackGoal(PRODUCT_GOALS.paid_feature_requested, { feature: planGate.qrLimitReached ? "qr_limit" : "dynamic_qr", source: "editor", contentType: typeParam })} className="qrs-navlink">
                     Перейти на Про
                   </Link>

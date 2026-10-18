@@ -18,7 +18,7 @@ export default async function DashboardPage() {
     getEntitlements(workspace.id),
     workspaceActivation(workspace.id),
     db.qrCode.count({ where: active }),
-    db.qrCode.findMany({ where: active, orderBy: { createdAt: "desc" }, take: 5, include: { _count: { select: { scanEvents: true } } } }),
+    db.qrCode.findMany({ where: active, orderBy: { createdAt: "desc" }, take: 5, include: { _count: { select: { scanEvents: { where: humanDevicePrismaWhere() } } } } }),
     db.qrCode.count({ where: { ...active, kind: "DYNAMIC" } }),
     db.qrCode.count({ where: { ...active, OR: [{ kind: "DYNAMIC" }, { contentType: "VCARD", shortCode: { not: null } }] } }),
     db.membership.count({ where: { workspaceId: workspace.id } }),

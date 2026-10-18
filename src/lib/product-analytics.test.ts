@@ -17,7 +17,7 @@ test("goals require current consent and a ready counter; payments cannot be forg
     assert.equal(calls.length, 0);
     choice = "accepted";
     assert.equal(trackGoal(PRODUCT_GOALS.trial_started, { planId: "PRO" }), true);
-    assert.deepEqual(calls, [["106988416", "reachGoal", "trial_started", { planId: "PRO" }]]);
+    assert.deepEqual(calls, [["106988416", "reachGoal", "trial_started", { plan: "pro" }]]);
     assert.equal(trackGoal(PRODUCT_GOALS.subscription_paid), false);
     assert.equal(calls.length, 1);
     fake.ym = () => { throw new Error("blocked"); };
@@ -36,4 +36,13 @@ test("failed downloads and HTML/JSON error responses do not count as received fi
       await assert.rejects(downloadQrFile("/api/qr/test/download?format=png"));
     }
   } finally { globalThis.fetch = original; }
+});
+
+import { goalParams } from "./product-analytics.ts";
+test("funnel parameters never include identities, URLs, QR contents or Wi-Fi secrets",()=>{
+  assert.deepEqual(goalParams({email:"private@example.test",url:"https://private.test",name:"Private",wifiPassword:"secret",payload:{text:"private"},type:"URL",dynamic:true,where:"home",format:"SVG",frame:true,plan:"PRO"}),{type:"URL",plan:"pro",where:"home",dynamic:true,format:"svg",frame:true});
+});
+test("public goal identifiers match the ten configured Metrika events",()=>{
+  const goals=new Set(Object.values(PRODUCT_GOALS));
+  for(const goal of ["registration_completed","qr_created","qr_downloaded","first_external_open","checkout_started","payment_succeeded","dynamic_enabled","pricing_view","trial_started","upgrade_prompt_click"])assert.equal(goals.has(goal as never),true,goal);
 });

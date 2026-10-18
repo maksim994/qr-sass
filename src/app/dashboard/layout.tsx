@@ -1,3 +1,4 @@
+import { OwnerOpenGoals } from "@/components/owner-open-goals";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
@@ -35,7 +36,8 @@ export default async function DashboardLayout({
       workspace={{ id: workspace.id, name: workspace.name, plan: entitlements.planId, planName: entitlements.plan.name }}
       workspaces={user.memberships.map((m) => m.workspace)}
     >
-      {reminder && <Alert variant="info" title={reminder.title}><p>{reminder.text} Напечатанные QR продолжают работать; для изменения назначений нужен действующий доступ.</p><Link href="/dashboard/billing">Посмотреть условия и продлить →</Link></Alert>}
+      <OwnerOpenGoals />
+      {reminder && <Alert variant="info" title={reminder.title}><p>{reminder.text} Напечатанные QR продолжают работать; два бесплатных динамических кода можно менять без оплаты.</p><Link href="/dashboard/billing">Посмотреть условия и продлить →</Link></Alert>}
       {children}
     </DashboardShell>
   );
