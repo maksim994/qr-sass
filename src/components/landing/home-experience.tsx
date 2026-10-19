@@ -27,7 +27,7 @@ export function HomeHero() {
   const scene = scenes[selected];
   return <section className={s.hero} aria-labelledby="home-title">
     <div className={s.heroCopy}>
-      <p className={s.slogan} id="home-title" tabIndex={-1}>Маленький код.<br /><span>Большие<br className={s.heroBreak} /> возможности.</span></p>
+      <p className={s.slogan} id="home-title" tabIndex={-1}>Маленький код.{" "}<br /><span>Большие<br className={s.heroBreak} /> возможности.</span></p>
       <p className={s.heroDescription}>Соедините то, что рядом, с тем, что онлайн. Сайт, контакты, программа события или история вашего бренда — в одном QR-коде.</p>
       <div className={s.heroActions}><Button href="#create-qr" variant="primary" size="lg" onClick={event => {
         trackGoal(PRODUCT_GOALS.hero_cta_click, { where: "hero" });
