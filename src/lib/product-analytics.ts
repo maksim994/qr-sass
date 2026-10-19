@@ -2,6 +2,7 @@ import { readCookieChoice } from "@/lib/cookie-consent";
 /** Client-side product funnel goals for Yandex Metrika reachGoal. */
 
 export const PRODUCT_GOALS = {
+  hero_create_qr_click: "hero_create_qr_click",
   upgrade_prompt_click: "upgrade_prompt_click",
   payment_succeeded: "payment_succeeded",
   first_external_open: "first_external_open",

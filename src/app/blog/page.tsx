@@ -1,3 +1,4 @@
+import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -26,7 +27,7 @@ const validateBlogQuery = cache(async (category: string | undefined, page: strin
   if (category !== undefined && (typeof category !== "string" || !category.trim())) notFound();
   const active = category ? await getBlogCategoryBySlug(category) : null;
   if (category !== undefined && !active) notFound();
-  const count = await getDb().blogPost.count({where:{publishedAt:{not:null},...(active ? {categoryId:active.id} : {})}});
+  const count = await getDb().blogPost.count({where:{publishedAt:{not:null},slug:{notIn:Object.keys(BLOG_REDIRECTS)},...(active ? {categoryId:active.id} : {})}});
   if (Number(page ?? 1) > Math.max(1, Math.ceil(count / PAGE_SIZE))) notFound();
 });
 
@@ -81,6 +82,7 @@ export default async function BlogListPage({ searchParams }: Props) {
   ]);
 
   const publishedWhere: Prisma.BlogPostWhereInput = {
+    slug: { notIn:Object.keys(BLOG_REDIRECTS) },
     publishedAt: { not: null },
     ...(activeCategory ? { categoryId: activeCategory.id } : {}),
   };

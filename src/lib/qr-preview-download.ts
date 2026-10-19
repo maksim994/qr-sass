@@ -30,3 +30,14 @@ export async function downloadQrPreview(data: string, style: QrStyle, format: "p
 export async function downloadSavedQr(qrId: string, format: "png" | "svg") {
   await downloadQrFile(`/api/qr/${encodeURIComponent(qrId)}/download?format=${format}`);
 }
+
+/** Reuses the same QR renderer; no file contents or destinations leave the browser. */
+export async function downloadQrA6Preview(data:string,style:QrStyle){
+  const {qrA6Svg}=await import("@/lib/qr-a6");
+  const qr=new QRCodeStyling(buildQrStylingOptions(data,style,1200));
+  const raw=await qr.getRawData("svg");
+  if(!raw)throw new Error("QR render failed");
+  const blob=new Blob([qrA6Svg(await (raw as Blob).text())],{type:"image/svg+xml;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="qr-reviews-a6.svg";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}

@@ -34,7 +34,7 @@ export default async function PricingPage() {
     ["Форматы экспорта", ...plans.map(p => p.limits.exportFormats.join(", "))],
     ["Рамки с призывом", "Да", "Да", "Да"],
     ["CSV за один запрос", "Нет", `До ${COMMERCIAL.pro.csvRows} строк`, `До ${COMMERCIAL.business.csvRows} строк`],
-    ["Команда", ...plans.map(p => p.limits.maxUsers == null ? "Без лимита" : `До ${p.limits.maxUsers} участников`)],
+    ["Команда", ...plans.map(p => p.limits.maxUsers === 1 ? "1 пользователь" : p.limits.maxUsers == null ? "Без лимита" : `До ${p.limits.maxUsers} участников`)],
     ["API", "Нет", "Нет", "Да"],
     ["Поддержка", "По электронной почте", "По электронной почте", "По электронной почте"],
   ];

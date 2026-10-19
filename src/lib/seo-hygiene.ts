@@ -1,3 +1,5 @@
+import { searchLandings } from "@/lib/search-landings";
+import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
 import { getSeoPages } from "@/lib/seo-content";
 import { publicOrigin } from "@/lib/public-url";
 
@@ -49,12 +51,13 @@ function normalizePathname(path: string): string {
 export function isDeniedSitemapPath(urlOrPath: string): boolean {
   const path = sitemapPathname(urlOrPath);
   if (CUSTOMER_QR_PATH.test(path)) return true;
+  if (path.startsWith("/blog/") && BLOG_REDIRECTS[path.slice(6)]) return true;
   return SITEMAP_DENY_PATHS.some((deny) => path === deny || path.startsWith(`${deny}/`));
 }
 
 export function buildIndexableStaticPaths(): string[] {
   const fromLandings = getSeoPages().map((page) => `/${page.slug}`);
-  return [...INDEXABLE_STATIC_PATHS, ...fromLandings].filter((path) => !isDeniedSitemapPath(path));
+  return [...new Set([...INDEXABLE_STATIC_PATHS, ...fromLandings, ...searchLandings.map(page=>`/${page.slug}`)])].filter((path) => !isDeniedSitemapPath(path));
 }
 
 export function findSitemapServiceUrls(urls: string[]): string[] {

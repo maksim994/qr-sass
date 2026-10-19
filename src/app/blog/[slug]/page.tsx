@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { BlogSeoIntro, ArticleGenerator } from "@/components/blog/blog-seo-intro";
+import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -107,7 +109,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   const relatedWhere = {
     publishedAt: { not: null },
-    slug: { not: slug },
+    slug: { not: slug, notIn: Object.keys(BLOG_REDIRECTS) },
     ...(post.categoryId ? { categoryId: post.categoryId } : {}),
   };
 
@@ -128,7 +130,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (relatedPosts.length < 3 && post.categoryId) {
     const fallback = await db.blogPost.findMany({
-      where: { publishedAt: { not: null }, slug: { not: slug }, categoryId: { not: post.categoryId } },
+      where: { publishedAt: { not: null }, slug: { not: slug, notIn: Object.keys(BLOG_REDIRECTS) }, categoryId: { not: post.categoryId } },
       orderBy: { publishedAt: "desc" },
       take: 3 - relatedPosts.length,
       select: {
@@ -144,7 +146,7 @@ export default async function BlogPostPage({ params }: Props) {
     relatedPosts = [...relatedPosts, ...fallback];
   } else if (relatedPosts.length < 3) {
     const fallback = await db.blogPost.findMany({
-      where: { publishedAt: { not: null }, slug: { not: slug } },
+      where: { publishedAt: { not: null }, slug: { not: slug, notIn: Object.keys(BLOG_REDIRECTS) } },
       orderBy: { publishedAt: "desc" },
       take: 3,
       select: {
@@ -221,6 +223,7 @@ export default async function BlogPostPage({ params }: Props) {
                 {excerpt}
               </p>
             )}
+            <BlogSeoIntro slug={post.slug} />
             <div style={{ marginTop: "26px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap", paddingTop: "22px", borderTop: "1px solid var(--border-subtle)" }}>
               {post.authorName ? (
                 <span style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -245,6 +248,7 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </section>
 
+      {slug === "qr-kod-dlya-vkontakte" && <ArticleGenerator />}
       <section style={{ paddingBottom: "clamp(24px, 4vw, 44px)" }}>
         <div className="fk-container" style={{ maxWidth: "900px" }}>
           <div

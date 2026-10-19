@@ -5,9 +5,9 @@ type LandingIdentity = { slug: string; title: string; description: string; keywo
 
 export function landingMetadata(page: LandingIdentity): Metadata {
   const url = publicSiteUrl(`/${page.slug}`);
-  const image = { url: publicSiteUrl(`/images/landings/${page.slug}.png`), width: 1200, height: 630, alt: page.title };
+  const image = { url: publicSiteUrl("/opengraph-image.png"), width: 1200, height: 630, alt: page.title };
   return {
-    title: page.title,
+    title: { absolute: page.title },
     description: page.description,
     keywords: page.keywords,
     alternates: { canonical: url },

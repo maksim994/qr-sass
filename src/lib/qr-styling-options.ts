@@ -1,3 +1,4 @@
+import { MODERN_QR_FRAMES } from "@/lib/qr-frame";
 import QRCode from "qrcode";
 import type { QrStyle } from "@/components/qr-designer";
 
@@ -68,13 +69,14 @@ export function buildQrStylingOptions(data: string, style: QrStyle, size = 280) 
     backgroundOptions.gradient = buildGradient(style.bgGradient);
   }
 
+  const quietZoneModules = MODERN_QR_FRAMES.some(frame=>frame.id!=="none"&&frame.id===style.frameStyle) ? Math.max(4, style.quietZoneModules ?? 0) : style.quietZoneModules;
   return {
     width: size,
     height: size,
     type: "svg" as const,
     data: encoded,
-    margin: style.quietZoneModules
-      ? Math.ceil(size * style.quietZoneModules / (QRCode.create(data || "https://example.com", { errorCorrectionLevel: style.errorCorrectionLevel }).modules.size + 2 * style.quietZoneModules))
+    margin: quietZoneModules
+      ? Math.ceil(size * quietZoneModules / (QRCode.create(data || "https://example.com", { errorCorrectionLevel: style.errorCorrectionLevel }).modules.size + 2 * quietZoneModules))
       : style.margin,
     dotsOptions,
     cornersSquareOptions,

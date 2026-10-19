@@ -1,3 +1,5 @@
+import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
+import { searchLandings } from "@/lib/search-landings";
 import { selectWorkspace } from "@/lib/workspace-select";
 import { getEntitlements } from "@/lib/entitlements";
 import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
@@ -26,13 +28,13 @@ import styles from "./home.module.css";
 export const dynamic = "force-dynamic";
 const baseUrl = publicSiteUrl();
 export const metadata: Metadata = {
-  title: "Создать QR-код онлайн — генератор QR-S.ru",
-  description: "Создавайте QR-коды для ссылок, меню и файлов. Настройте оформление, скачайте PNG или SVG. Динамические QR позволяют менять ссылку после печати.",
+  title: { absolute: "Генератор QR-кодов онлайн бесплатно — создать QR-код | QR-S" },
+  description: "Создать QR-код онлайн бесплатно и без регистрации: ссылка, Wi-Fi, контакты и текст. Скачайте PNG или SVG. Два динамических QR-кода бесплатно после регистрации.",
   keywords: ["генератор qr кодов", "создать qr код", "динамический qr код", "qr код онлайн"],
   alternates: { canonical: baseUrl },
   openGraph: { type: "website",
-    title: "Ваша ссылка. Ваш QR-код. — QR-S.ru",
-    description: "QR-коды для сайта, меню и печатных материалов. Создавайте, делитесь и управляйте ссылками в одном кабинете.",
+    title: "Генератор QR-кодов онлайн бесплатно — создать QR-код | QR-S",
+    description: "Создайте QR-код для ссылки, Wi-Fi или контактов бесплатно и без регистрации. Скачайте PNG или SVG. Два динамических кода бесплатно после регистрации.",
     url: baseUrl,
   },
 };
@@ -71,7 +73,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   try {
     const [user, latestPosts] = await Promise.all([
       session?.sub ? getDb().user.findUnique({ where: { id: session.sub }, select: { isAdmin: true } }) : Promise.resolve(null),
-      getDb().blogPost.findMany({ where: { publishedAt: { not: null } }, orderBy: { publishedAt: "desc" }, take: 100, select: { slug: true, title: true, excerpt: true } }),
+      getDb().blogPost.findMany({ where: { publishedAt: { not: null }, slug:{notIn:Object.keys(BLOG_REDIRECTS)} }, orderBy: { publishedAt: "desc" }, take: 100, select: { slug: true, title: true, excerpt: true } }),
     ]);
     isAdmin = user?.isAdmin ?? false;
     const themes = [/otzyv|otzivy|kart/, /razmer|pechat/, /wi-?fi/, /vizit/, /dinam/, /vkontakte/];
@@ -104,7 +106,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <SiteHeader session={session} isAdmin={isAdmin} minimal />
       <main>
         <PricingGoal />
-        <HomeHero><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} dynamicRemaining={dynamicRemaining} trialUsed={trialUsed} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} enabledTypes={enabledTypes.map(item=>item.type)} /></HomeHero>
+        <HomeHero />
+        <section id="create-qr" className={styles.generatorSection} aria-labelledby="generator-title"><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} dynamicRemaining={dynamicRemaining} trialUsed={trialUsed} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} enabledTypes={enabledTypes.map(item=>item.type)} /></section>
         <div className={`${styles.container} ${styles.valueStrip}`} aria-label="Возможности сервиса">
           <span><Check /> От ссылки до электронного меню</span><span><Check /> Дизайн под ваш бренд</span><span><Check /> Смена ссылки после печати</span><span><Check /> Статистика открытий</span>
         </div>
@@ -173,6 +176,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </div>
           <p><Link href="/pricing" className={styles.textLink}>Подробное сравнение тарифов →</Link></p>
           <div className={styles.pricingNotes}><p>Пробный период Про — {TRIAL_DAYS} дней без карты. Затем можно оплатить тариф или продолжить на бесплатном.</p><p>Оплата — за календарный месяц. Продление вручную, без автоматических списаний. <Link href="/terms-of-service#payment">Оплата и предоставление доступа</Link> · <Link href="/terms-of-service#refund">Отказ и возврат денег</Link>.</p><p>Напечатанные динамические коды продолжают открываться после окончания тарифа. Два бесплатных динамических кода можно менять без оплаты. <Link href={QR_LIFETIME_PATH}>Подробнее о сроке работы QR <Arrow /></Link></p></div>
+        </section>
+
+        <section className={`${styles.container} ${styles.section}`} aria-labelledby="generators-title">
+          <div className={styles.sectionHeading}><h2 id="generators-title">Создайте QR<br />под свою задачу</h2><p>Ссылка, документ, контакты или отзывы —<br />сразу с нужными полями и инструкцией.</p></div>
+          <nav className={styles.generatorLinks} aria-label="Генераторы QR по задачам">{searchLandings.map(page=><Link key={page.slug} href={`/${page.slug}`}>{page.label}<span aria-hidden="true">→</span></Link>)}</nav>
         </section>
 
         <section id="faq" className={`${styles.container} ${styles.faqSection}`}>

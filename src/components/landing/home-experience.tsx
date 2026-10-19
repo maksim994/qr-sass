@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { STATIC_QR_TYPES } from "@/lib/static-qr";
 import type { QrTypeInfo } from "@/lib/qr-types";
 import { HomeQrPreview } from "./home-qr-preview";
@@ -19,23 +20,37 @@ function Icon({ path, className }: { path: string; className?: string }) {
 }
 const arrow = "M5 12h14m-6-6 6 6-6 6";
 
-export function HomeHero({ children }: { children?: ReactNode }) {
+export function HomeHero() {
   const [selected, setSelected] = useState(2);
   const scene = scenes[selected];
-  return <><section className={s.hero} aria-labelledby="home-title">
-    {children}</section>
-    <section className={s.heroExamples} aria-label="Примеры использования QR">
+  return <section className={s.hero} aria-labelledby="home-title">
+    <div className={s.heroCopy}>
+      <p className={s.slogan} id="home-title" tabIndex={-1}>Маленький код.<br /><span>Большие<br className={s.heroBreak} /> возможности.</span></p>
+      <p className={s.heroDescription}>Соедините то, что рядом, с тем, что онлайн. Сайт, контакты, программа события или история вашего бренда — в одном QR-коде.</p>
+      <div className={s.heroActions}><Button href="#create-qr" variant="primary" size="lg" onClick={event => {
+        trackGoal(PRODUCT_GOALS.hero_create_qr_click, { where: "home" });
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        window.history.replaceState(null, "", "#create-qr");
+        const generator = document.getElementById("create-qr");
+        document.getElementById("generator-title")?.focus({ preventScroll: true });
+        generator?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      }}>Создать QR-код <Icon path={arrow} /></Button></div>
+      <div className={s.heroNote}><span aria-hidden="true">✓</span> Есть бесплатный тариф <i /> Без карты для старта</div>
+    </div>
     <div className={s.heroExperience}>
       <div className={s.sceneTabs} role="group" aria-label="Пример использования QR">{scenes.map((item, index) => <button type="button" key={item.name} aria-pressed={selected === index} onClick={() => setSelected(index)}>{item.name}</button>)}</div>
       <div className={s.scene} data-scene={scene.kind}>
         <div className={s.orbit} aria-hidden="true" />
+        <div className={s.sceneObjects}>
         <div className={s.paper} key={`paper-${selected}`}><span>{scene.label}</span><strong>{scene.title}</strong><HomeQrPreview value={`https://qr-s.ru${scene.href}`} /><p>Наведите камеру.<br />Дальше — интереснее.</p><span className={s.paperBrand}>qr-s.ru <span>↗</span></span></div>
         <div className={s.phone} key={`phone-${selected}`} aria-label={`Пример страницы: ${scene.phone}`}><div className={s.phoneTop}><span>9:41</span><span>● ▰</span></div><div className={s.phonePicture}><Icon path={selected === 0 ? "M5 9h11v6a5.5 5.5 0 0 1-11 0V9Zm11 1h2a3 3 0 0 1 0 6h-2M4 21h15M8 3v2m5-2v2" : selected === 1 ? "M4 7h16v14H4V7Zm4 0V5a4 4 0 0 1 8 0v2" : "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2"} /></div><strong>{scene.phone}</strong><p>{scene.subtitle}</p><div className={s.phoneItems}>{scene.items.map(item => <div key={item}>{item}<span aria-hidden="true">↗</span></div>)}</div><span className={s.phoneBottom}>Пример страницы после сканирования</span></div>
+        </div>
         <div className={s.scanLabel}><Icon path="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M7 12h10" /><span>Один скан.<br /><strong>И вы на связи.</strong></span></div>
       </div>
       <p className={s.sceneCaption}>Выберите сценарий — посмотрите, как оживает QR <span aria-hidden="true">↑</span></p>
     </div>
-  </section></>;
+  </section>;
 }
 
 export function TypeExplorer({ types, signedIn }: { types: QrTypeInfo[]; signedIn: boolean }) {

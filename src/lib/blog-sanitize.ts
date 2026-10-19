@@ -1,3 +1,6 @@
+import { BLOG_EDITORIAL, BLOG_ADDITIONS, BLOG_MERGED_CONTENT } from "@/lib/blog-seo";
+import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
+import { COMMERCIAL } from "@/lib/commercial-config";
 const EDITORIAL_TOKEN = "B(?:16|25|26|28|33|36)|CTA|Workflow";
 const EDITORIAL_HEADING = new RegExp(
   `<h([1-6])\\b[^>]*>\\s*(?:${EDITORIAL_TOKEN})\\s*</h\\1>`,
@@ -29,7 +32,7 @@ const FLOW_NOTICES: Record<string, string> = {
   "qr-kod-s-utm-metkami":
     "UTM вы добавляете в свою ссылку. Кабинет считает открытия QR, а не сессии в Метрике.",
   "massovaya-generaciya-qr-kodov":
-    "Пакет из CSV есть, лимит строк за загрузку зависит от тарифа (50 / 1000 / 5000). Это не тысячи кодов за минуту и не отдельная очередь.",
+    `Пакет из CSV доступен на Про и Бизнесе; лимит строк за загрузку — ${COMMERCIAL.pro.csvRows} на Про и ${COMMERCIAL.business.csvRows} на Бизнесе.`,
   "qr-kod-ssylka-na-prilozhenie":
     "Тип «Приложение» кодирует ссылки на магазины. Smart-link и атрибуция установок — на стороне магазина, не в QR-S.ru.",
 };
@@ -83,6 +86,10 @@ function noticeHtml(slug: string): string {
 
 export function sanitizeBlogHtml(html: string, slug?: string): string {
   let next = stripEditorialMarkers(rewriteWrongBrand(html));
+  if (slug === "massovaya-generaciya-qr-kodov") next = next.replace(/Пакет из CSV есть, лимит строк за загрузку зависит от тарифа \(50 \/ 1000 \/ 5000\)\. Это не тысячи кодов за минуту и не отдельная очередь\./g, FLOW_NOTICES[slug]);
+  if (slug && BLOG_MERGED_CONTENT[slug]) next = BLOG_MERGED_CONTENT[slug];
+  if (slug && BLOG_ADDITIONS[slug] && !next.includes(BLOG_ADDITIONS[slug])) next = BLOG_ADDITIONS[slug] + next;
+  for (const [source, target] of Object.entries(BLOG_REDIRECTS)) next = next.replaceAll(`/blog/${source}`, `/blog/${target}`);
   if (slug && FLOW_NOTICES[slug] && !next.includes("Как это сделано в QR-S.ru.")) {
     next = `${noticeHtml(slug)}${next}`;
   }
@@ -101,14 +108,15 @@ export type BlogSanitizeFields = {
 
 export function sanitizeBlogFields<T extends BlogSanitizeFields>(fields: T): T {
   const slug = fields.slug ?? undefined;
+  const editorial = slug ? BLOG_EDITORIAL[slug] : undefined;
   return {
     ...fields,
-    title: fields.title != null ? sanitizeBlogText(fields.title) : fields.title,
-    excerpt: fields.excerpt != null ? sanitizeBlogText(fields.excerpt) : fields.excerpt,
-    metaTitle: fields.metaTitle != null ? sanitizeBlogText(fields.metaTitle) : fields.metaTitle,
-    metaDescription: fields.metaDescription != null ? sanitizeBlogText(fields.metaDescription) : fields.metaDescription,
+    title: fields.title != null ? editorial?.title ?? sanitizeBlogText(fields.title) : fields.title,
+    excerpt: fields.excerpt != null ? editorial?.description ?? sanitizeBlogText(fields.excerpt) : fields.excerpt,
+    metaTitle: editorial?.title ?? (fields.metaTitle != null ? sanitizeBlogText(fields.metaTitle) : fields.metaTitle),
+    metaDescription: editorial?.description ?? (fields.metaDescription != null ? sanitizeBlogText(fields.metaDescription) : fields.metaDescription),
     content: fields.content != null ? sanitizeBlogHtml(fields.content, slug ?? undefined) : fields.content,
-    structuredData: fields.structuredData != null ? sanitizeBlogText(fields.structuredData) : fields.structuredData,
+    structuredData: slug && (editorial || BLOG_MERGED_CONTENT[slug]) ? null : fields.structuredData != null ? sanitizeBlogText(fields.structuredData) : fields.structuredData,
   };
 }
 

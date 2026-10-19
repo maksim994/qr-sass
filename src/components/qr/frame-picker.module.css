@@ -1,0 +1,9 @@
+.picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%}
+.picker button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;padding:8px 4px;border:1px solid var(--border-default);border-radius:10px;background:var(--surface-card);color:var(--text-default);font:600 11px/1.3 var(--font-sans);cursor:pointer;transition:border-color .15s,background .15s}
+.picker button:hover{border-color:var(--text-link)}
+.picker button[aria-pressed=true]{border-color:var(--text-link);background:var(--color-primary-subtle);color:var(--text-link)}
+.picker button:focus-visible{outline:3px solid var(--border-focus);outline-offset:3px}
+.sample{display:block;width:56px;height:56px;max-width:100%;border-radius:2px;background:#fff}
+.sample>svg,.sample>div,.sample>div>svg{display:block;width:100%;height:100%}
+.check{position:absolute;right:4px;top:4px;display:grid;place-items:center;width:15px;height:15px;border-radius:50%;background:var(--text-link);color:var(--surface-card);font-size:10px}
+@media(prefers-reduced-motion:reduce){.picker button{transition:none}}

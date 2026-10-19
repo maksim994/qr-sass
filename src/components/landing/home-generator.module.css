@@ -1,6 +1,6 @@
-.heading {text-align:center; margin:0 auto 28px; width:100%;}
-.heading h1 {font-size:clamp(32px,3.05vw,44px); line-height:1.2; font-weight:750; letter-spacing:-.035em; text-wrap:balance;}
-.heading p {margin-top:12px; font-size:18px; color:var(--text-muted);}
+.heading {text-align:center; margin:0 auto 20px; width:100%;}
+header.heading h1 {font-size:clamp(28px,2.35vw,36px); line-height:1.2; font-weight:750; letter-spacing:-.035em; text-wrap:balance;}
+.heading p {margin-top:8px; font-size:15px; color:var(--text-muted);}
 .heading button {display:inline-flex; align-items:center; min-height:44px; color:var(--text-link); font:inherit; cursor:pointer; text-underline-offset:4px;}
 .heading button:hover {text-decoration:underline;}
 .generator {display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); grid-template-rows:min-content 1fr; column-gap:48px; row-gap:20px; width:100%; padding:32px 40px; border:1px solid var(--border-default); border-radius:16px; background:var(--surface-card); scroll-margin-top:100px; text-align:left;}
@@ -60,15 +60,15 @@
 .heading button:focus-visible,.generator button:focus-visible,.generator a:focus-visible,.generator summary:focus-visible {outline:3px solid var(--border-focus); outline-offset:3px;}
 @media(max-width:1199px) {
   .generator {padding:28px; column-gap:28px; grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
-  .heading h1 {max-width:900px; margin-inline:auto;}
+  header.heading h1 {max-width:900px; margin-inline:auto;}
   .typeGrid button {flex-direction:column; gap:6px; padding:10px 4px; font-size:14px;}
   .kindChoice label {padding:10px 6px; gap:6px;}
   .preview {width:300px; height:300px;}
 }
 @media(max-width:767px) {
-  .heading {margin-bottom:24px;}
-  .heading h1 {font-size:28px; line-height:1.2;}
-  .heading p {font-size:15px; line-height:1.55; margin-top:12px;}
+  .heading {margin-bottom:16px;}
+  header.heading h1 {font-size:24px; line-height:1.2;}
+  .heading p {font-size:13px; line-height:1.5; margin-top:8px;}
   .generator {display:flex; flex-direction:column; gap:20px; padding:20px; border-radius:12px;}
   .inputPanel {gap:16px;}
   .contentFields>label {font-size:15px;}
@@ -91,8 +91,10 @@
 }
 @media(max-width:374px) {
   .generator {padding:16px;}
-  .heading h1 {font-size:27px;}
+  header.heading h1 {font-size:23px;}
   .typeGrid button {font-size:13px;}
   .kindChoice label {gap:5px; padding-inline:6px;}
   .kindChoice small {font-size:11px;}
 }
+
+.frameOptions{display:grid;gap:10px}.frameLabel{font-size:12px;font-weight:650;color:var(--text-muted)}

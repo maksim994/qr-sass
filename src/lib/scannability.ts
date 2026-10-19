@@ -1,3 +1,4 @@
+import { framePalette } from "@/lib/qr-frame";
 type Gradient = { colors?: [string, string] | string[] } | null | undefined;
 
 export type ScannabilityStyle = {
@@ -113,8 +114,10 @@ export function evaluateScannability(style: ScannabilityStyle) {
 
   let score = 100;
   if (style.frameStyle && style.frameStyle !== "none") {
-    const text = parseHexColor(style.frameTextColor ?? style.frameColor ?? "#111111");
-    if (!text || contrastRatio(text, "ffffff") < 4.5) { score -= 40; warnings.push("Увеличьте контраст подписи на белой рамке."); }
+    const palette = framePalette(style);
+    const text = parseHexColor(palette.text);
+    const captionBackground = parseHexColor(palette.background);
+    if (!text || !captionBackground || contrastRatio(text, captionBackground) < 4.5) { score -= 40; warnings.push("Увеличьте контраст подписи и фона рамки."); }
   }
   const margin = style.margin ?? 2;
   const logoScale = style.logoScale ?? 0;

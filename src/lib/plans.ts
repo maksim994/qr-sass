@@ -44,7 +44,7 @@ function analyticsLimitLabel(limits: PlanLimits): string {
 
 function usersLimitLabel(limits: PlanLimits): string {
   if (limits.maxUsers === 1) return "1 пользователь";
-  if (limits.maxUsers != null) return `До ${limits.maxUsers} участников workspace`;
+  if (limits.maxUsers != null) return `До ${limits.maxUsers} участников команды`;
   return "Участники: уже зарегистрированные пользователи";
 }
 
@@ -56,7 +56,7 @@ export function buildLimitLabels(limits: PlanLimits, planId: PlanId): string[] {
   parts.push(exportLimitLabel(limits.exportFormats));
   parts.push(usersLimitLabel(limits));
   if (planId === "BUSINESS") {
-    parts.push("Workspace API-ключи");
+    parts.push("API-ключи");
   }
   return parts;
 }
@@ -96,12 +96,12 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       "Неограниченные QR-коды",
       "Динамика: смена ссылки и открытия по дням",
       "PNG и SVG; PDF и EPS — растровая картинка",
-      "До 5 участников workspace",
+      "До 5 участников команды",
     ],
   },
   BUSINESS: {
     name: "Бизнес",
-    description: "То же, что Про, плюс API-ключи workspace. Белой метки нет",
+    description: "Возможности Про, совместная работа команды и API-ключи",
     priceRub: COMMERCIAL.business.priceRub,
     limits: {
       maxQrCodes: null,
@@ -115,7 +115,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       "Динамика: смена ссылки и открытия по дням",
       "PNG и SVG; PDF и EPS — растровая картинка",
       "Участники: уже зарегистрированные пользователи",
-      "Workspace API-ключи",
+      "API-ключи",
     ],
   },
 };

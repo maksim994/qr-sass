@@ -1,10 +1,7 @@
 import { landingMetadata } from "@/lib/landing-seo";
-import { scenarioLandings } from "@/lib/scenario-landings";
-import { ScenarioLanding } from "@/components/landing/scenario-landing";
-
-const page = scenarioLandings["qr-menu"];
-export const metadata = landingMetadata(page);
-
-export default function QrMenuPage() {
-  return <ScenarioLanding page={page} />;
-}
+import { getSearchLanding } from "@/lib/search-landings";
+import { SearchLanding } from "@/components/landing/search-landing";
+const page = getSearchLanding("qr-menu")!;
+export const dynamic = "force-dynamic";
+export const metadata = landingMetadata({...page, keywords:[]});
+export default function QrMenuPage(){return <SearchLanding page={page}/>;}

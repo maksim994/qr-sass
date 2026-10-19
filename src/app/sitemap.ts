@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((path) => !isDeniedSitemapPath(path))
     .map((path) => ({
       url: path === "/" ? base : `${base}${path}`,
-      lastModified: new Date("2026-10-18T00:00:00Z"),
+      lastModified: new Date("2026-10-19T00:00:00Z"),
     }));
 
   let blogEntries: MetadataRoute.Sitemap = [];

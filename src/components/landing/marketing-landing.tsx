@@ -44,7 +44,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
         </nav>
         <section className={`${s.container} ${s.hero}`} aria-labelledby="landing-title">
           <div className={s.heroCopy}>
-            <h1 id="landing-title">{detail.headline}</h1>
+            <h1 id="landing-title">{page.heading}</h1>
             <p>{scenario?.lead ?? page.description}</p>
             <div className={s.actions}>
               <Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">→</span></Button>

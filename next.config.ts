@@ -1,3 +1,4 @@
+import { BLOG_REDIRECTS } from "./src/lib/blog-redirects";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -15,6 +16,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      ...Object.entries(BLOG_REDIRECTS).map(([source,target])=>({source:`/blog/${source}`,destination:`/blog/${target}`,statusCode:301 as const})),
       {
         source: "/:path+/",
         destination: "/:path+",
