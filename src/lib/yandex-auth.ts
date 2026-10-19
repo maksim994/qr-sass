@@ -4,11 +4,12 @@ import { recordBusinessEvent } from "@/lib/business-events";
 import { DEFAULT_WORKSPACE_NAME } from "@/lib/workspace-name";
 import { nanoid } from "nanoid";
 import { getDb } from "@/lib/db";
-import { env } from "@/lib/env";
 import { hashPassword } from "@/lib/auth";
 import { MSG } from "@/lib/user-messages";
 import { FUNNEL_EVENTS, recordFunnelEvent } from "@/lib/funnel";
 import { yandexConfirmsLocalEmail } from "@/lib/yandex-email";
+import { getYandexAuthConfig } from "@/lib/yandex-auth-config";
+export { getYandexAuthConfig, isYandexAuthConfigured } from "@/lib/yandex-auth-config";
 
 const YANDEX_TOKEN_URL = "https://oauth.yandex.ru/token";
 const YANDEX_INFO_URL = "https://login.yandex.ru/info?format=json";
@@ -29,30 +30,6 @@ type YandexProfile = {
   display_name?: string;
   emails?: string[];
 };
-
-export function getYandexAuthConfig() {
-  if (
-    !env.YANDEX_CLIENT_ID ||
-    !env.YANDEX_CLIENT_SECRET ||
-    !env.YANDEX_REDIRECT_URI
-  ) {
-    throw new Error(MSG.YANDEX_AUTH_NOT_CONFIGURED);
-  }
-
-  return {
-    clientId: env.YANDEX_CLIENT_ID,
-    clientSecret: env.YANDEX_CLIENT_SECRET,
-    redirectUri: env.YANDEX_REDIRECT_URI,
-  };
-}
-
-export function isYandexAuthConfigured() {
-  return !!(
-    env.YANDEX_CLIENT_ID &&
-    env.YANDEX_CLIENT_SECRET &&
-    env.YANDEX_REDIRECT_URI
-  );
-}
 
 export async function exchangeYandexCode(code: string) {
   const config = getYandexAuthConfig();
