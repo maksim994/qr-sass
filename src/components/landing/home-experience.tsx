@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { STATIC_QR_TYPES } from "@/lib/static-qr";
 import type { QrTypeInfo } from "@/lib/qr-types";
@@ -21,6 +21,8 @@ function Icon({ path, className }: { path: string; className?: string }) {
 const arrow = "M5 12h14m-6-6 6 6-6 6";
 
 export function HomeHero() {
+  const pendingFocus = useRef<AbortController | null>(null);
+  useEffect(() => () => pendingFocus.current?.abort(), []);
   const [selected, setSelected] = useState(2);
   const scene = scenes[selected];
   return <section className={s.hero} aria-labelledby="home-title">
@@ -28,13 +30,34 @@ export function HomeHero() {
       <p className={s.slogan} id="home-title" tabIndex={-1}>Маленький код.<br /><span>Большие<br className={s.heroBreak} /> возможности.</span></p>
       <p className={s.heroDescription}>Соедините то, что рядом, с тем, что онлайн. Сайт, контакты, программа события или история вашего бренда — в одном QR-коде.</p>
       <div className={s.heroActions}><Button href="#create-qr" variant="primary" size="lg" onClick={event => {
-        trackGoal(PRODUCT_GOALS.hero_create_qr_click, { where: "home" });
+        trackGoal(PRODUCT_GOALS.hero_cta_click, { where: "hero" });
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
         window.history.replaceState(null, "", "#create-qr");
         const generator = document.getElementById("create-qr");
-        document.getElementById("generator-title")?.focus({ preventScroll: true });
-        generator?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+        pendingFocus.current?.abort();
+        if (!generator) return;
+        const instant = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const desktop = window.matchMedia("(min-width: 1024px)").matches;
+        const aligned = Math.abs(generator.getBoundingClientRect().top - (parseFloat(getComputedStyle(generator).scrollMarginTop) || 0)) < 1;
+        const focusLink = () => {
+          pendingFocus.current?.abort();
+          if (window.matchMedia("(min-width: 1024px)").matches) generator.querySelector<HTMLInputElement>("input[data-generator-url]")?.focus({ preventScroll: true });
+        };
+        if (desktop && !instant && !aligned) {
+          const controller = new AbortController();
+          pendingFocus.current = controller;
+          let settled: number | undefined;
+          controller.signal.addEventListener("abort", () => window.clearTimeout(settled), { once: true });
+          window.addEventListener("scrollend", focusLink, { once: true, signal: controller.signal });
+          // Fallback for browsers without scrollend: focus only after scrolling settles.
+          window.addEventListener("scroll", () => {
+            window.clearTimeout(settled);
+            settled = window.setTimeout(focusLink, 150);
+          }, { passive: true, signal: controller.signal });
+        }
+        generator.scrollIntoView({ behavior: instant ? "instant" : "smooth" });
+        if (desktop && (instant || aligned)) focusLink();
       }}>Создать QR-код <Icon path={arrow} /></Button></div>
       <div className={s.heroNote}><span aria-hidden="true">✓</span> Есть бесплатный тариф <i /> Без карты для старта</div>
     </div>

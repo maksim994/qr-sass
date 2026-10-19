@@ -2,6 +2,7 @@ import { readCookieChoice } from "@/lib/cookie-consent";
 /** Client-side product funnel goals for Yandex Metrika reachGoal. */
 
 export const PRODUCT_GOALS = {
+  hero_cta_click: "hero_cta_click",
   hero_create_qr_click: "hero_create_qr_click",
   upgrade_prompt_click: "upgrade_prompt_click",
   payment_succeeded: "payment_succeeded",
@@ -59,7 +60,7 @@ export function goalParams(params: Record<string, unknown> = {}) {
   if (typeof plan === "string" && /^(free|pro|business)$/i.test(plan)) out.plan = plan.toLowerCase();
   const sources: Record<string,string> = {home:"home",editor:"cabinet",library:"cabinet",billing:"cabinet",scenario:"landing",landing:"landing",pricing:"pricing"};
   const where = params.where ?? sources[String(params.source)];
-  if (typeof where === "string" && ["home","cabinet","landing","pricing"].includes(where)) out.where = where;
+  if (typeof where === "string" && ["home","hero","cabinet","landing","pricing"].includes(where)) out.where = where;
   if (typeof params.dynamic === "boolean") out.dynamic = params.dynamic;
   else if (params.kind === "DYNAMIC" || params.kind === "STATIC") out.dynamic = params.kind === "DYNAMIC";
   if (typeof params.format === "string" && ["png","svg","jpg","eps","pdf"].includes(params.format.toLowerCase())) {out.format=params.format.toLowerCase();out.frame=params.frame === true;}

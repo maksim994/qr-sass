@@ -14,12 +14,16 @@ test("goals require current consent and a ready counter; payments cannot be forg
   Object.defineProperty(globalThis, "window", { value: fake, configurable: true });
   try {
     assert.equal(trackGoal(PRODUCT_GOALS.trial_started), false);
+    assert.equal(trackGoal(PRODUCT_GOALS.hero_cta_click, { where: "hero" }), false);
     assert.equal(calls.length, 0);
     choice = "accepted";
     assert.equal(trackGoal(PRODUCT_GOALS.trial_started, { planId: "PRO" }), true);
     assert.deepEqual(calls, [["106988416", "reachGoal", "trial_started", { plan: "pro" }]]);
     assert.equal(trackGoal(PRODUCT_GOALS.subscription_paid), false);
     assert.equal(calls.length, 1);
+    assert.equal(trackGoal(PRODUCT_GOALS.hero_cta_click, { where: "hero" }), true);
+    assert.deepEqual(calls[1], ["106988416", "reachGoal", "hero_cta_click", { where: "hero" }]);
+    assert.equal(calls.length, 2);
     fake.ym = () => { throw new Error("blocked"); };
     assert.equal(trackGoal(PRODUCT_GOALS.qr_created), false);
   } finally {
