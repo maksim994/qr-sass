@@ -27,9 +27,10 @@ type Props = {
   planName: string;
   features: string[];
   nextPath: string;
+  yandexEnabled?: boolean;
 };
 
-export function RegisterPageClient({ planName, features, nextPath, dynamicIntent, staticIntent }: Props) {
+export function RegisterPageClient({ planName, features, nextPath, dynamicIntent, staticIntent, yandexEnabled = false }: Props) {
   const router = useRouter();
   const nameId = useId();
   const emailId = useId();
@@ -89,14 +90,14 @@ export function RegisterPageClient({ planName, features, nextPath, dynamicIntent
       planFeatures={dynamicIntent ? ["Код сохранится с вашей ссылкой", "Скачаете и напечатаете", "Ссылку можно менять в кабинете"] : features}
       nextPath={nextPath}
     >
-      <AuthDivider />
+      {yandexEnabled && <><AuthDivider />
 
       <div className="qrs-auth-social">
         <YandexAuthButton mode="register" nextPath={nextPath} />
         <p className="qrs-auth-social-note">
           Данные обрабатываются по <Link href="/privacy-policy">политике конфиденциальности</Link>. Для регистрации через Яндекс подтвердите условия на следующем шаге.
         </p>
-      </div>
+      </div></>}
 
       <form onSubmit={onSubmit} className="qrs-auth-form">
         {error ? (

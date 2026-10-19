@@ -21,9 +21,10 @@ import { destinationAfterAuth } from "@/lib/qr-draft";
 type Props = {
   initialError?: string;
   nextPath?: string;
+  yandexEnabled?: boolean;
 };
 
-export function LoginPageClient({ initialError = "", nextPath = "/dashboard" }: Props) {
+export function LoginPageClient({ initialError = "", nextPath = "/dashboard", yandexEnabled = false }: Props) {
   const router = useRouter();
   const emailId = useId();
   const rememberId = useId();
@@ -137,14 +138,14 @@ export function LoginPageClient({ initialError = "", nextPath = "/dashboard" }: 
         </Button>
       </form>
 
-      <AuthDivider />
+      {yandexEnabled && <><AuthDivider />
 
       <div className="qrs-auth-social">
         <YandexAuthButton mode="login" nextPath={nextPath} />
         <p className="qrs-auth-social-note">
           Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
         </p>
-      </div>
+      </div></>}
 
       <AuthSwitchLink mode="login" nextPath={nextPath} />
     </AuthShell>

@@ -1,5 +1,6 @@
 import { LoginPageClient } from "./login-page-client";
 import { safePostAuthPath } from "@/lib/safe-redirect";
+import { isYandexAuthConfigured } from "@/lib/yandex-auth-config";
 
 type Props = {
   searchParams: Promise<{ error?: string; next?: string }>;
@@ -8,5 +9,5 @@ type Props = {
 export default async function LoginPage({ searchParams }: Props) {
   const { error, next } = await searchParams;
   const nextPath = safePostAuthPath(next, "/dashboard");
-  return <LoginPageClient initialError={error ?? ""} nextPath={nextPath} />;
+  return <LoginPageClient initialError={error ?? ""} nextPath={nextPath} yandexEnabled={isYandexAuthConfigured()} />;
 }
