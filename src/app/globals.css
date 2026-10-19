@@ -4528,3 +4528,13 @@ html.has-cookie-banner .qrs-hero {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+.qrs-article-table-scroll {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.qrs-article-table-scroll:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}

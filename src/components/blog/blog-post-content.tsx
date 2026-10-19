@@ -53,7 +53,7 @@ export function BlogPostContent({ content }: Props) {
 
   const { html, items: tocItems } = useMemo(() => {
     const sanitized = DOMPurify.sanitize(content, SANITIZE);
-    return withHeadingIds(sanitized);
+    return withHeadingIds(sanitized.replace(/<table\b[\s\S]*?<\/table>/gi, table => `<div class="qrs-article-table-scroll" role="region" aria-label="Таблица с горизонтальной прокруткой" tabindex="0">${table}</div>`));
   }, [content]);
 
   const scrollToSection = (id: string) => {
