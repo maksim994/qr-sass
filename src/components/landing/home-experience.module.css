@@ -61,3 +61,6 @@
   .scanLabel{left:12px;bottom:8px}
 }
 @media(max-width:374px){.heroCopy .slogan{font-size:34px}}
+
+.designPlayground{min-width:0;max-width:100%}
+@media(max-width:800px){.orbit{width:100%;height:auto;aspect-ratio:1}}
