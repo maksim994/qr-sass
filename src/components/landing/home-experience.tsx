@@ -71,7 +71,6 @@ export function HomeHero() {
         </div>
         <div className={s.scanLabel}><Icon path="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M7 12h10" /><span>Один скан.<br /><strong>И вы на связи.</strong></span></div>
       </div>
-      <p className={s.sceneCaption}>Выберите сценарий — посмотрите, как оживает QR <span aria-hidden="true">↑</span></p>
     </div>
   </section>;
 }
