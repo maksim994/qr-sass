@@ -170,7 +170,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             {plans.map(plan => <article key={plan.id} className={`${styles.plan} ${plan.id === "PRO" ? styles.featuredPlan : ""}`}>
               <div className={styles.planName}><h3>{plan.name}</h3>{plan.id === "PRO" && <span>Для регулярной работы</span>}</div><p className={styles.planDescription}>{descriptions[plan.id]}</p>
               <p className={styles.price}>{plan.priceRub.toLocaleString("ru-RU")} <span>₽ / месяц</span></p>
-              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/register" : `/register?plan=${plan.id.toLowerCase()}`} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать ${TRIAL_DAYS} дней` : "Выбрать Бизнес"}</Button>
+              <Button href={session ? "/dashboard/billing" : plan.id === "FREE" ? "/register" : `/register?plan=${plan.id.toLowerCase()}`} variant={plan.id === "PRO" ? "primary" : "secondary"} block>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать Про ${TRIAL_DAYS} дней бесплатно` : "Выбрать Бизнес"}</Button>
               <ul>{planFeatures(plan).map(feature => <li key={feature}><Check />{feature}</li>)}</ul>
             </article>)}
           </div>
