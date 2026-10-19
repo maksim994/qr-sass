@@ -4524,3 +4524,7 @@ html.has-cookie-banner .qrs-hero {
 .qrs-frame-controls select, .qrs-frame-controls input:not([type=color]) { width: min(210px,65%); padding: 8px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-card); color: var(--text-strong); }
 .qrs-frame-captions { display:flex; flex-wrap:wrap; gap:8px; }.qrs-frame-captions button { border:1px solid var(--border-default); padding:6px 8px; border-radius:8px; font-size:12px; }
 @media (max-width: 640px) { .qrs-cookie-banner .fk-container { padding-block: 10px; } .qrs-cookie-banner p {font-size:12px;line-height:1.4;} .qrs-cookie-banner .fk-button {min-height:44px;padding:6px 12px;font-size:12px;} .qrs-cookie-banner .fk-container>div {gap:8px;} }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
