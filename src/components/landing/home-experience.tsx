@@ -59,7 +59,7 @@ export function HomeHero() {
         generator.scrollIntoView({ behavior: instant ? "instant" : "smooth" });
         if (desktop && (instant || aligned)) focusLink();
       }}>Создать QR-код <Icon path={arrow} /></Button></div>
-      <div className={s.heroNote}><span aria-hidden="true">✓</span> Есть бесплатный тариф <i /> Без карты для старта</div>
+      <div className={s.heroNote}><span aria-hidden="true">✓</span> Бесплатно и без регистрации · PNG и SVG</div>
     </div>
     <div className={s.heroExperience}>
       <div className={s.sceneTabs} role="group" aria-label="Пример использования QR">{scenes.map((item, index) => <button type="button" key={item.name} aria-pressed={selected === index} onClick={() => setSelected(index)}>{item.name}</button>)}</div>
