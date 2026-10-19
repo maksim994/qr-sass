@@ -9,6 +9,7 @@ import { getSession } from "@/lib/auth";
 import { getYandexAuthConfig } from "@/lib/yandex-auth";
 import { MSG } from "@/lib/user-messages";
 import { safePostAuthPath } from "@/lib/safe-redirect";
+import { publicSiteUrl } from "@/lib/public-url";
 
 const STATE_COOKIE = "yandex_oauth_state";
 const MODE_COOKIE = "yandex_oauth_mode";
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
     if (mode === "link") {
       const session = await getSession();
       if (!session?.sub) {
-        return NextResponse.redirect(new URL("/login", request.url));
+        return NextResponse.redirect(publicSiteUrl("/login"));
       }
     }
 
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(authUrl);
   } catch {
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(MSG.YANDEX_AUTH_NOT_CONFIGURED)}`, request.url));
+    return NextResponse.redirect(publicSiteUrl(`/login?error=${encodeURIComponent(MSG.YANDEX_AUTH_NOT_CONFIGURED)}`));
   }
 }
 

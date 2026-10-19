@@ -13,6 +13,7 @@ import {
 import { MSG } from "@/lib/user-messages";
 import { logger } from "@/lib/logger";
 import { getRequestId } from "@/lib/api-response";
+import { publicSiteUrl } from "@/lib/public-url";
 import { safePostAuthPath } from "@/lib/safe-redirect";
 
 const STATE_COOKIE = "yandex_oauth_state";
@@ -28,15 +29,15 @@ function readNextPath(raw: string | undefined): string {
   }
 }
 
-function loginRedirect(request: Request, message: string, nextPath: string) {
-  const url = new URL("/login", request.url);
+function loginRedirect(message: string, nextPath: string) {
+  const url = new URL(publicSiteUrl("/login"));
   url.searchParams.set("error", message);
   if (nextPath !== "/dashboard") url.searchParams.set("next", nextPath);
   return NextResponse.redirect(url);
 }
 
-function profileRedirect(request: Request, params: Record<string, string>) {
-  const url = new URL("/dashboard/profile", request.url);
+function profileRedirect(params: Record<string, string>) {
+  const url = new URL(publicSiteUrl("/dashboard/profile"));
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
@@ -60,16 +61,16 @@ export async function GET(request: Request) {
   if (error) {
     logger.warn({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex rejected authorization", code: error, status: 302 });
     if (mode === "link") {
-      return profileRedirect(request, { yandex: "error", message: MSG.YANDEX_AUTH_FAILED });
+      return profileRedirect({ yandex: "error", message: MSG.YANDEX_AUTH_FAILED });
     }
-      return loginRedirect(request, MSG.YANDEX_AUTH_FAILED, nextPath);
+      return loginRedirect(MSG.YANDEX_AUTH_FAILED, nextPath);
   }
 
   if (!code || !state || !expectedState || state !== expectedState) {
     if (mode === "link") {
-      return profileRedirect(request, { yandex: "error", message: MSG.YANDEX_AUTH_INVALID_STATE });
+      return profileRedirect({ yandex: "error", message: MSG.YANDEX_AUTH_INVALID_STATE });
     }
-      return loginRedirect(request, MSG.YANDEX_AUTH_INVALID_STATE, nextPath);
+      return loginRedirect(MSG.YANDEX_AUTH_INVALID_STATE, nextPath);
   }
 
   try {
@@ -79,11 +80,11 @@ export async function GET(request: Request) {
     if (mode === "link") {
       const session = await getSession();
       if (!session?.sub) {
-        return loginRedirect(request, MSG.UNAUTHORIZED, nextPath);
+        return loginRedirect(MSG.UNAUTHORIZED, nextPath);
       }
       await linkYandexToUser(session.sub, profile);
       logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex link success", status: 302 });
-      return profileRedirect(request, { yandex: "linked" });
+      return profileRedirect({ yandex: "linked" });
     }
 
     // Only a server-side one-use receipt may authorize creation of a new user.
@@ -98,7 +99,7 @@ export async function GET(request: Request) {
     const token = await createSessionToken({ sub: user.id, email: user.email, sv: user.sessionVersion });
     await setAuthCookie(token);
     logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex auth success", status: 302 });
-    return NextResponse.redirect(new URL(nextPath, request.url));
+    return NextResponse.redirect(publicSiteUrl(nextPath));
   } catch (authError) {
     logger.error({
       area: "api",
@@ -110,7 +111,7 @@ export async function GET(request: Request) {
       details: authError instanceof Error ? { message: authError.message } : authError,
     });
     if (authError instanceof Error && authError.message === MSG.YANDEX_REGISTRATION_REQUIRED) {
-      const registration = new URL("/register/yandex", request.url);
+      const registration = new URL(publicSiteUrl("/register/yandex"));
       registration.searchParams.set("next", nextPath);
       return NextResponse.redirect(registration);
     }
@@ -126,8 +127,8 @@ export async function GET(request: Request) {
       : MSG.YANDEX_AUTH_FAILED;
 
     if (mode === "link") {
-      return profileRedirect(request, { yandex: "error", message });
+      return profileRedirect({ yandex: "error", message });
     }
-    return loginRedirect(request, message, nextPath);
+    return loginRedirect(message, nextPath);
   }
 }
