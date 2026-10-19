@@ -84,6 +84,18 @@ function noticeHtml(slug: string): string {
   return `<p><strong>Как это сделано в QR-S.ru.</strong> ${notice}</p>`;
 }
 
+/** Remove redirect-only trailing slashes from our own links without touching external URLs or query data. */
+function normalizeInternalLinks(html: string): string {
+  return html.replace(/(\bhref\s*=\s*)(["'])(.*?)\2/gi, (full, prefix: string, quote: string, href: string) => {
+    if (!(href.startsWith("/") && !href.startsWith("//")) && !/^https?:\/\/(?:www\.)?qr-s\.ru(?=\/|$)/i.test(href)) return full;
+    const [, path, suffix = ""] = href.match(/^([^?#]*)([?#][\s\S]*)?$/) ?? [];
+    if (!path || path === "/") return full;
+    const trimmed = path.replace(/\/+$/, "");
+    if (/^https?:\/\/[^/]+$/i.test(trimmed)) return full;
+    return `${prefix}${quote}${trimmed}${suffix}${quote}`;
+  });
+}
+
 export function sanitizeBlogHtml(html: string, slug?: string): string {
   let next = stripEditorialMarkers(rewriteWrongBrand(html));
   if (slug === "massovaya-generaciya-qr-kodov") next = next.replace(/Пакет из CSV есть, лимит строк за загрузку зависит от тарифа \(50 \/ 1000 \/ 5000\)\. Это не тысячи кодов за минуту и не отдельная очередь\./g, FLOW_NOTICES[slug]);
@@ -93,7 +105,7 @@ export function sanitizeBlogHtml(html: string, slug?: string): string {
   if (slug && FLOW_NOTICES[slug] && !next.includes("Как это сделано в QR-S.ru.")) {
     next = `${noticeHtml(slug)}${next}`;
   }
-  return next;
+  return normalizeInternalLinks(next);
 }
 
 export type BlogSanitizeFields = {

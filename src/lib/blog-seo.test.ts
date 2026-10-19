@@ -19,3 +19,14 @@ test("editorial redirects have no chains or self redirects",()=>{
   assert.notEqual(source,target);assert.equal(BLOG_REDIRECTS[target],undefined);
  }
 });
+
+test("internal article links avoid slash redirects while external links and query values stay intact",()=>{
+ const input='<a href="/blog/example/">A</a><a href="https://qr-s.ru/qr-menu/?next=/keep/#part">B</a><a href="/">Root</a><a href="https://external.example/path/">External</a><a href="//external.example/path/">Protocol relative</a>';
+ const result=sanitizeBlogHtml(input);
+ assert.match(result,/href="\/blog\/example"/);
+ assert.match(result,/href="https:\/\/qr-s\.ru\/qr-menu\?next=\/keep\/#part"/);
+ assert.match(result,/href="\/"/);
+ assert.match(result,/href="https:\/\/external\.example\/path\/"/);
+ assert.match(result,/href="\/\/external\.example\/path\/"/);
+ assert.equal(sanitizeBlogHtml(result),result);
+});
