@@ -81,7 +81,7 @@ export function TypeExplorer({ types, signedIn }: { types: QrTypeInfo[]; signedI
   const activeGroup = groups.some(item => item.id === group) ? group : groups[0]?.id;
   return <div className={s.typeExplorer}>
     <div className={s.filterTabs} role="group" aria-label="Категории QR-кодов">{groups.map(item => <button key={item.id} type="button" aria-pressed={activeGroup === item.id} onClick={() => setGroup(item.id)}>{item.name}</button>)}</div>
-    <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => <Link key={type.type} href={(STATIC_QR_TYPES as readonly string[]).includes(type.type) ? `/?static=${type.type}#create-qr` : signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`}><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">↗</span></Link>)}</div>
+    <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => <Link key={type.type} href={(STATIC_QR_TYPES as readonly string[]).includes(type.type) ? `/?static=${type.type}#create-qr` : signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`}><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">→</span></Link>)}</div>
     {types.length === 0 && <p>Новые типы QR-кодов скоро появятся.</p>}
   </div>;
 }

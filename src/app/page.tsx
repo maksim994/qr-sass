@@ -48,7 +48,7 @@ const faqs = [
   { question: "Какую статистику можно посмотреть?", answer: "Для динамических QR на тарифе с аналитикой доступны открытия по дням и типу устройства. Боты учитываются отдельно. География и уникальные посетители не определяются." },
 ];
 
-function Arrow() { return <span aria-hidden="true">↗</span>; }
+function Arrow() { return <span aria-hidden="true">→</span>; }
 function Check() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>; }
 
 function planFeatures(plan: PlanInfo) {
@@ -188,7 +188,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className={styles.faqList}>{faqs.map(faq => <details key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div>
         </section>
 
-        {posts.length > 0 && <section className={`${styles.container} ${styles.articles}`}><div className={styles.sectionHeading}><h2>Идеи для ваших QR-кодов</h2><Link href="/blog" className={styles.textLink}>Все статьи <Arrow /></Link></div><div>{posts.map(post => <Link href={`/blog/${post.slug}`} key={post.slug}><h3>{post.title}</h3>{post.excerpt && <p>{post.excerpt}</p>}<span aria-hidden="true">↗</span></Link>)}</div></section>}
+        {posts.length > 0 && <section className={`${styles.container} ${styles.articles}`}><div className={styles.sectionHeading}><h2>Идеи для ваших QR-кодов</h2><Link href="/blog" className={styles.textLink}>Все статьи <Arrow /></Link></div><div>{posts.map(post => <Link href={`/blog/${post.slug}`} key={post.slug}><h3>{post.title}</h3>{post.excerpt && <p>{post.excerpt}</p>}<span aria-hidden="true">→</span></Link>)}</div></section>}
 
 
       </main>
