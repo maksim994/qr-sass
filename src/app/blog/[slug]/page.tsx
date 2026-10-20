@@ -264,7 +264,7 @@ export default async function BlogPostPage({ params }: Props) {
             style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-accent) 16%, transparent))", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {post.coverImageUrl ? (
-              coverAsset ? (
+              coverAsset && coverAsset.variants.length ? (
               // New uploaded assets carry trusted responsive WebP dimensions; old covers retain their renderer.
               // eslint-disable-next-line @next/next/no-img-element
               <img src={coverAsset.url} srcSet={coverAsset.variants.length ? blogImageSrcset(coverAsset.variants as ImageVariant[]) : undefined} sizes="(max-width:1000px) 100vw, 900px" alt={post.coverImageAlt ?? title} width={coverAsset.width} height={coverAsset.height} className="h-full w-full object-cover" fetchPriority="high" />
