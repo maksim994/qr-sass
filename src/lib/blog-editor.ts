@@ -55,7 +55,18 @@ function normalizeSlug(value: string): string {
 
 function canonical(value: unknown): string {
   // Whitespace-only edits must not advertise an editorial update.
-  return (typeof value === "string" ? value : JSON.stringify(value ?? null)).replace(/\s+/g, "");
+  // jsonb does not preserve object key order. Keep array order (FAQ order matters),
+  // but compare objects structurally rather than comparing their serialization.
+  function stable(input: unknown): unknown {
+    if (typeof input === "string") return input.replace(/\s+/g, "");
+    if (Array.isArray(input)) return input.map(stable);
+    if (input && typeof input === "object") {
+      const record = input as Record<string, unknown>;
+      return Object.fromEntries(Object.keys(record).sort().map(key => [key, stable(record[key])]));
+    }
+    return input;
+  }
+  return JSON.stringify(stable(value ?? null));
 }
 export function hasSubstantiveArticleChange(before: Record<string, unknown>, after: Record<string, unknown>): boolean {
   return ["content", "title", "metaTitle", "metaDescription", "excerpt", "faq", "coverImageUrl"].some(key =>

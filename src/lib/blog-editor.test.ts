@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { readBlogFaq } from "@/lib/blog-faq";
 import { prepareArticleSave, blogEditorSchema, type EditableArticle } from "@/lib/blog-editor";
 import { renderArticleBody, renderLegacyBody, sanitizeArticleHtml } from "@/lib/blog-render";
 import { prepareHtmlConversion, normalizeHtmlForDiff } from "@/lib/blog-convert";
@@ -133,4 +134,15 @@ test("field-owned BlogPosting/FAQPage win over manual nested duplicates and JSON
   const encoded = serializeArticleJsonLd({ text: "</script><script>alert(1)</script>" });
   assert.doesNotMatch(encoded, /</);
   assert.deepEqual(JSON.parse(encoded), { text: "</script><script>alert(1)</script>" });
+});
+
+
+test("FAQ object key order from PostgreSQL does not change the editorial date on a full form save", () => {
+  const stored = { ...existing, format: "markdown", content: "## Текст", contentUpdatedAt: then,
+    faq: [{ answer: "Ответ", question: "Вопрос?" }, { answer: "Другой ответ", question: "Другой вопрос?" }] };
+  const normalizedFaq = readBlogFaq(stored.faq);
+  const saved = prepareArticleSave({ title: stored.title, content: stored.content, faq: normalizedFaq, minorEdit: false }, stored, now);
+  assert.deepEqual(saved.contentUpdatedAt, then);
+  assert.deepEqual(prepareArticleSave({ faq: [...normalizedFaq].reverse() }, stored, now).contentUpdatedAt, now);
+  assert.deepEqual(prepareArticleSave({ faq: [{ ...normalizedFaq[0], answer: "Изменённый ответ" }, normalizedFaq[1]] }, stored, now).contentUpdatedAt, now);
 });
