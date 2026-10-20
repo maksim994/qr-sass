@@ -1,37 +1,16 @@
 import { createHash, randomBytes } from "node:crypto";
-import type { BlogPost, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { BlogEditorError, prepareArticleSave, type BlogEditorInput } from "@/lib/blog-editor";
 import { renderArticleBody } from "@/lib/blog-render";
 import { readBlogFaq } from "@/lib/blog-faq";
 import { MSG } from "@/lib/user-messages";
 
-export type BlogActor = { actorId: string | null; actorName: string; source: "admin" | "api" | "system" };
-export const articleFields = ["title", "slug", "metaTitle", "metaDescription", "excerpt", "content", "format", "renderedHtml", "legacyHtml", "faq", "showPrintSizeIntro", "coverImageUrl", "authorName", "structuredData", "readingTimeMinutes", "categoryId", "status", "scheduledAt", "publishedAt", "firstPublishedAt", "contentUpdatedAt"] as const;
-export function articleStatus(post: { status?: string | null; publishedAt: Date | string | null }) {
-  return post.status ?? (post.publishedAt ? "published" : "draft");
-}
-export function articleSnapshot(post: BlogPost): Prisma.InputJsonObject {
-  return JSON.parse(JSON.stringify(Object.fromEntries(articleFields.map(key => [key, key === "status" ? articleStatus(post) : post[key]]))));
-}
-export function changedArticleFields(before: Prisma.InputJsonObject, after: Prisma.InputJsonObject) {
-  return articleFields.filter(key => JSON.stringify(before[key]) !== JSON.stringify(after[key]));
-}
-async function recordSave(tx: Prisma.TransactionClient, before: BlogPost | null, post: BlogPost, actor: BlogActor, comment?: string, restoreId?: string) {
-  const latest = await tx.blogRevision.findFirst({ where: { postId: post.id }, orderBy: { number: "desc" }, select: { number: true } });
-  let number = latest?.number ?? 0;
-  if (!latest && before) {
-    await tx.blogRevision.create({ data: { postId: post.id, number: 0, snapshot: articleSnapshot(before), actorId: null, actorName: "До включения истории", source: "system", comment: "Исходное состояние перед первым изменением" } });
-  }
-  const revision = await tx.blogRevision.create({ data: { postId: post.id, number: ++number, snapshot: articleSnapshot(post), ...actor, comment } });
-  const fields = before ? changedArticleFields(articleSnapshot(before), articleSnapshot(post)) : [...articleFields];
-  const types = [restoreId ? "restore" : before ? "update" : "create"];
-  if (articleStatus(post) === "published" && (!before || articleStatus(before) !== "published")) types.push("publish");
-  if (before && articleStatus(before) === "published" && articleStatus(post) !== "published") types.push("unpublish");
-  if (articleStatus(post) === "scheduled" && (!before || before.scheduledAt?.getTime() !== post.scheduledAt?.getTime())) types.push("schedule");
-  await tx.blogEvent.createMany({ data: types.map(type => ({ postId: post.id, postTitle: post.title, ...actor, type, fields, comment: restoreId ? `Восстановлена версия ${restoreId}${comment ? ` · ${comment}` : ""}` : comment, revisionId: revision.id })) });
-  return post;
-}
+// Keep the scheduler and snapshot writer independent of renderer dependencies in the worker image.
+import { articleFields, articleSnapshot, recordSave, type BlogActor } from "@/lib/blog-versions";
+export { articleStatus } from "@/lib/blog-versions";
+export type { BlogActor } from "@/lib/blog-versions";
+
 export async function saveArticle(input: BlogEditorInput, actor: BlogActor, id?: string) {
   return getDb().$transaction(async tx => {
     const before = id ? await tx.blogPost.findUnique({ where: { id } }) : null;
@@ -67,26 +46,6 @@ export async function restoreArticle(id: string, revisionId: string, expectedUpd
     const post = await tx.blogPost.update({ where: { id, updatedAt: before.updatedAt }, data });
     return recordSave(tx, before, post, actor, undefined, `№${revision.number}`);
   });
-}
-export async function publishDueArticles(now = new Date()) {
-  const db = getDb();
-  const due = await db.blogPost.findMany({ where: { status: "scheduled", scheduledAt: { lte: now } }, select: { id: true }, take: 100, orderBy: { scheduledAt: "asc" } });
-  const published: string[] = [];
-  for (const { id } of due) {
-    try {
-      const post = await db.$transaction(async tx => {
-        const before = await tx.blogPost.findUnique({ where: { id } });
-        if (!before || before.status !== "scheduled" || !before.scheduledAt || before.scheduledAt > now) return null;
-        const firstPublishedAt = before.firstPublishedAt ?? before.scheduledAt;
-        const post = await tx.blogPost.update({ where: { id, status: "scheduled", updatedAt: before.updatedAt }, data: { updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)), status: "published", scheduledAt: null, publishedAt: firstPublishedAt, firstPublishedAt, contentUpdatedAt: before.contentUpdatedAt ?? before.updatedAt } });
-        return recordSave(tx, before, post, { actorId: null, actorName: "Планировщик публикаций", source: "system" }, "Автоматическая публикация по расписанию");
-      });
-      if (post) published.push(post.slug);
-    } catch (error) {
-      if (!(error && typeof error === "object" && "code" in error && error.code === "P2025")) throw error;
-    }
-  }
-  return published;
 }
 export function hashPreviewToken(token: string) { return createHash("sha256").update(token).digest("hex"); }
 export async function changePreviewToken(id: string, actor: BlogActor, revoke = false) {

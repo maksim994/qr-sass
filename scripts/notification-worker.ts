@@ -3,7 +3,7 @@ import {
   deliverNextNotification,
   scheduleDailyDigest,
 } from "../src/lib/telegram-notifications.ts";
-import { publishDueArticles } from "../src/lib/blog-workflow.ts";
+import { publishDueArticles } from "../src/lib/blog-scheduler.ts";
 import { notifyArticleIndexNow } from "../src/lib/blog-indexnow.ts";
 let stopping = false;
 process.on("SIGTERM", () => {
