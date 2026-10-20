@@ -8,6 +8,7 @@ import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import editorStyles from "@/components/admin/markdown-editor.module.css";
 import { extractLegacyFaq, type BlogFaq } from "@/lib/blog-faq";
 import type { ArticleBody } from "@/lib/blog-render";
+import { moscowInputToIso } from "@/lib/blog-publication";
 import { MSG } from "@/lib/user-messages";
 import { CoverImageUpload } from "@/components/admin/cover-image-upload";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
@@ -40,7 +41,9 @@ type BlogPostData = {
   authorName: string;
   readingTimeMinutes: string;
   structuredData: string;
-  published: boolean;
+  published?: boolean;
+  status?: "draft" | "scheduled" | "published";
+  scheduledAt?: string;
   categoryId: string;
 };
 
@@ -57,6 +60,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [comment, setComment] = useState("");
   const [minorEdit, setMinorEdit] = useState(false);
   const [confirmConversion, setConfirmConversion] = useState(false);
   const [imageAlt, setImageAlt] = useState("");
@@ -78,7 +82,8 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
     authorName: post?.authorName ?? "",
     readingTimeMinutes: post?.readingTimeMinutes ?? "",
     structuredData: post?.structuredData ?? "",
-    published: post?.published ?? false,
+    status: post?.status ?? (post?.published ? "published" : "draft"),
+    scheduledAt: post?.scheduledAt ?? "",
     categoryId: post?.categoryId ?? "",
   });
 
@@ -129,6 +134,10 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         readingTimeMinutes = Math.round(rt);
       }
 
+      const submitter = (e.nativeEvent as SubmitEvent).submitter;
+      const status = submitter?.getAttribute("value") === "published" ? "published" : state.status;
+      const scheduledAt = status === "scheduled" ? moscowInputToIso(state.scheduledAt ?? "") : null;
+      if (status === "scheduled" && !scheduledAt) throw new Error(MSG.BLOG_SCHEDULE_INVALID);
       const body: Record<string, unknown> = {
         title: state.title.trim(),
         slug: slugify(state.slug) || slugify(state.title),
@@ -146,7 +155,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         authorName: state.authorName.trim() || null,
         structuredData,
         categoryId: state.categoryId.trim() || null,
-        published: state.published,
+        status, scheduledAt, comment,
       };
       if (readingTimeMinutes !== undefined)
         body.readingTimeMinutes = readingTimeMinutes;
@@ -160,7 +169,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         });
         const json = await res.json();
         if (!json.ok) throw new Error(json.error ?? MSG.BLOG_SAVE_FAILED);
-        router.push("/admin/blog");
+        router.push(`/admin/blog/${json.data.id}/edit`);
         router.refresh();
       } else if (post?.id) {
         const res = await fetchApi(`/api/admin/blog/${post.id}`, {
@@ -416,33 +425,21 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         />
       </Field>
 
-      <label className="fk-choice fk-choice--checkbox">
-        <input
-          type="checkbox"
-          id="published"
-          className="fk-choice__input"
-          checked={state.published}
-          onChange={(e) =>
-            setState((s) => ({ ...s, published: e.target.checked }))
-          }
-        />
-        <span className="fk-choice__box" aria-hidden="true">
-          <svg
-            className="fk-icon"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        </span>
-        <span className="fk-choice__text">Опубликовать</span>
-      </label>
+      <div className={styles.formColumns}>
+        <Field label="Статус после сохранения" htmlFor="blog-status">
+          <Select id="blog-status" value={state.status} onChange={e => setState(s => ({ ...s, status: e.target.value as "draft" | "scheduled" | "published" }))}>
+            <option value="draft">Черновик</option>
+            <option value="scheduled">Запланировать публикацию</option>
+            <option value="published">Опубликована</option>
+          </Select>
+        </Field>
+        {state.status === "scheduled" && <Field label="Дата и время · МСК (UTC+3)" htmlFor="blog-scheduled" hint="Статья появится автоматически после сохранения.">
+          <Input id="blog-scheduled" type="datetime-local" required value={state.scheduledAt} onChange={e => setState(s => ({ ...s, scheduledAt: e.target.value }))} />
+        </Field>}
+      </div>
+      <Field label="Комментарий к версии" htmlFor="blog-version-comment" hint="Необязательно. Например: уточнены размеры для печати.">
+        <Input id="blog-version-comment" value={comment} maxLength={2000} onChange={e => setComment(e.target.value)} />
+      </Field>
 
       {mode === "edit" && <label className="fk-choice fk-choice--checkbox">
         <input type="checkbox" className="fk-choice__input" checked={minorEdit} onChange={event => setMinorEdit(event.target.checked)} />
@@ -454,6 +451,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         <Button type="submit" disabled={saving}>
           {saving ? "Сохранение…" : mode === "create" ? "Создать" : "Сохранить"}
         </Button>
+        {state.status !== "published" && <Button type="submit" name="publicationAction" value="published" variant="secondary" disabled={saving} formNoValidate>Опубликовать сейчас</Button>}
         <Button type="button" variant="secondary" onClick={() => router.back()}>
           Отмена
         </Button>

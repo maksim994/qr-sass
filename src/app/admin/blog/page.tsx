@@ -15,6 +15,8 @@ export default async function AdminBlogPage() {
       views: true,
       readingTimeMinutes: true,
       publishedAt: true,
+      status: true,
+      scheduledAt: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -31,6 +33,7 @@ export default async function AdminBlogPage() {
           </Button>
         }
       />
+      <p><Button href="/admin/blog/history" variant="secondary" size="sm">Журнал изменений статей →</Button></p>
       <AdminDataCard>
         <BlogList posts={posts} />
       </AdminDataCard>

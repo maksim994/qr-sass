@@ -18,9 +18,17 @@ function csrfBlockedResponse() {
 }
 
 export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-qrs-private-preview", request.nextUrl.pathname.startsWith("/preview/") ? "1" : "0");
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
   if (pathNeedsNoindexHeader(request.nextUrl.pathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
+  if (request.nextUrl.pathname.startsWith("/preview/")) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    response.headers.set("Referrer-Policy", "no-referrer");
   }
 
   // CSRF Protection for API routes

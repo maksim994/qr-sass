@@ -2,7 +2,8 @@ import { getDb } from "@/lib/db";
 import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
-import { BlogEditorError, blogEditorSchema, prepareArticleSave } from "@/lib/blog-editor";
+import { BlogEditorError, blogEditorSchema } from "@/lib/blog-editor";
+import { saveArticle } from "@/lib/blog-workflow";
 import { notifyArticleIndexNow } from "@/lib/blog-indexnow";
 
 export async function GET(req: Request) {
@@ -10,7 +11,7 @@ export async function GET(req: Request) {
   if (!await getAdminOrNull()) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
   const posts = await getDb().blogPost.findMany({
     orderBy: { createdAt: "desc" },
-    select: { id: true, slug: true, title: true, format: true, excerpt: true, authorName: true, readingTimeMinutes: true, publishedAt: true, createdAt: true, updatedAt: true, contentUpdatedAt: true },
+    select: { id: true, slug: true, title: true, format: true, excerpt: true, authorName: true, readingTimeMinutes: true, status: true, scheduledAt: true, publishedAt: true, createdAt: true, updatedAt: true, contentUpdatedAt: true },
   });
   return apiSuccess(posts);
 }
@@ -22,10 +23,7 @@ export async function POST(req: Request) {
   const parsed = blogEditorSchema.safeParse(await readJsonBody<unknown>(req));
   if (!parsed.success) return apiError(MSG.BLOG_INPUT_INVALID, "VALIDATION_ERROR", 400, undefined, requestId);
   try {
-    const data = prepareArticleSave(parsed.data, null);
-    const db = getDb();
-    if (await db.blogPost.findUnique({ where: { slug: data.slug }, select: { id: true } })) return apiError(MSG.POST_SLUG_EXISTS, "CONFLICT", 409, undefined, requestId);
-    const post = await db.blogPost.create({ data: { ...data, createdById: admin.id } });
+    const post = await saveArticle(parsed.data, { actorId: admin.id, actorName: admin.email, source: "admin" });
     if (post.publishedAt) await notifyArticleIndexNow(post.slug);
     return apiSuccess(post);
   } catch (error) {

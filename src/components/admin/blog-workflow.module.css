@@ -1,0 +1,5 @@
+.compareForm { display: flex; gap: var(--space-4, 16px); align-items: end; flex-wrap: wrap; margin-block: var(--space-5, 20px); }
+.compareForm label { display: grid; gap: var(--space-2, 8px); flex: 1 1 220px; min-width: 0; }
+.diff { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 32rem; overflow: auto; padding: var(--space-4, 16px); background: var(--surface-subtle); font-size: 13px; line-height: 1.7; }
+.added { color: var(--color-success); background: var(--color-success-subtle); text-decoration: none; }
+.removed { color: var(--color-danger); background: var(--color-danger-subtle); }

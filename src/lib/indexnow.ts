@@ -43,6 +43,7 @@ export async function notifyIndexNow(urls: string[], key: string): Promise<void>
     try {
       const res = await fetch(endpoint, {
         method: "POST",
+        signal: AbortSignal.timeout(5000),
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify(body),
       });

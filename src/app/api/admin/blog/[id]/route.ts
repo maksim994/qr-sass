@@ -2,7 +2,8 @@ import { getDb } from "@/lib/db";
 import { MSG } from "@/lib/user-messages";
 import { getAdminOrNull } from "@/lib/admin-auth";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
-import { BlogEditorError, blogEditorSchema, prepareArticleSave } from "@/lib/blog-editor";
+import { BlogEditorError, blogEditorSchema } from "@/lib/blog-editor";
+import { saveArticle, deleteArticle } from "@/lib/blog-workflow";
 import { notifyArticleIndexNow } from "@/lib/blog-indexnow";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -10,15 +11,15 @@ type RouteParams = { params: Promise<{ id: string }> };
 export async function PATCH(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = getRequestId(req);
-  if (!await getAdminOrNull()) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
+  const admin = await getAdminOrNull();
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
   const parsed = blogEditorSchema.safeParse(await readJsonBody<unknown>(req));
   if (!parsed.success) return apiError(MSG.BLOG_INPUT_INVALID, "VALIDATION_ERROR", 400, undefined, requestId);
   const db = getDb();
   const existing = await db.blogPost.findUnique({ where: { id } });
   if (!existing) return apiError(MSG.POST_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
   try {
-    const data = prepareArticleSave(parsed.data, existing);
-    const post = await db.blogPost.update({ where: { id, updatedAt: existing.updatedAt }, data });
+    const post = await saveArticle(parsed.data, { actorId: admin.id, actorName: admin.email, source: "admin" }, id);
     if (post.publishedAt && (!existing.publishedAt || post.contentUpdatedAt?.getTime() !== (existing.contentUpdatedAt ?? existing.updatedAt).getTime())) await notifyArticleIndexNow(post.slug);
     return apiSuccess(post);
   } catch (error) {
@@ -34,10 +35,13 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 export async function DELETE(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const requestId = getRequestId(req);
-  if (!await getAdminOrNull()) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
-  const db = getDb();
-  const existing = await db.blogPost.findUnique({ where: { id }, select: { id: true } });
-  if (!existing) return apiError(MSG.POST_NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
-  await db.blogPost.delete({ where: { id } });
-  return apiSuccess({ deleted: true });
+  const admin = await getAdminOrNull();
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
+  try {
+    await deleteArticle(id, { actorId: admin.id, actorName: admin.email, source: "admin" });
+    return apiSuccess({ deleted: true });
+  } catch (error) {
+    if (error instanceof BlogEditorError) return apiError(error.message, "NOT_FOUND", error.status);
+    return apiError(MSG.BLOG_SAVE_FAILED, "INTERNAL_ERROR", 500);
+  }
 }

@@ -3,6 +3,8 @@ import {
   deliverNextNotification,
   scheduleDailyDigest,
 } from "../src/lib/telegram-notifications.ts";
+import { publishDueArticles } from "../src/lib/blog-workflow.ts";
+import { notifyArticleIndexNow } from "../src/lib/blog-indexnow.ts";
 let stopping = false;
 process.on("SIGTERM", () => {
   stopping = true;
@@ -11,6 +13,11 @@ process.on("SIGINT", () => {
   stopping = true;
 });
 while (!stopping) {
+  try {
+    for (const slug of await publishDueArticles()) await notifyArticleIndexNow(slug);
+  } catch {
+    console.error("Blog scheduling iteration failed; retrying. No article data logged.");
+  }
   try {
     await getDb().notificationWorkerState.upsert({
       where: { id: "default" },

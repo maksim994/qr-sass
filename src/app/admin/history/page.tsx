@@ -40,6 +40,7 @@ export default async function HistoryPage({
         title="История изменений"
         description="Изменения прав администраторов и доступа кабинетов с момента включения журнала."
       />
+      <p><Link href="/admin/blog/history">Журнал изменений статей →</Link></p>
       <AdminFilters
         params={params}
         placeholder="Email администратора, ID объекта или причина"

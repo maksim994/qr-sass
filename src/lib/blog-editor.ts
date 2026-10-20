@@ -20,6 +20,9 @@ export const blogEditorSchema = z.object({
   categoryId: z.string().max(200).nullable(),
   publishedAt: z.iso.datetime({ offset: true }).nullable(),
   published: z.boolean(),
+  status: z.enum(["draft", "scheduled", "published"]),
+  scheduledAt: z.iso.datetime({ offset: true }).nullable(),
+  comment: z.string().trim().max(2000),
   faq: blogFaqSchema,
   showPrintSizeIntro: z.boolean(),
   minorEdit: z.boolean(),
@@ -34,6 +37,7 @@ export type EditableArticle = {
   coverImageUrl: string | null; authorName: string | null; structuredData: string | null;
   readingTimeMinutes: number | null; categoryId: string | null;
   publishedAt: Date | null; firstPublishedAt: Date | null;
+  status?: "draft" | "scheduled" | "published" | null; scheduledAt?: Date | null;
   updatedAt: Date; contentUpdatedAt: Date | null;
   legacyHtml: string | null; faq: unknown; showPrintSizeIntro: boolean;
 };
@@ -88,7 +92,10 @@ export function prepareArticleSave(input: BlogEditorInput, existing: EditableArt
   // HTML rows keep their original source, including whitespace and attribute order.
   const body = renderArticleBody(fields.content, format as "html" | "markdown", fields.faq);
   const wantsPublication = input.published ?? (input.publishedAt !== undefined ? !!input.publishedAt : !!existing?.publishedAt);
-  const firstPublishedAt = existing?.firstPublishedAt ?? existing?.publishedAt ?? (wantsPublication ? now : null);
+  const status = input.status ?? (input.published !== undefined || input.publishedAt !== undefined ? (wantsPublication ? "published" : "draft") : existing?.status ?? (wantsPublication ? "published" : "draft"));
+  const scheduledAt = status === "scheduled" ? (input.scheduledAt ? new Date(input.scheduledAt) : existing?.scheduledAt ?? null) : null;
+  if (status === "scheduled" && (!scheduledAt || scheduledAt <= now)) throw new BlogEditorError(MSG.BLOG_SCHEDULE_INVALID);
+  const firstPublishedAt = existing?.firstPublishedAt ?? existing?.publishedAt ?? (status === "published" ? now : null);
   const meaningful = !existing || hasSubstantiveArticleChange(existing, fields);
   return {
     ...fields,
@@ -97,7 +104,8 @@ export function prepareArticleSave(input: BlogEditorInput, existing: EditableArt
     legacyHtml: existing?.legacyHtml ?? (existing?.format === "html" && format === "markdown" ? existing.content : null),
     readingTimeMinutes: input.readingTimeMinutes ?? ((input.content === undefined && existing) ? existing.readingTimeMinutes : calculateReadingTimeMinutes(body.html)),
     firstPublishedAt,
-    publishedAt: wantsPublication ? firstPublishedAt : null,
+    status, scheduledAt,
+    publishedAt: status === "published" ? firstPublishedAt : null,
     contentUpdatedAt: meaningful && !input.minorEdit ? now : existing?.contentUpdatedAt ?? existing?.updatedAt ?? now,
   };
 }

@@ -1,3 +1,6 @@
+import { PreviewLinkControl } from "@/components/admin/blog-workflow-actions";
+import { articleStatus } from "@/lib/blog-workflow";
+import { formatMoscowInput } from "@/lib/blog-publication";
 import { readBlogFaq } from "@/lib/blog-faq";
 import { renderArticleBody } from "@/lib/blog-render";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
@@ -26,8 +29,8 @@ export default async function EditBlogPostPage({ params }: Props) {
         title="Редактирование"
         description={post.title}
         action={
-          <Button href={`/blog/${post.slug}`} variant="secondary" size="sm" target="_blank" rel="noopener noreferrer">
-            Посмотреть на сайте →
+          <Button href={`/admin/blog/${post.id}/versions`} variant="secondary" size="sm" target="_blank" rel="noopener noreferrer">
+            История версий →
           </Button>
         }
       />
@@ -54,10 +57,15 @@ export default async function EditBlogPostPage({ params }: Props) {
             authorName: post.authorName ?? "",
             readingTimeMinutes: post.readingTimeMinutes != null ? String(post.readingTimeMinutes) : "",
             structuredData: formatStructuredDataForEdit(post.structuredData),
-            published: !!post.publishedAt,
+            status: articleStatus(post) as "draft" | "scheduled" | "published",
+            scheduledAt: formatMoscowInput(post.scheduledAt),
             categoryId: post.categoryId ?? "",
           }}
         />
+      </AdminCard>
+      <AdminCard>
+        <PreviewLinkControl id={post.id} active={!!await db.blogPreviewToken.findFirst({ where: { postId: post.id, revokedAt: null }, select: { hash: true } })} />
+        {post.publishedAt && <p><a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">Посмотреть на сайте →</a></p>}
       </AdminCard>
     </div>
   );

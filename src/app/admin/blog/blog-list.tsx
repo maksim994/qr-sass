@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { fetchApi } from "@/lib/client-api";
+import { blogStatusLabels } from "@/lib/blog-workflow-labels";
 import { Alert, Badge } from "@/components/ui";
 
 type Post = {
@@ -12,6 +13,8 @@ type Post = {
   views: number;
   readingTimeMinutes: number | null;
   publishedAt: Date | null;
+  status: string | null;
+  scheduledAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -56,12 +59,12 @@ export function BlogList({ posts }: Props) {
               </td>
               <td>
                 <Badge variant={post.publishedAt ? "success" : "info"}>
-                  {post.publishedAt ? "Опубликован" : "Черновик"}
+                  {blogStatusLabels[post.status ?? (post.publishedAt ? "published" : "draft")]}
                 </Badge>
               </td>
               <td style={{ color: "var(--text-muted)", fontWeight: "var(--fw-medium)" }}>
-                {post.publishedAt
-                  ? new Date(post.publishedAt).toLocaleDateString("ru")
+                {post.scheduledAt ? new Date(post.scheduledAt).toLocaleString("ru", {timeZone:"Europe/Moscow"}) + " МСК" : post.publishedAt
+                  ? new Date(post.publishedAt).toLocaleDateString("ru", {timeZone:"Europe/Moscow"})
                   : new Date(post.createdAt).toLocaleDateString("ru")}
               </td>
               <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>

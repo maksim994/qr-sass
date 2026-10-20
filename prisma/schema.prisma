@@ -117,6 +117,9 @@ model BlogPost {
   views             Int            @default(0)
   likes             Int            @default(0)
   readingTimeMinutes Int?          // вручную или авто: словоcount / 200
+  status            BlogStatus? // null: legacy publication inferred from publishedAt
+  scheduledAt       DateTime?
+  previewTokens     BlogPreviewToken[]
   publishedAt       DateTime?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -125,6 +128,7 @@ model BlogPost {
   createdBy         User?          @relation("CreatedBlogPosts", fields: [createdById], references: [id], onDelete: SetNull)
   category          BlogCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
+  @@index([status, scheduledAt])
   @@index([publishedAt])
   @@index([slug])
   @@index([categoryId])
@@ -544,4 +548,52 @@ model PartnerVisit {
   isTest Boolean @default(false)
   consentVersion String
   @@index([partnerId, isTest])
+}
+
+
+enum BlogStatus {
+  draft
+  scheduled
+  published
+}
+
+// Snapshots deliberately survive article/user deletion; actor and title are historical facts.
+model BlogRevision {
+  id String @id @default(cuid())
+  postId String
+  number Int
+  snapshot Json
+  actorId String?
+  actorName String
+  source String
+  comment String?
+  createdAt DateTime @default(now())
+  @@unique([postId, number])
+  @@index([postId, createdAt])
+}
+
+model BlogEvent {
+  id String @id @default(cuid())
+  postId String
+  postTitle String
+  actorId String?
+  actorName String
+  source String
+  type String
+  fields String[]
+  comment String?
+  revisionId String?
+  createdAt DateTime @default(now())
+  @@index([postId, createdAt])
+  @@index([actorName, createdAt])
+  @@index([type, createdAt])
+}
+
+model BlogPreviewToken {
+  hash String @id
+  postId String
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+  @@index([postId, revokedAt])
 }

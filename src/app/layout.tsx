@@ -2,6 +2,7 @@ import { PublicOfferProvider } from "@/components/public-offer-provider";
 import { getPlan } from "@/lib/plans";
 import { ReferralCapture } from "@/components/referral-capture";
 import { RegistrationGoal } from "@/components/registration-goal";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import React from "react";
 import { Manrope } from "next/font/google";
@@ -49,6 +50,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const privatePreview = (await headers()).get("x-qrs-private-preview") === "1";
   const [settings, pro, business] = await Promise.all([getSiteSettings(),getPlan("PRO"),getPlan("BUSINESS")]);
 
   const headContent = [
@@ -58,7 +60,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href={settings.faviconUrl} />
       </React.Fragment>
     ),
-    settings.customHeadCode && (
+    !privatePreview && settings.customHeadCode && (
       <React.Fragment key="custom">
         {parse(
           settings.customHeadCode.replace(/>\s+</g, "><").trim()
@@ -76,9 +78,11 @@ export default async function RootLayout({
       <body className="antialiased">
         <ThemeProvider><PublicOfferProvider value={{proPrice:pro.priceRub,businessPrice:business.priceRub}}>
           {children}
-          <React.Suspense fallback={null}><ReferralCapture /></React.Suspense>
-          <RegistrationGoal />
-          <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
+          {!privatePreview && <>
+            <React.Suspense fallback={null}><ReferralCapture /></React.Suspense>
+            <RegistrationGoal />
+            <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
+          </>}
         </PublicOfferProvider></ThemeProvider>
       </body>
     </html>
