@@ -8,6 +8,8 @@ const CSRF_SKIP_PREFIXES = [
   "/api/auth/logout",
   "/api/qr/verify-password",
   "/api/gdpr/consent",
+  // Articles v1 accepts only explicit Bearer credentials, never session cookies.
+  "/api/v1/articles",
 ];
 
 function csrfBlockedResponse() {
@@ -19,13 +21,15 @@ function csrfBlockedResponse() {
 
 export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-qrs-private-preview", request.nextUrl.pathname.startsWith("/preview/") ? "1" : "0");
+  const privateSurface = request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";
+  // Trusted flag suppresses custom head and analytics on previews and one-time secret forms.
+  requestHeaders.set("x-qrs-private-preview", privateSurface ? "1" : "0");
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   if (pathNeedsNoindexHeader(request.nextUrl.pathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
 
-  if (request.nextUrl.pathname.startsWith("/preview/")) {
+  if (privateSurface) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
     response.headers.set("Cache-Control", "private, no-store, max-age=0");
     response.headers.set("Referrer-Policy", "no-referrer");

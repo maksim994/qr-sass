@@ -54,6 +54,7 @@ export default async function EditBlogPostPage({ params }: Props) {
             expectedUpdatedAt: post.updatedAt.toISOString(),
             wasPublished: !!(post.firstPublishedAt ?? post.publishedAt),
             coverImageUrl: post.coverImageUrl ?? "",
+            coverImageAlt: post.coverImageAlt ?? "",
             authorName: post.authorName ?? "",
             readingTimeMinutes: post.readingTimeMinutes != null ? String(post.readingTimeMinutes) : "",
             structuredData: formatStructuredDataForEdit(post.structuredData),

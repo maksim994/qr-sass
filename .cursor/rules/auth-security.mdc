@@ -21,6 +21,7 @@ alwaysApply: false
 - `/api/auth/logout`
 - `/api/qr/verify-password`
 - `/api/gdpr/consent`
+- `/api/v1/articles` — отдельная авторизация только Bearer, cookies не принимаются
 
 Новый skip = добавить в список **и** комментарий why в middleware.
 

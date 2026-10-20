@@ -38,6 +38,7 @@ type BlogPostData = {
   expectedUpdatedAt?: string;
   wasPublished?: boolean;
   coverImageUrl: string;
+  coverImageAlt?: string;
   authorName: string;
   readingTimeMinutes: string;
   structuredData: string;
@@ -79,6 +80,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
     expectedUpdatedAt: post?.expectedUpdatedAt,
     wasPublished: post?.wasPublished,
     coverImageUrl: post?.coverImageUrl ?? "",
+    coverImageAlt: post?.coverImageAlt ?? "",
     authorName: post?.authorName ?? "",
     readingTimeMinutes: post?.readingTimeMinutes ?? "",
     structuredData: post?.structuredData ?? "",
@@ -152,6 +154,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         confirmConversion,
         ...(state.expectedUpdatedAt ? { expectedUpdatedAt: state.expectedUpdatedAt } : {}),
         coverImageUrl: state.coverImageUrl.trim() || null,
+        coverImageAlt: state.coverImageAlt?.trim() || null,
         authorName: state.authorName.trim() || null,
         structuredData,
         categoryId: state.categoryId.trim() || null,
@@ -406,6 +409,10 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
             Убрать обложку
           </button>
         ) : null}
+      </Field>
+
+      <Field label="Alt обложки" htmlFor="blog-cover-alt" hint="Описание изображения для экранного диктора. По умолчанию — заголовок статьи.">
+        <Input id="blog-cover-alt" value={state.coverImageAlt ?? ""} maxLength={1000} onChange={e => setState(s => ({ ...s, coverImageAlt: e.target.value }))} />
       </Field>
 
       <Field

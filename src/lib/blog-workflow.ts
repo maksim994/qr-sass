@@ -5,6 +5,7 @@ import { BlogEditorError, prepareArticleSave, type BlogEditorInput } from "@/lib
 import { renderArticleBody } from "@/lib/blog-render";
 import { readBlogFaq } from "@/lib/blog-faq";
 import { MSG } from "@/lib/user-messages";
+import { assertActiveBlogToken } from "@/lib/blog-api-tokens";
 
 // Keep the scheduler and snapshot writer independent of renderer dependencies in the worker image.
 import { articleFields, articleSnapshot, recordSave, type BlogActor } from "@/lib/blog-versions";
@@ -12,14 +13,27 @@ export { articleStatus } from "@/lib/blog-versions";
 export type { BlogActor } from "@/lib/blog-versions";
 
 export async function saveArticle(input: BlogEditorInput, actor: BlogActor, id?: string) {
+  return (await persistArticle(input, actor, id)).post;
+}
+export async function saveArticleApi(input: BlogEditorInput, actor: BlogActor, tokenId: string, id?: string, version?: number) {
+  return persistArticle(input, actor, id, { tokenId, version });
+}
+async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId: string; version?: number }) {
   return getDb().$transaction(async tx => {
+    if (api) await assertActiveBlogToken(tx, api.tokenId);
     const before = id ? await tx.blogPost.findUnique({ where: { id } }) : null;
     if (id && !before) throw new BlogEditorError(MSG.POST_NOT_FOUND, 404);
+    if (before && api) {
+      const latest = await tx.blogRevision.findFirst({ where: { postId: id }, orderBy: { number: "desc" }, select: { number: true } });
+      if (api.version !== (latest?.number ?? 0)) throw new BlogEditorError(MSG.BLOG_SAVE_CONFLICT, 409);
+    }
     const data = prepareArticleSave(input, before);
     const post = before
       ? await tx.blogPost.update({ where: { id: before.id, updatedAt: before.updatedAt }, data: { ...data, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } })
       : await tx.blogPost.create({ data: { ...data, createdById: actor.actorId } });
-    return recordSave(tx, before, post, actor, input.comment);
+    await recordSave(tx, before, post, actor, input.comment);
+    const revision = await tx.blogRevision.findFirstOrThrow({ where: { postId: post.id }, orderBy: { number: "desc" }, select: { number: true } });
+    return { post, version: revision.number, editorialChanged: !before || post.contentUpdatedAt?.getTime() !== (before.contentUpdatedAt ?? before.updatedAt).getTime() };
   });
 }
 export async function restoreArticle(id: string, revisionId: string, expectedUpdatedAt: string, actor: BlogActor) {
@@ -33,7 +47,7 @@ export async function restoreArticle(id: string, revisionId: string, expectedUpd
     const snapshot = revision.snapshot as Record<string, unknown>;
     // Never recreate counters, identity, ownership or a previously published URL from a snapshot.
     if ((before.firstPublishedAt || before.publishedAt) && snapshot.slug !== before.slug) throw new BlogEditorError(MSG.BLOG_SLUG_LOCKED, 409);
-    const data = Object.fromEntries(articleFields.map(key => [key, snapshot[key]])) as Prisma.BlogPostUncheckedUpdateInput;
+    const data = Object.fromEntries(articleFields.map(key => [key, snapshot[key] ?? null])) as Prisma.BlogPostUncheckedUpdateInput;
     for (const key of ["publishedAt", "scheduledAt", "contentUpdatedAt", "firstPublishedAt"] as const) data[key] = snapshot[key] ? new Date(String(snapshot[key])) : null;
     data.firstPublishedAt = before.firstPublishedAt ?? before.publishedAt ?? data.firstPublishedAt;
     data.updatedAt = new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1));

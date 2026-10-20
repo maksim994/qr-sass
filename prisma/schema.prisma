@@ -112,6 +112,7 @@ model BlogPost {
   contentUpdatedAt  DateTime?      // null on legacy rows: use updatedAt until first editorial save
   firstPublishedAt  DateTime?      // preserves original publication across unpublish/republish
   coverImageUrl     String?
+  coverImageAlt     String?
   authorName        String?        // отображаемое имя автора
   structuredData    String?        @db.Text // JSON-LD микроразметка (если не задана — генерируется автоматически)
   views             Int            @default(0)
@@ -596,4 +597,19 @@ model BlogPreviewToken {
   createdAt DateTime @default(now())
   revokedAt DateTime?
   @@index([postId, revokedAt])
+}
+
+// Global editorial API; deliberately separate from workspace QR keys.
+model BlogApiToken {
+  id String @id @default(cuid())
+  name String
+  keyPrefix String @unique
+  keyHash String
+  salt String
+  createdById String
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime?
+  revokedAt DateTime?
+  windowStartedAt DateTime?
+  requestCount Int @default(0)
 }

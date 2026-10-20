@@ -14,6 +14,7 @@ export const blogEditorSchema = z.object({
   content: z.string().max(1_000_000),
   format: z.enum(["html", "markdown"]),
   coverImageUrl: z.union([z.literal(""), z.url({ protocol: /^https?$/ })]).nullable(),
+  coverImageAlt: z.string().trim().max(1000).nullable(),
   authorName: z.string().trim().max(300).nullable(),
   structuredData: z.unknown(),
   readingTimeMinutes: z.number().int().min(1).max(999).nullable(),
@@ -34,7 +35,7 @@ export type BlogEditorInput = z.infer<typeof blogEditorSchema>;
 export type EditableArticle = {
   title: string; slug: string; content: string; format: string;
   metaTitle: string | null; metaDescription: string | null; excerpt: string | null;
-  coverImageUrl: string | null; authorName: string | null; structuredData: string | null;
+  coverImageUrl: string | null; coverImageAlt?: string | null; authorName: string | null; structuredData: string | null;
   readingTimeMinutes: number | null; categoryId: string | null;
   publishedAt: Date | null; firstPublishedAt: Date | null;
   status?: "draft" | "scheduled" | "published" | null; scheduledAt?: Date | null;
@@ -69,7 +70,7 @@ function canonical(value: unknown): string {
   return JSON.stringify(stable(value ?? null));
 }
 export function hasSubstantiveArticleChange(before: Record<string, unknown>, after: Record<string, unknown>): boolean {
-  return ["content", "title", "metaTitle", "metaDescription", "excerpt", "faq", "coverImageUrl"].some(key =>
+  return ["content", "title", "metaTitle", "metaDescription", "excerpt", "faq", "coverImageUrl", "coverImageAlt"].some(key =>
     canonical(before[key] ?? "") !== canonical(after[key] ?? ""));
 }
 
@@ -93,6 +94,7 @@ export function prepareArticleSave(input: BlogEditorInput, existing: EditableArt
     excerpt: input.excerpt !== undefined ? input.excerpt || null : existing?.excerpt ?? null,
     content: input.content ?? existing?.content ?? "",
     coverImageUrl: input.coverImageUrl !== undefined ? input.coverImageUrl || null : existing?.coverImageUrl ?? null,
+    coverImageAlt: input.coverImageAlt !== undefined ? input.coverImageAlt : existing?.coverImageAlt ?? null,
     authorName: input.authorName !== undefined ? input.authorName || null : existing?.authorName ?? null,
     structuredData: structured?.ok ? structured.data || null : existing?.structuredData ?? null,
     categoryId: input.categoryId !== undefined ? input.categoryId || null : existing?.categoryId ?? null,

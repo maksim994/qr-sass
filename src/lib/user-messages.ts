@@ -1,6 +1,14 @@
 import { COMMERCIAL } from "@/lib/commercial-config";
 /** Пользовательские сообщения об ошибках и уведомлениях (только RU). */
 export const MSG = {
+  BLOG_API_FORBIDDEN: "API-ключ не разрешает публикацию, расписание или удаление статьи.",
+  BLOG_API_INPUT: "Проверьте поля запроса: PATCH требует целую version, Meta Title до 500, Meta Description до 2000 символов, JSON-LD — корректный JSON.",
+  BLOG_API_TOKEN_INVALID: "Укажите действующий API-ключ статей в Authorization: Bearer. Административная сессия и QR-ключи не подходят.",
+  BLOG_API_LIMIT: "Лимит ключа — 60 запросов в минуту. Повторите запрос после Retry-After.",
+  BLOG_API_TOKEN_NAME: "Введите имя ключа от 1 до 100 символов.",
+  BLOG_API_TOKEN_FAILED: "Не удалось изменить ключ. Повторите попытку.",
+  BLOG_API_TOKEN_NOT_FOUND: "API-ключ не найден.",
+  BLOG_API_COPY_FAILED: "Не удалось скопировать ключ. Выделите и скопируйте его вручную.",
   BLOG_SCHEDULE_INVALID: "Выберите будущие дату и время публикации (МСК).",
   BLOG_VERSION_NOT_FOUND: "Версия не найдена.",
   BLOG_PREVIEW_LINK_FAILED: "Не удалось изменить ссылку предпросмотра. Повторите попытку.",

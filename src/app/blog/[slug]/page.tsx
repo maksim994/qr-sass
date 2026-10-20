@@ -84,6 +84,7 @@ export default async function BlogPostPage({ params }: Props) {
       contentUpdatedAt: true,
       firstPublishedAt: true,
       coverImageUrl: true,
+      coverImageAlt: true,
       authorName: true,
       structuredData: true,
       views: true,
@@ -256,7 +257,7 @@ export default async function BlogPostPage({ params }: Props) {
             style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-accent) 16%, transparent))", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {post.coverImageUrl ? (
-              <Image src={post.coverImageUrl} alt={title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
+              <Image src={post.coverImageUrl} alt={post.coverImageAlt ?? title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
             ) : (
               <svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1" />

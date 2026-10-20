@@ -8,6 +8,7 @@ type ErrorCode =
   | "CONFLICT"
   | "CONFIG_ERROR"
   | "VALIDATION_ERROR"
+  | "RATE_LIMITED"
   | "INTERNAL_ERROR";
 
 export type ApiErrorBody = {

@@ -33,7 +33,7 @@ export default async function AdminBlogPage() {
           </Button>
         }
       />
-      <p><Button href="/admin/blog/history" variant="secondary" size="sm">Журнал изменений статей →</Button></p>
+      <p><Button href="/admin/blog/history" variant="secondary" size="sm">Журнал изменений статей →</Button>{" "}<Button href="/admin/blog/tokens" target="_blank" rel="noopener noreferrer" variant="secondary" size="sm">API-ключи статей ↗</Button></p>
       <AdminDataCard>
         <BlogList posts={posts} />
       </AdminDataCard>
