@@ -6,10 +6,11 @@ import { AdminPageHeader, AdminCard } from "@/components/admin/admin-page";
 import { RestoreRevisionButton } from "@/components/admin/blog-workflow-actions";
 import { AdminPagination } from "@/components/admin/admin-list";
 import { adminDate, listParams, type AdminSearchParams } from "@/lib/admin-list";
-import { blogFieldLabels } from "@/lib/blog-workflow-labels";
+import { blogFieldLabels, blogStatusLabels } from "@/lib/blog-workflow-labels";
 import styles from "@/components/admin/admin.module.css";
 import workflow from "@/components/admin/blog-workflow.module.css";
 import { Button, Select } from "@/components/ui";
+const markedLines = (value: string, marker: string) => value.replace(/\n$/, "").split("\n").map(line => `${marker} ${line}\n`).join("");
 const text = (value: unknown) => value == null ? "" : typeof value === "string" ? value : JSON.stringify(value, null, 2);
 export default async function VersionsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<AdminSearchParams> }) {
   const { id } = await params, query = await searchParams;
@@ -18,7 +19,8 @@ export default async function VersionsPage({ params, searchParams }: { params: P
   if (!post) notFound();
   const total = await db.blogRevision.count({ where: { postId: id } });
   const page = Math.min(requested, Math.max(1, Math.ceil(total / size)));
-  const revisions = await db.blogRevision.findMany({ where: { postId: id }, orderBy: { number: "desc" }, take: size, skip: (page - 1) * size, omit: { snapshot: true } });
+  const revisionRows = await db.blogRevision.findMany({ where: { postId: id }, orderBy: { number: "desc" }, take: size, skip: (page - 1) * size });
+  const revisions = revisionRows.map(({ snapshot, ...version }) => ({ ...version, publication: snapshot as Record<string, unknown> }));
   const ids = [typeof query.from === "string" ? query.from : (revisions[1]?.id ?? revisions[0]?.id), typeof query.to === "string" ? query.to : revisions[0]?.id].filter((v): v is string => !!v);
   const selected = await db.blogRevision.findMany({ where: { postId: id, id: { in: ids } } });
   const from = selected.find(v => v.id === ids[0]), to = selected.find(v => v.id === ids[1]);
@@ -40,7 +42,7 @@ export default async function VersionsPage({ params, searchParams }: { params: P
           <p>№{from.number} → №{to.number} · <span className={workflow.removed}>− удалено</span> · <span className={workflow.added}>+ добавлено</span></p>
           {changed.length ? changed.map(key => <details key={key} open={key === "content"}>
             <summary>{blogFieldLabels[key] ?? key}</summary>
-            <pre className={workflow.diff}>{diffLines(text(a[key]), text(b[key])).map((part, i) => part.added ? <ins key={i} className={workflow.added}>{part.value.endsWith("\n") ? part.value : `${part.value}\n`}</ins> : part.removed ? <del key={i} className={workflow.removed}>{part.value.endsWith("\n") ? part.value : `${part.value}\n`}</del> : <span key={i}>{part.value}</span>)}</pre>
+            <pre className={workflow.diff}>{diffLines(text(a[key]), text(b[key])).map((part, i) => part.added ? <ins key={i} className={workflow.added}>{markedLines(part.value, "+")}</ins> : part.removed ? <del key={i} className={workflow.removed}>{markedLines(part.value, "−")}</del> : <span key={i}>{part.value}</span>)}</pre>
           </details>) : <p>Редакционные поля совпадают.</p>}
         </div>}
       </AdminCard>
@@ -50,7 +52,7 @@ export default async function VersionsPage({ params, searchParams }: { params: P
           <td data-label="Версия · МСК">№{v.number}<br />{adminDate(v.createdAt)}</td>
           <td data-label="Кто и откуда">{v.actorName}<br />{v.source}</td>
           <td data-label="Комментарий">{v.comment || "—"}<br /><Link href={`?from=${v.id}&to=${revisions[0].id}&page=${page}`}>Сравнить с верхней версией</Link></td>
-          <td data-label="Восстановление"><RestoreRevisionButton id={id} revisionId={v.id} expectedUpdatedAt={post.updatedAt.toISOString()} /></td>
+          <td data-label="Восстановление"><p className={styles.note}>Восстановит: {blogStatusLabels[String(v.publication.status)] ?? "Черновик"}{v.publication.status === "scheduled" && v.publication.scheduledAt ? ` · ${adminDate(new Date(String(v.publication.scheduledAt)))} МСК` : ""}</p><RestoreRevisionButton id={id} revisionId={v.id} expectedUpdatedAt={post.updatedAt.toISOString()} /></td>
         </tr>)}</tbody>
       </table></div>
       <AdminPagination total={total} page={page} size={size} params={query} />

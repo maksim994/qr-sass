@@ -433,7 +433,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
             <option value="published">Опубликована</option>
           </Select>
         </Field>
-        {state.status === "scheduled" && <Field label="Дата и время · МСК (UTC+3)" htmlFor="blog-scheduled" hint="Статья появится автоматически после сохранения.">
+        {state.status === "scheduled" && <Field label="Дата и время · МСК (UTC+3)" htmlFor="blog-scheduled" hint="После сохранения статья будет опубликована в указанное время.">
           <Input id="blog-scheduled" type="datetime-local" required value={state.scheduledAt} onChange={e => setState(s => ({ ...s, scheduledAt: e.target.value }))} />
         </Field>}
       </div>
