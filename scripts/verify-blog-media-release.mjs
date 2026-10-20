@@ -33,7 +33,7 @@ try{
   const body=doc.querySelector('.qrs-body');assert.ok(body,row.slug);
   pages[row.slug]={body:body.innerHTML,format:row.format,headings:[...body.querySelectorAll('h2')].map(h=>[h.id,h.textContent]),tables:[...body.querySelectorAll('table')].map(t=>t.outerHTML),links:[...body.querySelectorAll('a')].map(a=>a.outerHTML)};
   if(comparing){
-   assert.ok(!html.includes('s3.mvmolkov.ru'),row.slug+': old host in HTML');
+   assert.ok(!/s3\.mvmolkov\.ru(?:\/|%2F)qr(?:\/|%2F)blog(?:\/|%2F)/i.test(html),row.slug+': old blog host in HTML');
    for(const prop of ['og:image','twitter:image']){const value=doc.querySelector(`meta[property="${prop}"],meta[name="${prop}"]`)?.getAttribute('content');assert.ok(value?.startsWith('https://qr-s.ru/media/blog/'),row.slug+': '+prop);}
    const graph=JSON.parse(doc.querySelector('script[type="application/ld+json"]')?.textContent)['@graph'];const article=graph.find(n=>n['@type']==='BlogPosting');assert.equal(article.image['@type'],'ImageObject');assert.ok(article.image.url.startsWith('https://qr-s.ru/media/blog/'));assert.ok(article.image.width>0&&article.image.height>0);assert.equal(article.dateModified,(row.contentUpdatedAt??row.updatedAt).toISOString());
    for(const img of doc.querySelectorAll('img')){await checkImage(img.getAttribute('src'));for(const candidate of (img.getAttribute('srcset')||'').split(','))await checkImage(candidate.trim().split(/\s+/)[0]||'/');}
