@@ -37,7 +37,7 @@ export function MarkdownEditor({ id, content, format, faq, slug, initialBody, le
       try {
         const response = await fetchApi("/api/admin/blog/preview", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content, format, faq, slug }), signal: controller.signal,
+          body: JSON.stringify({ content, format, faq: faq.filter(item => item.question.trim() && item.answer.trim()), ...(slug.trim() ? { slug } : {}) }), signal: controller.signal,
         });
         const json = await response.json();
         if (!json.ok) throw new Error(json.error || MSG.BLOG_PREVIEW_FAILED);

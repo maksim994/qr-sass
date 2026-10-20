@@ -34,6 +34,9 @@ async function save(path, method, body) {
   return result.json.data;
 }
 
+const emptyPreview = await save("/api/admin/blog/preview", "POST", { content: "", format: "markdown", faq: [] });
+assert.equal(emptyPreview.html, "");
+
 const then = new Date("2026-07-14T08:00:00Z");
 const sources = [
   '<h2 id="old">Раздел</h2>\n<p>Пробелы  и &amp; сущности.</p>',
