@@ -129,3 +129,39 @@ curl -X POST "https://qr-s.ru/api/v1/articles/$ARTICLE_ID/preview" \
 ```
 
 Ответ `data.html` и `data.items` (оглавление) соответствует рендереру сайта. Предпросмотр не меняет статью, даты, версии, журнал или ссылки предпросмотра; учитывается только использование ключа. Неизвестные поля отклоняются. Публикация, расписание и удаление через API по-прежнему запрещены.
+
+## ТЗ-08: удаление изображения (OpenAPI 1.3.0)
+
+Тот же `PATCH /api/v1/articles/{id}/images`, Bearer и общий лимит 60/мин. Для удаления передайте `remove: true` вместо `alt/newUrl`. `version` обязательна; сохранение, новая версия и событие `image_remove` с URL и автором `API: <имя ключа>` атомарны. `minorEdit: true` сохраняет редакционную дату (видимую дату, JSON-LD dateModified и sitemap lastmod); без флага удаление считается содержательной правкой.
+
+```bash
+curl -X PATCH "$BASE/api/v1/articles/$ARTICLE_ID/images" \
+  -H "Authorization: Bearer $BLOG_API_TOKEN" \
+  -H 'Content-Type: application/json' --data-binary @- <<'JSON'
+{"version":12,"url":"https://s3.mvmolkov.ru/qr/blog/content/UMbjoWh-Pkyz.webp","remove":true,"minorEdit":true,"comment":"Удалена таблица-дубль"}
+JSON
+```
+
+Сопоставляется точный `src` или URL одного из вариантов `srcset`. Если `<img>` — единственное медиа в `<figure>`, удаляется вся figure с figcaption. Иначе удаляется только img и пустые обёртки a/p. Остальной исходник остаётся побайтно прежним, HTML не конвертируется, `legacyHtml` и S3-объекты сохраняются. Поддерживаются обычные Markdown `![alt](url)` и raw HTML figure/img. Примеры внутри code/pre, fenced/indented/inline code, HTML-комментарии и атрибуты не считаются изображениями.
+
+При нескольких изображениях с этим URL — **409**, `details.count` и русское пояснение. Для удаления всех добавьте `"all":true`. URL не найден — **404**; URL совпадает с обложкой — **400**, «Для обложки используйте coverImageUrl». Устаревшая версия — **409**, без действующего Bearer — **401**, лимит — **429** с Retry-After. Смешивать `remove` с `alt/newUrl` нельзя. Откат предыдущей версии в админке возвращает исходный content байт в байт; обычный откат считается редакционным изменением.
+
+Предпросмотр без сохранения тем же серверным кодом:
+
+```bash
+curl -X POST "$BASE/api/v1/articles/$ARTICLE_ID/preview" \
+  -H "Authorization: Bearer $BLOG_API_TOKEN" \
+  -H 'Content-Type: application/json' --data-binary @- <<'JSON'
+{"imageRemoval":{"url":"https://s3.mvmolkov.ru/qr/blog/content/UMbjoWh-Pkyz.webp","remove":true}}
+JSON
+```
+
+Ответ: `html`, `items` и `content` после удаления. При обычном предпросмотре без `imageRemoval` контракт не меняется. `/api/admin/blog/preview` принимает такое же `imageRemoval` вместе с обязательными `content/format` и необязательным `coverImageUrl`; требует сессию администратора и CSRF. Предпросмотр не создаёт версий, событий и изменений дат. Отдельная кнопка удаления в редакторе не добавлена (необязательный пункт ТЗ).
+
+Локальная HTTP-приёмка на выделенной БД `qr_tz08`, синтетическом JWT `local-tz06-*` и сервере `BLOG_TEST_ORIGIN`:
+
+```bash
+node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-blog-image-remove.mjs
+```
+
+Скрипт создаёт и удаляет только собственные тестовые записи; production отклоняется по умолчанию. Два разных API-ключа проверяют реальный CAS статьи. На восстановленной изолированной копии разрешён явный `BLOG_REMOVE_ISOLATED=explicit-tz08-restored-copy` с синтетическим JWT; это не разрешение запускать скрипт на production.
