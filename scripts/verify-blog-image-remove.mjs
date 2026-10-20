@@ -52,9 +52,21 @@ const then=new Date('2026-07-14T08:00:00Z');
 try {
   keys.push(await createBlogApiToken(`${prefix}-a`,actor),await createBlogApiToken(`${prefix}-b`,actor));
   for (const format of ['html','markdown']) {
-    const beforeText=format==='html'?'<h2 id="before">До</h2>\n<p>Первый  &amp; второй</p>\n':'## До {#before}\n\nПервый  & второй\n\n';
-    const fragment=format==='html'?`<figure class="inline-quad" data-slot="inline_2">\n<img src="${url}" alt="Старая таблица"><figcaption>Подпись</figcaption>\n</figure>`:`![Таблица](${url} "Подпись")`;
-    const afterText=format==='html'?'\n<h2 id="after">После</h2><table><tr><td>1</td></tr></table><a href="/blog/x">Ссылка</a>':'\n\n## После {#after}\n\n| A |\n|---|\n| 1 |\n\n[Ссылка](/blog/x)';
+    let beforeText=format==='html'?'<h2 id="before">До</h2>\n<p>Первый  &amp; второй</p>\n':'## До {#before}\n\nПервый  & второй\n\n';
+    let fragment=format==='html'?`<figure class="inline-quad" data-slot="inline_2">\n<img src="${url}" alt="Старая таблица"><figcaption>Подпись</figcaption>\n</figure>`:`![Таблица](${url} "Подпись")`;
+    let afterText=format==='html'?'\n<h2 id="after">После</h2><table><tr><td>1</td></tr></table><a href="/blog/x">Ссылка</a>':'\n\n## После {#after}\n\n| A |\n|---|\n| 1 |\n\n[Ссылка](/blog/x)';
+    if (format === 'html' && process.env.BLOG_REMOVE_SOURCE_SLUG) {
+      assert.ok(isolated, 'Real source is only read on an isolated restored DB');
+      const source = await db.blogPost.findUniqueOrThrow({where:{slug:process.env.BLOG_REMOVE_SOURCE_SLUG}});
+      assert.equal(source.format,'html');
+      const dom = new JSDOM(source.content,{includeNodeLocations:true});
+      const target = [...dom.window.document.querySelectorAll('img')].find(img=>img.getAttribute('src')===url);
+      assert.ok(target);const figure=target.closest('figure');assert.ok(figure);
+      assert.equal(figure.getAttribute('data-slot'),'inline_2');assert.ok(figure.classList.contains('inline-quad'));
+      const location=dom.nodeLocation(figure);assert.ok(location?.endTag);
+      beforeText=source.content.slice(0,location.startOffset);fragment=source.content.slice(location.startOffset,location.endOffset);afterText=source.content.slice(location.endOffset);
+      dom.window.close();
+    }
     const content=beforeText+fragment+afterText;
     const post=await db.blogPost.create({data:{slug:`${prefix}-${format}`,title:`ТЗ-08 ${format}`,content,format,contentUpdatedAt:then,publishedAt:then,firstPublishedAt:then,status:'published',updatedAt:then,legacyHtml:'Exact legacy backup',coverImageUrl:'https://example.org/cover.webp',readingTimeMinutes:3,renderedHtml:format==='markdown'?renderArticleBody(content,format).html:null}});
     ids.push(post.id);
