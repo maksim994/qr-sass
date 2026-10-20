@@ -239,6 +239,7 @@ const spec = {
           ok: { const: false },
           error: { type: "string", description: "Сообщение по-русски" },
           code: { type: "string" },
+          details: { type: "object", properties: { count: { type: "integer", minimum: 1 } }, additionalProperties: true },
         },
       },
       ArticleSummary: summary,
@@ -276,7 +277,7 @@ const spec = {
     },
   },
 };
-spec.info.version = "1.2.0";
+spec.info.version = "1.3.0";
 spec.tags.push(
   {
     name: "Redirects",
@@ -427,28 +428,16 @@ spec.paths["/api/v1/articles/{id}/images"] = {
   ),
   patch: operation(
     "patchArticleImage",
-    "Заменить изображение или изменить alt",
+    "Заменить, удалить изображение или изменить alt",
     {
       tags: ["Images"],
       description:
-        "URL должен совпадать с обложкой или картинкой в исходном тексте. newUrl (HTTP(S), необязателен) заменяет точный URL и alt всех совпавших изображений/обложки. srcset/размеры берутся из загруженного файла, для внешнего URL устаревшие атрибуты удаляются. minorEdit=true сохраняет contentUpdatedAt; updatedAt — служебное время записи. Меняются только соответствующие изображения; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются.",
+        "URL должен совпадать с обложкой или картинкой в исходном тексте. newUrl (HTTP(S), необязателен) заменяет точный URL и alt всех совпавших изображений/обложки. srcset/размеры берутся из загруженного файла, для внешнего URL устаревшие атрибуты удаляются. minorEdit=true сохраняет contentUpdatedAt; updatedAt — служебное время записи. Меняются только соответствующие изображения; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются. remove=true удаляет по точному src или кандидату srcset. Если img — единственное медиа figure, удаляется figure с подписью; иначе img и пустые обёртки a/p. Markdown inline images и raw HTML поддерживаются. Повторный URL: 409 с details.count; all=true удаляет все. URL не найден: 404; URL обложки: 400 (используйте coverImageUrl). S3-объекты и legacyHtml сохраняются. Версия и событие image_remove с URL записываются в одной CAS-транзакции.",
       requestBody: {
         required: true,
         content: {
           "application/json": {
-            schema: {
-              type: "object",
-              additionalProperties: false,
-              required: ["version", "url", "alt"],
-              properties: {
-                version,
-                url: { type: "string", minLength: 1, maxLength: 4000 },
-                alt: { type: "string", minLength: 1, maxLength: 1000 },
-                comment: { type: "string", maxLength: 2000 },
-                newUrl: { type: "string", format: "uri", maxLength: 4000, description: "HTTP(S) без credentials/пробелов; без newUrl меняется только alt" },
-                minorEdit: fields.minorEdit,
-              },
-            },
+            schema: { oneOf: [ref("ArticleImageReplace"), ref("ArticleImageRemove")] },
           },
         },
       },
@@ -458,6 +447,20 @@ spec.paths["/api/v1/articles/{id}/images"] = {
       },
     },
   ),
+};
+spec.components.schemas.ArticleImageReplace = {
+  type: "object", additionalProperties: false, required: ["version", "url", "alt"],
+  properties: { version, url: {type:"string",minLength:1,maxLength:4000},
+    alt:{type:"string",minLength:1,maxLength:1000}, newUrl:{type:"string",format:"uri",maxLength:4000,description:"HTTP(S) без credentials/пробелов"},
+    minorEdit: fields.minorEdit, comment: fields.comment },
+};
+spec.components.schemas.ArticleImageRemoval = {
+  type: "object", additionalProperties: false, required: ["url", "remove"],
+  properties: { url: {type:"string",minLength:1,maxLength:4000}, remove:{type:"boolean",const:true}, all:{type:"boolean",default:false} },
+};
+spec.components.schemas.ArticleImageRemove = {
+  ...spec.components.schemas.ArticleImageRemoval, required:["version","url","remove"],
+  properties: {...spec.components.schemas.ArticleImageRemoval.properties, version, minorEdit:fields.minorEdit, comment:fields.comment},
 };
 spec.paths["/api/v1/images"] = {
   post: operation("uploadImage", "Загрузить изображение без статьи", {
@@ -475,13 +478,13 @@ spec.paths["/api/v1/images"] = {
 spec.paths["/api/v1/articles/{id}/preview"] = {
   parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
   post: operation("previewArticle", "Отрендерить HTML без сохранения", {
-    description: "Передайте JSON {} для сохранённого тела либо временные content/format/faq. Используется тот же рендерер, что на сайте. Ответ содержит html и items (оглавление). Статья, даты, версии, журнал и токены ссылок предпросмотра не меняются; учитывается только использование API-ключа. Публикационных полей нет.",
+    description: "Передайте JSON {} для сохранённого тела либо временные content/format/faq. imageRemoval={url,remove:true,all?} показывает удаление без сохранения тем же кодом, что PATCH; дополнительно возвращает изменённый исходник content, ошибки 400/404/409 совпадают с PATCH. Используется тот же рендерер, что на сайте. Ответ содержит html и items (оглавление). Статья, даты, версии, журнал и токены ссылок предпросмотра не меняются; учитывается только использование API-ключа. Публикационных полей нет.",
     requestBody: { required: true, content: { "application/json": { schema: {
-      type: "object", additionalProperties: false, properties: { content: fields.content, format: fields.format, faq: fields.faq },
+      type: "object", additionalProperties: false, properties: { content: fields.content, format: fields.format, faq: fields.faq, imageRemoval:ref("ArticleImageRemoval") },
     } } } },
     responses: { ...errors, 200: response("Предпросмотр", success({
       type: "object", required: ["html", "items"], properties: {
-        html: { type: "string" }, items: { type: "array", items: { type: "object", required: ["id", "text"], properties: { id: {type:"string"},text:{type:"string"} } } },
+        html: { type: "string" }, content: {type:"string",description:"Исходник после imageRemoval, только при запросе удаления"}, items: { type: "array", items: { type: "object", required: ["id", "text"], properties: { id: {type:"string"},text:{type:"string"} } } },
       },
     })) },
   }),

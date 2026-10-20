@@ -3,6 +3,9 @@ import { COMMERCIAL } from "@/lib/commercial-config";
 export const MSG = {
   BLOG_IMAGE_ALT: "Перед загрузкой укажите alt: описание изображения от 1 до 1000 символов.",
   BLOG_IMAGE_NOT_FOUND: "Изображение с этим URL не найдено в статье.",
+  BLOG_IMAGE_REMOVE_COVER: "Для обложки используйте coverImageUrl",
+  BLOG_IMAGE_REMOVE_MULTIPLE: "Изображение встречается несколько раз. Для удаления всех вхождений передайте all: true.",
+  BLOG_IMAGE_PATCH_INPUT: "Передайте version и url, а также alt для замены или remove: true для удаления.",
   BLOG_IMAGE_INPUT: "Передайте file, alt, kind (cover/content) и актуальную целую version.",
   BLOG_IMAGE_SIZE: "Максимальный размер изображения — 10 МБ и 40 миллионов пикселей.",
   BLOG_IMAGE_TYPE: "Поддерживаются JPEG, PNG, GIF и WebP с соответствующим содержимым файла.",

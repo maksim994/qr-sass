@@ -1,8 +1,13 @@
 import { JSDOM } from "jsdom";
 import MarkdownIt from "markdown-it";
 import { escapeImageAttribute, blogImageSrcset, type ImageVariant } from "@/lib/blog-image-markup";
+import { removeArticleImage, type ArticleImageRemoval } from "@/lib/blog-image-remove";
 
-export type ArticleImageChange = { url: string; alt: string; newUrl?: string; variants?: ImageVariant[] };
+export type ArticleImageReplacement = { url: string; alt: string; newUrl?: string; variants?: ImageVariant[] };
+export type ArticleImageChange = ArticleImageReplacement | ArticleImageRemoval;
+export function applyArticleImageChange(content: string, change: ArticleImageChange, format: "html" | "markdown" = "html") {
+  return "remove" in change ? removeArticleImage(content, change.url, format) : replaceArticleImage(content, change, format);
+}
 /** Change only matched image tags/Markdown labels; preserve the rest of the source byte for byte. */
 export function replaceArticleImageAlt(
   content: string,
@@ -13,7 +18,7 @@ export function replaceArticleImageAlt(
   return replaceArticleImage(content, { url, alt }, format);
 }
 
-export function replaceArticleImage(content: string, change: ArticleImageChange, format: "html" | "markdown" = "html") {
+export function replaceArticleImage(content: string, change: ArticleImageReplacement, format: "html" | "markdown" = "html") {
   const { url, alt, newUrl, variants } = change;
   const codeRanges: { start: number; end: number }[] = [];
   if (format === "markdown") {

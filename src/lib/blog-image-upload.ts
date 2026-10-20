@@ -4,7 +4,8 @@ import { apiError, apiSuccess, getRequestId } from "@/lib/api-response";
 import { validateFileType } from "@/lib/file-validation";
 import { uploadFile, getBlogCoverKey, getBlogContentImageKey } from "@/lib/s3";
 import { optimizeBlogImageVariants } from "@/lib/image-optimize";
-import { z } from "zod";
+import { imageAltSchema } from "@/lib/blog-image-input";
+export { imageAltSchema } from "@/lib/blog-image-input";
 import { getDb } from "@/lib/db";
 import { deleteFile } from "@/lib/s3";
 import { blogImageFigure, type ImageVariant } from "@/lib/blog-image-markup";
@@ -20,7 +21,6 @@ const ALLOWED_TYPES = new Set([
 ]);
 
 export type BlogImageKind = "cover" | "content";
-export const imageAltSchema = z.string().trim().min(1).max(1000);
 
 export async function readBlogImageForm(request: Request) {
   if (!request.headers.get("content-type")?.startsWith("multipart/form-data;"))

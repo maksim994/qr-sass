@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QR-S Article API",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Все записи создают версию с автором API: <имя ключа>. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
     "license": {
       "name": "Proprietary",
@@ -1016,7 +1016,7 @@
       },
       "patch": {
         "operationId": "patchArticleImage",
-        "summary": "Заменить изображение или изменить alt",
+        "summary": "Заменить, удалить изображение или изменить alt",
         "security": [
           {
             "ArticleBearer": []
@@ -1025,50 +1025,20 @@
         "tags": [
           "Images"
         ],
-        "description": "URL должен совпадать с обложкой или картинкой в исходном тексте. newUrl (HTTP(S), необязателен) заменяет точный URL и alt всех совпавших изображений/обложки. srcset/размеры берутся из загруженного файла, для внешнего URL устаревшие атрибуты удаляются. minorEdit=true сохраняет contentUpdatedAt; updatedAt — служебное время записи. Меняются только соответствующие изображения; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются.",
+        "description": "URL должен совпадать с обложкой или картинкой в исходном тексте. newUrl (HTTP(S), необязателен) заменяет точный URL и alt всех совпавших изображений/обложки. srcset/размеры берутся из загруженного файла, для внешнего URL устаревшие атрибуты удаляются. minorEdit=true сохраняет contentUpdatedAt; updatedAt — служебное время записи. Меняются только соответствующие изображения; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются. remove=true удаляет по точному src или кандидату srcset. Если img — единственное медиа figure, удаляется figure с подписью; иначе img и пустые обёртки a/p. Markdown inline images и raw HTML поддерживаются. Повторный URL: 409 с details.count; all=true удаляет все. URL не найден: 404; URL обложки: 400 (используйте coverImageUrl). S3-объекты и legacyHtml сохраняются. Версия и событие image_remove с URL записываются в одной CAS-транзакции.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "version",
-                  "url",
-                  "alt"
-                ],
-                "properties": {
-                  "version": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "Последний номер редакционной версии. 0 до первого сохранения истории. PATCH требует точное совпадение; конфликт — 409."
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ArticleImageReplace"
                   },
-                  "url": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 4000
-                  },
-                  "alt": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 1000
-                  },
-                  "comment": {
-                    "type": "string",
-                    "maxLength": 2000
-                  },
-                  "newUrl": {
-                    "type": "string",
-                    "format": "uri",
-                    "maxLength": 4000,
-                    "description": "HTTP(S) без credentials/пробелов; без newUrl меняется только alt"
-                  },
-                  "minorEdit": {
-                    "type": "boolean",
-                    "description": "Сохраняет редакционную дату. No-op/пробелы сохраняют дату независимо от флага."
+                  {
+                    "$ref": "#/components/schemas/ArticleImageRemove"
                   }
-                }
+                ]
               }
             }
           }
@@ -1351,7 +1321,7 @@
         "tags": [
           "Articles"
         ],
-        "description": "Передайте JSON {} для сохранённого тела либо временные content/format/faq. Используется тот же рендерер, что на сайте. Ответ содержит html и items (оглавление). Статья, даты, версии, журнал и токены ссылок предпросмотра не меняются; учитывается только использование API-ключа. Публикационных полей нет.",
+        "description": "Передайте JSON {} для сохранённого тела либо временные content/format/faq. imageRemoval={url,remove:true,all?} показывает удаление без сохранения тем же кодом, что PATCH; дополнительно возвращает изменённый исходник content, ошибки 400/404/409 совпадают с PATCH. Используется тот же рендерер, что на сайте. Ответ содержит html и items (оглавление). Статья, даты, версии, журнал и токены ссылок предпросмотра не меняются; учитывается только использование API-ключа. Публикационных полей нет.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1395,6 +1365,9 @@
                         }
                       }
                     }
+                  },
+                  "imageRemoval": {
+                    "$ref": "#/components/schemas/ArticleImageRemoval"
                   }
                 }
               }
@@ -1425,6 +1398,10 @@
                       "properties": {
                         "html": {
                           "type": "string"
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "Исходник после imageRemoval, только при запросе удаления"
                         },
                         "items": {
                           "type": "array",
@@ -1560,6 +1537,16 @@
           },
           "code": {
             "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": true
           }
         }
       },
@@ -2277,6 +2264,106 @@
                 }
               }
             }
+          }
+        }
+      },
+      "ArticleImageReplace": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "url",
+          "alt"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Последний номер редакционной версии. 0 до первого сохранения истории. PATCH требует точное совпадение; конфликт — 409."
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "alt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "newUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 4000,
+            "description": "HTTP(S) без credentials/пробелов"
+          },
+          "minorEdit": {
+            "type": "boolean",
+            "description": "Сохраняет редакционную дату. No-op/пробелы сохраняют дату независимо от флага."
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "ArticleImageRemoval": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "url",
+          "remove"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "remove": {
+            "type": "boolean",
+            "const": true
+          },
+          "all": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "ArticleImageRemove": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "url",
+          "remove"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "remove": {
+            "type": "boolean",
+            "const": true
+          },
+          "all": {
+            "type": "boolean",
+            "default": false
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Последний номер редакционной версии. 0 до первого сохранения истории. PATCH требует точное совпадение; конфликт — 409."
+          },
+          "minorEdit": {
+            "type": "boolean",
+            "description": "Сохраняет редакционную дату. No-op/пробелы сохраняют дату независимо от флага."
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 2000
           }
         }
       }

@@ -1,10 +1,9 @@
-import { z } from "zod";
+import { articleImagePatchSchema } from "@/lib/blog-image-input";
 import { getDb } from "@/lib/db";
 import { authenticateBlogApi } from "@/lib/blog-api-tokens";
 import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";
 import { blogApiError, privateApi, articleApiView } from "@/lib/blog-api";
 import {
-  imageAltSchema,
   readBlogImageForm,
   storeBlogImage,
   discardBlogImage,
@@ -84,31 +83,16 @@ export async function PATCH(req: Request, context: Context) {
   try {
     const auth = await authenticateBlogApi(req),
       { id } = await context.params;
-    const parsed = z
-      .object({
-        version: z.number().int().min(0),
-        url: z.string().min(1).max(4000),
-        alt: imageAltSchema,
-        newUrl: z.url({ protocol: /^https?$/ }).max(4000).refine(value => {
-          try {
-            const url = new URL(value);
-            return !url.username && !url.password && !/[\s<>]/.test(value);
-          } catch { return false; }
-        }).optional(),
-        minorEdit: z.boolean().optional(),
-        comment: z.string().max(2000).optional(),
-      })
-      .strict()
-      .safeParse(await readJsonBody(req));
+    const parsed = articleImagePatchSchema.safeParse(await readJsonBody(req));
     if (!parsed.success)
       return privateApi(
-        apiError(MSG.BLOG_IMAGE_INPUT, "VALIDATION_ERROR", 400),
+        apiError(MSG.BLOG_IMAGE_PATCH_INPUT, "VALIDATION_ERROR", 400),
       );
-    const { version, url, alt, newUrl, minorEdit, comment } = parsed.data,
+    const { version, minorEdit, comment, ...change } = parsed.data,
       saved = await saveArticleImage(
         id,
         version,
-        { url, alt, newUrl },
+        change,
         auth.actor,
         auth.tokenId,
         { comment, minorEdit },

@@ -24,7 +24,7 @@ export function blogApiError(error: unknown) {
     if (error.retryAfter) response.headers.set("Retry-After", String(error.retryAfter));
     return privateApi(response);
   }
-  if (error instanceof BlogEditorError) return privateApi(apiError(error.message, error.status === 409 ? "CONFLICT" : error.status === 403 ? "FORBIDDEN" : error.status === 404 ? "NOT_FOUND" : "VALIDATION_ERROR", error.status));
+  if (error instanceof BlogEditorError) return privateApi(apiError(error.message, error.status === 409 ? "CONFLICT" : error.status === 403 ? "FORBIDDEN" : error.status === 404 ? "NOT_FOUND" : "VALIDATION_ERROR", error.status, error.details));
   if (error && typeof error === "object" && "code" in error) {
     if (error.code === "P2002") return privateApi(apiError(MSG.POST_SLUG_EXISTS, "CONFLICT", 409));
     if (error.code === "P2025" || error.code === "P2034") return privateApi(apiError(MSG.BLOG_SAVE_CONFLICT, "CONFLICT", 409));

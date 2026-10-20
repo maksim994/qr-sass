@@ -21,4 +21,8 @@ test("served OpenAPI exactly matches committed YAML and strict request limits", 
   assert.equal(spec.components.schemas.ArticlePatch.properties.faq.items.properties.question.maxLength,500);
   assert.equal(spec.components.schemas.ArticlePatch.properties.faq.items.properties.answer.maxLength,10000);
   assert.equal(spec.paths["/api/v1/articles/{id}"].delete,undefined);
+  assert.equal(spec.info.version,"1.3.0");
+  assert.deepEqual(spec.components.schemas.ArticleImageRemove.required,["version","url","remove"]);
+  assert.equal(spec.components.schemas.ArticleImageRemove.properties.remove.const,true);
+  assert.equal(spec.paths["/api/v1/articles/{id}/images"].patch.requestBody.content["application/json"].schema.oneOf.length,2);
 });
