@@ -165,3 +165,27 @@ node --experimental-strip-types --import ./scripts/register-src-alias.mjs script
 ```
 
 Скрипт создаёт и удаляет только собственные тестовые записи; production отклоняется по умолчанию. Два разных API-ключа проверяют реальный CAS статьи. На восстановленной изолированной копии разрешён явный `BLOG_REMOVE_ISOLATED=explicit-tz08-restored-copy` с синтетическим JWT; это не разрешение запускать скрипт на production.
+
+## ТЗ-08: публичные URL изображений блога
+
+Все новые загрузки (отдельный `/api/v1/images`, article-scoped POST images и админка) возвращают `https://qr-s.ru/media/blog/covers|content/<file>.webp` в `url`, `variants`, `srcset` и `figure`. Объекты остаются в прежнем S3 под теми же ключами `qr/blog/...`; WebP 480/960/1600 и размеры сохранены.
+
+```bash
+curl -I 'https://qr-s.ru/media/blog/content/<file>-960.webp'
+curl -I -H 'If-None-Match: "<etag-из-предыдущего-ответа>"' \
+  'https://qr-s.ru/media/blog/content/<file>-960.webp'
+```
+
+Маршрут публичный: Bearer не нужен, cookie не устанавливаются, редиректа на S3 нет. Отдаёт WebP/PNG/JPEG/GIF, `Cache-Control: public, max-age=31536000, immutable`, `Content-Length`, `ETag`, `Last-Modified`; HEAD без тела, условный запрос — 304. Разрешены только covers/content, допустимые имена и расширения, произвольные ключи/вложенные пути/SVG не отдаются. Отсутствующий файл — 404, временная ошибка хранилища — 502 без внутренних адресов. Кеш процесса ограничен 64 MiB/128 объектами, параллельные чтения одного объекта объединяются.
+
+Старые статьи не мигрируют: API GET по-прежнему возвращает исходный `content/coverImageUrl`, где может оставаться S3 URL. Публичная страница и preview переписывают image src/srcset и метаданные при рендере. Исходные даты и версия не меняются от этого переписывания. Новый публичный URL и исходный S3 URL считаются эквивалентными при точечной замене/удалении изображения; прочие домены и разные query/hash не смешиваются. Старые S3 URL продолжают работать.
+
+JSON-LD BlogPosting.image — ImageObject с URL и реальными width/height. Sitemap получает image:loc для обложки и изображений тела; редакционный lastmod остаётся прежним. Четыре ранее исключённых адреса-редиректа не возвращаются в sitemap: изображения добавляются к 40 индексируемым статьям, даты проверяются у всех 44 записей. Favicon в `qr/site/` находится вне этого маршрута и не меняется.
+
+HTTP-проверка с синтетическим S3 на отдельной БД `qr_tz08`:
+
+```bash
+node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-blog-media.mjs
+```
+
+`scripts/verify-blog-media-release.mjs` сохраняет read-only baseline пяти публичных страниц, всех исходников/дат и sitemap; `--compare <private-baseline.json>` проверяет, что в телах поменялись только URL картинок, а H2/id, ссылки, таблицы, даты и URL статей совпадают. Снимки хранятся вне Git, mode 0600. В восстановленной копии используется внутренний S3-стенд с зеркалом публичных картинок, синтетические JWT/S3-настройки и изолированная Docker-сеть; внешние workers не запускаются.
