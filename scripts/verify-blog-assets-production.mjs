@@ -7,9 +7,9 @@ import { createBlogApiToken, revokeBlogApiToken } from '../src/lib/blog-api-toke
 import { deleteEditorialRedirect } from '../src/lib/editorial-redirects.ts';
 import { deleteFile } from '../src/lib/s3.ts';
 assert.equal(process.env.BLOG_ASSETS_PRODUCTION_SMOKE,'explicit-stage4-fixtures-only');
-assert.equal(process.env.APP_URL,'https://qr-s.ru');
-assert.equal(new URL(process.env.S3_ENDPOINT).hostname,'s3.mvmolkov.ru');
-const db=getDb(), origin=process.env.BLOG_TEST_ORIGIN||process.env.APP_URL;
+assert.equal(new URL(process.env.APP_URL).origin,'https://qr-s.ru');
+assert.equal(new URL(process.env.S3_PUBLIC_URL||process.env.S3_ENDPOINT).hostname,'s3.mvmolkov.ru');
+const db=getDb(), origin=(process.env.BLOG_TEST_ORIGIN||process.env.APP_URL).replace(/\/+$/, '');
 const run=Date.now(), slug=`tz06-assets-acceptance-${run}`, source=`/tz06-assets-check-${run}`;
 const admin=await db.user.findFirst({where:{isAdmin:true},select:{id:true}});
 assert.ok(admin);
