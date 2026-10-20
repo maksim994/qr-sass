@@ -33,7 +33,7 @@ async function patch(id, body, status=200, key=keys[0]) {
 async function state(id) {
   const post=await db.blogPost.findUniqueOrThrow({where:{id}});
   // Opening a public page legitimately increments views.
-  const {views, ...stable}=post;
+  const stable={...post};delete stable.views;
   return {post:stable,revisions:await db.blogRevision.findMany({where:{postId:id},orderBy:{number:'asc'}}),events:await db.blogEvent.findMany({where:{postId:id},orderBy:{createdAt:'asc'}})};
 }
 async function page(slug) {

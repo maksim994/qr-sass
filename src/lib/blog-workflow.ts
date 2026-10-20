@@ -10,6 +10,7 @@ import { assertArticleRouteAvailable } from "@/lib/editorial-redirects";
 import { RedirectError } from "@/lib/editorial-redirect-input";
 import { replaceArticleImage, type ArticleImageChange, type ArticleImageReplacement } from "@/lib/blog-image-content";
 import { prepareArticleImageRemoval } from "@/lib/blog-image-removal";
+import { blogImageUrlAliases, sameBlogImageUrl } from "@/lib/blog-media-url";
 
 // Keep the scheduler and snapshot writer independent of renderer dependencies in the worker image.
 import { articleFields, articleSnapshot, recordSave, type BlogActor } from "@/lib/blog-versions";
@@ -40,13 +41,13 @@ async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: str
     if (before && api?.imageChange) {
       const change = { ...api.imageChange };
       if (!("remove" in change) && change.newUrl && change.newUrl !== change.url) {
-        const image = await tx.blogImage.findUnique({ where: { url: change.newUrl } });
+        const image = await tx.blogImage.findFirst({ where: { url: { in: blogImageUrlAliases(change.newUrl) } } });
         change.variants = image?.variants as ArticleImageReplacement["variants"];
       }
       const patched = "remove" in change
         ? prepareArticleImageRemoval(before.content, change, before.format === "markdown" ? "markdown" : "html", before.coverImageUrl)
         : replaceArticleImage(before.content, change, before.format === "markdown" ? "markdown" : "html");
-      const cover = !("remove" in change) && before.coverImageUrl === change.url;
+      const cover = !("remove" in change) && sameBlogImageUrl(before.coverImageUrl, change.url);
       if (!patched.found && !cover) throw new BlogEditorError(MSG.BLOG_IMAGE_NOT_FOUND, 404);
       input = { ...input, ...(patched.found ? { content: patched.content } : {}), ...(cover && !("remove" in change) ? { coverImageAlt: change.alt, ...(change.newUrl ? { coverImageUrl: change.newUrl } : {}) } : {}) };
       api.imageChange = change;

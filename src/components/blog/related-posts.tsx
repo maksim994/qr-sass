@@ -1,3 +1,4 @@
+import { blogMediaImageSrc } from "@/lib/blog-media-url";
 import Link from "next/link";
 import Image from "next/image";
 import { getBlogCardMeta } from "@/lib/blog-card-meta";
@@ -33,7 +34,7 @@ export function RelatedPosts({ posts }: { posts: RelatedPost[] }) {
             <Link href={`/blog/${post.slug}`} className="block">
               {post.coverImageUrl ? (
                 <div className="relative" style={{ height: "152px", background: "var(--surface-subtle)" }}>
-                  <Image src={post.coverImageUrl} alt={post.title} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
+                  <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={post.title} fill className="object-cover" sizes="(max-width:768px) 100vw, 33vw" />
                 </div>
               ) : (
                 <div style={{ height: "152px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>

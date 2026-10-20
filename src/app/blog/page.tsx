@@ -1,3 +1,4 @@
+import { blogMediaImageSrc } from "@/lib/blog-media-url";
 import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
 import { cache } from "react";
 import { notFound } from "next/navigation";
@@ -183,7 +184,7 @@ export default async function BlogListPage({ searchParams }: Props) {
                     РЕКОМЕНДУЕМ
                   </span>
                   {featured.coverImageUrl ? (
-                    <Image src={featured.coverImageUrl} alt={featured.title} fill className="object-cover" priority sizes="(max-width:900px) 100vw, 50vw" />
+                    <Image src={blogMediaImageSrc(featured.coverImageUrl)} alt={featured.title} fill className="object-cover" priority sizes="(max-width:900px) 100vw, 50vw" />
                   ) : (
                     <BlogCardIcon type={featuredMeta?.icon ?? "qr"} size={88} />
                   )}
@@ -253,7 +254,7 @@ export default async function BlogListPage({ searchParams }: Props) {
                     <Link href={`/blog/${post.slug}`} className="block">
                       {post.coverImageUrl ? (
                         <div className="relative" style={{ height: "168px", background: meta.bg }}>
-                          <Image src={post.coverImageUrl} alt={post.title} fill sizes="(max-width:640px) 100vw, 33vw" className="object-cover" priority={index < 2} />
+                          <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={post.title} fill sizes="(max-width:640px) 100vw, 33vw" className="object-cover" priority={index < 2} />
                         </div>
                       ) : (
                         <div style={{ height: "168px", background: meta.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>

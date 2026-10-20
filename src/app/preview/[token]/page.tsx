@@ -1,3 +1,4 @@
+import { blogMediaImageSrc } from "@/lib/blog-media-url";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -20,7 +21,7 @@ export default async function PreviewArticle({ params }: { params: Promise<{ tok
     <p>Предпросмотр сохранённой версии · Доступ по секретной ссылке</p>
     <h1 className="qrs-h1">{copy.title}</h1>
     {copy.excerpt && <p>{copy.excerpt}</p>}
-    {post.coverImageUrl && <Image src={post.coverImageUrl} alt={copy.title} width={1200} height={630} unoptimized className="max-w-full h-auto rounded-xl" />}
+    {post.coverImageUrl && <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={copy.title} width={1200} height={630} unoptimized className="max-w-full h-auto rounded-xl" />}
     <BlogPostContent body={body} />
   </main>;
 }

@@ -4,6 +4,7 @@ import taskLists from "markdown-it-task-lists";
 import sanitizeHtml from "sanitize-html";
 import DOMPurify from "isomorphic-dompurify";
 import { readBlogFaq, type BlogFaq } from "@/lib/blog-faq";
+import { rewriteBlogMediaHtml } from "@/lib/blog-media-html";
 
 export type ArticleBody = { html: string; items: { id: string; text: string }[] };
 export type ArticleFormat = "html" | "markdown";
@@ -135,7 +136,7 @@ export function renderLegacyBody(content: string): ArticleBody {
     const cleanedAttrs = String(attrs).replace(/\s+id=(["']).*?\1/i, "");
     return `<h2${cleanedAttrs} id="${id}">${inner}</h2>`;
   });
-  return { html, items };
+  return { html: rewriteBlogMediaHtml(html), items };
 }
 
 export function renderArticleBody(content: string, format: ArticleFormat, faqValue: unknown = []): ArticleBody {
@@ -146,7 +147,7 @@ export function renderArticleBody(content: string, format: ArticleFormat, faqVal
     const html = placeFaq(legacy.html, faq);
     const items = [...html.matchAll(/<h2\b[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/gi)]
       .map(match => ({ id: match[1], text: match[2].replace(/<[^>]+>/g, "") }));
-    return { html, items };
+    return { html: rewriteBlogMediaHtml(html), items };
   }
   const tokens = md.parse(content, {});
   const used = new Set<string>(faq.length ? ["faq"] : []);
@@ -174,5 +175,5 @@ export function renderArticleBody(content: string, format: ArticleFormat, faqVal
   html = placeFaq(html, faq);
   const finalItems = [...html.matchAll(/<h[23]\b[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/h[23]>/gi)]
     .map(match => ({ id: match[1], text: md.utils.unescapeAll(sanitizeHtml(match[2], { allowedTags: [], allowedAttributes: {} })) }));
-  return { html: wrapTables(html), items: finalItems };
+  return { html: rewriteBlogMediaHtml(wrapTables(html)), items: finalItems };
 }

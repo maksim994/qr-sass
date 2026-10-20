@@ -395,7 +395,7 @@ spec.paths["/api/v1/articles/{id}/images"] = {
     {
       tags: ["Images"],
       description:
-        "JPEG/PNG/GIF/WebP ≤10 MiB, ≤40 млн пикселей; GIF — первый кадр. WebP 480/960/1600 без увеличения. kind=cover обновляет обложку/alt; content дописывает figure в Markdown (HTML требует явной предварительной конвертации). version обязательна, 409 при конфликте. Статус статьи сохраняется, публикация запрещена. Объекты в прежнем S3, исходные файлы не меняются.",
+        "JPEG/PNG/GIF/WebP ≤10 MiB, ≤40 млн пикселей; GIF — первый кадр. WebP 480/960/1600 без увеличения. kind=cover обновляет обложку/alt; content дописывает figure в Markdown (HTML требует явной предварительной конвертации). version обязательна, 409 при конфликте. Статус статьи сохраняется, публикация запрещена. Объекты в прежнем S3, публичные url/variants/srcset/figure на qr-s.ru/media/blog/. Исходные файлы не меняются.",
       requestBody: {
         required: true,
         content: {
@@ -465,7 +465,7 @@ spec.components.schemas.ArticleImageRemove = {
 spec.paths["/api/v1/images"] = {
   post: operation("uploadImage", "Загрузить изображение без статьи", {
     tags: ["Images"],
-    description: "Тот же Bearer и общий лимит 60/мин. Обязательные file/alt; kind необязателен, по умолчанию content. JPEG/PNG/GIF/WebP ≤10 MiB и ≤40 млн пикселей, MIME по байтам. WebP 480/960/1600 без увеличения, GIF — первый кадр. Возвращает url/variants/srcset/figure, пишет image_upload с автором API. Статьи/версии не создаются. DELETE/PUT/PATCH отсутствуют.",
+    description: "Тот же Bearer и общий лимит 60/мин. Публичные URL: qr-s.ru/media/blog/, S3 остаётся хранилищем. Обязательные file/alt; kind необязателен, по умолчанию content. JPEG/PNG/GIF/WebP ≤10 MiB и ≤40 млн пикселей, MIME по байтам. WebP 480/960/1600 без увеличения, GIF — первый кадр. Возвращает url/variants/srcset/figure, пишет image_upload с автором API. Статьи/версии не создаются. DELETE/PUT/PATCH отсутствуют.",
     requestBody: { required: true, content: { "multipart/form-data": { schema: {
       type: "object", required: ["file", "alt"], properties: {
         file: {type:"string",format:"binary"}, alt:{type:"string",minLength:1,maxLength:1000},
@@ -488,6 +488,19 @@ spec.paths["/api/v1/articles/{id}/preview"] = {
       },
     })) },
   }),
+};
+const mediaHeaders = {
+  "Cache-Control": {description:"public, max-age=31536000, immutable",schema:{type:"string"}},
+  ETag:{description:"ETag объекта, используется с If-None-Match",schema:{type:"string"}},
+  "Last-Modified":{description:"Время изменения объекта в HTTP-date",schema:{type:"string"}},
+};
+spec.paths["/media/blog/{kind}/{file}"] = {
+  parameters:[{name:"kind",in:"path",required:true,schema:{type:"string",enum:["covers","content"]}},{name:"file",in:"path",required:true,schema:{type:"string",pattern:"^[A-Za-z0-9_-]{1,200}\\.(webp|png|jpe?g|gif)$"}}],
+  get: {operationId:"getBlogMedia",summary:"Публичное изображение блога",tags:["Images"],security:[],
+    description:"Байты S3 на домене сайта, без редиректа и cookie. Только qr/blog/covers и qr/blog/content. Посторонние ключи, SVG и обход пути запрещены. Ограниченный кеш процесса, immutable HTTP-кеш. If-None-Match/If-Modified-Since поддерживаются.",
+    parameters:[{name:"If-None-Match",in:"header",schema:{type:"string"}},{name:"If-Modified-Since",in:"header",schema:{type:"string"}}],
+    responses:{200:{description:"Изображение",headers:mediaHeaders,content:Object.fromEntries(["image/webp","image/png","image/jpeg","image/gif"].map(type=>[type,{schema:{type:"string",format:"binary"}}]))},304:{description:"Объект не изменён",headers:mediaHeaders},404:{description:"Нет изображения/недопустимый путь"},502:{description:"Хранилище временно недоступно, внутренние адреса не раскрываются"}}},
+  head:{operationId:"headBlogMedia",summary:"Метаданные изображения без тела",tags:["Images"],security:[],responses:{200:{description:"Метаданные",headers:mediaHeaders},304:{description:"Объект не изменён",headers:mediaHeaders},404:{description:"Изображение не найдено"},502:{description:"Хранилище недоступно"}}},
 };
 writeFileSync("openapi.yaml", JSON.stringify(spec, null, 2) + "\n");
 writeFileSync(

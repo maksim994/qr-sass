@@ -16,6 +16,8 @@ import { publicSiteUrl } from "@/lib/public-url";
 import { blogImageSrcset, type ImageVariant } from "@/lib/blog-image-markup";
 import { renderArticleBody } from "@/lib/blog-render";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
+import { blogMediaUrl, blogMediaImageSrc } from "@/lib/blog-media-url";
+import { getBlogCoverImage } from "@/lib/blog-cover-image";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -52,6 +54,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const url = publicSiteUrl(`/blog/${raw.slug}`);
   const seoTitle = post.metaTitle?.trim() || `${post.title} — Блог qr-s.ru`;
   const seoDescription = post.metaDescription?.trim() || (post.excerpt ?? post.title);
+  const cover = await getBlogCoverImage(raw.coverImageUrl);
+  const images = raw.coverImageUrl ? [{ url: blogMediaUrl(raw.coverImageUrl), ...(cover ? { width: cover.width, height: cover.height } : {}) }] : undefined;
 
   return {
     title: seoTitle,
@@ -60,9 +64,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: seoTitle,
       description: seoDescription,
-      images: raw.coverImageUrl ? [{ url: raw.coverImageUrl }] : undefined,
+      images,
       url,
     },
+    twitter: { card: "summary_large_image", title: seoTitle, description: seoDescription, images },
   };
 }
 
@@ -173,11 +178,11 @@ export default async function BlogPostPage({ params }: Props) {
   const articleUrl = publicSiteUrl(`/blog/${post.slug}`);
   const modifiedAt = post.contentUpdatedAt ?? post.updatedAt;
   const firstPublishedAt = post.firstPublishedAt ?? post.publishedAt!;
-  const coverAsset=post.coverImageUrl?await getDb().blogImage.findUnique({where:{url:post.coverImageUrl}}):null;
+  const coverAsset = await getBlogCoverImage(post.coverImageUrl);
   const body = renderArticleBody(content, post.format === "markdown" ? "markdown" : "html", post.faq);
   const jsonLd = buildArticleJsonLd({
     base: publicSiteUrl(), articleUrl, title, seoTitle, seoDescription,
-    coverImageUrl: post.coverImageUrl, publishedAt: firstPublishedAt,
+    coverImageUrl: post.coverImageUrl, coverImageWidth: coverAsset?.width, coverImageHeight: coverAsset?.height, publishedAt: firstPublishedAt,
     updatedAt: modifiedAt, likes: post.likes, authorName: post.authorName,
     faq: post.faq, structuredData,
   });
@@ -262,8 +267,8 @@ export default async function BlogPostPage({ params }: Props) {
               coverAsset ? (
               // New uploaded assets carry trusted responsive WebP dimensions; old covers retain their renderer.
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={coverAsset.url} srcSet={blogImageSrcset(coverAsset.variants as ImageVariant[])} sizes="(max-width:1000px) 100vw, 900px" alt={post.coverImageAlt ?? title} width={coverAsset.width} height={coverAsset.height} className="h-full w-full object-cover" fetchPriority="high" />
-              ) : <Image src={post.coverImageUrl} alt={post.coverImageAlt ?? title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
+              <img src={coverAsset.url} srcSet={coverAsset.variants.length ? blogImageSrcset(coverAsset.variants as ImageVariant[]) : undefined} sizes="(max-width:1000px) 100vw, 900px" alt={post.coverImageAlt ?? title} width={coverAsset.width} height={coverAsset.height} className="h-full w-full object-cover" fetchPriority="high" />
+              ) : <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={post.coverImageAlt ?? title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
             ) : (
               <svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1" />

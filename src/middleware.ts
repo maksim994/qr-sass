@@ -27,6 +27,8 @@ function csrfBlockedResponse() {
 }
 
 export async function middleware(request: NextRequest) {
+  // Public media must never generate a session/CSRF cookie or query editorial redirects.
+  if (request.nextUrl.pathname.startsWith("/media/")) return NextResponse.next();
   if (["GET", "HEAD"].includes(request.method) && request.nextUrl.pathname !== "/" && isEditorialRedirectPath(request.nextUrl.pathname)) {
     try {
       const source = normalizeRedirectPath(request.nextUrl.pathname);

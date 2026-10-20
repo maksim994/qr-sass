@@ -15,7 +15,7 @@ export const redirectInput = z
   })
   .strict();
 const reserved =
-  /^\/(?:api|admin|dashboard|preview|r|p|g|v|_next|login|register|forgot-password|reset-password|mini|expired|unavailable)(?:\/|$)/i;
+  /^\/(?:api|admin|dashboard|preview|media|r|p|g|v|_next|login|register|forgot-password|reset-password|mini|expired|unavailable)(?:\/|$)/i;
 export function normalizeRedirectPath(value: string) {
   if (
     !value.startsWith("/") ||

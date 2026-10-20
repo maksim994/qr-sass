@@ -1,4 +1,6 @@
 import { extractLegacyFaq, readBlogFaq } from "@/lib/blog-faq";
+import { blogMediaUrl } from "@/lib/blog-media-url";
+import { rewriteBlogMediaJsonLd } from "@/lib/blog-media-html";
 
 /** Форматирует JSON-LD для формы, сохраняя повреждённые данные для исправления. */
 export function formatStructuredDataForEdit(raw: string | null | undefined): string {
@@ -59,6 +61,8 @@ type DefaultArticleJsonLdParams = {
   seoTitle: string;
   seoDescription: string;
   coverImageUrl: string | null;
+  coverImageWidth?: number;
+  coverImageHeight?: number;
   publishedAt: Date;
   updatedAt: Date;
   likes: number;
@@ -110,7 +114,7 @@ export function buildDefaultArticleJsonLd(params: DefaultArticleJsonLdParams): R
         "@id": articleId,
         headline: title,
         description: seoDescription,
-        image: coverImageUrl ?? undefined,
+        image: coverImageUrl ? { "@type": "ImageObject", url: blogMediaUrl(coverImageUrl), ...(params.coverImageWidth && params.coverImageHeight ? { width: params.coverImageWidth, height: params.coverImageHeight } : {}) } : undefined,
         datePublished: publishedAt.toISOString(),
         dateModified: updatedAt.toISOString(),
         url: articleUrl,
@@ -160,7 +164,7 @@ export function buildArticleJsonLd(params: DefaultArticleJsonLdParams & { faq: u
     if (Array.isArray(custom["@graph"])) graph.push(...custom["@graph"] as Record<string, unknown>[]);
     else if (custom["@type"]) graph.push(custom);
   }
-  return generated;
+  return rewriteBlogMediaJsonLd(generated) as Record<string, unknown>;
 }
 
 export function serializeArticleJsonLd(value: unknown): string {

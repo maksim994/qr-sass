@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { getDb } from "@/lib/db";
 import { publicOrigin } from "@/lib/public-url";
 import { buildIndexableStaticPaths, isDeniedSitemapPath } from "@/lib/seo-hygiene";
+import { renderArticleBody } from "@/lib/blog-render";
+import { blogImageUrls } from "@/lib/blog-media-html";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +22,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const db = getDb();
     const blogPosts = await db.blogPost.findMany({
       where: { publishedAt: { not: null } },
-      select: { slug: true, updatedAt: true, contentUpdatedAt: true },
+      select: { slug: true, updatedAt: true, contentUpdatedAt: true, content: true, format: true, faq: true, coverImageUrl: true },
     });
     blogEntries = blogPosts
       .filter((post) => post.slug && !isDeniedSitemapPath(`/blog/${post.slug}`))
       .map((post) => ({
         url: `${base}/blog/${post.slug}`,
         lastModified: post.contentUpdatedAt ?? post.updatedAt,
-
+        images: blogImageUrls(renderArticleBody(post.content, post.format === "markdown" ? "markdown" : "html", post.faq).html, post.coverImageUrl),
       }));
   } catch {
     blogEntries = [];

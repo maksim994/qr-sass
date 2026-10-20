@@ -11,6 +11,7 @@ import { deleteFile } from "@/lib/s3";
 import { blogImageFigure, type ImageVariant } from "@/lib/blog-image-markup";
 import type { BlogActor } from "@/lib/blog-versions";
 import { BlogEditorError } from "@/lib/blog-editor";
+import { blogMediaUrlForKey } from "@/lib/blog-media-url";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = new Set([
@@ -83,7 +84,8 @@ export async function storeBlogImage(
           : getBlogContentImageKey(`${id}-${image.width}`);
       const entry = { key, url: "", width: image.width, height: image.height };
       variants.push(entry);
-      entry.url = await uploadFile(image.buffer, key, "image/webp", "public");
+      await uploadFile(image.buffer, key, "image/webp", "public");
+      entry.url = blogMediaUrlForKey(key);
     }
     const largest = variants.at(-1)!;
     const row = await getDb().blogImage.create({

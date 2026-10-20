@@ -1,4 +1,6 @@
 // Synthetic S3 protocol stub for named local/isolated integration tests. No real credentials/data.
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 assertSynthetic();
 function assertSynthetic() {
@@ -6,6 +8,9 @@ function assertSynthetic() {
     throw Error("Explicit synthetic fixture flag required");
 }
 const files = new Map();
+if (process.env.BLOG_TEST_S3_SEED) {
+  for (const file of JSON.parse(readFileSync(process.env.BLOG_TEST_S3_SEED,"utf8"))) files.set("/fixture/"+file.key, {body:Buffer.from(file.body,"base64"),type:file.contentType});
+}
 function decode(body, encoding) {
   if (!encoding?.includes("aws-chunked")) return body;
   const chunks = [];
@@ -57,6 +62,8 @@ const server = createServer(async (req, res) => {
   res.writeHead(200, {
     "Content-Type": file.type,
     "Content-Length": file.body.length,
+    ETag: `"${createHash("sha256").update(file.body).digest("hex")}"`,
+    "Last-Modified": "Tue, 20 Oct 2026 10:00:00 GMT",
   });
   res.end(req.method === "HEAD" ? undefined : file.body);
 });

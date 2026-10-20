@@ -2,6 +2,7 @@ import { JSDOM } from "jsdom";
 import MarkdownIt from "markdown-it";
 import { escapeImageAttribute, blogImageSrcset, type ImageVariant } from "@/lib/blog-image-markup";
 import { removeArticleImage, type ArticleImageRemoval } from "@/lib/blog-image-remove";
+import { sameBlogImageUrl, blogImageUrlAliases } from "@/lib/blog-media-url";
 
 export type ArticleImageReplacement = { url: string; alt: string; newUrl?: string; variants?: ImageVariant[] };
 export type ArticleImageChange = ArticleImageReplacement | ArticleImageRemoval;
@@ -46,7 +47,7 @@ export function replaceArticleImage(content: string, change: ArticleImageReplace
   const replacements: { start: number; end: number; text: string }[] = [];
   try {
     for (const img of dom.window.document.querySelectorAll("img")) {
-      if (img.getAttribute("src") !== url || img.closest("pre, code")) continue;
+      if (!sameBlogImageUrl(img.getAttribute("src"), url) || img.closest("pre, code")) continue;
       const location = dom.nodeLocation(img);
       if (!location) continue;
       if (inCode(location.startOffset, location.endOffset)) continue;
@@ -80,9 +81,9 @@ export function replaceArticleImage(content: string, change: ArticleImageReplace
   } finally {
     dom.window.close();
   }
-  const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escaped = blogImageUrlAliases(url).map(value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
   const markdown = new RegExp(
-    `!\\[((?:\\\\.|[^\\]\\\\])*)\\](\\(\\s*<?${escaped}>?(?:\\s+["'][^"']*["'])?\\s*\\))`,
+    `!\\[((?:\\\\.|[^\\]\\\\])*)\\](\\(\\s*<?(?:${escaped})>?(?:\\s+["'][^"']*["'])?\\s*\\))`,
     "g",
   );
   for (const match of format === "markdown" ? content.matchAll(markdown) : []) {

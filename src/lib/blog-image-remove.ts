@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
 import MarkdownIt from "markdown-it";
+import { sameBlogImageUrl } from "@/lib/blog-media-url";
 
 type Range = { start: number; end: number };
 export type ArticleImageRemoval = { url: string; remove: true; all?: boolean };
@@ -11,7 +12,7 @@ function srcsetContains(srcset: string, target: string) {
     rest = rest.replace(/^[\s,]+/, "");
     const token = /^\S+/.exec(rest)?.[0];
     if (!token) break;
-    if (token.replace(/,+$/, "") === target) return true;
+    if (sameBlogImageUrl(token.replace(/,+$/, ""), target)) return true;
     rest = rest.slice(token.length);
     if (!token.endsWith(",")) rest = rest.replace(/^[^,]*(?:,|$)/, "");
   }
@@ -64,7 +65,7 @@ export function removeArticleImage(content: string, url: string, format: "html" 
     visit(dom.window.document);
     for (const img of dom.window.document.querySelectorAll("img")) {
       if (img.closest("pre, code, script, style, textarea")) continue;
-      if (img.getAttribute("src") !== url && !srcsetContains(img.getAttribute("srcset") ?? "", url)) continue;
+      if (!sameBlogImageUrl(img.getAttribute("src"), url) && !srcsetContains(img.getAttribute("srcset") ?? "", url)) continue;
       const location = dom.nodeLocation(img);
       if (!location || excluded.slice(0, sourceExcludedCount).some(r => location.startOffset < r.end && location.endOffset > r.start)) continue;
       let element: Element = img;
@@ -112,7 +113,7 @@ export function removeArticleImage(content: string, url: string, format: "html" 
         const range = { start, end: i };
         if (overlaps(range)) continue;
         const tokens = md.parseInline(content.slice(start, i), {})[0]?.children;
-        if (tokens?.length !== 1 || tokens[0].type !== "image" || tokens[0].attrGet("src") !== url) continue;
+        if (tokens?.length !== 1 || tokens[0].type !== "image" || !sameBlogImageUrl(String(tokens[0].attrGet("src") ?? ""), url)) continue;
         ranges.push(range);
         count++;
       }

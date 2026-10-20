@@ -1,5 +1,6 @@
 "use client";
 
+import { blogMediaImageSrc } from "@/lib/blog-media-url";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useCallback } from "react";
@@ -81,7 +82,7 @@ export function BlogPostsSlider({ posts }: Props) {
               <div className="relative aspect-[16/10] overflow-hidden qrs-surface-subtle">
                 {post.coverImageUrl ? (
                   <Image
-                    src={post.coverImageUrl}
+                    src={blogMediaImageSrc(post.coverImageUrl)}
                     alt={post.title}
                     fill
                     sizes="(max-width: 640px) 78vw, 340px"
