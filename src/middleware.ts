@@ -15,6 +15,8 @@ const CSRF_SKIP_PREFIXES = [
   "/api/v1/articles",
   // Editorial REST endpoints accept Bearer only, never cookie sessions.
   "/api/v1/redirects",
+  // Standalone image upload also accepts only explicit Bearer credentials.
+  "/api/v1/images",
 ];
 
 function csrfBlockedResponse() {

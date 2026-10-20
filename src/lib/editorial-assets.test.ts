@@ -184,3 +184,47 @@ test("alt operation leaves Markdown code examples untouched", () => {
   assert.ok(patched.content.startsWith(code));
   assert.ok(patched.content.endsWith("![Новое описание](" + url + ")"));
 });
+
+test("image replacement preserves every unrelated HTML byte and updates responsive sources", async () => {
+  const { replaceArticleImage } = await import('./blog-image-content.ts');
+  const old = 'https://example.org/old.webp';
+  const next = 'https://example.org/new.webp';
+  const prefix = '<!--  legacy -->\n<H2 id=Keep data-x="1">Якорь &amp; текст</H2>\n<figure class=inline-quad data-slot=inline_1>';
+  const suffix = '</figure>\n<a href="#Keep">Ссылка</a><img src="https://example.org/other.webp" alt=other>\n';
+  const before = prefix + `<IMG class='keep' SRC='${old}' ALT='old' srcset='${old} 100w' sizes='100vw' width='100' height='50' loading=lazy />` + suffix;
+  const change = { url: old, newUrl: next, alt: 'Новая "картинка" <ok>', variants: [{ url: next, key: 'x', width: 960, height: 480 }] };
+  const patched = replaceArticleImage(before, change);
+  assert.ok(patched.found);
+  assert.ok(patched.content.startsWith(prefix) && patched.content.endsWith(suffix));
+  assert.ok(patched.content.includes("<IMG class='keep' "));
+  assert.ok(patched.content.includes('loading=lazy />'));
+  const dom = new JSDOM(patched.content);
+  const img = dom.window.document.querySelector('img')!;
+  assert.equal(img.getAttribute('src'), next);
+  assert.equal(img.getAttribute('alt'), change.alt);
+  assert.equal(img.getAttribute('srcset'), `${next} 960w`);
+  assert.equal(img.getAttribute('width'), '960');
+  dom.window.close();
+  const external = replaceArticleImage(before, { url: old, newUrl: next, alt: 'External' }).content;
+  assert.doesNotMatch(external, /srcset=|sizes=|width=|height=/);
+  assert.ok(external.startsWith(prefix) && external.endsWith(suffix));
+});
+test("image replacement no-op stays byte-identical and never changes HTML code or similar URLs", async () => {
+  const { replaceArticleImage } = await import('./blog-image-content.ts');
+  const url = 'https://example.org/a.webp?x=1&y=2';
+  const source = `<IMG src='https://example.org/a.webp?x=1&amp;y=2' alt='Same' />`;
+  assert.deepEqual(replaceArticleImage(source, {url, alt:'Same', newUrl:url}), {content:source, found:true});
+  const excluded = `<pre><img src="${url}" alt="code"></pre><img src="${url}0" alt="similar"><!-- <img src="${url}"> -->`;
+  assert.deepEqual(replaceArticleImage(excluded, {url, alt:'new', newUrl:'https://example.org/new.webp'}), {content:excluded, found:false});
+});
+test("Markdown replacement preserves title and code; new URLs cannot break destination syntax", async () => {
+  const { replaceArticleImage } = await import('./blog-image-content.ts');
+  const url = 'https://example.org/a.webp';
+  const code = `\`![Code](${url})\`\n\n\`\`\`md\n![Code](${url})\n\`\`\`\n\n`;
+  const result = replaceArticleImage(code + `![Old](${url} "Title")`, {url, newUrl:'https://example.org/new(1).webp?x=1&y=2', alt:'[Новый]'}, 'markdown');
+  assert.ok(result.content.startsWith(code));
+  const rendered = renderArticleBody(result.content, 'markdown').html;
+  assert.match(rendered, /src="https:\/\/example.org\/new%281%29.webp\?x=1&amp;y=2"/);
+  assert.match(result.content, /"Title"\)/);
+  assert.match(rendered, /alt="\[Новый\]"/);
+});

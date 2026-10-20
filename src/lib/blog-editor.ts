@@ -4,7 +4,7 @@ import { blogFaqSchema } from "@/lib/blog-faq";
 import { renderArticleBody, sanitizeArticleHtml } from "@/lib/blog-render";
 import { normalizeStructuredDataInput } from "@/lib/blog-structured-data";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
-import { replaceArticleImageAlt } from "@/lib/blog-image-content";
+import { replaceArticleImage, type ArticleImageChange } from "@/lib/blog-image-content";
 
 export const blogEditorSchema = z.object({
   title: z.string().trim().min(1).max(500),
@@ -75,12 +75,12 @@ export function hasSubstantiveArticleChange(before: Record<string, unknown>, aft
     canonical(before[key] ?? "") !== canonical(after[key] ?? ""));
 }
 
-export function prepareArticleSave(input: BlogEditorInput, existing: EditableArticle | null, now = new Date(), imageAlt?:{url:string;alt:string}) {
+export function prepareArticleSave(input: BlogEditorInput, existing: EditableArticle | null, now = new Date(), imageChange?: ArticleImageChange) {
   if (!existing && (!input.title || !input.slug || input.content === undefined)) throw new BlogEditorError(MSG.BLOG_INPUT_INVALID);
   const format = input.format ?? existing?.format ?? "markdown";
   if (existing?.format === "html" && format === "markdown" && !input.confirmConversion) throw new BlogEditorError(MSG.BLOG_CONVERSION_REQUIRED);
   if (existing?.format === "markdown" && format !== "markdown") throw new BlogEditorError(MSG.BLOG_FORMAT_LOCKED);
-  if (existing?.format === "html" && format === "html" && input.content !== undefined && input.content !== existing.content && (!imageAlt || input.content !== replaceArticleImageAlt(existing.content,imageAlt.url,imageAlt.alt).content)) throw new BlogEditorError(MSG.BLOG_LEGACY_READONLY);
+  if (existing?.format === "html" && format === "html" && input.content !== undefined && input.content !== existing.content && (!imageChange || input.content !== replaceArticleImage(existing.content,imageChange).content)) throw new BlogEditorError(MSG.BLOG_LEGACY_READONLY);
   if (existing && input.expectedUpdatedAt && new Date(input.expectedUpdatedAt).getTime() !== existing.updatedAt.getTime()) throw new BlogEditorError(MSG.BLOG_SAVE_CONFLICT, 409);
   const slug = normalizeSlug(input.slug ?? existing?.slug ?? "");
   if (existing && (existing.firstPublishedAt || existing.publishedAt) && slug !== existing.slug) throw new BlogEditorError(MSG.BLOG_SLUG_LOCKED, 403);
@@ -116,10 +116,10 @@ export function prepareArticleSave(input: BlogEditorInput, existing: EditableArt
     faq: fields.faq as z.infer<typeof blogFaqSchema>,
     renderedHtml: format === "markdown" ? body.html : null,
     legacyHtml: existing?.legacyHtml ?? (existing?.format === "html" && format === "markdown" ? existing.content : null),
-    readingTimeMinutes: input.readingTimeMinutes ?? ((input.content === undefined && existing) ? existing.readingTimeMinutes : calculateReadingTimeMinutes(body.html)),
-    firstPublishedAt,
-    status, scheduledAt,
-    publishedAt: status === "published" ? firstPublishedAt : null,
+    readingTimeMinutes: input.readingTimeMinutes ?? (((input.content === undefined || imageChange) && existing) ? existing.readingTimeMinutes : calculateReadingTimeMinutes(body.html)),
+    firstPublishedAt: imageChange && existing ? existing.firstPublishedAt : firstPublishedAt,
+    status, scheduledAt: imageChange && existing ? existing.scheduledAt ?? null : scheduledAt,
+    publishedAt: imageChange && existing ? existing.publishedAt : status === "published" ? firstPublishedAt : null,
     contentUpdatedAt: meaningful && !input.minorEdit ? now : existing?.contentUpdatedAt ?? existing?.updatedAt ?? now,
   };
 }

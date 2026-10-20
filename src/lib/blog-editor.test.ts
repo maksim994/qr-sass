@@ -146,3 +146,21 @@ test("FAQ object key order from PostgreSQL does not change the editorial date on
   assert.deepEqual(prepareArticleSave({ faq: [...normalizedFaq].reverse() }, stored, now).contentUpdatedAt, now);
   assert.deepEqual(prepareArticleSave({ faq: [{ ...normalizedFaq[0], answer: "Изменённый ответ" }, normalizedFaq[1]] }, stored, now).contentUpdatedAt, now);
 });
+
+test("targeted HTML image replacement preserves publication/editorial dates with minorEdit and blocks a broader overwrite", async () => {
+  const { replaceArticleImage } = await import('./blog-image-content.ts');
+  const old = 'https://example.org/old.webp', newUrl = 'https://example.org/new.webp';
+  const row = {...existing, content: existing.content + `<IMG src='${old}' alt='old'>`, readingTimeMinutes:7};
+  const change = {url:old,newUrl,alt:'Новая картинка'};
+  const content = replaceArticleImage(row.content,change).content;
+  const saved = prepareArticleSave({content,minorEdit:true},row,now,change);
+  assert.equal(saved.content,content);
+  assert.equal(saved.format,'html');
+  assert.equal(saved.legacyHtml,null);
+  assert.deepEqual(saved.contentUpdatedAt,then);
+  assert.deepEqual(saved.publishedAt,then);
+  assert.equal(saved.firstPublishedAt,null);
+  assert.equal(saved.readingTimeMinutes,7);
+  assert.deepEqual(prepareArticleSave({content},row,now,change).contentUpdatedAt,now);
+  assert.throws(()=>prepareArticleSave({content:content+'<p>Injected</p>'},row,now,change), /только для чтения/);
+});

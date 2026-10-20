@@ -276,7 +276,7 @@ const spec = {
     },
   },
 };
-spec.info.version = "1.1.0";
+spec.info.version = "1.2.0";
 spec.tags.push(
   {
     name: "Redirects",
@@ -426,12 +426,12 @@ spec.paths["/api/v1/articles/{id}/images"] = {
     },
   ),
   patch: operation(
-    "patchArticleImageAlt",
-    "Изменить alt существующего изображения",
+    "patchArticleImage",
+    "Заменить изображение или изменить alt",
     {
       tags: ["Images"],
       description:
-        "URL должен совпадать с обложкой или картинкой в исходном тексте. Меняются только соответствующие alt; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются.",
+        "URL должен совпадать с обложкой или картинкой в исходном тексте. newUrl (HTTP(S), необязателен) заменяет точный URL и alt всех совпавших изображений/обложки. srcset/размеры берутся из загруженного файла, для внешнего URL устаревшие атрибуты удаляются. minorEdit=true сохраняет contentUpdatedAt; updatedAt — служебное время записи. Меняются только соответствующие изображения; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются.",
       requestBody: {
         required: true,
         content: {
@@ -445,6 +445,8 @@ spec.paths["/api/v1/articles/{id}/images"] = {
                 url: { type: "string", minLength: 1, maxLength: 4000 },
                 alt: { type: "string", minLength: 1, maxLength: 1000 },
                 comment: { type: "string", maxLength: 2000 },
+                newUrl: { type: "string", format: "uri", maxLength: 4000, description: "HTTP(S) без credentials/пробелов; без newUrl меняется только alt" },
+                minorEdit: fields.minorEdit,
               },
             },
           },
@@ -456,6 +458,33 @@ spec.paths["/api/v1/articles/{id}/images"] = {
       },
     },
   ),
+};
+spec.paths["/api/v1/images"] = {
+  post: operation("uploadImage", "Загрузить изображение без статьи", {
+    tags: ["Images"],
+    description: "Тот же Bearer и общий лимит 60/мин. Обязательные file/alt; kind необязателен, по умолчанию content. JPEG/PNG/GIF/WebP ≤10 MiB и ≤40 млн пикселей, MIME по байтам. WebP 480/960/1600 без увеличения, GIF — первый кадр. Возвращает url/variants/srcset/figure, пишет image_upload с автором API. Статьи/версии не создаются. DELETE/PUT/PATCH отсутствуют.",
+    requestBody: { required: true, content: { "multipart/form-data": { schema: {
+      type: "object", required: ["file", "alt"], properties: {
+        file: {type:"string",format:"binary"}, alt:{type:"string",minLength:1,maxLength:1000},
+        kind:{type:"string",enum:["cover","content"],default:"content"},
+      },
+    } } } },
+    responses: { ...errors, 201: response("Изображение загружено", success(ref("BlogImage"))) },
+  }),
+};
+spec.paths["/api/v1/articles/{id}/preview"] = {
+  parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+  post: operation("previewArticle", "Отрендерить HTML без сохранения", {
+    description: "Передайте JSON {} для сохранённого тела либо временные content/format/faq. Используется тот же рендерер, что на сайте. Ответ содержит html и items (оглавление). Статья, даты, версии, журнал и токены ссылок предпросмотра не меняются; учитывается только использование API-ключа. Публикационных полей нет.",
+    requestBody: { required: true, content: { "application/json": { schema: {
+      type: "object", additionalProperties: false, properties: { content: fields.content, format: fields.format, faq: fields.faq },
+    } } } },
+    responses: { ...errors, 200: response("Предпросмотр", success({
+      type: "object", required: ["html", "items"], properties: {
+        html: { type: "string" }, items: { type: "array", items: { type: "object", required: ["id", "text"], properties: { id: {type:"string"},text:{type:"string"} } } },
+      },
+    })) },
+  }),
 };
 writeFileSync("openapi.yaml", JSON.stringify(spec, null, 2) + "\n");
 writeFileSync(

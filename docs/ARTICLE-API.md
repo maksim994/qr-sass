@@ -97,3 +97,35 @@ JSON
 ```
 
 Новые методы используют тот же ключ и общий лимит 60 запросов в минуту. Право публикации новых статей остаётся у администратора.
+
+## ТЗ-07: отдельная загрузка, замена и предпросмотр (OpenAPI 1.2.0)
+
+Тот же Bearer-ключ и общий лимит 60 запросов/мин. Загрузить файл без изменения статьи:
+
+```bash
+curl https://qr-s.ru/api/v1/images \
+  -H "Authorization: Bearer $ARTICLE_API_KEY" \
+  -F 'file=@picture.png' -F 'alt=Описание картинки'
+```
+
+Ответ `data`: `url` крупнейшего WebP, `variants` (url/width/height), `srcset`, размеры, alt и готовый `figure`. `kind=content` по умолчанию, можно `cover`. Те же ограничения: 10 MiB, 40 млн пикселей, JPEG/PNG/GIF/WebP с проверкой MIME; WebP 480/960/1600 без увеличения, GIF — первый кадр. Статья/версия не создаются, загрузка записывается в журнал с автором API.
+
+Заменить все изображения/обложку с **точным** прежним URL (без `newUrl` — прежняя смена alt):
+
+```bash
+curl -X PATCH "https://qr-s.ru/api/v1/articles/$ARTICLE_ID/images" \
+  -H "Authorization: Bearer $ARTICLE_API_KEY" -H 'Content-Type: application/json' \
+  --data '{"version":3,"url":"https://example.org/old.webp","newUrl":"https://s3.mvmolkov.ru/example/new-1600.webp","alt":"Новое описание","minorEdit":true,"comment":"Заменена иллюстрация"}'
+```
+
+`version` обязательна: устаревшая версия — 409, URL не найден — 404. `newUrl` — HTTP(S) без credentials и пробелов. Загруженный через API файл получает свои srcset/размеры; для внешнего URL старые srcset/sizes/width/height удаляются. Меняются только атрибуты совпавших img или inline Markdown-картинки и обложка. Остальные исходные байты HTML/якоря, формат и legacyHtml сохраняются; HTML не требует конвертации. Кодовые примеры пропускаются. Создаются версия и событие с автором API. `minorEdit=true` сохраняет `contentUpdatedAt` (дату сайта/sitemap); `updatedAt` — служебная дата сохранения версии. Без minorEdit существенная замена обновляет редакционную дату. Даты публикации/расписания не меняются.
+
+Предпросмотр сохранённого тела: POST с `{}`; временного — с `content`, `format` и/или `faq`:
+
+```bash
+curl -X POST "https://qr-s.ru/api/v1/articles/$ARTICLE_ID/preview" \
+  -H "Authorization: Bearer $ARTICLE_API_KEY" -H 'Content-Type: application/json' \
+  --data '{"content":"## Новый раздел {#section}\n\nТекст","format":"markdown"}'
+```
+
+Ответ `data.html` и `data.items` (оглавление) соответствует рендереру сайта. Предпросмотр не меняет статью, даты, версии, журнал или ссылки предпросмотра; учитывается только использование ключа. Неизвестные поля отклоняются. Публикация, расписание и удаление через API по-прежнему запрещены.

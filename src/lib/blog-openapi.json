@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QR-S Article API",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Все записи создают версию с автором API: <имя ключа>. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
     "license": {
       "name": "Proprietary",
@@ -1015,8 +1015,8 @@
         }
       },
       "patch": {
-        "operationId": "patchArticleImageAlt",
-        "summary": "Изменить alt существующего изображения",
+        "operationId": "patchArticleImage",
+        "summary": "Заменить изображение или изменить alt",
         "security": [
           {
             "ArticleBearer": []
@@ -1025,7 +1025,7 @@
         "tags": [
           "Images"
         ],
-        "description": "URL должен совпадать с обложкой или картинкой в исходном тексте. Меняются только соответствующие alt; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются.",
+        "description": "URL должен совпадать с обложкой или картинкой в исходном тексте. newUrl (HTTP(S), необязателен) заменяет точный URL и alt всех совпавших изображений/обложки. srcset/размеры берутся из загруженного файла, для внешнего URL устаревшие атрибуты удаляются. minorEdit=true сохраняет contentUpdatedAt; updatedAt — служебное время записи. Меняются только соответствующие изображения; поддерживаются готовые figure, HTML img и обычные inline Markdown images. HTML не конвертируется; остальные исходные фрагменты сохраняются. Создаётся версия и запись журнала, публикационные права не меняются.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1057,6 +1057,16 @@
                   "comment": {
                     "type": "string",
                     "maxLength": 2000
+                  },
+                  "newUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 4000,
+                    "description": "HTTP(S) без credentials/пробелов; без newUrl меняется только alt"
+                  },
+                  "minorEdit": {
+                    "type": "boolean",
+                    "description": "Сохраняет редакционную дату. No-op/пробелы сохраняют дату независимо от флага."
                   }
                 }
               }
@@ -1080,6 +1090,361 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/Article"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос / JSON-LD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нет действующего ключа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Запрещённая операция / опубликованный slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Статья не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт версии или slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "60 запросов в минуту",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Секунд до следующего окна",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/images": {
+      "post": {
+        "operationId": "uploadImage",
+        "summary": "Загрузить изображение без статьи",
+        "security": [
+          {
+            "ArticleBearer": []
+          }
+        ],
+        "tags": [
+          "Images"
+        ],
+        "description": "Тот же Bearer и общий лимит 60/мин. Обязательные file/alt; kind необязателен, по умолчанию content. JPEG/PNG/GIF/WebP ≤10 MiB и ≤40 млн пикселей, MIME по байтам. WebP 480/960/1600 без увеличения, GIF — первый кадр. Возвращает url/variants/srcset/figure, пишет image_upload с автором API. Статьи/версии не создаются. DELETE/PUT/PATCH отсутствуют.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "alt"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "alt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "cover",
+                      "content"
+                    ],
+                    "default": "content"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Изображение загружено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlogImage"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос / JSON-LD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нет действующего ключа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Запрещённая операция / опубликованный slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Статья не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт версии или slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "60 запросов в минуту",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Секунд до следующего окна",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{id}/preview": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "previewArticle",
+        "summary": "Отрендерить HTML без сохранения",
+        "security": [
+          {
+            "ArticleBearer": []
+          }
+        ],
+        "tags": [
+          "Articles"
+        ],
+        "description": "Передайте JSON {} для сохранённого тела либо временные content/format/faq. Используется тот же рендерер, что на сайте. Ответ содержит html и items (оглавление). Статья, даты, версии, журнал и токены ссылок предпросмотра не меняются; учитывается только использование API-ключа. Публикационных полей нет.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "maxLength": 1000000,
+                    "description": "Исходный HTML или Markdown, inline images: ![alt](https://…). Старый HTML меняется только при явном переходе на Markdown с confirmConversion=true."
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "html",
+                      "markdown"
+                    ]
+                  },
+                  "faq": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "question",
+                        "answer"
+                      ],
+                      "properties": {
+                        "question": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "answer": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 10000
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Предпросмотр",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "html",
+                        "items"
+                      ],
+                      "properties": {
+                        "html": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "id",
+                              "text"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }

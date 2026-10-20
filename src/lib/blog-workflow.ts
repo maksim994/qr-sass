@@ -8,7 +8,7 @@ import { MSG } from "@/lib/user-messages";
 import { assertActiveBlogToken } from "@/lib/blog-api-tokens";
 import { assertArticleRouteAvailable } from "@/lib/editorial-redirects";
 import { RedirectError } from "@/lib/editorial-redirect-input";
-import { replaceArticleImageAlt } from "@/lib/blog-image-content";
+import { replaceArticleImage, type ArticleImageChange } from "@/lib/blog-image-content";
 
 // Keep the scheduler and snapshot writer independent of renderer dependencies in the worker image.
 import { articleFields, articleSnapshot, recordSave, type BlogActor } from "@/lib/blog-versions";
@@ -22,9 +22,12 @@ export async function saveArticleApi(input: BlogEditorInput, actor: BlogActor, t
   return persistArticle(input, actor, id, { tokenId, version });
 }
 export async function saveArticleImageAlt(id:string,version:number,url:string,alt:string,actor:BlogActor,tokenId:string,comment?:string) {
-  return persistArticle({comment:comment??"Изменён alt изображения"},actor,id,{tokenId,version,imageAlt:{url,alt}});
+  return saveArticleImage(id,version,{url,alt},actor,tokenId,{comment});
 }
-async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId: string; version?: number; imageAlt?:{url:string;alt:string} }) {
+export async function saveArticleImage(id: string, version: number, change: ArticleImageChange, actor: BlogActor, tokenId: string, options: { comment?: string; minorEdit?: boolean } = {}) {
+  return persistArticle({ comment: options.comment ?? (change.newUrl ? "Заменено изображение через API" : "Изменён alt изображения"), minorEdit: options.minorEdit }, actor, id, { tokenId, version, imageChange: change });
+}
+async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId: string; version?: number; imageChange?: ArticleImageChange }) {
   return getDb().$transaction(async tx => {
     if (api) await assertActiveBlogToken(tx, api.tokenId);
     const before = id ? await tx.blogPost.findUnique({ where: { id } }) : null;
@@ -33,13 +36,19 @@ async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: str
       const latest = await tx.blogRevision.findFirst({ where: { postId: id }, orderBy: { number: "desc" }, select: { number: true } });
       if (api.version !== (latest?.number ?? 0)) throw new BlogEditorError(MSG.BLOG_SAVE_CONFLICT, 409);
     }
-    if(before && api?.imageAlt) {
-      const {url,alt}=api.imageAlt, patched=replaceArticleImageAlt(before.content,url,alt,before.format==="markdown"?"markdown":"html");
-      const cover=before.coverImageUrl===url;
-      if(!patched.found&&!cover)throw new BlogEditorError(MSG.BLOG_IMAGE_NOT_FOUND,404);
-      input={...input,...(patched.found?{content:patched.content}:{}),...(cover?{coverImageAlt:alt}:{})};
+    if (before && api?.imageChange) {
+      const change = { ...api.imageChange };
+      if (change.newUrl && change.newUrl !== change.url) {
+        const image = await tx.blogImage.findUnique({ where: { url: change.newUrl } });
+        change.variants = image?.variants as ArticleImageChange["variants"];
+      }
+      const patched = replaceArticleImage(before.content, change, before.format === "markdown" ? "markdown" : "html");
+      const cover = before.coverImageUrl === change.url;
+      if (!patched.found && !cover) throw new BlogEditorError(MSG.BLOG_IMAGE_NOT_FOUND, 404);
+      input = { ...input, ...(patched.found ? { content: patched.content } : {}), ...(cover ? { coverImageAlt: change.alt, ...(change.newUrl ? { coverImageUrl: change.newUrl } : {}) } : {}) };
+      api.imageChange = change;
     }
-    const data = prepareArticleSave(input, before, new Date(), api?.imageAlt);
+    const data = prepareArticleSave(input, before, new Date(), api?.imageChange);
     try { await assertArticleRouteAvailable(tx, data.slug, data.status, !!before?.publishedAt); } catch(error) { if(error instanceof RedirectError) throw new BlogEditorError(error.message,error.status); throw error; }
     const post = before
       ? await tx.blogPost.update({ where: { id: before.id, updatedAt: before.updatedAt }, data: { ...data, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } })

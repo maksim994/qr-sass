@@ -9,7 +9,7 @@ import {
   storeBlogImage,
   discardBlogImage,
 } from "@/lib/blog-image-upload";
-import { saveArticleApi, saveArticleImageAlt } from "@/lib/blog-workflow";
+import { saveArticleApi, saveArticleImage } from "@/lib/blog-workflow";
 import { BlogEditorError } from "@/lib/blog-editor";
 import { MSG } from "@/lib/user-messages";
 import { notifyArticleIndexNow } from "@/lib/blog-indexnow";
@@ -89,6 +89,13 @@ export async function PATCH(req: Request, context: Context) {
         version: z.number().int().min(0),
         url: z.string().min(1).max(4000),
         alt: imageAltSchema,
+        newUrl: z.url({ protocol: /^https?$/ }).max(4000).refine(value => {
+          try {
+            const url = new URL(value);
+            return !url.username && !url.password && !/[\s<>]/.test(value);
+          } catch { return false; }
+        }).optional(),
+        minorEdit: z.boolean().optional(),
         comment: z.string().max(2000).optional(),
       })
       .strict()
@@ -97,15 +104,14 @@ export async function PATCH(req: Request, context: Context) {
       return privateApi(
         apiError(MSG.BLOG_IMAGE_INPUT, "VALIDATION_ERROR", 400),
       );
-    const { version, url, alt, comment } = parsed.data,
-      saved = await saveArticleImageAlt(
+    const { version, url, alt, newUrl, minorEdit, comment } = parsed.data,
+      saved = await saveArticleImage(
         id,
         version,
-        url,
-        alt,
+        { url, alt, newUrl },
         auth.actor,
         auth.tokenId,
-        comment,
+        { comment, minorEdit },
       );
     if (saved.post.publishedAt && saved.editorialChanged)
       await notifyArticleIndexNow(saved.post.slug);

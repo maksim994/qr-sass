@@ -1,5 +1,8 @@
 import { JSDOM } from "jsdom";
 import MarkdownIt from "markdown-it";
+import { escapeImageAttribute, blogImageSrcset, type ImageVariant } from "@/lib/blog-image-markup";
+
+export type ArticleImageChange = { url: string; alt: string; newUrl?: string; variants?: ImageVariant[] };
 /** Change only matched image tags/Markdown labels; preserve the rest of the source byte for byte. */
 export function replaceArticleImageAlt(
   content: string,
@@ -7,6 +10,11 @@ export function replaceArticleImageAlt(
   alt: string,
   format: "html" | "markdown" = "html",
 ) {
+  return replaceArticleImage(content, { url, alt }, format);
+}
+
+export function replaceArticleImage(content: string, change: ArticleImageChange, format: "html" | "markdown" = "html") {
+  const { url, alt, newUrl, variants } = change;
   const codeRanges: { start: number; end: number }[] = [];
   if (format === "markdown") {
     const offsets = [0];
@@ -29,19 +37,40 @@ export function replaceArticleImageAlt(
   const inCode = (start: number, end: number) =>
     codeRanges.some((range) => start < range.end && end > range.start);
   const dom = new JSDOM(content, { includeNodeLocations: true });
+  let found = false;
   const replacements: { start: number; end: number; text: string }[] = [];
   try {
     for (const img of dom.window.document.querySelectorAll("img")) {
-      if (img.getAttribute("src") !== url) continue;
+      if (img.getAttribute("src") !== url || img.closest("pre, code")) continue;
       const location = dom.nodeLocation(img);
       if (!location) continue;
       if (inCode(location.startOffset, location.endOffset)) continue;
-      img.setAttribute("alt", alt);
-      replacements.push({
-        start: location.startOffset,
-        end: location.endOffset,
-        text: img.outerHTML,
-      });
+      found = true;
+      // Attribute offsets preserve case, quotes, spaces and unrelated attributes exactly.
+      const attrs: Record<string, string | null> = { alt };
+      if (newUrl !== undefined && newUrl !== url) {
+        attrs.src = newUrl;
+        const largest = variants?.at(-1);
+        Object.assign(attrs, {
+          srcset: largest ? blogImageSrcset(variants!) : null,
+          sizes: largest ? "(max-width: 960px) 100vw, 960px" : null,
+          width: largest ? String(largest.width) : null,
+          height: largest ? String(largest.height) : null,
+        });
+      }
+      const insert: string[] = [];
+      for (const [name, value] of Object.entries(attrs)) {
+        if (img.getAttribute(name) === value) continue;
+        const attr = location.attrs?.[name];
+        const text = value === null ? "" : `${name}="${escapeImageAttribute(value)}"`;
+        if (attr) replacements.push({ start: attr.startOffset, end: attr.endOffset, text });
+        else if (value !== null) insert.push(text);
+      }
+      if (insert.length) {
+        const tag = content.slice(location.startOffset, location.endOffset);
+        const end = location.endOffset - (tag.endsWith("/>") ? 2 : 1);
+        replacements.push({ start: end, end, text: " " + insert.join(" ") });
+      }
     }
   } finally {
     dom.window.close();
@@ -59,6 +88,8 @@ export function replaceArticleImageAlt(
       replacements.some((r) => offset < r.end && end > r.start)
     )
       continue;
+    found = true;
+    if (newUrl === undefined && match[1] === alt) continue;
     replacements.push({
       start: offset,
       end,
@@ -66,11 +97,11 @@ export function replaceArticleImageAlt(
         .replace(/\\/g, "\\\\")
         .replace(/\[/g, "\\[")
         .replace(/\]/g, "\\]")
-        .replace(/[\r\n]/g, " ")}]${match[2]}`,
+        .replace(/[\r\n]/g, " ")}]${newUrl === undefined || newUrl === url ? match[2] : `(<${newUrl.replace(/\(/g, "%28").replace(/\)/g, "%29")}>${match[2].match(/\s+(["'][^"']*["'])\s*\)$/)?.[0].replace(/\)$/, "") ?? ""})`}`,
     });
   }
   let result = content;
   for (const r of replacements.sort((a, b) => b.start - a.start))
     result = result.slice(0, r.start) + r.text + result.slice(r.end);
-  return { content: result, found: replacements.length > 0 };
+  return { content: result, found };
 }
