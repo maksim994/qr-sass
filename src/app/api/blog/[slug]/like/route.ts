@@ -41,11 +41,10 @@ export async function POST(
     return NextResponse.json({ likes: post.likes });
   }
 
-  const updated = await db.blogPost.update({
-    where: { id: post.id },
-    data: { likes: { increment: 1 } },
-    select: { likes: true },
-  });
+  // An atomic counter update must not change Prisma's editorial updatedAt fallback.
+  const [updated] = await db.$queryRaw<{ likes: number }[]>`
+    UPDATE "BlogPost" SET "likes" = "likes" + 1 WHERE "id" = ${post.id} RETURNING "likes"
+  `;
 
   const res = NextResponse.json({ likes: updated.likes });
   res.cookies.set(cookieName, "1", {

@@ -4,7 +4,7 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
-# --ignore-scripts: postinstall копирует CKEditor CSS, но scripts/ ещё не скопирован
+# Generate Prisma explicitly in the builder after sources have been copied.
 RUN npm ci --ignore-scripts
 
 FROM base AS builder
@@ -19,7 +19,6 @@ ENV DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public"
 ENV JWT_SECRET="build-time-jwt-secret-do-not-use-in-runtime"
 ENV APP_URL="https://qr-s.ru"
 ENV REDIS_URL="redis://localhost:6379"
-RUN node scripts/copy-ckeditor-css.mjs
 RUN npx prisma generate
 RUN npm run build
 

@@ -104,6 +104,13 @@ model BlogPost {
   metaDescription   String?        // SEO description (если не задан — используется excerpt)
   excerpt           String?
   content           String         @db.Text
+  format            String         @default("html") // html | markdown; existing content is never converted by migration
+  renderedHtml      String?        @db.Text // sanitized Markdown render at save; sanitized again on read
+  legacyHtml        String?        @db.Text // exact original HTML saved on explicit conversion
+  faq               Json           @default("[]")
+  showPrintSizeIntro Boolean       @default(true)
+  contentUpdatedAt  DateTime?      // null on legacy rows: use updatedAt until first editorial save
+  firstPublishedAt  DateTime?      // preserves original publication across unpublish/republish
   coverImageUrl     String?
   authorName        String?        // отображаемое имя автора
   structuredData    String?        @db.Text // JSON-LD микроразметка (если не задана — генерируется автоматически)

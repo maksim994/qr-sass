@@ -1,60 +1,19 @@
 "use client";
 
-import DOMPurify from "isomorphic-dompurify";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\p{L}\p{N}-]/gu, "");
-}
+import type { ArticleBody } from "@/lib/blog-render";
 
-type TocItem = { id: string; text: string };
+type Props = { body: ArticleBody };
 
-function withHeadingIds(html: string): { html: string; items: TocItem[] } {
-  const items: TocItem[] = [];
-  const usedIds = new Set<string>();
-  const next = html.replace(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi, (_full, attrs = "", inner: string) => {
-    const text = inner.replace(/<[^>]+>/g, "").trim();
-    let id = slugify(text) || `section-${items.length}`;
-    if (usedIds.has(id)) {
-      let n = 1;
-      while (usedIds.has(`${id}-${n}`)) n += 1;
-      id = `${id}-${n}`;
-    }
-    usedIds.add(id);
-    items.push({ id, text });
-    const cleanedAttrs = String(attrs).replace(/\s+id=(["']).*?\1/i, "");
-    return `<h2${cleanedAttrs} id="${id}">${inner}</h2>`;
-  });
-  return { html: next, items };
-}
-
-const SANITIZE = {
-  ALLOWED_TAGS: [
-    "h1", "h2", "h3", "h4", "h5", "h6", "p", "br", "hr",
-    "strong", "b", "em", "i", "u", "s", "code", "pre",
-    "ul", "ol", "li", "blockquote", "a", "img",
-    "table", "thead", "tbody", "tr", "th", "td",
-  ],
-  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel"],
-};
-
-type Props = { content: string };
-
-export function BlogPostContent({ content }: Props) {
+export function BlogPostContent({ body }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
 
-  const { html, items: tocItems } = useMemo(() => {
-    const sanitized = DOMPurify.sanitize(content, SANITIZE);
-    return withHeadingIds(sanitized.replace(/<table\b[\s\S]*?<\/table>/gi, table => `<div class="qrs-article-table-scroll" role="region" aria-label="Таблица с горизонтальной прокруткой" tabindex="0">${table}</div>`));
-  }, [content]);
+  const { html, items: tocItems } = body;
 
   const scrollToSection = (id: string) => {
     const el = containerRef.current;
@@ -105,49 +64,7 @@ export function BlogPostContent({ content }: Props) {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [content]);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || tocItems.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-            break;
-          }
-        }
-      },
-      { rootMargin: "-100px 0px -60% 0px", threshold: 0 }
-    );
-
-    tocItems.forEach(({ id }) => {
-      const target = el.querySelector(`#${CSS.escape(id)}`);
-      if (target) observer.observe(target);
-    });
-
-    return () => observer.disconnect();
-  }, [tocItems]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const articleTop = rect.top + window.scrollY;
-      const articleHeight = el.offsetHeight;
-      const viewportCenter = window.scrollY + window.innerHeight / 2;
-      const readAmount = Math.max(0, Math.min(articleHeight, viewportCenter - articleTop));
-      const pct = articleHeight > 0 ? Math.min(100, Math.round((readAmount / articleHeight) * 100)) : 0;
-      setProgress(pct);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [content]);
+  }, [html]);
 
   return (
     <div className="qrs-article-grid">

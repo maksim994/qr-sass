@@ -1,3 +1,5 @@
+import { extractLegacyFaq, readBlogFaq } from "@/lib/blog-faq";
+
 /** Форматирует JSON-LD для формы, сохраняя повреждённые данные для исправления. */
 export function formatStructuredDataForEdit(raw: string | null | undefined): string {
   if (!raw?.trim()) return "";
@@ -125,4 +127,43 @@ export function buildDefaultArticleJsonLd(params: DefaultArticleJsonLdParams): R
       },
     ],
   };
+}
+
+/** Field-owned types take priority even inside nested @graph/arrays or multi-type nodes. */
+function withoutOwnedTypes(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(withoutOwnedTypes).filter(item => item !== undefined);
+  if (!value || typeof value !== "object") return value;
+  const record = value as Record<string, unknown>;
+  const types = Array.isArray(record["@type"]) ? record["@type"] : [record["@type"]];
+  if (types.some(type => ["Article", "BlogPosting", "FAQPage"].includes(String(type)))) return undefined;
+  return Object.fromEntries(Object.entries(record).flatMap(([key, item]) => {
+    const clean = withoutOwnedTypes(item);
+    return clean === undefined ? [] : [[key, clean]];
+  }));
+}
+
+export function buildArticleJsonLd(params: DefaultArticleJsonLdParams & { faq: unknown; structuredData: string | null }): Record<string, unknown> {
+  const generated = buildDefaultArticleJsonLd(params);
+  const graph = generated["@graph"] as Record<string, unknown>[];
+  const article = graph.find(node => node["@type"] === "Article")!;
+  article["@type"] = "BlogPosting";
+  article.author = { "@type": "Person", name: params.authorName?.trim() || "Мольков Максим", url: "https://mvmolkov.ru/" };
+  const fieldFaq = readBlogFaq(params.faq);
+  // Compatibility until the administrator explicitly imports legacy questions into fields.
+  const faq = fieldFaq.length ? fieldFaq : extractLegacyFaq(params.structuredData);
+  if (faq.length) graph.push({
+    "@type": "FAQPage", "@id": `${params.articleUrl}#faq`,
+    mainEntity: faq.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })),
+  });
+  const custom = withoutOwnedTypes(parseStructuredDataForPage(params.structuredData)) as Record<string, unknown> | undefined;
+  if (custom) {
+    if (Array.isArray(custom["@graph"])) graph.push(...custom["@graph"] as Record<string, unknown>[]);
+    else if (custom["@type"]) graph.push(custom);
+  }
+  return generated;
+}
+
+export function serializeArticleJsonLd(value: unknown): string {
+  // Prevent a JSON string containing </script> from closing the JSON-LD element.
+  return JSON.stringify(value).replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
 }

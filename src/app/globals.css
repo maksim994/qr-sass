@@ -3622,47 +3622,7 @@ html.has-cookie-banner .qrs-hero {
   color: var(--text-muted);
 }
 
-/* CKEditor — DS theme overrides */
-.qrs-admin-ckeditor .ck.ck-editor__main > .ck-editor__editable {
-  min-height: 280px;
-  background: var(--surface-card) !important;
-  color: var(--text-default) !important;
-  border-color: var(--border-default) !important;
-}
 
-.qrs-admin-ckeditor .ck.ck-toolbar {
-  background: var(--surface-subtle) !important;
-  border-color: var(--border-default) !important;
-}
-
-.qrs-admin-ckeditor .ck.ck-toolbar .ck-button {
-  color: var(--text-default) !important;
-}
-
-.qrs-admin-ckeditor .ck.ck-toolbar .ck-button:hover,
-.qrs-admin-ckeditor .ck.ck-toolbar .ck-button.ck-on {
-  background: var(--color-primary-subtle) !important;
-  color: var(--color-primary) !important;
-}
-
-.qrs-admin-ckeditor .ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused {
-  border-color: var(--border-focus) !important;
-  box-shadow: var(--shadow-focus) !important;
-}
-
-.qrs-admin-ckeditor .ck.ck-dropdown__panel,
-.qrs-admin-ckeditor .ck.ck-list {
-  background: var(--surface-card) !important;
-  border-color: var(--border-default) !important;
-}
-
-.qrs-admin-ckeditor .ck.ck-list__item .ck-button {
-  color: var(--text-default) !important;
-}
-
-.qrs-admin-ckeditor .ck.ck-list__item .ck-button:hover:not(.ck-disabled) {
-  background: var(--surface-subtle) !important;
-}
 
 .fk-select__control--sm {
   height: var(--control-h-sm);
@@ -4538,3 +4498,9 @@ html.has-cookie-banner .qrs-hero {
   outline: 2px solid var(--border-focus);
   outline-offset: 3px;
 }
+
+/* Article content can contain long URLs; tables scroll inside their own region. */
+.qrs-body { overflow-wrap: anywhere; min-width: 0; }
+.qrs-body h3 { scroll-margin-top: 96px; }
+.qrs-body figure { margin: 1.25rem 0; }
+.qrs-body figcaption { margin-top: 8px; color: var(--text-default); font-size: .875rem; }

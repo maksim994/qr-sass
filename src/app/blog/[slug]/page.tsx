@@ -11,8 +11,9 @@ import { BlogViewTracker } from "@/components/blog/blog-view-tracker";
 import { Breadcrumbs } from "@/components/blog/breadcrumbs";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ArticleShare } from "@/components/blog/article-share";
-import { buildDefaultArticleJsonLd, parseStructuredDataForPage } from "@/lib/blog-structured-data";
+import { buildArticleJsonLd, serializeArticleJsonLd } from "@/lib/blog-structured-data";
 import { publicSiteUrl } from "@/lib/public-url";
+import { renderArticleBody } from "@/lib/blog-render";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
   if (!raw) return { title: "Статья не найдена" };
 
-  const post = sanitizeBlogFields({
+  const post = raw.format === "markdown" ? raw : sanitizeBlogFields({
     slug: raw.slug,
     title: raw.title,
     excerpt: raw.excerpt,
@@ -77,6 +78,11 @@ export default async function BlogPostPage({ params }: Props) {
       metaDescription: true,
       excerpt: true,
       content: true,
+      format: true,
+      faq: true,
+      showPrintSizeIntro: true,
+      contentUpdatedAt: true,
+      firstPublishedAt: true,
       coverImageUrl: true,
       authorName: true,
       structuredData: true,
@@ -91,7 +97,7 @@ export default async function BlogPostPage({ params }: Props) {
   });
   if (!post) notFound();
 
-  const copy = sanitizeBlogFields({
+  const copy = post.format === "markdown" ? post : sanitizeBlogFields({
     slug: post.slug,
     title: post.title,
     excerpt: post.excerpt,
@@ -163,27 +169,21 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   const articleUrl = publicSiteUrl(`/blog/${post.slug}`);
-  const customJsonLd = parseStructuredDataForPage(structuredData);
-  const jsonLd =
-    customJsonLd ??
-    buildDefaultArticleJsonLd({
-      base: publicSiteUrl(),
-      articleUrl,
-      title,
-      seoTitle,
-      seoDescription,
-      coverImageUrl: post.coverImageUrl,
-      publishedAt: post.publishedAt!,
-      updatedAt: post.updatedAt,
-      likes: post.likes,
-      authorName: post.authorName,
-    });
+  const modifiedAt = post.contentUpdatedAt ?? post.updatedAt;
+  const firstPublishedAt = post.firstPublishedAt ?? post.publishedAt!;
+  const body = renderArticleBody(content, post.format === "markdown" ? "markdown" : "html", post.faq);
+  const jsonLd = buildArticleJsonLd({
+    base: publicSiteUrl(), articleUrl, title, seoTitle, seoDescription,
+    coverImageUrl: post.coverImageUrl, publishedAt: firstPublishedAt,
+    updatedAt: modifiedAt, likes: post.likes, authorName: post.authorName,
+    faq: post.faq, structuredData,
+  });
 
   const publishedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric" })
+    ? new Date(firstPublishedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric", timeZone: "Europe/Moscow" })
     : null;
-  const updatedDate = post.updatedAt
-    ? new Date(post.updatedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric" })
+  const updatedDate = modifiedAt
+    ? new Date(modifiedAt).toLocaleDateString("ru", { year: "numeric", month: "long", day: "numeric", timeZone: "Europe/Moscow" })
     : null;
 
   return (
@@ -223,7 +223,7 @@ export default async function BlogPostPage({ params }: Props) {
                 {excerpt}
               </p>
             )}
-            <BlogSeoIntro slug={post.slug} />
+            <BlogSeoIntro slug={post.slug} showPrintSizeIntro={post.showPrintSizeIntro} />
             <div style={{ marginTop: "26px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap", paddingTop: "22px", borderTop: "1px solid var(--border-subtle)" }}>
               {post.authorName ? (
                 <span style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -271,7 +271,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       <section style={{ paddingBottom: "var(--section-y)" }}>
         <div className="fk-container">
-          <BlogPostContent content={content} />
+          <BlogPostContent body={body} />
           {/telegram|max|instagram|vizit/i.test(post.slug) && <p style={{maxWidth:"720px",margin:"24px auto"}}>Для другой социальной сети: <Link href="/blog/qr-kod-dlya-vkontakte">как создать QR-код для ВКонтакте</Link>.</p>}
           <div style={{ maxWidth: "720px", margin: "48px auto 0" }}>
             <ArticleUsefulBlock slug={post.slug} initialLikes={post.likes} />
@@ -295,7 +295,7 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </section>
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeArticleJsonLd(jsonLd) }} />
     </main>
   );
 }

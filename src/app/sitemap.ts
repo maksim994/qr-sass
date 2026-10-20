@@ -20,13 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const db = getDb();
     const blogPosts = await db.blogPost.findMany({
       where: { publishedAt: { not: null } },
-      select: { slug: true, updatedAt: true },
+      select: { slug: true, updatedAt: true, contentUpdatedAt: true },
     });
     blogEntries = blogPosts
       .filter((post) => post.slug && !isDeniedSitemapPath(`/blog/${post.slug}`))
       .map((post) => ({
         url: `${base}/blog/${post.slug}`,
-        lastModified: post.updatedAt,
+        lastModified: post.contentUpdatedAt ?? post.updatedAt,
 
       }));
   } catch {

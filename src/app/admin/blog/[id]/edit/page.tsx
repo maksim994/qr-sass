@@ -1,3 +1,6 @@
+import { readBlogFaq } from "@/lib/blog-faq";
+import { renderArticleBody } from "@/lib/blog-render";
+import { sanitizeBlogFields } from "@/lib/blog-sanitize";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { ensureBlogCategories } from "@/lib/blog-categories";
@@ -31,6 +34,7 @@ export default async function EditBlogPostPage({ params }: Props) {
       <AdminCard>
         <BlogPostForm
           mode="edit"
+          initialBody={renderArticleBody(post.format === "markdown" ? post.content : sanitizeBlogFields({ slug: post.slug, content: post.content }).content, post.format === "markdown" ? "markdown" : "html", post.faq)}
           categories={categories}
           post={{
             id: post.id,
@@ -40,6 +44,12 @@ export default async function EditBlogPostPage({ params }: Props) {
             metaDescription: post.metaDescription ?? "",
             excerpt: post.excerpt ?? "",
             content: post.content,
+            format: post.format === "markdown" ? "markdown" : "html",
+            faq: readBlogFaq(post.faq),
+            showPrintSizeIntro: post.showPrintSizeIntro,
+            legacyHtml: post.legacyHtml,
+            expectedUpdatedAt: post.updatedAt.toISOString(),
+            wasPublished: !!(post.firstPublishedAt ?? post.publishedAt),
             coverImageUrl: post.coverImageUrl ?? "",
             authorName: post.authorName ?? "",
             readingTimeMinutes: post.readingTimeMinutes != null ? String(post.readingTimeMinutes) : "",
