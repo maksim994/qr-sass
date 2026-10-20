@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { MSG } from "@/lib/user-messages";
 import type { NextRequest } from "next/server";
 import { pathNeedsNoindexHeader } from "@/lib/seo-hygiene";
+import { getDb } from "@/lib/db";
+import { isEditorialRedirectPath, normalizeRedirectPath } from "@/lib/editorial-redirect-input";
+import { publicOrigin } from "@/lib/public-url";
 
 const CSRF_SKIP_PREFIXES = [
   "/api/billing/webhook",
@@ -10,6 +13,8 @@ const CSRF_SKIP_PREFIXES = [
   "/api/gdpr/consent",
   // Articles v1 accepts only explicit Bearer credentials, never session cookies.
   "/api/v1/articles",
+  // Editorial REST endpoints accept Bearer only, never cookie sessions.
+  "/api/v1/redirects",
 ];
 
 function csrfBlockedResponse() {
@@ -19,7 +24,20 @@ function csrfBlockedResponse() {
   });
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  if (["GET", "HEAD"].includes(request.method) && request.nextUrl.pathname !== "/" && isEditorialRedirectPath(request.nextUrl.pathname)) {
+    try {
+      const source = normalizeRedirectPath(request.nextUrl.pathname);
+      const rule = await getDb().blogRedirect.findUnique({ where: { source }, select: { target: true } });
+      if (rule) {
+        const target = new URL(rule.target, publicOrigin());
+        if (!target.search) target.search = request.nextUrl.search;
+        const redirect = NextResponse.redirect(target, 301);
+        redirect.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+        return redirect;
+      }
+    } catch { /* Keep existing routes available if the optional redirect lookup fails. */ }
+  }
   const requestHeaders = new Headers(request.headers);
   const privateSurface = request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";
   // Trusted flag suppresses custom head and analytics on previews and one-time secret forms.
@@ -76,6 +94,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: "nodejs",
   matcher: [
     /*
      * Match all request paths except for the ones starting with:

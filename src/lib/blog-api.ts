@@ -4,6 +4,7 @@ import { BlogApiAuthError } from "@/lib/blog-api-tokens";
 import { apiError } from "@/lib/api-response";
 import { articleStatus } from "@/lib/blog-versions";
 import { MSG } from "@/lib/user-messages";
+import { RedirectError } from "@/lib/editorial-redirect-input";
 
 export { articleCreateSchema, articlePatchSchema, articleListSchema, forbiddenApiPublication } from "@/lib/blog-api-input";
 export function articleApiView(post: BlogPost, version: number) {
@@ -16,6 +17,7 @@ export function privateApi<T extends Response>(response: T): T {
   return response;
 }
 export function blogApiError(error: unknown) {
+  if (error instanceof RedirectError) return privateApi(apiError(error.message, error.status === 409 ? "CONFLICT" : error.status === 403 ? "FORBIDDEN" : error.status === 404 ? "NOT_FOUND" : "VALIDATION_ERROR", error.status));
   if (error instanceof BlogApiAuthError) {
     const response = apiError(error.message, error.status === 429 ? "RATE_LIMITED" : error.status === 404 ? "NOT_FOUND" : "UNAUTHORIZED", error.status);
     if (error.status === 401) response.headers.set("WWW-Authenticate", 'Bearer realm="articles"');

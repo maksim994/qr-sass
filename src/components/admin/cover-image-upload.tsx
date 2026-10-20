@@ -4,9 +4,13 @@ import { fetchApi } from "@/lib/client-api";
 import { useCallback, useRef, useState } from "react";
 import { Alert } from "@/components/ui";
 import { PreviewImage } from "@/components/ui/preview-image";
+import { MSG } from "@/lib/user-messages";
+import type { ImageVariant } from "@/lib/blog-image-markup";
+export type BlogUploadedImage={url:string;alt:string;width:number;height:number;variants:ImageVariant[];figure:string};
 
 type Props = {
-  onUploaded: (url: string) => void;
+  onUploaded: (url: string,image:BlogUploadedImage) => void;
+  alt: string;
   currentUrl?: string;
   uploadEndpoint?: string;
 };
@@ -14,6 +18,7 @@ type Props = {
 export function CoverImageUpload({
   onUploaded,
   currentUrl,
+  alt,
   uploadEndpoint = "/api/admin/blog/upload",
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -22,10 +27,12 @@ export function CoverImageUpload({
 
   const upload = useCallback(
     async (file: File) => {
+      if(!alt.trim()){setError(MSG.BLOG_IMAGE_ALT);return;}
       setUploading(true);
       setError("");
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("alt",alt.trim());
 
       try {
         const res = await fetchApi(uploadEndpoint, {
@@ -35,14 +42,14 @@ export function CoverImageUpload({
         });
         const json = await res.json();
         if (!json.ok) throw new Error(json.error ?? "Ошибка загрузки");
-        onUploaded(json.data.url);
+        onUploaded(json.data.url,json.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Не удалось загрузить");
       } finally {
         setUploading(false);
       }
     },
-    [onUploaded, uploadEndpoint],
+    [onUploaded, uploadEndpoint,alt],
   );
 
   return (
@@ -69,6 +76,8 @@ export function CoverImageUpload({
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
+            // Permit choosing the same file again after correcting alt or a failed upload.
+            e.currentTarget.value = "";
             if (f) upload(f);
           }}
         />
@@ -105,6 +114,7 @@ export function CoverImageUpload({
             </p>
             <p style={{ marginTop: 4, font: "var(--fw-regular) 12px/1.3 var(--font-sans)", color: "var(--text-muted)" }}>
               JPEG, PNG, GIF, WebP. Будут оптимизированы и загружены на S3.
+              {" "}Сначала укажите alt. WebP до 480/960/1600 px; GIF — первый кадр.
             </p>
           </div>
         )}

@@ -613,3 +613,24 @@ model BlogApiToken {
   windowStartedAt DateTime?
   requestCount Int @default(0)
 }
+
+model BlogRedirect {
+  id String @id @default(cuid())
+  source String @unique
+  target String
+  comment String?
+  actorName String
+  createdAt DateTime @default(now())
+}
+
+model BlogImage {
+  id String @id
+  url String @unique
+  kind String
+  alt String
+  width Int
+  height Int
+  variants Json
+  actorName String
+  createdAt DateTime @default(now())
+}

@@ -15,7 +15,7 @@ const rawPolicy: sanitizeHtml.IOptions = {
   allowedTags: ["figure", "img", "figcaption"],
   allowedAttributes: {
     figure: ["class", "data-slot"],
-    img: ["src", "alt", "width", "height", "loading"],
+    img: ["src", "alt", "srcset", "sizes", "width", "height", "loading"],
   },
   allowedSchemes: ["http", "https"],
   allowProtocolRelative: false,
@@ -49,7 +49,7 @@ export function sanitizeArticleHtml(html: string): string {
     allowedAttributes: {
       h2: ["id"], h3: ["id"],
       a: ["href", "title", "target", "rel"],
-      img: ["src", "alt", "width", "height", "loading"],
+      img: ["src", "alt", "srcset", "sizes", "width", "height", "loading"],
       figure: ["class", "data-slot"],
       ol: ["start"], th: ["align"], td: ["align"],
       input: ["type", "checked", "disabled"],

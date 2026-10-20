@@ -53,14 +53,47 @@ curl --fail-with-body -sS --config "$ARTICLE_CURL_CONFIG" -X PATCH \
 JSON
 ```
 
-Meta Title — до 500 символов, Meta Description — до 2000, excerpt — до 10000, content — до 1000000 (всё тело запроса ≤1 MiB). FAQ — до 100 пунктов, вопрос до 500 и ответ до 10000 символов. JSON-LD принимает объект или строку, проверяется JSON.parse; невалидный JSON/неизвестные поля — 400. Изображения в тексте задаются Markdown `![alt](https://…)` или допустимым HTML; всё проходит действующий санитайзер. Обложка — `coverImageUrl` HTTP(S) и `coverImageAlt` до 1000 символов; null alt использует заголовок. Загрузка файлов через API не входит в этап 3.
+Meta Title — до 500 символов, Meta Description — до 2000, excerpt — до 10000, content — до 1000000 (всё тело запроса ≤1 MiB). FAQ — до 100 пунктов, вопрос до 500 и ответ до 10000 символов. JSON-LD принимает объект или строку, проверяется JSON.parse; невалидный JSON/неизвестные поля — 400. Изображения в тексте задаются Markdown `![alt](https://…)` или допустимым HTML; всё проходит действующий санитайзер. Обложка — `coverImageUrl` HTTP(S) и `coverImageAlt` до 1000 символов; null alt использует заголовок. Загрузка файлов и точечная смена alt доступны с этапа 4 (ниже).
 
 Старый HTML остаётся только для чтения. Чтобы изменить тело, получите его через GET, подготовьте Markdown и передайте `format: "markdown", confirmConversion: true`. Исходный HTML сохранится в `legacyHtml` и версии №0. Массовой/автоматической конвертации нет. Вернуться к HTML можно штатным откатом в админке.
 
-Запрещены (403): изменение slug после первой публикации и любые поля `status`, `published`, `publishedAt`, `scheduledAt`, `firstPublishedAt` в PATCH. Опубликованный текст обновляется сразу, но право публикации/снятия/расписания остаётся в админке. DELETE/PUT и методы работы с версиями/журналом отсутствуют (405/404). Редиректы — отдельный этап 4.
+Запрещены (403): изменение slug после первой публикации и любые поля `status`, `published`, `publishedAt`, `scheduledAt`, `firstPublishedAt` в PATCH. Опубликованный текст обновляется сразу, но право публикации/снятия/расписания остаётся в админке. DELETE/PUT и методы работы с версиями/журналом отсутствуют (405/404). Для редиректов доступны GET/POST; удаление остаётся в админке.
 
 Публичная схема:
 
 ```bash
 curl --fail-with-body -sS "$BASE/api/v1/openapi.json"
 ```
+
+## Изображения (этап 4)
+
+POST `/api/v1/articles/{id}/images`: multipart `file`, обязательный `alt` (1–1000 символов), `kind=content|cover`, текущая `version`. JPEG/PNG/GIF/WebP до 10 MiB и 40 млн пикселей; MIME проверяется по содержимому. GIF сохраняется первым кадром. Создаются WebP шириной до 480/960/1600 px без увеличения оригинала в прежнем S3. Ответ 201 содержит `image` (url, variants, размеры, srcset, безопасный figure) и обновлённую `article` с новой version. Content добавляется figure в конец Markdown; cover обновляет обложку. Для HTML доступна обложка; вставка в тело требует явной конвертации в Markdown. При конфликте 409 новые объекты удаляются.
+
+```bash
+curl --fail-with-body -sS --config "$ARTICLE_CURL_CONFIG" \
+  -F 'file=@image.png' -F 'alt=Описание картинки' -F 'kind=content' -F 'version=1' \
+  "$BASE/api/v1/articles/$ARTICLE_ID/images"
+```
+
+PATCH того же URL меняет только alt обложки/совпадающих изображений по точному `url`. Работает с существующим HTML без конвертации; кодовые примеры и остальные поля остаются прежними. Сначала получите актуальную version. Создаётся версия и событие с API-автором.
+
+```bash
+curl --fail-with-body -sS --config "$ARTICLE_CURL_CONFIG" -X PATCH \
+  -H 'Content-Type: application/json' --data-binary @- "$BASE/api/v1/articles/$ARTICLE_ID/images" <<'JSON'
+{"version":2,"url":"https://s3.mvmolkov.ru/path/image.webp","alt":"Уточнённое описание","comment":"Исправлен alt"}
+JSON
+```
+
+## Редиректы (этап 4)
+
+GET `/api/v1/redirects` возвращает список, в том числе перенесённые четыре 301 и информационные защищённые системные правила 308. POST принимает `source`, `target`, необязательный `comment` и создаёт 301 с API-автором в журнале. Source — путь сайта без query/hash; target — путь или HTTP(S) URL. Внутренние пути нормализуются по слешам и регистру; внешние пути сохраняют регистр. Занятые опубликованные/запланированные страницы и системные/QR-маршруты защищены. Циклы и цепочки отклоняются, сообщение предлагает конечный адрес. DELETE доступен только администратору в интерфейсе.
+
+```bash
+curl --fail-with-body -sS --config "$ARTICLE_CURL_CONFIG" "$BASE/api/v1/redirects"
+curl --fail-with-body -sS --config "$ARTICLE_CURL_CONFIG" \
+  -H 'Content-Type: application/json' --data-binary @- "$BASE/api/v1/redirects" <<'JSON'
+{"source":"/blog/old-example","target":"/blog/new-example","comment":"Переезд статьи"}
+JSON
+```
+
+Новые методы используют тот же ключ и общий лимит 60 запросов в минуту. Право публикации новых статей остаётся у администратора.

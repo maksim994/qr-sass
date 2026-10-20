@@ -32,7 +32,7 @@ export default async function BlogHistoryPage({ searchParams }: { searchParams: 
       <tbody>{events.map(event => <tr key={event.id}>
         <td data-label="Дата · МСК">{adminDate(event.createdAt)}</td>
         <td data-label="Кто">{event.actorName}<br />{event.source}</td>
-        <td data-label="Статья и действие">{blogEventLabels[event.type] ?? event.type}<br />{event.postId.startsWith("token:") ? <Link href="/admin/blog/tokens" target="_blank" rel="noopener noreferrer">{event.postTitle}</Link> : event.type === "delete" ? event.postTitle : <Link href={`/admin/blog/${event.postId}/versions`}>{event.postTitle}</Link>}</td>
+        <td data-label="Статья и действие">{blogEventLabels[event.type] ?? event.type}<br />{event.postId.startsWith("redirect:") ? <Link href="/admin/blog/redirects">{event.postTitle}</Link> : event.postId.startsWith("image:") ? event.postTitle : event.postId.startsWith("token:") ? <Link href="/admin/blog/tokens" target="_blank" rel="noopener noreferrer">{event.postTitle}</Link> : event.type === "delete" ? event.postTitle : <Link href={`/admin/blog/${event.postId}/versions`}>{event.postTitle}</Link>}</td>
         <td data-label="Изменённые поля">{event.fields.filter(f => f !== "renderedHtml").map(f => blogFieldLabels[f] ?? f).join(", ") || "—"}{event.comment && <p>{event.comment}</p>}</td>
       </tr>)}</tbody>
     </table> : <p className={styles.empty}>Записей пока нет или они не соответствуют фильтрам.</p>}</div>

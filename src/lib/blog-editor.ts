@@ -4,6 +4,7 @@ import { blogFaqSchema } from "@/lib/blog-faq";
 import { renderArticleBody, sanitizeArticleHtml } from "@/lib/blog-render";
 import { normalizeStructuredDataInput } from "@/lib/blog-structured-data";
 import { calculateReadingTimeMinutes } from "@/lib/reading-time";
+import { replaceArticleImageAlt } from "@/lib/blog-image-content";
 
 export const blogEditorSchema = z.object({
   title: z.string().trim().min(1).max(500),
@@ -74,12 +75,12 @@ export function hasSubstantiveArticleChange(before: Record<string, unknown>, aft
     canonical(before[key] ?? "") !== canonical(after[key] ?? ""));
 }
 
-export function prepareArticleSave(input: BlogEditorInput, existing: EditableArticle | null, now = new Date()) {
+export function prepareArticleSave(input: BlogEditorInput, existing: EditableArticle | null, now = new Date(), imageAlt?:{url:string;alt:string}) {
   if (!existing && (!input.title || !input.slug || input.content === undefined)) throw new BlogEditorError(MSG.BLOG_INPUT_INVALID);
   const format = input.format ?? existing?.format ?? "markdown";
   if (existing?.format === "html" && format === "markdown" && !input.confirmConversion) throw new BlogEditorError(MSG.BLOG_CONVERSION_REQUIRED);
   if (existing?.format === "markdown" && format !== "markdown") throw new BlogEditorError(MSG.BLOG_FORMAT_LOCKED);
-  if (existing?.format === "html" && format === "html" && input.content !== undefined && input.content !== existing.content) throw new BlogEditorError(MSG.BLOG_LEGACY_READONLY);
+  if (existing?.format === "html" && format === "html" && input.content !== undefined && input.content !== existing.content && (!imageAlt || input.content !== replaceArticleImageAlt(existing.content,imageAlt.url,imageAlt.alt).content)) throw new BlogEditorError(MSG.BLOG_LEGACY_READONLY);
   if (existing && input.expectedUpdatedAt && new Date(input.expectedUpdatedAt).getTime() !== existing.updatedAt.getTime()) throw new BlogEditorError(MSG.BLOG_SAVE_CONFLICT, 409);
   const slug = normalizeSlug(input.slug ?? existing?.slug ?? "");
   if (existing && (existing.firstPublishedAt || existing.publishedAt) && slug !== existing.slug) throw new BlogEditorError(MSG.BLOG_SLUG_LOCKED, 403);

@@ -48,7 +48,7 @@ export function AdminShell({ children, user }: Props) {
   const navLink = (href: string, label: string, icon: string | string[]) => {
     const paths = Array.isArray(icon) ? icon : [icon];
     const active =
-      href === "/admin" ? pathname === href : pathname.startsWith(href);
+      href === "/admin" ? pathname === href : pathname.startsWith(href) && !adminNavItems.some(item => item.href !== href && item.href.startsWith(href + "/") && pathname.startsWith(item.href));
     return (
       <Link
         key={href}
@@ -111,7 +111,7 @@ export function AdminShell({ children, user }: Props) {
           {
             label: "Контент и настройки",
             paths: [
-              "/admin/blog",
+              "/admin/blog", "/admin/blog/redirects",
               "/admin/qr-types",
               "/admin/plans",
               "/admin/site-settings",

@@ -22,3 +22,15 @@ export async function optimizeImageForBlog(buffer: Buffer): Promise<Buffer> {
     .webp({ quality: QUALITY })
     .toBuffer();
 }
+
+export async function optimizeBlogImageVariants(buffer:Buffer) {
+  const meta=await sharp(buffer,{limitInputPixels:40_000_000,animated:false}).metadata();
+  const rotated=[5,6,7,8].includes(meta.orientation??0);
+  const width=(rotated?meta.height:meta.width)??0;
+  if(!width)throw new Error("Invalid image dimensions");
+  const widths=[...new Set([480,960,1600].map(w=>Math.min(w,width)))].sort((a,b)=>a-b);
+  return Promise.all(widths.map(async width=>{
+    const {data,info}=await sharp(buffer,{limitInputPixels:40_000_000,animated:false}).rotate().resize({width,withoutEnlargement:true}).webp({quality:85}).toBuffer({resolveWithObject:true});
+    return {buffer:data,width:info.width,height:info.height};
+  }));
+}

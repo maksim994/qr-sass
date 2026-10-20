@@ -1,4 +1,5 @@
 "use client";
+import { blogImageFigure, type ImageVariant } from "@/lib/blog-image-markup";
 import styles from "@/components/admin/admin.module.css";
 
 import { useState } from "react";
@@ -66,6 +67,7 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
   const [confirmConversion, setConfirmConversion] = useState(false);
   const [imageAlt, setImageAlt] = useState("");
   const [lastContentImageUrl, setLastContentImageUrl] = useState("");
+  const [lastImageData,setLastImageData]=useState<{url:string;alt:string;width:number;height:number;variants:ImageVariant[]}|null>(null);
   const [state, setState] = useState<BlogPostData>({
     title: post?.title ?? "",
     slug: post?.slug ?? "",
@@ -95,8 +97,8 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
 
   function insertContentImage(url: string) {
     if (!imageAlt.trim() || state.format !== "markdown") return;
-    const escapeAttribute = (value: string) => value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const img = `<figure><img src="${escapeAttribute(url)}" alt="${escapeAttribute(imageAlt.trim())}" loading="lazy"></figure>`;
+    if(!lastImageData)return;
+    const img=blogImageFigure({...lastImageData,url,alt:imageAlt.trim()});
     setState(current => ({ ...current, content: current.content ? `${current.content}\n\n${img}` : img }));
   }
 
@@ -357,18 +359,19 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
 
       <Field
         label="Изображение в тексте статьи"
-        hint="Загрузите картинку, укажите описание и добавьте её в Markdown. В HTML-режиме сначала подтвердите конвертацию."
+        hint="Сначала укажите описание (alt), затем загрузите картинку и добавьте её в Markdown. В HTML-режиме сначала подтвердите конвертацию."
       >
+        <Field label="Описание картинки (alt)" htmlFor="blog-image-alt">
+          <Input id="blog-image-alt" value={imageAlt} maxLength={1000} onChange={event => setImageAlt(event.target.value)} placeholder="Что изображено на картинке" />
+        </Field>
         <CoverImageUpload
+          alt={imageAlt}
           uploadEndpoint="/api/admin/blog/upload-content"
-          onUploaded={(url) => setLastContentImageUrl(url)}
+          onUploaded={(url,image) => {setLastContentImageUrl(url);setLastImageData(image);}}
         />
         {lastContentImageUrl ? (
           <div className="qrs-upload-result">
             <p className="qrs-upload-result__url">{lastContentImageUrl}</p>
-            <Field label="Описание картинки (alt)" htmlFor="blog-image-alt">
-              <Input id="blog-image-alt" value={imageAlt} onChange={event => setImageAlt(event.target.value)} placeholder="Что изображено на картинке" />
-            </Field>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
@@ -394,8 +397,13 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         ) : null}
       </Field>
 
+      <Field label="Alt обложки" htmlFor="blog-cover-alt" hint="Описание изображения для экранного диктора. Обязательно перед загрузкой новой обложки.">
+        <Input id="blog-cover-alt" value={state.coverImageAlt ?? ""} maxLength={1000} onChange={e => setState(s => ({ ...s, coverImageAlt: e.target.value }))} />
+      </Field>
+
       <Field label="Обложка статьи">
         <CoverImageUpload
+          alt={state.coverImageAlt??""}
           currentUrl={state.coverImageUrl || undefined}
           onUploaded={(url) => setState((s) => ({ ...s, coverImageUrl: url }))}
         />
@@ -409,10 +417,6 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
             Убрать обложку
           </button>
         ) : null}
-      </Field>
-
-      <Field label="Alt обложки" htmlFor="blog-cover-alt" hint="Описание изображения для экранного диктора. По умолчанию — заголовок статьи.">
-        <Input id="blog-cover-alt" value={state.coverImageAlt ?? ""} maxLength={1000} onChange={e => setState(s => ({ ...s, coverImageAlt: e.target.value }))} />
       </Field>
 
       <Field

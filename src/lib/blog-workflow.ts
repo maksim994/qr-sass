@@ -6,6 +6,9 @@ import { renderArticleBody } from "@/lib/blog-render";
 import { readBlogFaq } from "@/lib/blog-faq";
 import { MSG } from "@/lib/user-messages";
 import { assertActiveBlogToken } from "@/lib/blog-api-tokens";
+import { assertArticleRouteAvailable } from "@/lib/editorial-redirects";
+import { RedirectError } from "@/lib/editorial-redirect-input";
+import { replaceArticleImageAlt } from "@/lib/blog-image-content";
 
 // Keep the scheduler and snapshot writer independent of renderer dependencies in the worker image.
 import { articleFields, articleSnapshot, recordSave, type BlogActor } from "@/lib/blog-versions";
@@ -18,7 +21,10 @@ export async function saveArticle(input: BlogEditorInput, actor: BlogActor, id?:
 export async function saveArticleApi(input: BlogEditorInput, actor: BlogActor, tokenId: string, id?: string, version?: number) {
   return persistArticle(input, actor, id, { tokenId, version });
 }
-async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId: string; version?: number }) {
+export async function saveArticleImageAlt(id:string,version:number,url:string,alt:string,actor:BlogActor,tokenId:string,comment?:string) {
+  return persistArticle({comment:comment??"Изменён alt изображения"},actor,id,{tokenId,version,imageAlt:{url,alt}});
+}
+async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId: string; version?: number; imageAlt?:{url:string;alt:string} }) {
   return getDb().$transaction(async tx => {
     if (api) await assertActiveBlogToken(tx, api.tokenId);
     const before = id ? await tx.blogPost.findUnique({ where: { id } }) : null;
@@ -27,7 +33,14 @@ async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: str
       const latest = await tx.blogRevision.findFirst({ where: { postId: id }, orderBy: { number: "desc" }, select: { number: true } });
       if (api.version !== (latest?.number ?? 0)) throw new BlogEditorError(MSG.BLOG_SAVE_CONFLICT, 409);
     }
-    const data = prepareArticleSave(input, before);
+    if(before && api?.imageAlt) {
+      const {url,alt}=api.imageAlt, patched=replaceArticleImageAlt(before.content,url,alt,before.format==="markdown"?"markdown":"html");
+      const cover=before.coverImageUrl===url;
+      if(!patched.found&&!cover)throw new BlogEditorError(MSG.BLOG_IMAGE_NOT_FOUND,404);
+      input={...input,...(patched.found?{content:patched.content}:{}),...(cover?{coverImageAlt:alt}:{})};
+    }
+    const data = prepareArticleSave(input, before, new Date(), api?.imageAlt);
+    try { await assertArticleRouteAvailable(tx, data.slug, data.status, !!before?.publishedAt); } catch(error) { if(error instanceof RedirectError) throw new BlogEditorError(error.message,error.status); throw error; }
     const post = before
       ? await tx.blogPost.update({ where: { id: before.id, updatedAt: before.updatedAt }, data: { ...data, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } })
       : await tx.blogPost.create({ data: { ...data, createdById: actor.actorId } });
@@ -57,6 +70,7 @@ export async function restoreArticle(id: string, revisionId: string, expectedUpd
     if (snapshot.status === "published") data.publishedAt = data.firstPublishedAt ?? new Date();
     // Retain the exact legacy backup even when restoring an earlier Markdown revision.
     data.legacyHtml = before.legacyHtml ?? (typeof snapshot.legacyHtml === "string" ? snapshot.legacyHtml : null);
+    try { await assertArticleRouteAvailable(tx, String(data.slug), String(data.status), !!before.publishedAt); } catch(error) { if(error instanceof RedirectError) throw new BlogEditorError(error.message,error.status); throw error; }
     const post = await tx.blogPost.update({ where: { id, updatedAt: before.updatedAt }, data });
     return recordSave(tx, before, post, actor, undefined, `№${revision.number}`);
   });

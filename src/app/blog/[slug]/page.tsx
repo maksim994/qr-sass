@@ -13,6 +13,7 @@ import { RelatedPosts } from "@/components/blog/related-posts";
 import { ArticleShare } from "@/components/blog/article-share";
 import { buildArticleJsonLd, serializeArticleJsonLd } from "@/lib/blog-structured-data";
 import { publicSiteUrl } from "@/lib/public-url";
+import { blogImageSrcset, type ImageVariant } from "@/lib/blog-image-markup";
 import { renderArticleBody } from "@/lib/blog-render";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
 
@@ -172,6 +173,7 @@ export default async function BlogPostPage({ params }: Props) {
   const articleUrl = publicSiteUrl(`/blog/${post.slug}`);
   const modifiedAt = post.contentUpdatedAt ?? post.updatedAt;
   const firstPublishedAt = post.firstPublishedAt ?? post.publishedAt!;
+  const coverAsset=post.coverImageUrl?await getDb().blogImage.findUnique({where:{url:post.coverImageUrl}}):null;
   const body = renderArticleBody(content, post.format === "markdown" ? "markdown" : "html", post.faq);
   const jsonLd = buildArticleJsonLd({
     base: publicSiteUrl(), articleUrl, title, seoTitle, seoDescription,
@@ -257,7 +259,11 @@ export default async function BlogPostPage({ params }: Props) {
             style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-accent) 16%, transparent))", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {post.coverImageUrl ? (
-              <Image src={post.coverImageUrl} alt={post.coverImageAlt ?? title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
+              coverAsset ? (
+              // New uploaded assets carry trusted responsive WebP dimensions; old covers retain their renderer.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={coverAsset.url} srcSet={blogImageSrcset(coverAsset.variants as ImageVariant[])} sizes="(max-width:1000px) 100vw, 900px" alt={post.coverImageAlt ?? title} width={coverAsset.width} height={coverAsset.height} className="h-full w-full object-cover" fetchPriority="high" />
+              ) : <Image src={post.coverImageUrl} alt={post.coverImageAlt ?? title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
             ) : (
               <svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1" />
