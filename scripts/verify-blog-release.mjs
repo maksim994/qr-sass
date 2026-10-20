@@ -10,6 +10,7 @@ const origin = (process.env.BLOG_VERIFY_ORIGIN || process.env.APP_URL).replace(/
 const oldFields = ["id", "slug", "title", "metaTitle", "metaDescription", "excerpt", "content", "coverImageUrl", "authorName", "structuredData", "readingTimeMinutes", "publishedAt", "createdAt", "createdById", "categoryId"];
 try {
   const rows = await db.blogPost.findMany({ orderBy: { slug: "asc" } });
+  const formats = Object.fromEntries(rows.map(row => [row.id, row.format]));
   const records = Object.fromEntries(rows.map(row => [row.id, hash(Object.fromEntries(oldFields.map(key => [key, row[key]])))]));
   const published = rows.filter(row => row.publishedAt);
   const chosen = [...published.filter(row => row.slug === "razmer-qr-koda-dlya-pechati"), ...published.filter(row => /figure[^>]*inline-quad/.test(row.content)), ...published];
@@ -39,8 +40,8 @@ try {
       if (!current || current.body !== page.body || current.sourceHash !== page.sourceHash) failures.push(`html:${slug}`);
     }
     for (const url of before.urls) if (!urls.includes(url)) failures.push(`sitemap:${url}`);
-    if (rows.some(row => row.format !== undefined && row.format !== "html")) failures.push("unexpected-conversion");
+    for (const [id, format] of Object.entries(before.formats ?? {})) if (formats[id] !== format) failures.push(`format:${id}`);
     console.log(JSON.stringify({ ok: !failures.length, articleRecords: rows.length, htmlCompared: Object.keys(before.pages).length, figureArticles: Object.values(before.pages).filter(page => page.hasInlineFigure).length, sitemapUrls: urls.length, failures }));
     if (failures.length) process.exitCode = 1;
-  } else console.log(JSON.stringify({ records, pages, urls }));
+  } else console.log(JSON.stringify({ records, formats, pages, urls }));
 } finally { await db.$disconnect(); }
