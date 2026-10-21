@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { decryptIntegrationSecret } from "@/lib/integration-secrets";
 import { sendMail } from "@/lib/mail";
 import {
+  billingEmailPath,
   emailDate,
   queueEmail,
   queueOwnerAlert,
@@ -259,7 +260,7 @@ export async function scheduleEmailNotifications(now = new Date()) {
             message: serviceMessage(
               title,
               `Рабочее пространство: ${workspace.name}.\nДата окончания периода: ${emailDate(sub.currentPeriodEnd)}.\n${free}\nУже созданные короткие ссылки продолжат работать; заданные вами пароль, срок действия и лимиты сканов сохраняются.\nПродлить доступ можно в разделе оплаты.`,
-              "/dashboard/billing",
+              billingEmailPath(workspace.id),
               "Посмотреть тариф и продлить",
             ),
           });

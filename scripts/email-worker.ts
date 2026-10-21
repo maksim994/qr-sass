@@ -12,12 +12,12 @@ process.on("SIGINT", () => {
 });
 while (!stopping) {
   try {
+    await scheduleEmailNotifications();
+    await deliverNextEmail();
     await getDb().emailControl.update({
       where: { id: "default" },
       data: { lastSeenAt: new Date() },
     });
-    await scheduleEmailNotifications();
-    await deliverNextEmail();
   } catch {
     console.error(
       "Email worker iteration failed; no credentials or message content logged.",

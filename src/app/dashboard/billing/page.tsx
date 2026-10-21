@@ -9,15 +9,16 @@ import { getEntitlements } from "@/lib/entitlements";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { BillingClient, type BillingPaymentRow } from "./billing-client";
 
-export default async function BillingPage({ searchParams }: { searchParams: Promise<{ paymentId?: string }> }) {
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ paymentId?: string; workspaceId?: string }> }) {
   const user = await requireUser();
-  const workspace = await selectWorkspace(user.memberships);
+  const { paymentId, workspaceId: requestedWorkspaceId } = await searchParams;
+  const requested = typeof requestedWorkspaceId === "string" ? user.memberships.find(m => m.workspaceId === requestedWorkspaceId)?.workspace : null;
+  const workspace = requested ?? await selectWorkspace(user.memberships);
   if (!workspace) redirect("/register");
 
   const entitlements = await getEntitlements(workspace.id);
 
   const db = getDb();
-  const { paymentId } = await searchParams;
   const returned = typeof paymentId === "string" ? await db.payment.findFirst({
     where: { id: paymentId, workspaceId: workspace.id },
     select: { status: true, isTest: true, subscriptionId: true },
@@ -71,7 +72,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       {paymentId && returned?.status === "SUCCEEDED" && !returned.isTest && <ConfirmedPaymentGoal paymentId={paymentId} />}
       <DashboardPageHeader
         title="Оплата и тарифы"
-        description="Ваш тариф, доступные возможности и история платежей."
+        description={`Рабочее пространство: ${workspace.name}. Ваш тариф, доступные возможности и история платежей.`}
       />
 
       <BillingClient

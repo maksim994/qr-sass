@@ -10,6 +10,9 @@ export type EmailMessage = { subject: string; text: string; html?: string };
 export function emailLink(path: string) {
   return new URL(path, env.APP_URL).toString();
 }
+export function billingEmailPath(workspaceId: string) {
+  return `/dashboard/billing?workspaceId=${encodeURIComponent(workspaceId)}`;
+}
 export function emailDate(date: Date) {
   return date.toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) + " МСК";
 }
@@ -161,7 +164,7 @@ export async function queuePaymentEmail(
       message: serviceMessage(
         "Оплата получена",
         `Рабочее пространство: ${owner.workspace.name}.\nПолучено ${input.amount} ₽. Тариф ${input.plan} активирован до ${emailDate(input.periodEnd)}.\nНомер платежа: ${input.id}.\nЭто подтверждение от сервиса. Фискальный чек оформляется отдельно платёжным провайдером.`,
-        "/dashboard/billing",
+        billingEmailPath(input.workspaceId),
       ),
     });
 }
