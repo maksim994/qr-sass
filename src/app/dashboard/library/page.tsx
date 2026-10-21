@@ -1,3 +1,4 @@
+import { editableManagedQrIds } from "@/lib/qr-edit-policy";
 import { requireUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { redirect } from "next/navigation";
@@ -25,6 +26,7 @@ export default async function LibraryPage({ searchParams }: Props) {
   const db = getDb();
   const entitlements = await getEntitlements(workspace.id);
   const plan = entitlements.plan;
+  const editableIds = await editableManagedQrIds(workspace.id, entitlements);
   const dynamicCount = await db.qrCode.count({where:{workspaceId:workspace.id,isArchived:false,OR:[{kind:"DYNAMIC"},{shortCode:{not:null}}]}});
 
   const where: Prisma.QrCodeWhereInput = {
@@ -56,6 +58,7 @@ export default async function LibraryPage({ searchParams }: Props) {
 
   const items = qrCodes.map((qr) => ({
     id: qr.id,
+    canEditDestination: !(qr.kind === "DYNAMIC" || qr.shortCode) || editableIds === null || editableIds.includes(qr.id),
     name: qr.name,
     kind: qr.kind,
     contentType: qr.contentType,

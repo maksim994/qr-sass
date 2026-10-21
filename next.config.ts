@@ -1,7 +1,9 @@
+import { PUBLIC_FRAME_ANCESTORS, PRIVATE_FRAME_ANCESTORS, PRIVATE_FRAME_PATHS } from "./src/lib/frame-policy";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  poweredByHeader: false,
   output: "standalone",
   // Leave room for multipart headers around the allowed 10 MB file.
   experimental: { proxyClientMaxBodySize: "11mb" },
@@ -9,9 +11,14 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   async headers() {
     return [{ source: "/:path*", headers: [
+      { key: "Content-Security-Policy", value: PUBLIC_FRAME_ANCESTORS },
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "Strict-Transport-Security", value: "max-age=31536000" },
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-    ] }];
+    ] }, ...PRIVATE_FRAME_PATHS.map(path => ({ source: `${path}/:path*`, headers: [
+      { key: "Content-Security-Policy", value: PRIVATE_FRAME_ANCESTORS },
+    ] }))];
   },
   async redirects() {
     return [

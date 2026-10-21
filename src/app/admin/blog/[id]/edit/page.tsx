@@ -1,3 +1,4 @@
+import { BlogMergeControl } from "@/components/admin/blog-merge-control";
 import { PendingRevisionPanel } from "@/components/admin/blog-pending-revision-panel";
 import { PreviewLinkControl } from "@/components/admin/blog-workflow-actions";
 import { articleStatus } from "@/lib/blog-workflow";
@@ -23,6 +24,8 @@ export default async function EditBlogPostPage({ params }: Props) {
     ensureBlogCategories(),
   ]);
   if (!post) notFound();
+  const redirects = await db.blogRedirect.findMany({ select: { source: true } });
+  const targets = await db.blogPost.findMany({ where: { id: { not: id }, publishedAt: { not: null }, slug: { notIn: redirects.filter(row => row.source.startsWith("/blog/")).map(row => row.source.slice(6)) } }, select: { id: true, title: true, slug: true }, orderBy: { title: "asc" } });
 
   return (
     <div>
@@ -64,9 +67,14 @@ export default async function EditBlogPostPage({ params }: Props) {
             status: articleStatus(post) as "draft" | "scheduled" | "published",
             scheduledAt: formatMoscowInput(post.scheduledAt),
             categoryId: post.categoryId ?? "",
+            tags: post.tags,
+            relatedArticleIds: post.relatedArticleIds,
           }}
         />
       </AdminCard>
+      {post.publishedAt && <AdminCard>
+        <BlogMergeControl id={post.id} expectedUpdatedAt={post.updatedAt.toISOString()} targets={targets} />
+      </AdminCard>}
       <AdminCard>
         <PreviewLinkControl id={post.id} active={!!await db.blogPreviewToken.findFirst({ where: { postId: post.id, pendingRevisionId: null, revokedAt: null }, select: { hash: true } })} />
         {post.publishedAt && <p><a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">Посмотреть на сайте →</a></p>}

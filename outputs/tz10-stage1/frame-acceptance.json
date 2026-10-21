@@ -1,0 +1,116 @@
+{
+  "localHeaders": {
+    "/contacts": {
+      "Content-Security-Policy": "frame-ancestors 'self' https://metrika.yandex.ru https://analytics.yandex.by https://analytics.yandex.com https://analytics.yandex.com.tr https://analytics.yandex.kz https://analytics.yandex.ru https://metr.yandex.by https://metr.yandex.com https://metr.yandex.com.tr https://metr.yandex.kz https://metr.yandex.ru https://metrica.ya.ru https://metrica.yandex https://metrica.yandex.by https://metrica.yandex.com https://metrica.yandex.com.tr https://metrica.yandex.kz https://metrica.yandex.ru https://metrika.ya.ru https://metrika.yandex https://metrika.yandex.by https://metrika.yandex.com https://metrika.yandex.com.tr https://metrika.yandex.kz https://metrika.yandex.uz https://webvisor.com https://*.webvisor.com",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Content-Type": "text/html"
+    },
+    "/login": {
+      "Content-Security-Policy": "frame-ancestors 'self'",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Content-Type": "text/html"
+    }
+  },
+  "syntheticOrigins": true,
+  "externalNetworkRequests": 0,
+  "results": [
+    {
+      "engine": "chrome",
+      "parent": "https://qr-s.ru",
+      "path": "/contacts",
+      "allowed": true,
+      "passed": true
+    },
+    {
+      "engine": "chrome",
+      "parent": "https://metrika.yandex.ru",
+      "path": "/contacts",
+      "allowed": true,
+      "passed": true
+    },
+    {
+      "engine": "chrome",
+      "parent": "https://playback.webvisor.com",
+      "path": "/contacts",
+      "allowed": true,
+      "passed": true
+    },
+    {
+      "engine": "chrome",
+      "parent": "https://evil.example.invalid",
+      "path": "/contacts",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "chrome",
+      "parent": "https://metrika.yandex.ru.evil.example.invalid",
+      "path": "/contacts",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "chrome",
+      "parent": "http://metrika.yandex.ru",
+      "path": "/contacts",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "chrome",
+      "parent": "https://metrika.yandex.ru",
+      "path": "/login",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "https://qr-s.ru",
+      "path": "/contacts",
+      "allowed": true,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "https://metrika.yandex.ru",
+      "path": "/contacts",
+      "allowed": true,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "https://playback.webvisor.com",
+      "path": "/contacts",
+      "allowed": true,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "https://evil.example.invalid",
+      "path": "/contacts",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "https://metrika.yandex.ru.evil.example.invalid",
+      "path": "/contacts",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "http://metrika.yandex.ru",
+      "path": "/contacts",
+      "allowed": false,
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "parent": "https://metrika.yandex.ru",
+      "path": "/login",
+      "allowed": false,
+      "passed": true
+    }
+  ]
+}

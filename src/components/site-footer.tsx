@@ -47,6 +47,7 @@ export async function SiteFooter({ session, children }: Props) {
                 { label: "Тарифы", href: "/pricing" },
                 { label: "FAQ", href: "/#faq" },
                 { label: "Блог", href: "/blog" },
+                { label: "Контакты и реквизиты", href: "/contacts" },
                 { label: "История изменений", href: "/changelog" },
                 ...(children ? [
                   { label: "Сценарии по отраслям", href: "/#use-cases" },

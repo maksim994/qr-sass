@@ -20,6 +20,7 @@ type Qr = Prisma.QrCodeGetPayload<{ include: { scanEvents: true; _count: { selec
 type Breakdown = { label: string; count: number }[];
 type Props = {
   dynamicAvailable?: boolean;
+  canEditDestination?: boolean;
   now: number; qr: Qr; svgString: string; exportFormats: string[];
   scans7d: number; scans30d: number; humanTotal: number;
   devices: Breakdown; osList: Breakdown;
@@ -32,7 +33,7 @@ function BreakdownList({title,items}:{title:string;items:Breakdown}) {
   const total = items.reduce((sum,item)=>sum+item.count,0);
   return <section className={styles.panel}><h3>{title}</h3><ul className={styles.breakdown}>{items.map(item=><li key={item.label}><div><span>{item.label}</span><strong>{number(item.count)} <small>· {Math.round(item.count/Math.max(total,1)*100)}%</small></strong></div><div className={styles.track} aria-hidden="true"><span style={{width:`${item.count/Math.max(total,1)*100}%`}}/></div></li>)}</ul></section>;
 }
-export function QrDetail({dynamicAvailable=true,now,qr,svgString,exportFormats,scans7d,scans30d,humanTotal,devices,osList,dailyCounts}:Props) {
+export function QrDetail({canEditDestination=true,dynamicAvailable=true,now,qr,svgString,exportFormats,scans7d,scans30d,humanTotal,devices,osList,dailyCounts}:Props) {
   const isVcard=qr.contentType==="VCARD"&&!(qr.kind==="STATIC"&&(qr.payload as Record<string,unknown>|null)?.staticDirect===true);
   const tracks=qr.kind==="DYNAMIC"||isVcard;
   const hosted=needsHostedPage(qr.contentType);
@@ -49,7 +50,7 @@ export function QrDetail({dynamicAvailable=true,now,qr,svgString,exportFormats,s
       <div className={styles.summary}>
         <h2>Готов к скачиванию</h2><p>Сохраните QR-код для печати или публикации.</p>
         <div className={styles.downloads}>{exportFormats.map((format,i)=><TrackedDownloadLink data-frame={String(!!(qr.styleConfig as Record<string,unknown> | null)?.frameStyle && (qr.styleConfig as Record<string,unknown> | null)?.frameStyle !== "none")} key={format} href={`/api/qr/${qr.id}/download?format=${format.toLowerCase()}`} download className={`fk-button ${i===0?'fk-button--primary':'fk-button--secondary'}`} aria-label={`Скачать ${format}`}>{i===0?`Скачать ${format}`:format}</TrackedDownloadLink>)}</div>
-        <Link className={styles.edit} href={`/dashboard/qr/${qr.id}/edit`}>{tracks ? "Редактировать содержимое и оформление" : "Создать новую версию — оригинал останется прежним"}</Link>
+        <Link className={styles.edit} href={canEditDestination ? `/dashboard/qr/${qr.id}/edit` : "/pricing"}>{!canEditDestination ? "Изменить назначение · тариф Про" : tracks ? "Редактировать содержимое и оформление" : "Создать новую версию — оригинал останется прежним"}</Link>
         <RenameQr qrId={qr.id} name={qr.name} />
         <dl className={styles.facts}>
           {publicPath&&<div><dt>{isVcard?'Файл визитки':hosted?'Страница QR':'Короткая ссылка'}</dt><dd><a href={publicPath} target="_blank" rel="noopener noreferrer">{publicPath}<span className="sr-only"> — откроется в новой вкладке</span></a></dd></div>}
@@ -62,7 +63,7 @@ export function QrDetail({dynamicAvailable=true,now,qr,svgString,exportFormats,s
     <details className={styles.lifetime}><summary>Как долго работает QR-код</summary><QrLifetimeNote variant={qr.kind==='DYNAMIC'?'detail-dynamic':'download-static'}/></details>
 
     {publicPath&&(qr.kind==="DYNAMIC"||(!hosted&&!isVcard))&&<section className={`${styles.panel} ${styles.settings}`} aria-labelledby="qr-settings-title"><h2 id="qr-settings-title">Управление кодом</h2><p>Изменения применяются к уже созданному QR-коду.</p>
-      {!hosted&&!isVcard&&<details><summary>Изменить ссылку назначения</summary><UpdateTarget qrId={qr.id} currentUrl={qr.currentTargetUrl}/></details>}
+      {!hosted&&!isVcard&&(canEditDestination ? <details><summary>Изменить ссылку назначения</summary><UpdateTarget qrId={qr.id} currentUrl={qr.currentTargetUrl}/></details> : <p>Бесплатно можно менять назначение у первых двух созданных кодов. <Link href="/pricing">Изменить назначение · тариф Про</Link></p>)}
       {qr.kind==='DYNAMIC'&&<details><summary>Срок, лимит открытий и защита</summary><QrExpirySettings qrId={qr.id} expireAt={qr.expireAt} maxScans={qr.maxScans} passwordRequired={!!qr.passwordHash} gdprRequired={payload.gdprRequired===true} gdprPolicyUrl={typeof payload.gdprPolicyUrl==='string'?payload.gdprPolicyUrl:null} scanCount={qr._count.scanEvents}/></details>}
       {qr.contentType==='URL'&&!hosted&&!isVcard&&<>
         <details><summary>Ретаргетинг</summary><TrackingPixelsForm qrId={qr.id} trackingPixels={payload.trackingPixels as {metaPixelId?:string;ga4Id?:string;gtmId?:string;ymCounterId?:string;vkPixelId?:string}??null}/></details>

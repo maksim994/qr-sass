@@ -23,6 +23,7 @@ export const INDEXABLE_STATIC_PATHS = [
   "/",
   "/blog",
   "/pricing",
+  "/contacts",
   "/personal-data-consent",
   "/changelog",
   "/qr-lifetime",
@@ -73,15 +74,11 @@ export function findSitemapServiceUrls(urls: string[]): string[] {
 export function getDefaultRobotsTxt(origin = publicOrigin()): string {
   return `User-agent: *
 Allow: /
+Allow: /media/
 Disallow: /dashboard
-Disallow: /dashboard/
 Disallow: /admin
-Disallow: /admin/
-Disallow: /api/
-Disallow: /preview
-Disallow: /mini
-
-Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&utm_id&yclid&ysclid&fbclid&gclid
+Disallow: /api/auth/
+Clean-param: static&next&plan
 
 Sitemap: ${origin}/sitemap.xml`;
 }

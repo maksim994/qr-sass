@@ -4,6 +4,7 @@ import { landingDestination, type LandingInputMode } from "@/lib/landing-input";
 import { FramePicker } from "@/components/qr/frame-picker";
 import { FrameControls } from "@/components/qr/frame-controls";
 import type { FrameConfig } from "@/lib/qr-frame";
+import { HOME_QR_TYPE_EVENT } from "@/lib/home-qr-selection";
 import { COMMERCIAL } from "@/lib/commercial-config";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 
@@ -53,6 +54,17 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
+  useEffect(() => {
+    if (source !== "home") return;
+    function select(event: Event) {
+      const next = (event as CustomEvent<string>).detail as StaticQrType;
+      if (!enabledStaticTypes.includes(next)) return;
+      setType(next); setKind("STATIC"); setError(""); setNotice("");
+      document.getElementById("create-qr")?.querySelector<HTMLElement>("input, textarea, select")?.focus({ preventScroll: true });
+    }
+    window.addEventListener(HOME_QR_TYPE_EVENT, select);
+    return () => window.removeEventListener(HOME_QR_TYPE_EVENT, select);
+  }, [enabledStaticTypes, source]);
   const rawPayload = payloads[type] ?? {};
   const normalized = type === "URL" ? landingDestination(String(rawPayload.url ?? ""), inputMode, message) : null;
   const payload = type === "URL" ? { ...rawPayload, url: normalized ?? "" } : rawPayload;

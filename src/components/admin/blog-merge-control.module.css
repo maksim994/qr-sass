@@ -1,0 +1,7 @@
+.form{display:grid;gap:16px;color:var(--text-default)}
+.form h2{font:var(--fw-bold) 20px/1.3 var(--font-sans);color:var(--text-strong)}
+.form p{margin:0;line-height:1.6}
+.form a{color:var(--color-primary);text-decoration:underline;text-underline-offset:3px}
+.confirmation{display:flex;align-items:flex-start;gap:12px;line-height:1.55;cursor:pointer}
+.confirmation input{flex:0 0 auto;width:16px;height:16px;margin-top:4px;accent-color:var(--color-primary)}
+.form>button{justify-self:start}

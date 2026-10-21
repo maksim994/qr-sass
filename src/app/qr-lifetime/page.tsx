@@ -50,7 +50,7 @@ export default async function QrLifetimePage() {
 
       <p>
         Вопросы по уже напечатанным тиражам:{" "}
-        <Link href="/dashboard/billing">раздел оплаты</Link> или контакты на сайте.
+        <Link href="/pricing">раздел оплаты</Link> или контакты на сайте.
       </p>
     </LegalArticleLayout>
   );

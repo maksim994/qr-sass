@@ -1,0 +1,7 @@
+{
+  "checks": 75,
+  "result": "passed",
+  "origin": "http://127.0.0.1:3010",
+  "database": "qr_tz10",
+  "productionWrites": 0
+}

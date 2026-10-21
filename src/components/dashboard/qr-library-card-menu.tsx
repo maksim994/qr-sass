@@ -12,6 +12,7 @@ import { MSG } from "@/lib/user-messages";
 
 type Props = {
   hasFrame?: boolean;
+  canEditDestination?: boolean;
   qrId: string;
   qrName?: string;
   kind: "STATIC" | "DYNAMIC";
@@ -19,7 +20,7 @@ type Props = {
   exportFormats: ("PNG" | "SVG" | "JPG" | "EPS" | "PDF")[];
 };
 
-export function QrLibraryCardMenu({ hasFrame, qrId, qrName, kind, managed = kind === "DYNAMIC", exportFormats }: Props) {
+export function QrLibraryCardMenu({ canEditDestination = true, hasFrame, qrId, qrName, kind, managed = kind === "DYNAMIC", exportFormats }: Props) {
   const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -145,7 +146,7 @@ export function QrLibraryCardMenu({ hasFrame, qrId, qrName, kind, managed = kind
           <Link href={`/dashboard/qr/${qrId}`} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>
             Открыть
           </Link>
-          <Link href={`/dashboard/qr/${qrId}/edit`} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>{managed ? "Редактировать" : "Создать новую версию"}</Link>
+          <Link href={canEditDestination ? `/dashboard/qr/${qrId}/edit` : "/pricing"} className="qrs-lib-menu-item" role="menuitem" onClick={() => setOpen(false)}>{!canEditDestination ? "Изменить назначение · тариф Про" : managed ? "Редактировать" : "Создать новую версию"}</Link>
           {exportFormats.map((format) => (
             <TrackedDownloadLink data-frame={String(hasFrame)} key={format}
               href={`/api/qr/${qrId}/download?format=${format.toLowerCase()}`}

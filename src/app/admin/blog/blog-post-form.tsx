@@ -47,6 +47,8 @@ type BlogPostData = {
   status?: "draft" | "scheduled" | "published";
   scheduledAt?: string;
   categoryId: string;
+  tags?: string[];
+  relatedArticleIds?: string[];
 };
 
 type CategoryOption = { id: string; name: string };
@@ -64,6 +66,8 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
   const [minorEdit, setMinorEdit] = useState(false);
+  const [tagsText, setTagsText] = useState(post?.tags?.join(", ") ?? "");
+  const [relatedText, setRelatedText] = useState(post?.relatedArticleIds?.join(", ") ?? "");
   const [confirmConversion, setConfirmConversion] = useState(false);
   const [imageAlt, setImageAlt] = useState("");
   const [lastContentImageUrl, setLastContentImageUrl] = useState("");
@@ -89,6 +93,8 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
     status: post?.status ?? (post?.published ? "published" : "draft"),
     scheduledAt: post?.scheduledAt ?? "",
     categoryId: post?.categoryId ?? "",
+    tags: post?.tags ?? [],
+    relatedArticleIds: post?.relatedArticleIds ?? [],
   });
 
   const autoSlug = !post || mode === "create";
@@ -160,6 +166,8 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         authorName: state.authorName.trim() || null,
         structuredData,
         categoryId: state.categoryId.trim() || null,
+        tags: [...new Set(tagsText.split(",").map(value => value.trim()).filter(Boolean))],
+        relatedArticleIds: relatedText.split(",").map(value => value.trim()).filter(Boolean),
         status, scheduledAt, comment,
       };
       if (readingTimeMinutes !== undefined)
@@ -351,6 +359,12 @@ export function BlogPostForm({ post, mode, categories = [], initialBody }: Props
         <Button type="button" variant="secondary" size="sm" disabled={state.faq.length >= 100} onClick={() => setState(current => ({ ...current, faq: [...current.faq, { question: "", answer: "" }] }))}>Добавить вопрос</Button>
       </fieldset>
 
+      <Field label="Теги (через запятую)">
+        <Input value={tagsText} onChange={event => setTagsText(event.target.value)} placeholder="динамический QR, смена ссылки" />
+      </Field>
+      <Field label="Связанные статьи: ID через запятую, в нужном порядке" hint="До трёх опубликованных статей в блоке. Пустой список — подбор по рубрике, тегам и дате. ID есть в API статей.">
+        <Input value={relatedText} onChange={event => setRelatedText(event.target.value)} placeholder="ID первой статьи, ID второй статьи" />
+      </Field>
       <label className="fk-choice fk-choice--checkbox">
         <input type="checkbox" className="fk-choice__input" checked={state.showPrintSizeIntro} onChange={event => setState(current => ({ ...current, showPrintSizeIntro: event.target.checked }))} />
         <span className="fk-choice__box" aria-hidden="true"><svg className="fk-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span>

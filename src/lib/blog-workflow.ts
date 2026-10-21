@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { Prisma } from "@prisma/client";
+import { validateRelatedArticles } from "@/lib/blog-related";
 import { getDb } from "@/lib/db";
 import { BlogEditorError, prepareArticleSave, type BlogEditorInput } from "@/lib/blog-editor";
 import { renderArticleBody } from "@/lib/blog-render";
@@ -53,6 +54,7 @@ async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: str
       api.imageChange = change;
     }
     const data = prepareArticleSave(input, before, new Date(), api?.imageChange);
+    await validateRelatedArticles(tx, data.relatedArticleIds, id);
     try { await assertArticleRouteAvailable(tx, data.slug, data.status, !!before?.publishedAt); } catch(error) { if(error instanceof RedirectError) throw new BlogEditorError(error.message,error.status); throw error; }
     const post = before
       ? await tx.blogPost.update({ where: { id: before.id, updatedAt: before.updatedAt }, data: { ...data, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } })
@@ -82,6 +84,9 @@ export async function restoreArticle(id: string, revisionId: string, expectedUpd
     data.updatedAt = new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1));
     data.contentUpdatedAt = new Date();
     data.faq = readBlogFaq(snapshot.faq);
+    data.tags = Array.isArray(snapshot.tags) ? snapshot.tags as string[] : [];
+    data.relatedArticleIds = Array.isArray(snapshot.relatedArticleIds) ? snapshot.relatedArticleIds as string[] : [];
+    await validateRelatedArticles(tx, data.relatedArticleIds as string[], id);
     data.renderedHtml = snapshot.format === "markdown" ? renderArticleBody(String(snapshot.content), "markdown", data.faq).html : null;
     if (snapshot.status === "published") data.publishedAt = data.firstPublishedAt ?? new Date();
     // Retain the exact legacy backup even when restoring an earlier Markdown revision.

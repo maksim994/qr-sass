@@ -13,6 +13,7 @@ const navLinks = [
   { label: "Меню", href: "/qr-menu" },
   { label: "Упаковка", href: "/qr-for-packaging" },
   { label: "Тарифы", href: "/pricing" },
+  { label: "Контакты", href: "/contacts" },
 ];
 
 type Props = {
@@ -28,6 +29,7 @@ export function SiteHeaderClient({ session, isAdmin, minimal = false, createHref
     { label: "Для кого", href: "/#use-cases" },
     { label: "Типы QR", href: "/#types" },
     { label: "Тарифы", href: "/pricing" },
+  { label: "Контакты", href: "/contacts" },
   ] : navLinks;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();

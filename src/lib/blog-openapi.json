@@ -2465,6 +2465,27 @@
             ],
             "maxLength": 200
           },
+          "tags": {
+            "type": "array",
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Теги для тематического подбора; приводятся к нижнему регистру."
+          },
+          "relatedArticleIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "description": "Ручной порядок связанных статей (приоритет перед рубрикой/тегами). Блок показывает 3 опубликованные статьи; текущая и редиректы исключаются."
+          },
           "readingTimeMinutes": {
             "type": [
               "integer",
@@ -2620,6 +2641,27 @@
             ],
             "maxLength": 200
           },
+          "tags": {
+            "type": "array",
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Теги для тематического подбора; приводятся к нижнему регистру."
+          },
+          "relatedArticleIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "description": "Ручной порядок связанных статей (приоритет перед рубрикой/тегами). Блок показывает 3 опубликованные статьи; текущая и редиректы исключаются."
+          },
           "readingTimeMinutes": {
             "type": [
               "integer",
@@ -2770,6 +2812,27 @@
               "null"
             ],
             "maxLength": 200
+          },
+          "tags": {
+            "type": "array",
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Теги для тематического подбора; приводятся к нижнему регистру."
+          },
+          "relatedArticleIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "description": "Ручной порядок связанных статей (приоритет перед рубрикой/тегами). Блок показывает 3 опубликованные статьи; текущая и редиректы исключаются."
           },
           "readingTimeMinutes": {
             "type": [
@@ -3146,6 +3209,27 @@
               "null"
             ],
             "maxLength": 200
+          },
+          "tags": {
+            "type": "array",
+            "maxItems": 30,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Теги для тематического подбора; приводятся к нижнему регистру."
+          },
+          "relatedArticleIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "description": "Ручной порядок связанных статей (приоритет перед рубрикой/тегами). Блок показывает 3 опубликованные статьи; текущая и редиректы исключаются."
           },
           "readingTimeMinutes": {
             "type": [

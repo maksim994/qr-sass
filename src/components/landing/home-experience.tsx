@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { selectHomeQrType, staticQrLanding } from "@/lib/home-qr-selection";
 import { useEffect, useRef, useState } from "react";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { STATIC_QR_TYPES } from "@/lib/static-qr";
@@ -81,7 +82,12 @@ export function TypeExplorer({ types, signedIn }: { types: QrTypeInfo[]; signedI
   const activeGroup = groups.some(item => item.id === group) ? group : groups[0]?.id;
   return <div className={s.typeExplorer}>
     <div className={s.filterTabs} role="group" aria-label="Категории QR-кодов">{groups.map(item => <button key={item.id} type="button" aria-pressed={activeGroup === item.id} onClick={() => setGroup(item.id)}>{item.name}</button>)}</div>
-    <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => <Link key={type.type} href={(STATIC_QR_TYPES as readonly string[]).includes(type.type) ? `/?static=${type.type}#create-qr` : signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`}><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">→</span></Link>)}</div>
+    <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => {
+      const content = <><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">→</span></>;
+      const isStatic = (STATIC_QR_TYPES as readonly string[]).includes(type.type);
+      if (isStatic && !staticQrLanding(type.type)) return <button type="button" key={type.type} onClick={() => selectHomeQrType(type.type)}>{content}</button>;
+      return <Link key={type.type} href={staticQrLanding(type.type) ?? (signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`)}>{content}</Link>;
+    })}</div>
     {types.length === 0 && <p>Новые типы QR-кодов скоро появятся.</p>}
   </div>;
 }
@@ -119,7 +125,7 @@ export function IndustryShowcase({ types, signedIn }: { types: QrTypeInfo[]; sig
   return <div className={s.industries}>
     <div className={s.industryNav} role="group" aria-label="Сценарии по отраслям">{available.map(item => <button type="button" key={item.id} aria-pressed={selected.id === item.id} onClick={() => setSelection(item.id)}><Icon path={item.icon} /><span>{item.name}</span><span aria-hidden="true">↗</span></button>)}</div>
     <div className={s.industryContent}>
-      <div className={s.industryCopy}><h3>{selected.title}</h3><p>{selected.copy}</p><Button href={(STATIC_QR_TYPES as readonly string[]).includes(selected.type) ? `/?static=${selected.type}#create-qr` : signedIn ? path : `/register?next=${encodeURIComponent(path)}`} variant="secondary">Создать QR <Icon path={arrow} /></Button><span>Начните с типа «{types.find(type => type.type === selected.type)?.label}»</span></div>
+      <div className={s.industryCopy}><h3>{selected.title}</h3><p>{selected.copy}</p><Button onClick={() => { if (!staticQrLanding(selected.type)) selectHomeQrType(selected.type); }} href={(STATIC_QR_TYPES as readonly string[]).includes(selected.type) ? staticQrLanding(selected.type) ?? "#create-qr" : signedIn ? path : `/register?next=${encodeURIComponent(path)}`} variant="secondary">Создать QR <Icon path={arrow} /></Button><span>Начните с типа «{types.find(type => type.type === selected.type)?.label}»</span></div>
       <div className={s.industryArt} data-industry={selected.id}><div className={s.industryDocument}><div className={s.documentBrand}><Icon path={selected.icon} /><span>{selected.label}</span></div><strong>{selected.headline}</strong><div className={s.documentLines}>{selected.lines.map(line => <span key={line}>{line}</span>)}</div><div className={s.documentCode}><HomeQrPreview value="https://qr-s.ru/#use-cases" /><span>Откройте<br />в телефоне ↗</span></div></div><span className={s.industryDisclaimer}>Пример оформления</span></div>
     </div>
   </div>;
@@ -155,7 +161,7 @@ export function HomeFooterExperience({ types, signedIn }: { types: QrTypeInfo[];
   };
   const hint = hints[selected] ?? hints.URL;
   return <div className={s.footerExperience}>
-    <div className={s.footerStart}><div className={s.footerCopy}><h2>Есть идея?<br />Дайте ей свой QR.</h2><p>Выберите, чем хотите поделиться.<br />Остальное соберём в редакторе.</p><div className={s.footerChoices} role="group" aria-label="Тип нового QR-кода">{choices.map(type => <button key={type.type} type="button" aria-pressed={selected === type.type} onClick={() => setSelected(type.type)}><Icon path={type.icon} />{type.label}</button>)}</div><Button variant="primary" size="lg" href={(STATIC_QR_TYPES as readonly string[]).includes(selected) ? `/?static=${selected}#create-qr` : signedIn ? path : `/register?next=${encodeURIComponent(path)}`}>Перейти к созданию <Icon path={arrow} /></Button></div>
+    <div className={s.footerStart}><div className={s.footerCopy}><h2>Есть идея?<br />Дайте ей свой QR.</h2><p>Выберите, чем хотите поделиться.<br />Остальное соберём в редакторе.</p><div className={s.footerChoices} role="group" aria-label="Тип нового QR-кода">{choices.map(type => <button key={type.type} type="button" aria-pressed={selected === type.type} onClick={() => setSelected(type.type)}><Icon path={type.icon} />{type.label}</button>)}</div><Button variant="primary" size="lg" onClick={() => { if (!staticQrLanding(selected)) selectHomeQrType(selected); }} href={(STATIC_QR_TYPES as readonly string[]).includes(selected) ? staticQrLanding(selected) ?? "#create-qr" : signedIn ? path : `/register?next=${encodeURIComponent(path)}`}>Перейти к созданию <Icon path={arrow} /></Button></div>
       <div className={s.footerPreview} aria-live="polite"><Icon path={selectedType?.icon ?? arrow} /><strong>{hint.title}</strong><p>{hint.text}</p><div className={s.footerPreviewBottom}><span>{selectedType?.label ?? "QR-код"}<small>Выбранный тип</small></span><span aria-hidden="true">↗</span></div></div>
     </div>
     <div className={s.footerSignature}><span>От идеи до первого сканирования.</span><button type="button" onClick={() => { document.getElementById("home-title")?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }); }}>К началу страницы <span aria-hidden="true">↑</span></button></div>

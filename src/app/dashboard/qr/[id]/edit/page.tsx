@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { selectWorkspace } from "@/lib/workspace-select";
+import { canEditManagedQr } from "@/lib/qr-edit-policy";
 import { EditQrClient } from "@/components/edit-qr-client";
 
 type Props = {
@@ -20,6 +21,7 @@ export default async function EditQrPage({ params }: Props) {
   });
 
   if (!qr || qr.workspaceId !== workspace.id) notFound();
+  if ((qr.kind === "DYNAMIC" || qr.shortCode) && !await canEditManagedQr(qr)) redirect("/pricing");
 
   return (
     <EditQrClient

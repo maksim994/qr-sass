@@ -1,0 +1,60 @@
+// Requires Playwright (or PLAYWRIGHT_MODULE); uses the local fixture from verify-tz10-stage1.mjs.
+const { chromium, webkit } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const fixture=JSON.parse(readFileSync('/tmp/tz10-fixture.json','utf8'));
+const dir=fileURLToPath(new URL('../outputs/tz10-stage1', import.meta.url));mkdirSync(dir,{recursive:true});
+const results=[];
+for(const [engine,browserType,options] of [['chrome',chromium,{channel:'chrome'}],['webkit',webkit,{}]]){
+ const browser=await browserType.launch({headless:true,...options});
+ for(const width of [1440,375]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(fixture.origin+'/contacts',{waitUntil:'networkidle'});
+  const decline=page.getByRole('button',{name:'Без аналитики',exact:true});
+  if(await decline.count()) await decline.click();
+  await page.screenshot({path:`${dir}/contacts-${engine}-${width}.png`,fullPage:true});
+  assert.equal(await page.locator('h1').innerText(),'Контакты и реквизиты');
+  assert.equal(await page.locator('main a[href="https://t.me/m_mvmolkov"]').count(),1);
+  assert.ok(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'Contacts overflow');
+  await page.goto(fixture.origin,{waitUntil:'networkidle'});
+  const tiles=page.locator('div[class*="typeGrid"]');
+  await tiles.scrollIntoViewIfNeeded();
+  await tiles.screenshot({path:`${dir}/home-types-${engine}-${width}.png`});
+  assert.ok(await tiles.locator('a[href="/qr-po-ssylke"]').count());
+  assert.ok(await tiles.locator('a[href="/qr-wifi"]').count());
+  assert.ok(await tiles.locator('a[href="/qr-dlya-vizitki"]').count());
+  const before=page.url();
+  await tiles.getByRole('button',{name:/Текст/}).click();
+  assert.equal(page.url(),before,'Static tile must not navigate');
+  assert.ok(await page.locator('#create-qr textarea').count(),'TEXT form should open');
+  assert.ok(await page.locator('#create-qr textarea').isVisible());
+  await page.goto(fixture.origin+'/?static=WIFI#transaction',{waitUntil:'networkidle'});
+  assert.ok(await page.getByLabel(/SSID/).count(),'Legacy static parameter');
+  await context.addCookies([{name:'qr_saas_session',value:fixture.session,url:fixture.origin},{name:'qr_workspace_id',value:fixture.workspaceId,url:fixture.origin}]);
+  await page.goto(fixture.origin+`/dashboard/qr/${fixture.lockedId}`,{waitUntil:'networkidle'});
+  assert.ok(await page.locator('a[href="/pricing"]').filter({hasText:'Изменить назначение'}).count());
+  assert.equal(await page.locator('input[value="https://example.com/paid"]').count(),0);
+  await page.locator('main').screenshot({path:`${dir}/locked-qr-${engine}-${width}.png`});
+  await page.goto(fixture.origin+`/admin/blog/${fixture.targetId}/edit`,{waitUntil:'networkidle'});
+  const related=page.getByLabel('Связанные статьи: ID через запятую, в нужном порядке');
+  assert.equal(await related.count(),1,'Related field must have an accessible label');
+  await related.scrollIntoViewIfNeeded();
+  await page.screenshot({path:`${dir}/related-editor-${engine}-${width}.png`});
+  const merge=page.locator('form').filter({has:page.getByRole('heading',{name:'Склеить с другой статьёй'})});
+  await merge.scrollIntoViewIfNeeded();
+  const submit=merge.getByRole('button',{name:'Склеить и включить 301'});
+  assert.ok(await submit.isDisabled());
+  await merge.getByLabel('Целевая статья').selectOption(fixture.sameTopicId);
+  assert.ok(await submit.isDisabled());
+  await merge.getByRole('checkbox').check();assert.ok(await submit.isEnabled());
+  await merge.screenshot({path:`${dir}/merge-${engine}-${width}.png`});
+  assert.ok(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'Admin overflow');
+  results.push({engine,width,contacts:true,staticSelection:true,legacyStaticParameter:true,editGate:true,relatedLabel:true,mergeConfirmation:true,pageErrors:errors});
+  assert.deepEqual(errors,[]);
+  await context.close();
+ }
+ await browser.close();
+}
+writeFileSync(`${dir}/ui-acceptance.json`,JSON.stringify(results,null,2));console.log(JSON.stringify({result:'passed',runs:results.length}));

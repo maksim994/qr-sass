@@ -1,7 +1,7 @@
 import type { BlogPost, Prisma } from "@prisma/client";
 
 export type BlogActor = { actorId: string | null; actorName: string; source: "admin" | "api" | "system" };
-export const articleFields = ["title", "slug", "metaTitle", "metaDescription", "excerpt", "content", "format", "renderedHtml", "legacyHtml", "faq", "showPrintSizeIntro", "coverImageUrl", "coverImageAlt", "authorName", "structuredData", "readingTimeMinutes", "categoryId", "status", "scheduledAt", "publishedAt", "firstPublishedAt", "contentUpdatedAt"] as const;
+export const articleFields = ["title", "slug", "metaTitle", "metaDescription", "excerpt", "content", "format", "renderedHtml", "legacyHtml", "faq", "showPrintSizeIntro", "coverImageUrl", "coverImageAlt", "authorName", "structuredData", "readingTimeMinutes", "categoryId", "tags", "relatedArticleIds", "status", "scheduledAt", "publishedAt", "firstPublishedAt", "contentUpdatedAt"] as const;
 export function articleStatus(post: { status?: string | null; publishedAt: Date | string | null }) {
   return post.status ?? (post.publishedAt ? "published" : "draft");
 }

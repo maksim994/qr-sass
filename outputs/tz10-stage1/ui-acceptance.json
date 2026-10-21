@@ -1,0 +1,46 @@
+[
+  {
+    "engine": "chrome",
+    "width": 1440,
+    "contacts": true,
+    "staticSelection": true,
+    "legacyStaticParameter": true,
+    "editGate": true,
+    "relatedLabel": true,
+    "mergeConfirmation": true,
+    "pageErrors": []
+  },
+  {
+    "engine": "chrome",
+    "width": 375,
+    "contacts": true,
+    "staticSelection": true,
+    "legacyStaticParameter": true,
+    "editGate": true,
+    "relatedLabel": true,
+    "mergeConfirmation": true,
+    "pageErrors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 1440,
+    "contacts": true,
+    "staticSelection": true,
+    "legacyStaticParameter": true,
+    "editGate": true,
+    "relatedLabel": true,
+    "mergeConfirmation": true,
+    "pageErrors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "contacts": true,
+    "staticSelection": true,
+    "legacyStaticParameter": true,
+    "editGate": true,
+    "relatedLabel": true,
+    "mergeConfirmation": true,
+    "pageErrors": []
+  }
+]

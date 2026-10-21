@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { BlogPendingRevision, BlogPost, Prisma } from "@prisma/client";
+import { validateRelatedArticles } from "@/lib/blog-related";
 import { getDb } from "@/lib/db";
 import { BlogEditorError, prepareArticleSave } from "@/lib/blog-editor";
 import { articleRevisionFields, articleRevisionSchema } from "@/lib/blog-api-input";
@@ -48,7 +49,8 @@ export async function savePendingRevision(id: string, body: unknown, actor: Blog
     const before = await tx.blogPendingRevision.findUnique({ where: { postId: id } });
     if (before) assertPendingUnchanged(post, before);
     const input = { ...articleRevisionFields.parse(before?.input ?? {}), ...patch };
-    const prepared = prepareArticleSave(input, post); // Same validation, renderer and conversion safeguards as PATCH.
+    const prepared = prepareArticleSave(input, post);
+    await validateRelatedArticles(tx, prepared.relatedArticleIds, id); // Same validation, renderer and conversion safeguards as PATCH.
     if (input.categoryId && !await tx.blogCategory.findUnique({ where: { id: input.categoryId }, select: { id: true } })) throw new BlogEditorError(MSG.BLOG_API_INPUT);
     const data = { snapshot: articleSnapshot({ ...post, ...prepared }), input: input as Prisma.InputJsonObject, baseUpdatedAt: post.updatedAt, actorName: actor.actorName, updatedAt: new Date(Math.max(Date.now(), (before?.updatedAt.getTime() ?? 0) + 1)) };
     const pending = await tx.blogPendingRevision.upsert({ where: { postId: id }, create: { postId: id, ...data }, update: data });
@@ -101,6 +103,7 @@ export async function publishPendingRevision(id: string, expected: { id: string;
     const input = articleRevisionFields.parse(pending.input);
     const now = new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1));
     const data = prepareArticleSave(input, before, now);
+    await validateRelatedArticles(tx, data.relatedArticleIds, id);
     const post = await tx.blogPost.update({ where: { id, updatedAt: before.updatedAt }, data: { ...data, slug: before.slug, publishedAt: before.publishedAt, firstPublishedAt: before.firstPublishedAt ?? before.publishedAt, contentUpdatedAt: now, updatedAt: now } });
     await recordSave(tx, before, post, actor, input.comment ?? `Опубликован черновик изменений · ${pending.actorName}`);
     // Cascades revoke every secret preview of this pending revision atomically.

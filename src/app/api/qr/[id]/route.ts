@@ -10,6 +10,7 @@ import { applyTrackingPixelsToPayload } from "@/lib/tracking-pixels";
 import { stampTrackingConsentVersion } from "@/lib/qr-consent";
 import { collectUploadIds, uploadsBelongToWorkspace } from "@/lib/tenant";
 import { updateQrSchema, validatePayloadUrls, payloadMeetsType } from "@/lib/validation";
+import { canEditManagedQr } from "@/lib/qr-edit-policy";
 import { assertAllowsDynamic, getEntitlements } from "@/lib/entitlements";
 import { prepareStaticQr } from "@/lib/static-qr";
 import { toPublicQr } from "@/lib/qr-public-dto";
@@ -170,6 +171,9 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (data.payload != null) updateData.payload = nextPayload as object;
     if (data.style != null) updateData.styleConfig = data.style as object;
 
+    if (isManaged && data.payload != null && !await canEditManagedQr(qr)) {
+      return apiError(MSG.PLAN_QR_EDIT_LIMIT, "FORBIDDEN", 403, { pricingUrl: "/pricing" }, requestId);
+    }
     if (isManaged) {
       const changesPaidFeature =
         data.payload != null ||

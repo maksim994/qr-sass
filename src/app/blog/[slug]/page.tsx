@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BlogSeoIntro, ArticleGenerator } from "@/components/blog/blog-seo-intro";
-import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
+import { relatedArticles } from "@/lib/blog-related";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -99,6 +99,8 @@ export default async function BlogPostPage({ params }: Props) {
       publishedAt: true,
       updatedAt: true,
       categoryId: true,
+      tags: true,
+      relatedArticleIds: true,
       category: { select: { slug: true, name: true } },
     },
   });
@@ -120,60 +122,7 @@ export default async function BlogPostPage({ params }: Props) {
   const seoTitle = copy.metaTitle?.trim() || `${title} — Блог qr-s.ru`;
   const seoDescription = copy.metaDescription?.trim() || (excerpt ?? title);
 
-  const relatedWhere = {
-    publishedAt: { not: null },
-    slug: { not: slug, notIn: Object.keys(BLOG_REDIRECTS) },
-    ...(post.categoryId ? { categoryId: post.categoryId } : {}),
-  };
-
-  let relatedPosts = await db.blogPost.findMany({
-    where: relatedWhere,
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-    select: {
-      slug: true,
-      title: true,
-      excerpt: true,
-      coverImageUrl: true,
-      publishedAt: true,
-      readingTimeMinutes: true,
-      category: { select: { slug: true, name: true } },
-    },
-  });
-
-  if (relatedPosts.length < 3 && post.categoryId) {
-    const fallback = await db.blogPost.findMany({
-      where: { publishedAt: { not: null }, slug: { not: slug, notIn: Object.keys(BLOG_REDIRECTS) }, categoryId: { not: post.categoryId } },
-      orderBy: { publishedAt: "desc" },
-      take: 3 - relatedPosts.length,
-      select: {
-        slug: true,
-        title: true,
-        excerpt: true,
-        coverImageUrl: true,
-        publishedAt: true,
-        readingTimeMinutes: true,
-        category: { select: { slug: true, name: true } },
-      },
-    });
-    relatedPosts = [...relatedPosts, ...fallback];
-  } else if (relatedPosts.length < 3) {
-    const fallback = await db.blogPost.findMany({
-      where: { publishedAt: { not: null }, slug: { not: slug, notIn: Object.keys(BLOG_REDIRECTS) } },
-      orderBy: { publishedAt: "desc" },
-      take: 3,
-      select: {
-        slug: true,
-        title: true,
-        excerpt: true,
-        coverImageUrl: true,
-        publishedAt: true,
-        readingTimeMinutes: true,
-        category: { select: { slug: true, name: true } },
-      },
-    });
-    relatedPosts = fallback;
-  }
+  const relatedPosts = await relatedArticles(post);
 
   const articleUrl = publicSiteUrl(`/blog/${post.slug}`);
   const modifiedAt = post.contentUpdatedAt ?? post.updatedAt;

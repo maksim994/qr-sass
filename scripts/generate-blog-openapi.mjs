@@ -28,6 +28,8 @@ const fields = {
   coverImageAlt: nullable("string", { maxLength: 1000 }),
   authorName: nullable("string", { maxLength: 300 }),
   categoryId: nullable("string", { maxLength: 200 }),
+  tags: { type: "array", maxItems: 30, items: { type: "string", minLength: 1, maxLength: 100 }, description: "Теги для тематического подбора; приводятся к нижнему регистру." },
+  relatedArticleIds: { type: "array", uniqueItems: true, maxItems: 20, items: { type: "string", minLength: 1, maxLength: 200 }, description: "Ручной порядок связанных статей (приоритет перед рубрикой/тегами). Блок показывает 3 опубликованные статьи; текущая и редиректы исключаются." },
   readingTimeMinutes: nullable("integer", { minimum: 1, maximum: 999 }),
   structuredData: {
     description:

@@ -23,6 +23,7 @@ type QrItem = {
   encodedContent: string | null;
   publicPath: string | null;
   hasFrame?: boolean;
+  canEditDestination?: boolean;
   _count: { scanEvents: number };
 };
 
@@ -117,7 +118,7 @@ export default function QrLibrary({ items, contentTypeLabels, exportFormats, que
                     <td className={styles.actionsCell}>
                       <div className={styles.actions}>
                         {exportFormats.includes("PNG") && <TrackedDownloadLink data-frame={String(qr.hasFrame)} href={`/api/qr/${qr.id}/download?format=png`} className={styles.download} download aria-label={`Скачать PNG: ${qr.name}`}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" /></svg><span>Скачать</span></TrackedDownloadLink>}
-                        <QrLibraryCardMenu hasFrame={qr.hasFrame} qrId={qr.id} qrName={qr.name} kind={qr.kind} managed={tracksScans} exportFormats={exportFormats} />
+                        <QrLibraryCardMenu canEditDestination={qr.canEditDestination} hasFrame={qr.hasFrame} qrId={qr.id} qrName={qr.name} kind={qr.kind} managed={tracksScans} exportFormats={exportFormats} />
                       </div>
                     </td>
                   </tr>

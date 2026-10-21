@@ -109,6 +109,8 @@ model BlogPost {
   legacyHtml        String?        @db.Text // exact original HTML saved on explicit conversion
   faq               Json           @default("[]")
   showPrintSizeIntro Boolean       @default(true)
+  tags              String[]       @default([])
+  relatedArticleIds String[]       @default([])
   contentUpdatedAt  DateTime?      // null on legacy rows: use updatedAt until first editorial save
   firstPublishedAt  DateTime?      // preserves original publication across unpublish/republish
   coverImageUrl     String?
