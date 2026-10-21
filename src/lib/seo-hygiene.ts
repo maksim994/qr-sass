@@ -25,6 +25,7 @@ export const INDEXABLE_STATIC_PATHS = [
   "/pricing",
   "/contacts",
   "/skaner-qr-koda",
+  "/qr-s-logotipom",
   "/personal-data-consent",
   "/changelog",
   "/qr-lifetime",

@@ -1,0 +1,39 @@
+/* THESIS: Put the user's own logo in a working QR before explaining it.
+   OWN-WORLD: Homepage Manrope, blue controls and the shared public grid.
+   STORY: enter URL, choose logo, inspect, download and test before printing.
+   FIRST VIEWPORT: title plus a two-column generator; mobile stacks the fields,
+   preview and downloads. FORM: user-pinned /qr-wifi public tool family.
+   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md */
+.generator { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:48px; border:1px solid var(--border-default); border-radius:16px; padding:32px 40px; background:var(--surface-card); scroll-margin-top:112px; }
+.inputs { min-width:0; }
+.field { display:grid; gap:12px; font-size:16px; font-weight:650; }
+.field input { width:100%; min-height:52px; font-size:16px; }
+.hint { font-size:12px; line-height:1.65; color:var(--text-muted); margin-top:8px; }
+.logoField { margin-top:28px; }
+.label { font-size:16px; font-weight:650; }
+.uploadRow { display:flex; gap:16px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+.uploadRow>div { min-width:0; flex:1; }
+.thumbnail { width:56px; height:56px; object-fit:contain; border:1px solid var(--border-default); border-radius:8px; background:white; }
+.fileName { font-size:12px; color:var(--text-muted); overflow-wrap:anywhere; margin-top:10px; line-height:1.6; }
+.logoField>.error { margin-top:12px; }
+.fileInput { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.safety { margin-top:28px; padding-top:24px; border-top:1px solid var(--border-subtle); }
+.safety strong { font-size:14px; font-weight:650; color:var(--text-strong); }
+.safety p,.private { font-size:13px; line-height:1.75; color:var(--text-muted); margin-top:10px; max-width:65ch; }
+.colors { margin-top:16px; }
+.colors summary { cursor:pointer; min-height:44px; padding-block:12px; font-size:14px; font-weight:650; }
+.colors>div { display:flex; gap:28px; margin-top:12px; }
+.colors label { display:grid; gap:10px; font-size:13px; }
+.colors input { width:80px; height:44px; padding:4px; }
+.output { min-width:0; display:flex; flex-direction:column; gap:12px; max-width:360px; width:100%; justify-self:center; }
+.preview { position:relative; width:320px; height:320px; max-width:100%; align-self:center; background:white; border-radius:8px; overflow:hidden; }
+.qr,.qr>svg { width:100%; height:100%; display:block; }
+.example { position:absolute; right:0; top:0; z-index:1; font-size:11px; padding:5px 8px; color:var(--text-muted); background:var(--surface-subtle); border-radius:4px; }
+.loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--text-muted); background:var(--surface-card); font-size:13px; }
+.output>:global(.fk-button) { min-height:48px; }
+.output>.hint { text-align:center; margin-top:0; }
+.error { color:var(--color-danger); font-size:13px; line-height:1.65; }
+.notice { color:var(--text-muted); font-size:13px; line-height:1.65; }
+.notice a { color:var(--text-link); text-decoration:underline; text-underline-offset:3px; }
+@media(max-width:1100px) { .generator { gap:28px; padding:28px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+@media(max-width:767px) { .generator { grid-template-columns:1fr; gap:24px; padding:20px; border-radius:12px; }.logoField { margin-top:22px; }.safety { margin-top:22px; padding-top:18px; }.preview { width:260px; height:260px; }.output { max-width:360px; }.private { font-size:12px; }.colors>div { margin-top:8px; } }

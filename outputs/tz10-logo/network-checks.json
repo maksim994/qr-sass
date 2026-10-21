@@ -1,0 +1,14 @@
+{
+  "requests": 14,
+  "requestBodies": [],
+  "uploadRequests": [],
+  "nonGet": [
+    {
+      "at": "2026-10-21T10:31:16.978Z",
+      "method": "POST",
+      "path": "/api/analytics/revoke",
+      "bytes": 0,
+      "contentType": null
+    }
+  ]
+}

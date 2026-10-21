@@ -189,7 +189,7 @@ export function QrScanner() {
         {result.wifi?.password && <Button type="button" variant="secondary" onClick={() => void copy(result.wifi!.password, "password")}>{copied === "password" ? "Пароль скопирован" : "Скопировать пароль"}</Button>}
         <Button type="button" variant="ghost" onClick={reset}>Сканировать ещё</Button>
       </div>
-      <p className={s.generatorLink}>{result.type === "WIFI" ? <Link href="/qr-wifi">Сделать такой же код для своей сети →</Link> : <>Нужен свой QR-код? <Link href="/#create-qr">Создайте статический бесплатно, без регистрации, в PNG или SVG</Link>.</>}</p>
+      <p className={s.generatorLink}>{result.type === "WIFI" ? <Link href="/qr-wifi">Сделать такой же код для своей сети →</Link> : <>Нужен свой QR-код? <Link href="/#create-qr">Создай статический бесплатно, без регистрации, в PNG или SVG</Link>.</>}</p>
     </div> : <>
       <div className={s.tabs} role="tablist" aria-label="Источник QR-кода">{([['camera','Камера'],['photo','Фото или скриншот']] as const).map(([value,label]) => <button type="button" role="tab" id={`scan-tab-${value}`} aria-controls={`scan-panel-${value}`} aria-selected={tab === value} tabIndex={tab === value ? 0 : -1} key={value} onClick={() => selectTab(value)} onKeyDown={event => { if (["ArrowLeft","ArrowRight","Home","End"].includes(event.key)) { event.preventDefault(); const next = event.key === "Home" ? "camera" : event.key === "End" ? "photo" : tab === "camera" ? "photo" : "camera"; selectTab(next); document.getElementById(`scan-tab-${next}`)?.focus(); } }}>{label}</button>)}</div>
       {tab === "camera" ? <div id="scan-panel-camera" role="tabpanel" aria-labelledby="scan-tab-camera" className={s.panel}>

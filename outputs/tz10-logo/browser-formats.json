@@ -1,0 +1,14 @@
+[
+  {
+    "format": "png",
+    "downloadEnabled": true
+  },
+  {
+    "format": "jpg",
+    "downloadEnabled": true
+  },
+  {
+    "format": "webp",
+    "downloadEnabled": true
+  }
+]

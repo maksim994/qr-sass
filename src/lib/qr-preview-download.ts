@@ -8,7 +8,14 @@ import { buildQrStylingOptions } from "@/lib/qr-styling-options";
 
 export async function downloadQrPreview(data: string, style: QrStyle, format: "png" | "svg") {
   const qr = new QRCodeStyling(buildQrStylingOptions(data, style, 1200));
-  if (!frameEnabled(style)) { await qr.download({ name: "qr-code", extension: format }); return; }
+  if (!frameEnabled(style)) {
+    const raw = await qr.getRawData(format);
+    if (!raw) throw new Error("QR render failed");
+    const url = URL.createObjectURL(raw as Blob), a = document.createElement("a");
+    a.href = url; a.download = `qr-code.${format}`; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return;
+  }
   const raw = await qr.getRawData("svg");
   if (!raw) throw new Error("QR render failed");
   const svg = withQrFrame(await (raw as Blob).text(), style, 1200);

@@ -1,0 +1,18 @@
+[
+  {
+    "format": "png",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/logo-preview",
+    "logoPixels": 12425,
+    "passed": true
+  },
+  {
+    "format": "svg",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/logo-preview",
+    "logoPixels": 12426,
+    "passed": true
+  }
+]

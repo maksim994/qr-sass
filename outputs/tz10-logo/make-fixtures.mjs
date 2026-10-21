@@ -1,0 +1,10 @@
+import fs from 'node:fs/promises';
+import sharp from 'sharp';
+const directory=new URL('./fixtures/',import.meta.url);
+await fs.mkdir(directory,{recursive:true});
+const svg='<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><rect width="320" height="160" rx="18" fill="#1E4FD1"/><text x="160" y="103" text-anchor="middle" font-family="sans-serif" font-size="70" font-weight="700" fill="white">DEMO</text></svg>';
+await sharp(Buffer.from(svg)).png().toFile(new URL('demo-logo.png',directory).pathname);
+await sharp(Buffer.from(svg)).jpeg().toFile(new URL('demo-logo.jpg',directory).pathname);
+await sharp(Buffer.from(svg)).webp().toFile(new URL('demo-logo.webp',directory).pathname);
+await fs.writeFile(new URL('unsupported.svg',directory),svg);
+await fs.writeFile(new URL('broken.png',directory),'Not an actual PNG');

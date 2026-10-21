@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "path": "/qr-s-logotipom",
+      "status": 200,
+      "title": "QR-код с логотипом — создать онлайн бесплатно | qr-s.ru",
+      "faq": 5,
+      "faqMatches": true,
+      "canonical": "http://127.0.0.1:3010/qr-s-logotipom"
+    },
+    {
+      "path": "/skaner-qr-koda",
+      "status": 200,
+      "title": "Сканер QR-кода онлайн: с камеры, по фото и скриншоту | qr-s.ru",
+      "faq": 11,
+      "faqMatches": true,
+      "canonical": "http://127.0.0.1:3010/skaner-qr-koda"
+    }
+  ],
+  "sitemapUnique": true,
+  "scannerApprovedCopy": true
+}
