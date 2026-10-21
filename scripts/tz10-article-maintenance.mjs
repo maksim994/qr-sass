@@ -1,17 +1,24 @@
 // Dry-run by default. Run --apply only as part of the approved Stage 1 release.
 // Uses the versioned Article API with minorEdit; no direct production DB writes.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { replacePrivateArticleLinks } from "../src/lib/blog-public-links.ts";
 const origin = process.env.ARTICLE_API_ORIGIN || "https://qr-s.ru";
 const token = process.env.ARTICLE_API_TOKEN;
-assert.ok(token, "Set ARTICLE_API_TOKEN (an editorial Bearer key)");
+
 assert.ok(["https://qr-s.ru", "http://127.0.0.1:3010"].includes(origin), "Unexpected API origin");
 const apply = process.argv.includes("--apply");
+const snapshotPath = process.env.ARTICLE_DRY_RUN_SNAPSHOT;
+assert.ok(!(apply && snapshotPath), "A read-only snapshot may never be used with --apply");
+assert.ok(snapshotPath || token, "Set ARTICLE_API_TOKEN or ARTICLE_DRY_RUN_SNAPSHOT for a read-only plan");
+const snapshot = snapshotPath ? JSON.parse(readFileSync(snapshotPath, "utf8")) : null;
+assert.ok(!snapshot || Array.isArray(snapshot), "Article snapshot must be an array");
 async function api(path, method = "GET", data) {
   const r = await fetch(origin + "/api/v1/articles" + path, { method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: data ? JSON.stringify(data) : undefined });
   const j = await r.json(); assert.ok(r.ok && j.ok, `Article API ${r.status}: ${j.error || "request failed"}`); return j.data;
 }
 async function article(slug) {
+  if (snapshot) return snapshot.find(post => post.slug === slug) ?? null;
   const list = await api(`?slug=${encodeURIComponent(slug)}`);
   return list.items[0] ? api(`/${list.items[0].id}`) : null;
 }
@@ -33,9 +40,18 @@ const relatedSlugs = ["qr-kod-s-analitikoj-i-korotkoj-ssylkoj", "qr-kod-s-utm-me
 const related = (await Promise.all(relatedSlugs.map(article))).filter(Boolean);
 const main = await article("dinamicheskij-i-staticheskij-qr-kod-raznica");
 if (main) plans.push({ post: main, patch: { tags: ["динамический qr", "смена ссылки"], relatedArticleIds: related.map(p => p.id) } });
-for (const post of related) plans.push({ post, patch: { tags: [...new Set([...post.tags, "динамический qr", "смена ссылки"])] } });
+for (const post of related) plans.push({ post, patch: { tags: [...new Set([...(post.tags ?? []), "динамический qr", "смена ссылки"])] } });
 for (const { post, patch } of plans) {
-  console.log(JSON.stringify({ slug: post.slug, mode: apply ? "apply" : "dry-run", fields: Object.keys(patch), privateLinksRemoved: patch.content ? post.content.length - patch.content.length : 0 }));
+  const linkPairs = [["/dashboard/billing", "/pricing"], ["/dashboard/create/menu", "/qr-menu"], ["/dashboard/create/url", "/#create-qr"]];
+  const links = patch.content ? linkPairs.flatMap(([from, to]) => {
+    const count = post.content.split(from).length - patch.content.split(from).length;
+    return count > 0 ? [{ from, to, count }] : [];
+  }) : [];
+  console.log(JSON.stringify({ slug: post.slug, url: `${origin}/blog/${post.slug}`, mode: apply ? "apply" : "dry-run", source: snapshot ? "read-only-production-snapshot" : "article-api", fields: Object.keys(patch), links,
+    ...(patch.metaTitle !== undefined ? { metaTitle: { before: post.metaTitle ?? null, after: patch.metaTitle } } : {}),
+    ...(patch.tags ? { tags: { before: post.tags ?? [], after: patch.tags } } : {}),
+    ...(patch.relatedArticleIds ? { relatedArticles: related.map(item => ({ id: item.id, slug: item.slug, title: item.title })) } : {}),
+  }));
   if (!apply) continue;
   const after = await api(`/${post.id}`, "PATCH", { ...patch, version: post.version, minorEdit: true, comment: "ТЗ-10 этап 1: публичные CTA, короткий title, тематические связи" });
   for (const field of ["slug", "publishedAt", "firstPublishedAt", "contentUpdatedAt"]) assert.deepEqual(after[field], post[field], `Unexpected ${field} change`);
