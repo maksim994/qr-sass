@@ -94,7 +94,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const enabledTypes = qrTypes.filter(type => !disabledTypes.includes(type.type));
   const enabledStaticTypes = STATIC_QR_TYPES.filter(type => enabledTypes.some(item => item.type === type));
   const publicType = enabledStaticTypes.find(type => type === requestedType) ?? enabledStaticTypes[0];
-  const startPath = session ? "/dashboard/create" : "/register";
   const plans = [free, pro, business];
   const descriptions = { FREE: "Для первых кодов и простых задач", PRO: "Для ссылок, которые меняются", BUSINESS: "Для команды и интеграций" };
   const siteSettings = await getDb().siteSettings.findUnique({where:{id:"default"},select:{contactEmail:true,contactPhone:true}});
@@ -116,7 +115,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <h2 id="how-title" className="sr-only">Три шага до готового QR-кода</h2>
           {[
             ["1", "Добавьте содержимое", "Ссылку на сайт, меню, файл или контакты."],
-            ["2", "Настройте оформление", "Выберите цвет. В кабинете можно добавить логотип."],
+            ["2", "Настройте оформление", "Выберите цвет. Добавить логотип можно без регистрации."],
             ["3", "Скачайте и поделитесь", "Разместите код на экране или в печатном макете."],
           ].map(([step, title, text]) => <div key={step} className={styles.step}><span>{step}</span><div><h3>{title}</h3><p>{text}</p></div></div>)}
         </section>
@@ -140,7 +139,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         <section className={`${styles.container} ${styles.designSection}`}>
           <DesignPlayground />
-          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет и добавьте логотип в редакторе кабинета.</p><p>Попробуйте цвет в примере. Свой код вы настроите в редакторе.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />PNG и SVG для макетов</li></ul><Button href={startPath} variant="secondary">Добавить логотип — бесплатно после регистрации</Button></div>
+          <div className={styles.featureCopy}><h2>Узнаваемый. <br />Даже в деталях.</h2><p>Ваш код может быть частью фирменного стиля. Подберите цвет и добавьте логотип без регистрации.</p><p>Попробуйте цвет в примере. Свой логотип добавьте в генераторе QR с логотипом.</p><ul><li><Check />Цвета и оформление модулей</li><li><Check />Логотип в центре QR-кода</li><li><Check />PNG и SVG для макетов</li></ul><Button href="/qr-s-logotipom" variant="secondary">Добавить логотип — бесплатно без регистрации</Button></div>
         </section>
 
         <section className={styles.printSection}>

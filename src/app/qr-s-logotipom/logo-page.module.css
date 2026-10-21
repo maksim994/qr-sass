@@ -7,6 +7,8 @@
 .reading p,.reading li { font-size:16px; line-height:1.85; max-width:75ch; }
 .reading p+p { margin-top:18px; }
 .reading ol { padding-left:22px; display:grid; gap:20px; }
+.reading ol+p,.reading ul+p { margin-top:18px; }
+.reading ul { padding-left:22px; list-style:disc; margin-top:18px; }
 .reading a { color:var(--text-link); text-decoration:underline; text-underline-offset:4px; }
 .reading details { border-bottom:1px solid var(--border-default); padding-block:20px; }
 .reading summary { cursor:pointer; font-size:16px; line-height:1.65; font-weight:650; }
