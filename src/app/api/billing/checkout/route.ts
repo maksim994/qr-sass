@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     try { counter = (await getSiteSettings()).yandexMetrikaId; } catch { /* Optional attribution. */ }
     const metrika = req.cookies.get(ANALYTICS_OPTOUT_COOKIE)?.value === "1" ? null : parseMetrikaAttribution(body.metrika, counter);
     // Legacy column names: store the collection-policy mode, never a fabricated consent click.
-    const attribution = metrika ? { metrikaUserId: user.id, metrikaClientId: metrika.clientId, metrikaCounterId: metrika.counterId, metrikaConsentAt: new Date(), metrikaConsentVersion: metrika.policyVersion } : {};
+    const attribution = { signupSourceUserId: user.id, ...(metrika ? { metrikaUserId: user.id, metrikaClientId: metrika.clientId, metrikaCounterId: metrika.counterId, metrikaConsentAt: new Date(), metrikaConsentVersion: metrika.policyVersion } : {}) };
 
     if (env.BILLING_PROVIDER === "robokassa") {
       const config = getRobokassaConfig();

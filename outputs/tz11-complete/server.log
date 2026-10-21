@@ -1,0 +1,8 @@
+▲ Next.js 16.3.8
+- Local:         http://127.0.0.1:3016
+- Network:       http://127.0.0.1:3016
+✓ Ready in 98ms
+✓ Running next.config.ts took 22ms
+⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+{"timestamp":"2026-10-21T15:32:56.428Z","level":"info","area":"api","route":"/api/auth/register","message":"User registered","requestId":"ada86b41-c24e-457c-a725-98d7219e1630","status":200}
+{"timestamp":"2026-10-21T15:32:56.636Z","level":"info","area":"api","route":"/api/auth/register","message":"User registered","requestId":"085ac6b5-15f5-45c3-8476-db1f5b83ca56","status":200}

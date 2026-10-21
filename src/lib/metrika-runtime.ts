@@ -14,7 +14,7 @@ export function startMetrika(id: string) {
   script.src = "https://mc.yandex.ru/metrika/tag.js";
   script.async = true; script.dataset.qrsAnalytics = "true";
   document.head.appendChild(script);
-  w.ym(id, "init", { defer: true, clickmap: true, trackLinks: false, accurateTrackBounce: true, webvisor: true });
+  w.ym(id, "init", { defer: true, clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
   setMetrikaCounterId(id);
   window.dispatchEvent(new Event(METRIKA_READY_EVENT));
 }

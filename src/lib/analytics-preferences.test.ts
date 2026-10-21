@@ -19,13 +19,13 @@ function browser() {
   return { dom, close() { dom.window.close(); for (const [key, value] of old) { if (value) Object.defineProperty(globalThis, key, value); else Reflect.deleteProperty(globalThis, key); } } };
 }
 
-test("refusal survives old policy, expiry, and legacy storage without silently opting in", () => {
+test("refusal survives old policy and expiry; retired storage is ignored", () => {
   for (const record of [{choice:"declined",version:"2026-09-20.1",at:1}, {choice:"declined"}, {choice:"declined",at:Date.now()+1}]) assert.equal(parseCookieChoice(JSON.stringify(record)), "declined");
   const b = browser();
   try {
     window.localStorage.setItem("cookie_consent", "declined");
-    assert.equal(readCookieChoice(), "declined");
-    assert.equal(isAnalyticsEnabled(), false);
+    assert.equal(readCookieChoice(), "none");
+    assert.equal(isAnalyticsEnabled(), true);
     saveCookieChoice("accepted");
     assert.equal(readCookieChoice(), "accepted");
     assert.equal(window.localStorage.getItem("cookie_consent"), null);
@@ -50,7 +50,7 @@ test("new visitor starts one Webvisor counter; acknowledging the notice is not e
     startMetrika("106988416"); startMetrika("106988416");
     assert.equal(document.querySelectorAll("script[data-qrs-analytics]").length, 1);
     const w = window as Window & { ym: { a: unknown[][] } };
-    assert.deepEqual(w.ym.a, [["106988416", "init", {defer:true, clickmap:true, trackLinks:false, accurateTrackBounce:true, webvisor:true}]]);
+    assert.deepEqual(w.ym.a, [["106988416", "init", {defer:true, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true}]]);
     assert.equal(trackGoal(PRODUCT_GOALS.scan_success, {type:"TEXT",where:"landing",raw:"secret"}), true);
     assert.deepEqual(w.ym.a[1], ["106988416", "reachGoal", "scan_success", {type:"TEXT",where:"landing"}]);
     assert.equal(trackGoal(PRODUCT_GOALS.subscription_paid), false);

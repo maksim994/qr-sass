@@ -1,6 +1,7 @@
 "use client";
 
 import { COMMERCIAL } from "@/lib/commercial-config";
+import { readFirstTouch } from "@/lib/signup-source";
 import { LEGAL_VERSION } from "@/lib/legal-documents";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,7 +52,7 @@ export function RegisterPageClient({ planName, features, nextPath, dynamicIntent
       const response = await fetchApi("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, consent, termsAccepted, legalVersion: LEGAL_VERSION }),
+        body: JSON.stringify({ name, email, password, consent, termsAccepted, signupSource: readFirstTouch(), legalVersion: LEGAL_VERSION }),
       });
       const parsed = await parseApiResponse<{ userId?: string }>(response);
       if (!parsed.ok) {

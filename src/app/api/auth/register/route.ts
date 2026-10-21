@@ -1,3 +1,4 @@
+import { registrationSource } from "@/lib/signup-source";
 import { readRegistrationPartner, registrationPartnerData } from "@/lib/partners";
 import { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
@@ -84,6 +85,7 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-")
       .slice(0, 30)}-${nanoid(6)}`;
 
+    const signupSource = registrationSource((raw as Record<string, unknown>).signupSource, request);
     const partnerVisitId = await readRegistrationPartner();
     const user = await db.$transaction(async (tx) => {
       const partnerData = await registrationPartnerData(tx, partnerVisitId);
@@ -94,6 +96,7 @@ export async function POST(request: Request) {
           passwordHash,
           metrikaRegistrationPending: true,
           legalAcceptances: { create: legalReceipt("email") },
+          signupSource: { create: { ...signupSource, firstTouchAt: new Date(signupSource.firstTouchAt) } },
           memberships: {
             create: {
               role: "OWNER",

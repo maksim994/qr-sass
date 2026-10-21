@@ -5,6 +5,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { ConsentField } from "@/components/auth/consent-field";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
+import { readFirstTouch } from "@/lib/signup-source";
 import { LEGAL_VERSION } from "@/lib/legal-documents";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { MSG } from "@/lib/user-messages";
@@ -18,7 +19,7 @@ export function YandexRegistration({ nextPath }: { nextPath: string }) {
     setBusy(true); setError("");
     try {
       const response = await fetchApi("/api/auth/yandex", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ termsAccepted, consent, legalVersion: LEGAL_VERSION, next: nextPath }) });
+        body: JSON.stringify({ termsAccepted, consent, signupSource: readFirstTouch(), legalVersion: LEGAL_VERSION, next: nextPath }) });
       const parsed = await parseApiResponse<{ url: string }>(response);
       if (!parsed.ok || !parsed.data?.url) { setError(parsed.error ?? MSG.YANDEX_AUTH_FAILED); setBusy(false); return; }
       window.location.assign(parsed.data.url);

@@ -1,0 +1,103 @@
+{
+  "vkCounter": "3807133",
+  "metrikaCounter": "106988416",
+  "goals": [
+    {
+      "goal": "registration",
+      "applicationKeys": [
+        "goal",
+        "id",
+        "type"
+      ],
+      "value": null,
+      "realNetworkHits": 1,
+      "endpoint": "https://top-fwz1.mail.ru/tracker"
+    },
+    {
+      "goal": "dynamicqrcreated",
+      "applicationKeys": [
+        "goal",
+        "id",
+        "type"
+      ],
+      "value": null,
+      "realNetworkHits": 1,
+      "endpoint": "https://top-fwz1.mail.ru/tracker"
+    },
+    {
+      "goal": "pricingview",
+      "applicationKeys": [
+        "goal",
+        "id",
+        "type"
+      ],
+      "value": null,
+      "realNetworkHits": 1,
+      "endpoint": "https://top-fwz1.mail.ru/tracker"
+    },
+    {
+      "goal": "checkoutstart",
+      "applicationKeys": [
+        "goal",
+        "id",
+        "type"
+      ],
+      "value": null,
+      "realNetworkHits": 1,
+      "endpoint": "https://top-fwz1.mail.ru/tracker"
+    },
+    {
+      "goal": "paymentsuccess",
+      "applicationKeys": [
+        "goal",
+        "id",
+        "type",
+        "value"
+      ],
+      "value": 299,
+      "realNetworkHits": 1,
+      "endpoint": "https://top-fwz1.mail.ru/tracker"
+    }
+  ],
+  "piiSentinelsInNetwork": false,
+  "cspViolations": 0,
+  "metrika200": 23,
+  "webvisorResources": 0,
+  "vkStatusNote": "Cross-origin ResourceTiming does not expose HTTP status (0); actual SDK loaded and tracker resources observed.",
+  "categories": [
+    {
+      "state": "ym-only",
+      "scripts": [
+        "https://mc.yandex.ru/metrika/tag.js"
+      ],
+      "vk": false,
+      "ym": "106988416"
+    },
+    {
+      "state": "vk-only",
+      "scripts": [
+        "https://top-fwz1.mail.ru/js/code.js",
+        "https://top-fwz1.mail.ru/js/dyn-goal-config.js?ids=3807133"
+      ],
+      "vk": true,
+      "ym": null
+    },
+    {
+      "state": "both-off-after-reload",
+      "scripts": [],
+      "vk": false,
+      "ym": null
+    },
+    {
+      "state": "vk-reenabled",
+      "vk": true,
+      "ym": null
+    },
+    {
+      "state": "admin",
+      "scripts": [],
+      "vk": false,
+      "ym": null
+    }
+  ]
+}

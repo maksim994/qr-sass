@@ -9,5 +9,6 @@ export async function resolve(specifier, context, nextResolve) {
     const withExt = /\.(ts|js|mjs|cjs)$/.test(rel) ? rel : `${rel}.ts`;
     return nextResolve(pathToFileURL(join(srcRoot, withExt)).href, context);
   }
+  if (["next/headers", "next/navigation", "next/server"].includes(specifier)) return nextResolve(`${specifier}.js`, context);
   return nextResolve(specifier, context);
 }

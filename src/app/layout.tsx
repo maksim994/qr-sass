@@ -1,3 +1,4 @@
+import { FirstTouchCapture } from "@/components/first-touch-capture";
 import { PublicOfferProvider } from "@/components/public-offer-provider";
 import { getPlan } from "@/lib/plans";
 import { ReferralCapture } from "@/components/referral-capture";
@@ -80,6 +81,7 @@ export default async function RootLayout({
           {children}
           {!privatePreview && <>
             <React.Suspense fallback={null}><ReferralCapture /></React.Suspense>
+            <FirstTouchCapture />
             <RegistrationGoal />
             <CookieBanner yandexMetrikaId={settings.yandexMetrikaId || undefined} />
           </>}

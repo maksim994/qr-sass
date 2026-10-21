@@ -1,3 +1,4 @@
+import { normalizeSignupSource } from "@/lib/signup-source";
 import { getDb } from "@/lib/db";
 import { LEGAL_VERSION } from "@/lib/legal-documents";
 import { oauthStateHash, legalReceipt } from "@/lib/legal-acceptance";
@@ -95,7 +96,7 @@ export async function GET(request: Request) {
       return consumed.count === 1 ? found : null;
     });
     const receipt = intent ? { ...legalReceipt("yandex", intent.acceptedAt), documents: intent.documents as ReturnType<typeof legalReceipt>["documents"] } : undefined;
-    const user = await findOrCreateYandexUser(profile, receipt);
+    const user = await findOrCreateYandexUser(profile, receipt, normalizeSignupSource(intent?.signupSource, request.url) ?? undefined);
     const token = await createSessionToken({ sub: user.id, email: user.email, sv: user.sessionVersion });
     await setAuthCookie(token);
     logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex auth success", status: 302 });

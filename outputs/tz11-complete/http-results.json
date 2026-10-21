@@ -1,0 +1,30 @@
+[
+  {
+    "check": "email registration stores all first-touch fields and existing partner attribution",
+    "ok": true
+  },
+  {
+    "check": "registration receipts independent, one per destination",
+    "ok": true
+  },
+  {
+    "check": "verified payment has independent VK/Metrika deduplication",
+    "ok": true
+  },
+  {
+    "check": "real notification builder adds registration source for signup and payment; no Telegram requests",
+    "ok": true
+  },
+  {
+    "check": "admin source fields rendered and old user has no data",
+    "ok": true
+  },
+  {
+    "check": "Yandex POST persists source in OAuth intent; real creation function stores it, external OAuth not contacted",
+    "ok": true
+  },
+  {
+    "check": "three synthetic legacy redirects unchanged, server-only; no production QR links opened",
+    "ok": true
+  }
+]
