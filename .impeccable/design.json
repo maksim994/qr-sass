@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T09:17:25.273255+00:00",
+  "title": "Design System: QR-S public site",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Action Blue",
+        "canonical": "#1E4FD1",
+        "tonalRamp": [
+          "#15306A",
+          "#173885",
+          "#1840AB",
+          "#1E4FD1",
+          "#2F5FE6",
+          "#5B7FEF",
+          "#B4C7FB",
+          "#EDF2FE"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Action Blue Hover",
+        "canonical": "#1840AB",
+        "tonalRamp": [
+          "#15306A",
+          "#173885",
+          "#1840AB",
+          "#1E4FD1",
+          "#2F5FE6",
+          "#5B7FEF",
+          "#B4C7FB",
+          "#EDF2FE"
+        ]
+      },
+      "primary-subtle": {
+        "role": "primary",
+        "displayName": "Blue Tint",
+        "canonical": "#EDF2FE",
+        "tonalRamp": [
+          "#15306A",
+          "#173885",
+          "#1840AB",
+          "#1E4FD1",
+          "#2F5FE6",
+          "#5B7FEF",
+          "#B4C7FB",
+          "#EDF2FE"
+        ]
+      },
+      "on-primary": {
+        "role": "neutral",
+        "displayName": "On Blue",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "page": {
+        "role": "neutral",
+        "displayName": "Page White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Cool Slate Wash",
+        "canonical": "#F5F7FA",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Strong Ink",
+        "canonical": "#131720",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Body Slate",
+        "canonical": "#222834",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "canonical": "#6B7689",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Quiet Border",
+        "canonical": "#DEE3EB",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "border-subtle": {
+        "role": "neutral",
+        "displayName": "Quiet Divider",
+        "canonical": "#ECEFF4",
+        "tonalRamp": [
+          "#131720",
+          "#222834",
+          "#353D4C",
+          "#4D5667",
+          "#9AA4B5",
+          "#DEE3EB",
+          "#F5F7FA",
+          "#FFFFFF"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Focus Blue",
+        "canonical": "#2F5FE6",
+        "tonalRamp": [
+          "#15306A",
+          "#173885",
+          "#1840AB",
+          "#1E4FD1",
+          "#2F5FE6",
+          "#5B7FEF",
+          "#B4C7FB",
+          "#EDF2FE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Public Headline",
+        "purpose": "Shared secondary-page titles."
+      },
+      "section": {
+        "displayName": "Section Heading",
+        "purpose": "Homepage and broad marketing sections."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default public interface copy."
+      },
+      "reading": {
+        "displayName": "Reading",
+        "purpose": "Long legal and article text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Standard field labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "focus",
+        "value": "0 0 0 3px rgba(var(--focus-ring), 0.35)",
+        "purpose": "Existing input focus ring; public surface shadows are suppressed."
+      }
+    ],
+    "motion": [
+      {
+        "name": "public-border",
+        "value": "border-color .18s ease-out",
+        "purpose": "Blog and shared public card hover."
+      },
+      {
+        "name": "standard-colors",
+        "value": "140ms cubic-bezier(0.2, 0.8, 0.3, 1)",
+        "purpose": "Existing semantic control color transitions; disabled under reduced-motion preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "public-tablet-wide",
+        "value": "1100px"
+      },
+      {
+        "name": "public-tablet",
+        "value": "800px"
+      },
+      {
+        "name": "public-mobile",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Public action with a stable surface and visible keyboard focus.",
+      "html": "<button class=\"ds-button-primary\">Продолжить</button>",
+      "css": ".ds-button-primary{font-family:var(--font-sans,Manrope,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:12px;height:44px;padding:0 20px;border:1.5px solid transparent;border-radius:8px;font-size:14px;font-weight:650;text-decoration:none;cursor:pointer;transition:background-color 140ms cubic-bezier(.2,.8,.3,1),border-color 140ms cubic-bezier(.2,.8,.3,1);background:var(--text-link,#1E4FD1);color:var(--color-primary-on,#FFFFFF);}.ds-button-primary:hover{background:var(--text-link-hover,#1840AB);}.ds-button-primary:focus-visible{outline:3px solid var(--border-focus,#2F5FE6);outline-offset:4px;}.ds-button-primary:active{transform:scale(.98)}.ds-button-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none}}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Public action with a stable surface and visible keyboard focus.",
+      "html": "<button class=\"ds-button-secondary\">Продолжить</button>",
+      "css": ".ds-button-secondary{font-family:var(--font-sans,Manrope,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:12px;height:44px;padding:0 20px;border:1.5px solid transparent;border-radius:8px;font-size:14px;font-weight:650;text-decoration:none;cursor:pointer;transition:background-color 140ms cubic-bezier(.2,.8,.3,1),border-color 140ms cubic-bezier(.2,.8,.3,1);background:var(--surface-card,#FFFFFF);color:var(--text-strong,#131720);border-color:var(--border-strong,#C7CEDA);}.ds-button-secondary:hover{background:var(--surface-subtle,#F5F7FA);border-color:var(--text-subtle,#9AA4B5);}.ds-button-secondary:focus-visible{outline:3px solid var(--border-focus,#2F5FE6);outline-offset:4px;}.ds-button-secondary:active{transform:scale(.98)}.ds-button-secondary:disabled{opacity:.55;cursor:not-allowed;transform:none}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition:none}}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Public action with a stable surface and visible keyboard focus.",
+      "html": "<button class=\"ds-button-ghost\">Продолжить</button>",
+      "css": ".ds-button-ghost{font-family:var(--font-sans,Manrope,system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:12px;height:44px;padding:0 20px;border:1.5px solid transparent;border-radius:8px;font-size:14px;font-weight:650;text-decoration:none;cursor:pointer;transition:background-color 140ms cubic-bezier(.2,.8,.3,1),border-color 140ms cubic-bezier(.2,.8,.3,1);background:transparent;color:var(--text-link,#1E4FD1);}.ds-button-ghost:hover{background:var(--color-primary-subtle,#EDF2FE);}.ds-button-ghost:focus-visible{outline:3px solid var(--border-focus,#2F5FE6);outline-offset:4px;}.ds-button-ghost:active{transform:scale(.98)}.ds-button-ghost:disabled{opacity:.55;cursor:not-allowed;transform:none}@media(prefers-reduced-motion:reduce){.ds-button-ghost{transition:none}}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled neutral field with a semantic focus ring.",
+      "html": "<label class=\"ds-field\">Ссылка<input class=\"ds-input\" type=\"url\" placeholder=\"https://example.com\" /></label>",
+      "css": ".ds-field{font-family:var(--font-sans,Manrope,system-ui,sans-serif);display:grid;gap:8px;color:var(--text-strong,#131720);font-size:14px;font-weight:600}.ds-input{font-family:var(--font-sans,Manrope,system-ui,sans-serif);height:44px;padding:0 16px;font-size:16px;font-weight:400;background:var(--surface-card,#FFFFFF);color:var(--text-strong,#131720);border:1px solid var(--border-default,#DEE3EB);border-radius:8px;transition:border-color 140ms}.ds-input::placeholder{color:var(--text-subtle,#9AA4B5)}.ds-input:hover{border-color:var(--border-strong,#C7CEDA)}.ds-input:focus-visible{outline:none;border-color:var(--border-focus,#2F5FE6);box-shadow:0 0 0 3px rgba(var(--focus-ring,47,95,230),.35)}.ds-input:disabled{background:var(--surface-subtle,#F5F7FA);color:var(--text-muted,#6B7689)}"
+    },
+    {
+      "name": "Inset Navigation",
+      "kind": "nav",
+      "description": "The public header island with current-route tint.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Основное меню\"><a href=\"#features\">Возможности</a><a href=\"#pricing\" aria-current=\"page\">Тарифы</a><a href=\"#contacts\">Контакты</a></nav>",
+      "css": ".ds-nav{font-family:var(--font-sans,Manrope,system-ui,sans-serif);display:flex;flex-wrap:wrap;align-items:center;gap:3px;min-height:68px;padding:0 20px;border:1px solid var(--border-default,#DEE3EB);border-radius:14px;background:var(--surface-card,#FFFFFF)}.ds-nav a{font-size:13px;font-weight:550;padding:10px 13px;border-radius:7px;color:var(--text-muted,#6B7689);text-decoration:none;transition:background .18s,color .18s}.ds-nav a:hover{background:var(--surface-subtle,#F5F7FA);color:var(--text-link,#1E4FD1)}.ds-nav a[aria-current=page]{background:var(--color-primary-subtle,#EDF2FE);color:var(--text-link,#1E4FD1)}.ds-nav a:focus-visible{outline:3px solid var(--border-focus,#2F5FE6);outline-offset:4px;}"
+    },
+    {
+      "name": "Selected Category",
+      "kind": "chip",
+      "description": "Blue-tinted selected category using the existing tag shape.",
+      "html": "<button class=\"ds-category\" aria-pressed=\"true\">QR-коды</button>",
+      "css": ".ds-category{font-family:var(--font-sans,Manrope,system-ui,sans-serif);display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;font-size:14px;font-weight:600;border:1px solid var(--text-link,#1E4FD1);border-radius:8px;background:var(--color-primary-subtle,#EDF2FE);color:var(--text-link,#1E4FD1);cursor:pointer}.ds-category:hover{text-decoration:underline;text-underline-offset:4px}.ds-category:focus-visible{outline:3px solid var(--border-focus,#2F5FE6);outline-offset:4px;}"
+    },
+    {
+      "name": "Plan Card",
+      "kind": "card",
+      "refersTo": "plan-card",
+      "description": "A flat comparison panel with a stable border and generous spacing.",
+      "html": "<article class=\"ds-plan\"><h3>Бесплатный</h3><p>Статические QR-коды и два динамических кода</p><a href=\"#start\">Начать бесплатно</a></article>",
+      "css": ".ds-plan{font-family:var(--font-sans,Manrope,system-ui,sans-serif);border:1px solid var(--border-default,#DEE3EB);border-radius:14px;padding:30px;background:var(--surface-card,#FFFFFF);color:var(--text-default,#222834);max-width:360px}.ds-plan h3{margin:0;font-size:23px;font-weight:750;letter-spacing:-.025em;color:var(--text-strong,#131720)}.ds-plan p{margin:16px 0 28px;font-size:14px;line-height:1.7;color:var(--text-muted,#6B7689)}.ds-plan a{color:var(--text-link,#1E4FD1);font-size:14px;font-weight:650;text-underline-offset:4px}.ds-plan a:hover{color:var(--text-link-hover,#1840AB)}.ds-plan a:focus-visible{outline:3px solid var(--border-focus,#2F5FE6);outline-offset:4px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "One QR-S public site",
+    "overview": "The existing homepage is the visual authority. Its broad inset grid, Manrope typography, blue actions and white/slate surfaces carry through pricing, marketing pages, generators, blog, legal documents and authentication. This is a refinement of the established identity, rather than a new brand direction.\n\nPublic screens feel open and practical. Borders and muted surfaces organize information; existing QR and print illustrations explain the product. Reading columns and forms keep their own comfortable measure inside the shared outer grid. Dashboard, administration and user-authored hosted QR designs are outside this document's scope.",
+    "keyCharacteristics": [
+      "A single outer grid with responsive side insets.",
+      "Manrope throughout, with compact labels and strong balanced headings.",
+      "Blue actions and selection states over semantic white/slate surfaces.",
+      "Flat interface panels with restrained borders and visible keyboard focus.",
+      "Existing product illustrations, readable documents and task-focused forms."
+    ],
+    "rules": [
+      {
+        "name": "The One Action Family Rule",
+        "body": "Public primary and accent actions use the established blue family; reserve status colors for their actual meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Keep public headings, controls and prose in Manrope; introduce hierarchy through size, weight, measure and spacing.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Outer Grid Rule",
+        "body": "Derive public width and side insets from the shared public properties. Do not add a second container max-width or horizontal padding that narrows an entire public page.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Interface Rule",
+        "body": "Use tonal layering and restrained borders for public interface panels; keep physical depth within the existing product artwork.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do align public headers, titles and broad content to the shared outer grid.",
+      "Do keep readable inner measures for prose and forms within that grid.",
+      "Do use semantic colors so light and dark themes retain the same hierarchy.",
+      "Do preserve visible focus, native disclosure behavior and reduced-motion support.",
+      "Do keep embedded titles and QR details in article artwork visible at mobile sizes."
+    ],
+    "donts": [
+      "Don't add a second page-wide max-width or double horizontal padding inside the public container.",
+      "Don't introduce a separate font, action palette or legacy header treatment for an individual public route.",
+      "Don't transfer physical illustration shadows and rotations to ordinary interface cards.",
+      "Don't crop meaningful text or QR details merely to fill an image frame.",
+      "Don't extend these public-only rules into dashboard, administration or customer-authored QR layouts without reviewing those surfaces."
+    ]
+  }
+}

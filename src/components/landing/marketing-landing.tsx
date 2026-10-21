@@ -35,7 +35,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
   const actionHref = scenario ? "#create" : signedIn ? detail.next : `/register?next=${encodeURIComponent(detail.next)}`;
   const secondaryHref = scenario ? (signedIn ? scenario.secondary.signedInHref : scenario.secondary.guestHref) : undefined;
   return (
-    <div className={s.page}>
+    <div className={`qrs-public ${s.page}`}>
       <a className={s.skip} href="#landing-main">Перейти к содержимому</a>
       <SiteHeader session={session} isAdmin={isAdmin} minimal createHref={scenario ? "#create" : "/#create-qr"} />
       <main id="landing-main" tabIndex={-1}>

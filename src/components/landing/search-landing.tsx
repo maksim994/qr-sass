@@ -18,7 +18,7 @@ export async function SearchLanding({page}: {page:LandingData}) {
   const hostedHref=(type:string)=>session?`/dashboard/create/${type}`:`/register?next=${encodeURIComponent(`/dashboard/create/${type}`)}`;
   const guideType=page.type === "WIFI" ? "wifi" : page.type === "VCARD" ? "vcard" : "link";
   const structured=landingStructuredData({...page, keywords:[]},page.label,page.faqs);
-  return <div className={s.page}>
+  return <div className={`qrs-public ${s.page}`}>
     <SiteHeader session={session} minimal createHref="#create-qr" />
     <main className={s.main}>
       <nav className={s.breadcrumb} aria-label="Хлебные крошки"><Link href="/">Главная</Link><span aria-hidden="true">/</span><span aria-current="page">{page.label}</span></nav>

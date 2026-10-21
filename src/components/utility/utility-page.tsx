@@ -44,7 +44,7 @@ export function UtilityPage({
   showLogo = true,
 }: Props) {
   return (
-    <div className="qrs-utility">
+    <div className="qrs-public qrs-utility">
       <div className="qrs-utility__inner">
         {showLogo ? (
           <div className="qrs-utility__logo">

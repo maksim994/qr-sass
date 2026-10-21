@@ -13,14 +13,15 @@ export function BlogCategoryChips({ categories, activeSlug }: Props) {
     <div style={{ marginTop: "28px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
       <Link
         href="/blog"
-        className="qrs-chip"
+        aria-current={isAll ? "page" : undefined}
+        className="qrs-public-category"
         style={{
           whiteSpace: "nowrap",
           padding: "9px 18px",
-          borderRadius: "999px",
+          borderRadius: "8px",
           border: `1px solid ${isAll ? "var(--color-primary)" : "var(--border-default)"}`,
           background: isAll ? "var(--color-primary)" : "var(--surface-card)",
-          color: isAll ? "#fff" : "var(--text-default)",
+          color: isAll ? "var(--color-primary-on)" : "var(--text-default)",
           font: "var(--fw-semibold) 14px/1 var(--font-sans)",
           textDecoration: "none",
         }}
@@ -33,14 +34,15 @@ export function BlogCategoryChips({ categories, activeSlug }: Props) {
           <Link
             key={category.id}
             href={`/blog?category=${category.slug}`}
-            className="qrs-chip"
+            aria-current={active ? "page" : undefined}
+            className="qrs-public-category"
             style={{
               whiteSpace: "nowrap",
               padding: "9px 18px",
-              borderRadius: "999px",
+              borderRadius: "8px",
               border: `1px solid ${active ? "var(--color-primary)" : "var(--border-default)"}`,
               background: active ? "var(--color-primary)" : "var(--surface-card)",
-              color: active ? "#fff" : "var(--text-default)",
+              color: active ? "var(--color-primary-on)" : "var(--text-default)",
               font: "var(--fw-semibold) 14px/1 var(--font-sans)",
               textDecoration: "none",
             }}

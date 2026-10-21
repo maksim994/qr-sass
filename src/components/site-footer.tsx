@@ -23,7 +23,7 @@ export async function SiteFooter({ session, children }: Props) {
   } as const;
 
   return (
-    <footer style={{ borderTop: "1px solid var(--border-subtle)", background: "var(--surface-page)" }}>
+    <footer className="qrs-public qrs-public-footer">
       {children}
       <div className="fk-container" style={{ paddingBlock: "48px" }}>
         <div

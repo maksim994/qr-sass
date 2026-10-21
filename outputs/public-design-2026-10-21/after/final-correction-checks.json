@@ -1,0 +1,182 @@
+[
+  {
+    "name": "article-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Статический и динамический QR-код: как выбрать"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "login-mobile",
+    "brokenImages": [],
+    "h1": [
+      "С возвращением"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/login",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "register-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Создать аккаунт"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/register",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "marketing-mobile",
+    "brokenImages": [],
+    "h1": [
+      "QR-код на упаковке товара"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-for-packaging",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "pricing-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Тарифы QR-S: бесплатно, Про за 299 ₽ и Бизнес"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/pricing",
+    "plans": {
+      "width": 358,
+      "x": 16
+    },
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "article-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Статический и динамический QR-код: как выбрать"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "login-desktop",
+    "brokenImages": [],
+    "h1": [
+      "С возвращением"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/login",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "register-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Создать аккаунт"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/register",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "pricing-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Тарифы QR-S: бесплатно, Про за 299 ₽ и Бизнес"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/pricing",
+    "plans": {
+      "width": 1344,
+      "x": 48
+    },
+    "scrollWidth": 1440,
+    "width": 1440
+  }
+]

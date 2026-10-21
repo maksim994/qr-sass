@@ -28,8 +28,8 @@ export function RelatedPosts({ posts }: { posts: RelatedPost[] }) {
           return (
           <article
             key={post.slug}
-            className="qrs-card-lift"
-            style={{ display: "flex", flexDirection: "column", background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "12px", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}
+            className="qrs-public-post-card"
+            style={{ display: "flex", flexDirection: "column", background: "var(--surface-card)", borderRadius: "12px", overflow: "hidden" }}
           >
             <Link href={`/blog/${post.slug}`} className="block">
               {post.coverImageUrl ? (

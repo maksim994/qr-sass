@@ -1,0 +1,21 @@
+.page { padding-bottom:72px; }
+.page > header { border-bottom:1px solid var(--border-subtle); padding-bottom:36px; margin-bottom:44px; }
+.page > header > .updated { font-size:13px; line-height:1.7; max-width:76ch; }
+.columns { display:grid; grid-template-columns:minmax(180px,240px) minmax(0,760px); gap:80px; align-items:start; }
+.sidebar { position:sticky; top:116px; max-height:calc(100dvh - 140px); overflow-y:auto; padding-right:12px; }
+.sidebar h2 { font-size:14px; font-weight:700; margin-bottom:18px; color:var(--text-strong); }
+.sidebar ol { display:grid; gap:13px; padding:0; list-style:none; }
+.sidebar li { font-size:13px; line-height:1.65; }
+.sidebar a { color:var(--text-muted); text-decoration:none; }
+.sidebar a:hover { color:var(--text-link); text-decoration:underline; text-underline-offset:4px; }
+.documents { display:grid; gap:13px; margin-top:28px; padding-top:24px; border-top:1px solid var(--border-subtle); font-size:12px; line-height:1.6; }
+.mobileContents { display:none; }
+.article { min-width:0; max-width:72ch; }
+.article > section { padding-bottom:28px; border-bottom:1px solid var(--border-subtle); margin-bottom:32px; }
+.article > section > h2:first-child, .article > h2:first-child { margin-top:0; }
+.article p:first-child { margin-top:0; }
+.article > p:last-child { margin-top:32px; padding-top:24px; border-top:1px solid var(--border-subtle); font-size:13px; line-height:2; }
+.back { border-top:1px solid var(--border-subtle); margin-top:56px; padding-top:24px; font-size:13px; }
+@media(max-width:1100px) { .columns { grid-template-columns:200px minmax(0,1fr); gap:40px; } }
+@media(max-width:800px) { .columns { grid-template-columns:1fr; gap:28px; }.sidebar { position:static; max-height:none; padding:0; }.desktopContents,.documents { display:none; }.mobileContents { display:block; border-block:1px solid var(--border-subtle); }.mobileContents summary { cursor:pointer; padding-block:17px; font-size:14px; font-weight:650; color:var(--text-strong); }.mobileContents nav { padding-bottom:22px; }.article { max-width:72ch; }.page > header { border:0; margin-bottom:0; padding-bottom:28px; } }
+@media(max-width:560px) { .page { padding-bottom:40px; }.page > header h1 { font-size:32px; }.article > section { padding-bottom:24px; margin-bottom:28px; }.back { margin-top:40px; } }

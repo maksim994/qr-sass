@@ -1,0 +1,16 @@
+[
+  {
+    "type": "png",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/design-check",
+    "passed": true
+  },
+  {
+    "type": "svg",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/design-check",
+    "passed": true
+  }
+]

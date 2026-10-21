@@ -20,7 +20,7 @@ export default async function BlogLayout({
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--surface-page)" }}>
+    <div className="qrs-public min-h-screen" style={{ background: "var(--surface-page)" }}>
       <SiteHeader session={session} isAdmin={isAdmin} />
       {children}
       <SiteFooter session={session} />

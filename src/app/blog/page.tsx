@@ -127,18 +127,16 @@ export default async function BlogListPage({ searchParams }: Props) {
       <section
         style={{
           padding: "clamp(40px, 6vw, 72px) 0 clamp(28px, 4vw, 44px)",
-          background: "radial-gradient(120% 80% at 82% -20%, var(--color-primary-subtle) 0%, transparent 55%), var(--surface-page)",
+          background: "var(--surface-page)",
         }}
       >
         <div className="fk-container">
           <Breadcrumbs items={[{ label: "Главная", href: "/" }, { label: "Блог" }]} />
           <div style={{ marginTop: "22px" }}>
-            <span className="fk-eyebrow">Блог</span>
             <h1
               style={{
-                marginTop: "12px",
-                maxWidth: "16ch",
-                font: "var(--fw-extra) clamp(2.2rem, 5vw, 3.2rem)/1.08 var(--font-display)",
+                maxWidth: "28ch",
+                font: "750 clamp(34px, 4vw, 56px)/1.12 var(--font-display)",
                 color: "var(--text-strong)",
                 letterSpacing: "-0.03em",
                 textWrap: "balance",
@@ -176,8 +174,8 @@ export default async function BlogListPage({ searchParams }: Props) {
                 return (
                   <article
                     key={post.slug}
-                    className="qrs-card-lift"
-                    style={{ display: "flex", flexDirection: "column", background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "12px", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}
+                    className="qrs-public-post-card"
+                    style={{ display: "flex", flexDirection: "column", background: "var(--surface-card)", borderRadius: "12px", overflow: "hidden" }}
                   >
                     <Link href={`/blog/${post.slug}`} style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                       {post.coverImageUrl ? (

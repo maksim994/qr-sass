@@ -11,6 +11,8 @@
 @import "../styles/design-system/components/feedback/feedback.css";
 @import "../styles/design-system/components/navigation/navigation.css";
 
+@import "../styles/design-system/public.css";
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 

@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Logo } from "@/components/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { SiteHeader } from "@/components/site-header";
 import { HomeQrPreview } from "@/components/landing/home-qr-preview";
 import styles from "./auth-shell.module.css";
 import { Button } from "@/components/ui/button";
@@ -118,11 +117,8 @@ export function AuthShell({
     : ["Ссылки, файлы и контакты в QR", "Оформление под ваш бренд", "Все ваши коды в одном кабинете"];
 
   return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
-        <Logo href="/" size="md" showTagline={false} />
-        <div><Link href="/" className={styles.homeLink}><span aria-hidden="true">←</span> На главную</Link><ThemeToggle /></div>
-      </header>
+    <div className={`qrs-public ${styles.shell}`}>
+      <SiteHeader session={null} minimal />
       <main className={styles.layout}>
         <div className={styles.formPanel}>
           <div className={styles.formBody}>

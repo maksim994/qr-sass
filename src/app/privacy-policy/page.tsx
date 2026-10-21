@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
-import { LegalDocument } from "@/components/legal/legal-document";
+import { LegalDocument, legalContents } from "@/components/legal/legal-document";
 import { PRIVACY_SECTIONS, PRIVACY_VERSION, PRIVACY_DATE_LABEL } from "@/lib/legal-documents";
 import { publicSiteUrl } from "@/lib/public-url";
 import { analyticsRetentionDays } from "@/lib/analytics-retention";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: publicSiteUrl("/privacy-policy") },
 };
 export default async function Page() {
-  return <LegalArticleLayout session={await getSession()} eyebrow="Правовая информация" title="Политика конфиденциальности"
+  return <LegalArticleLayout contents={[...legalContents(PRIVACY_SECTIONS), { id: "cookie-settings", title: "Настройки cookie" }]} session={await getSession()} eyebrow="Правовая информация" title="Политика конфиденциальности"
     updatedLabel={`Редакция ${PRIVACY_VERSION} от ${PRIVACY_DATE_LABEL}`}>
     <LegalDocument sections={PRIVACY_SECTIONS} />
     <p>Срок хранения технических полей аналитики QR: {analyticsRetentionDays()} дней.</p>

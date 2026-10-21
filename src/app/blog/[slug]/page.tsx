@@ -150,7 +150,7 @@ export default async function BlogPostPage({ params }: Props) {
       <section
         style={{
           padding: "clamp(32px, 5vw, 56px) 0 clamp(20px, 3vw, 32px)",
-          background: "radial-gradient(120% 80% at 85% -30%, var(--color-primary-subtle) 0%, transparent 50%), var(--surface-page)",
+          background: "var(--surface-page)",
         }}
       >
         <div className="fk-container" style={{ maxWidth: "820px" }}>
@@ -163,7 +163,7 @@ export default async function BlogPostPage({ params }: Props) {
           />
           <header style={{ marginTop: "22px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-              <span style={{ padding: "5px 13px", borderRadius: "999px", background: "var(--color-primary-subtle)", color: "var(--color-primary)", font: "var(--fw-bold) 12px/1 var(--font-sans)" }}>
+              <span style={{ color: "var(--text-link)", font: "var(--fw-semibold) 13px/1.5 var(--font-sans)" }}>
                 {post.category?.name ?? "Блог"}
               </span>
               {post.readingTimeMinutes != null && (
@@ -210,14 +210,14 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="fk-container" style={{ maxWidth: "900px" }}>
           <div
             className={post.coverImageUrl ? "relative overflow-hidden" : ""}
-            style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-accent) 16%, transparent))", display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ height: "clamp(220px, 34vw, 380px)", borderRadius: "16px", border: "1px solid var(--border-subtle)", background: "var(--color-primary-subtle)", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {post.coverImageUrl ? (
               coverAsset && coverAsset.variants.length ? (
               // New uploaded assets carry trusted responsive WebP dimensions; old covers retain their renderer.
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={coverAsset.url} srcSet={coverAsset.variants.length ? blogImageSrcset(coverAsset.variants as ImageVariant[]) : undefined} sizes="(max-width:1000px) 100vw, 900px" alt={post.coverImageAlt ?? title} width={coverAsset.width} height={coverAsset.height} className="h-full w-full object-cover" fetchPriority="high" />
-              ) : <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={post.coverImageAlt ?? title} fill className="object-cover" priority sizes="(max-width:1000px) 100vw, 900px" />
+              <img src={coverAsset.url} srcSet={coverAsset.variants.length ? blogImageSrcset(coverAsset.variants as ImageVariant[]) : undefined} sizes="(max-width:1000px) 100vw, 900px" alt={post.coverImageAlt ?? title} width={coverAsset.width} height={coverAsset.height} className="h-full w-full object-contain" fetchPriority="high" />
+              ) : <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={post.coverImageAlt ?? title} fill className="object-contain" priority sizes="(max-width:1000px) 100vw, 900px" />
             ) : (
               <svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1" />

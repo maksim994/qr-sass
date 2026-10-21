@@ -1,0 +1,65 @@
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "qr_design", schema "public" at "127.0.0.1:5432"
+
+18 migrations found in prisma/migrations
+
+Applying migration `20260722100000_baseline_schema`
+Applying migration `20260723100000_add_blog_categories`
+Applying migration `20260918120000_review_r01_r16_schema`
+Applying migration `20260919130000_admin_notifications`
+Applying migration `20260919160000_preserve_workspace_terms`
+Applying migration `20260920100000_legal_acceptance`
+Applying migration `20260930180000_workspace_invites`
+Applying migration `20260930200000_metrika_conversions`
+Applying migration `20260930210000_partners`
+Applying migration `20261008120000_robokassa_provider`
+Applying migration `20261008160000_qr_bulk_batches`
+Applying migration `20261008180000_auth_identities`
+Applying migration `20261020070000_blog_markdown`
+Applying migration `20261020110000_blog_workflow`
+Applying migration `20261020140000_blog_api`
+Applying migration `20261020160000_blog_assets`
+Applying migration `20261021090000_blog_pending_revision`
+Applying migration `20261021093000_blog_related`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260722100000_baseline_schema/
+    └─ migration.sql
+  └─ 20260723100000_add_blog_categories/
+    └─ migration.sql
+  └─ 20260918120000_review_r01_r16_schema/
+    └─ migration.sql
+  └─ 20260919130000_admin_notifications/
+    └─ migration.sql
+  └─ 20260919160000_preserve_workspace_terms/
+    └─ migration.sql
+  └─ 20260920100000_legal_acceptance/
+    └─ migration.sql
+  └─ 20260930180000_workspace_invites/
+    └─ migration.sql
+  └─ 20260930200000_metrika_conversions/
+    └─ migration.sql
+  └─ 20260930210000_partners/
+    └─ migration.sql
+  └─ 20261008120000_robokassa_provider/
+    └─ migration.sql
+  └─ 20261008160000_qr_bulk_batches/
+    └─ migration.sql
+  └─ 20261008180000_auth_identities/
+    └─ migration.sql
+  └─ 20261020070000_blog_markdown/
+    └─ migration.sql
+  └─ 20261020110000_blog_workflow/
+    └─ migration.sql
+  └─ 20261020140000_blog_api/
+    └─ migration.sql
+  └─ 20261020160000_blog_assets/
+    └─ migration.sql
+  └─ 20261021090000_blog_pending_revision/
+    └─ migration.sql
+  └─ 20261021093000_blog_related/
+    └─ migration.sql
+      
+All migrations have been successfully applied.

@@ -1,0 +1,871 @@
+[
+  {
+    "name": "home-reference",
+    "brokenImages": [],
+    "h1": [
+      "Генератор QR-кодов онлайн — бесплатно и без регистрации"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": {
+      "width": 617.4453125,
+      "x": 48
+    },
+    "main": null,
+    "missingAnchors": [],
+    "path": "/",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "pricing-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Тарифы QR-S: бесплатно, Про за 299 ₽ и Бизнес"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/pricing",
+    "plans": {
+      "width": 1344,
+      "x": 48
+    },
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "privacy-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Политика конфиденциальности"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/privacy-policy",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "terms-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Публичная оферта и пользовательское соглашение"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/terms-of-service",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "consent-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Согласие на обработку персональных данных"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/personal-data-consent",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "lifetime-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Как долго работает напечатанный QR-код"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/qr-lifetime",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "contacts-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Контакты и реквизиты"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/contacts",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "blog-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Статьи о QR-кодах"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/blog",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "article-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Статический и динамический QR-код: как выбрать"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "search-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Создать QR-код по ссылке"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-po-ssylke",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "menu-desktop",
+    "brokenImages": [],
+    "h1": [
+      "QR-код на меню для кафе и ресторана"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-menu",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "marketing-desktop",
+    "brokenImages": [],
+    "h1": [
+      "QR-код на упаковке товара"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": {
+      "width": 684.6484375,
+      "x": 48
+    },
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-for-packaging",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "changelog-desktop",
+    "brokenImages": [],
+    "h1": [
+      "История изменений"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "heroCopy": null,
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/changelog",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "login-desktop",
+    "brokenImages": [],
+    "h1": [
+      "С возвращением"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/login",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "register-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Создать аккаунт"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/register",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "forgot-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Сброс пароля"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/forgot-password",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "reset-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Новый пароль"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/reset-password",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "expired-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Срок действия истёк"
+    ],
+    "header": null,
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/expired",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "unavailable-desktop",
+    "brokenImages": [],
+    "h1": [
+      "QR-код не найден"
+    ],
+    "header": null,
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/unavailable",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "not-found-desktop",
+    "brokenImages": [],
+    "h1": [
+      "Страница не найдена"
+    ],
+    "header": null,
+    "heading": null,
+    "heroCopy": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/design-preview-not-found",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "pricing-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Тарифы QR-S: бесплатно, Про за 299 ₽ и Бизнес"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/pricing",
+    "plans": {
+      "width": 358,
+      "x": 16
+    },
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "privacy-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Политика конфиденциальности"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/privacy-policy",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "terms-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Публичная оферта и пользовательское соглашение"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/terms-of-service",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "consent-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Согласие на обработку персональных данных"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/personal-data-consent",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "lifetime-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Как долго работает напечатанный QR-код"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/qr-lifetime",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "contacts-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Контакты и реквизиты"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/contacts",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "blog-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Статьи о QR-кодах"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/blog",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "article-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Статический и динамический QR-код: как выбрать"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "search-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Создать QR-код по ссылке"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-po-ssylke",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "menu-mobile",
+    "brokenImages": [],
+    "h1": [
+      "QR-код на меню для кафе и ресторана"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-menu",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "marketing-mobile",
+    "brokenImages": [],
+    "h1": [
+      "QR-код на упаковке товара"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/qr-for-packaging",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "changelog-mobile",
+    "brokenImages": [],
+    "h1": [
+      "История изменений"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": {
+      "width": 358,
+      "x": 16
+    },
+    "main": {
+      "width": 358,
+      "x": 16
+    },
+    "missingAnchors": [],
+    "path": "/changelog",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "login-mobile",
+    "brokenImages": [],
+    "h1": [
+      "С возвращением"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/login",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "register-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Создать аккаунт"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/register",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "forgot-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Сброс пароля"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/forgot-password",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "reset-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Новый пароль"
+    ],
+    "header": {
+      "width": 358,
+      "x": 16
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/reset-password",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "expired-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Срок действия истёк"
+    ],
+    "header": null,
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/expired",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "unavailable-mobile",
+    "brokenImages": [],
+    "h1": [
+      "QR-код не найден"
+    ],
+    "header": null,
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/unavailable",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "not-found-mobile",
+    "brokenImages": [],
+    "h1": [
+      "Страница не найдена"
+    ],
+    "header": null,
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/design-preview-not-found",
+    "plans": null,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "name": "pricing-dark",
+    "brokenImages": [],
+    "h1": [
+      "Тарифы QR-S: бесплатно, Про за 299 ₽ и Бизнес"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/pricing",
+    "plans": {
+      "width": 1344,
+      "x": 48
+    },
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "privacy-dark",
+    "brokenImages": [],
+    "h1": [
+      "Политика конфиденциальности"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": {
+      "width": 1056.828125,
+      "x": 48
+    },
+    "main": {
+      "width": 1344,
+      "x": 48
+    },
+    "missingAnchors": [],
+    "path": "/privacy-policy",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "name": "login-dark",
+    "brokenImages": [],
+    "h1": [
+      "С возвращением"
+    ],
+    "header": {
+      "width": 1344,
+      "x": 48
+    },
+    "heading": null,
+    "main": null,
+    "missingAnchors": [],
+    "path": "/login",
+    "plans": null,
+    "scrollWidth": 1440,
+    "width": 1440
+  }
+]

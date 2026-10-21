@@ -1,0 +1,86 @@
+/* Public-site refinement. Authority: the approved homepage, not the legacy app.
+   Manrope, blue actions, an inset header, open sections and restrained borders.
+   Reading pages keep a comfortable measure inside the same outer grid.
+   Scope excludes dashboard/admin and user-authored hosted QR designs.
+   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md */
+.qrs-public {
+  --color-primary: var(--text-link);
+  --color-primary-hover: var(--text-link-hover);
+  --color-accent: var(--color-primary);
+  --color-accent-hover: var(--color-primary-hover);
+  --color-accent-on: var(--color-primary-on);
+  --public-width: 1440px;
+  --public-inset: 96px;
+  min-width: 0;
+  color: var(--text-default);
+  background: var(--surface-page);
+}
+.qrs-public .fk-container, .qrs-public-container {
+  width: min(var(--public-width), calc(100% - var(--public-inset)));
+  max-width: none;
+  margin-inline: auto;
+  padding-inline: 0;
+}
+.qrs-public .fk-button {
+  border-radius: 8px;
+  box-shadow: none;
+  font-weight: 650;
+  gap: 12px;
+  white-space: normal;
+  text-align: center;
+}
+.qrs-public .fk-button:hover { transform: none; box-shadow: none; }
+.qrs-public .fk-input { border-radius: 8px; box-shadow: none; }
+.qrs-public .fk-input:focus { box-shadow: var(--shadow-focus); }
+.qrs-public :is(a, button, summary):focus-visible { outline: 3px solid var(--border-focus); outline-offset: 4px; }
+.qrs-public :is(section, h2, h3)[id] { scroll-margin-top: 112px; }
+.qrs-public :is(h1, h2, h3) { text-wrap: balance; }
+.qrs-public-heading {
+  padding-block: clamp(32px, 4.5vw, 64px) 36px;
+}
+.qrs-public-heading h1 {
+  max-width: 28ch;
+  font: 750 clamp(34px, 4vw, 56px)/1.12 var(--font-display);
+  letter-spacing: -.035em;
+  color: var(--text-strong);
+}
+.qrs-public-heading p { max-width: 64ch; margin-top: 22px; color: var(--text-muted); font-size: 16px; line-height: 1.7; }
+.qrs-public-breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; color: var(--text-muted); font-size: 12px; line-height: 1.6; }
+.qrs-public-breadcrumb a { color: inherit; }
+.qrs-public-breadcrumb a:hover { color: var(--text-link); }
+.qrs-public-breadcrumb > span[aria-hidden] { color: var(--text-subtle); }
+.qrs-public-footer { border-top: 1px solid var(--border-subtle); background: var(--surface-subtle); }
+.qrs-public-footer.qrs-public { background: var(--surface-subtle); }
+.qrs-public-footer a:hover { color: var(--text-link); }
+.qrs-public .qrs-body { font-size: 16px; line-height: 1.85; }
+.qrs-public .qrs-body h2 { margin-top: 44px; margin-bottom: 16px; font-size: 25px; line-height: 1.35; letter-spacing: -.025em; }
+.qrs-public .qrs-body h3 { font-size: 20px; letter-spacing: -.015em; }
+.qrs-public .qrs-body :is(p, li) { overflow-wrap: anywhere; }
+.qrs-public .qrs-body a { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.qrs-public .qrs-card-lift { box-shadow: none; transition: border-color .18s ease-out; }
+.qrs-public .qrs-card-lift:hover { transform: none; box-shadow: none; border-color: var(--border-focus); }
+@media (max-width: 1100px) { .qrs-public { --public-inset: 64px; } }
+@media (max-width: 800px) { .qrs-public { --public-inset: 48px; } }
+@media (max-width: 560px) {
+  .qrs-public { --public-inset: 32px; }
+  .qrs-public-heading { padding-block: 28px 28px; }
+  .qrs-public-heading h1 { font-size: 34px; max-width: 100%; overflow-wrap: anywhere; }
+  .qrs-public-heading p { margin-top: 18px; font-size: 15px; }
+  .qrs-public-breadcrumb { padding-top: 18px; font-size: 11px; }
+  .qrs-public .qrs-body { font-size: 15px; line-height: 1.8; }
+  .qrs-public .qrs-body h2 { font-size: 23px; margin-top: 36px; }
+}
+@media (prefers-reduced-motion: reduce) { .qrs-public *, .qrs-public *::before, .qrs-public *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+.qrs-public-post-card { border:1px solid var(--border-default); transition:border-color .18s ease-out; }
+.qrs-public-post-card:hover { border-color:var(--border-focus); }
+.qrs-public-category { min-height:40px; display:inline-flex; align-items:center; }
+.qrs-public-category:hover { text-decoration:underline; text-underline-offset:4px; }
+.qrs-public.qrs-utility { background:var(--surface-page); }
+.qrs-public .qrs-utility__inner { max-width:500px; }
+.qrs-public .qrs-utility__card { background:var(--surface-page); border:0; box-shadow:none; padding:24px 0; }
+.qrs-public .qrs-utility__title { font-size:clamp(28px,4vw,36px); letter-spacing:-.03em; line-height:1.2; }
+.qrs-public .qrs-utility__icon { border-radius:12px; }
+.qrs-public .qrs-utility__description { font-size:15px; line-height:1.75; margin-top:18px; }
+
+.qrs-public #cookie-settings { scroll-margin-top:112px; }

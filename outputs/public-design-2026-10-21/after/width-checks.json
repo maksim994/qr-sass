@@ -1,0 +1,4142 @@
+[
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-yandex-karty",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-na-pdf",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-dlya-vizitki",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/dynamic-qr",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-dlya-telegram",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-menu",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-wifi",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-2gis",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-po-ssylke",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-dlya-whatsapp",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-dlya-max",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-packaging",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-agencies",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-events",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/bulk-qr-generator",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/qr-code-analytics",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container pricing-module__kvPdYW__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/pricing",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container contacts-module__YFrkHq__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/contacts",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/privacy-policy",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/terms-of-service",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/personal-data-consent",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/qr-lifetime",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "MAIN",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/changelog",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/blog",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      },
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 768,
+        "x": 0
+      }
+    ],
+    "path": "/blog/preview-contact",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/login",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/register",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/forgot-password",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 720,
+        "x": 24
+      }
+    ],
+    "path": "/reset-password",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/expired",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/unavailable",
+    "scroll": 768,
+    "width": 768
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-yandex-karty",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-na-pdf",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-dlya-vizitki",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/dynamic-qr",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-dlya-telegram",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-menu",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-wifi",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-2gis",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-po-ssylke",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-dlya-whatsapp",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-dlya-max",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-packaging",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-agencies",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-events",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/bulk-qr-generator",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/qr-code-analytics",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container pricing-module__kvPdYW__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/pricing",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container contacts-module__YFrkHq__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/contacts",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/privacy-policy",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/terms-of-service",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/personal-data-consent",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/qr-lifetime",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "MAIN",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/changelog",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/blog",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      },
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 390,
+        "x": 0
+      }
+    ],
+    "path": "/blog/preview-contact",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/login",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/register",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/forgot-password",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 358,
+        "x": 16
+      }
+    ],
+    "path": "/reset-password",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/expired",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/unavailable",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-yandex-karty",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-na-pdf",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-dlya-vizitki",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/dynamic-qr",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-dlya-telegram",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-menu",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-wifi",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-2gis",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-po-ssylke",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-dlya-whatsapp",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-dlya-max",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-packaging",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-agencies",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-events",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/bulk-qr-generator",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/qr-code-analytics",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container pricing-module__kvPdYW__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/pricing",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container contacts-module__YFrkHq__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/contacts",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/privacy-policy",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/terms-of-service",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/personal-data-consent",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/qr-lifetime",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "MAIN",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/changelog",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/blog",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 820,
+        "x": 102
+      },
+      {
+        "tag": "DIV",
+        "w": 900,
+        "x": 62
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 820,
+        "x": 102
+      },
+      {
+        "tag": "DIV",
+        "w": 900,
+        "x": 62
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      },
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1024,
+        "x": 0
+      }
+    ],
+    "path": "/blog/preview-contact",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/login",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/register",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/forgot-password",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 960,
+        "x": 32
+      }
+    ],
+    "path": "/reset-password",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/expired",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/unavailable",
+    "scroll": 1024,
+    "width": 1024
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-yandex-karty",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-na-pdf",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-dlya-vizitki",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/dynamic-qr",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-dlya-telegram",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-menu",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-wifi",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-2gis",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-po-ssylke",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-dlya-whatsapp",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-dlya-max",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-packaging",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-agencies",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-events",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/bulk-qr-generator",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/qr-code-analytics",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container pricing-module__kvPdYW__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/pricing",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container contacts-module__YFrkHq__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/contacts",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/privacy-policy",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/terms-of-service",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/personal-data-consent",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/qr-lifetime",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "MAIN",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/changelog",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/blog",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 820,
+        "x": 310
+      },
+      {
+        "tag": "DIV",
+        "w": 900,
+        "x": 270
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 820,
+        "x": 310
+      },
+      {
+        "tag": "DIV",
+        "w": 900,
+        "x": 270
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      },
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1440,
+        "x": 0
+      }
+    ],
+    "path": "/blog/preview-contact",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/login",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/register",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/forgot-password",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1344,
+        "x": 48
+      }
+    ],
+    "path": "/reset-password",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/expired",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/unavailable",
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-yandex-karty",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-na-pdf",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-dlya-vizitki",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/dynamic-qr",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-dlya-telegram",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-menu",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-wifi",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-dlya-otzyvov-2gis",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-po-ssylke",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-dlya-whatsapp",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "search-landing-module__p7X0MG__main",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-dlya-max",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-packaging",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-agencies",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/qr-for-events",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/bulk-qr-generator",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/qr-code-analytics",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container pricing-module__kvPdYW__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/pricing",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container contacts-module__YFrkHq__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/contacts",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/privacy-policy",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/terms-of-service",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/personal-data-consent",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/qr-lifetime",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "MAIN",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "fk-container legal-article-layout-module__B16-SW__page",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/changelog",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/blog",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 820,
+        "x": 550
+      },
+      {
+        "tag": "DIV",
+        "w": 900,
+        "x": 510
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 820,
+        "x": 550
+      },
+      {
+        "tag": "DIV",
+        "w": 900,
+        "x": 510
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      },
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "",
+        "w": 1920,
+        "x": 0
+      }
+    ],
+    "path": "/blog/preview-contact",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/login",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/register",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/forgot-password",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [
+      {
+        "tag": "DIV",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "main": [
+      {
+        "class": "auth-shell-module__j9EB2G__layout",
+        "w": 1440,
+        "x": 240
+      }
+    ],
+    "path": "/reset-password",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/expired",
+    "scroll": 1920,
+    "width": 1920
+  },
+  {
+    "containers": [],
+    "main": [],
+    "path": "/unavailable",
+    "scroll": 1920,
+    "width": 1920
+  }
+]

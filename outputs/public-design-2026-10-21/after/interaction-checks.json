@@ -1,0 +1,39 @@
+[
+  {
+    "expanded": "true",
+    "test": "mobile-menu-open"
+  },
+  {
+    "expanded": "false",
+    "focus": "Меню",
+    "test": "mobile-menu-escape"
+  },
+  {
+    "test": "cookie-settings-opens",
+    "visible": true
+  },
+  {
+    "test": "pricing-faq",
+    "open": true
+  },
+  {
+    "test": "password-reveal",
+    "type": "text"
+  },
+  {
+    "test": "login-error-state",
+    "text": "Неверный email или пароль."
+  },
+  {
+    "hash": "#section-4",
+    "scrollTop": 2533.5,
+    "targetTop": 111.765625,
+    "test": "legal-mobile-toc"
+  },
+  {
+    "test": "static-qr-download",
+    "png": true,
+    "svg": true,
+    "payload": "https://example.com/design-check"
+  }
+]

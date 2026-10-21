@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useId, useRef, useState } from "react";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,9 @@ import s from "./site-header.module.css";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 const navLinks = [
-  { label: "Как работает", href: "/#how" },
-  { label: "Меню", href: "/qr-menu" },
-  { label: "Упаковка", href: "/qr-for-packaging" },
+  { label: "Возможности", href: "/#features" },
+  { label: "Для кого", href: "/#use-cases" },
+  { label: "Типы QR", href: "/#types" },
   { label: "Тарифы", href: "/pricing" },
   { label: "Контакты", href: "/contacts" },
 ];
@@ -23,14 +24,9 @@ type Props = {
   createHref?: string;
 };
 
-export function SiteHeaderClient({ session, isAdmin, minimal = false, createHref = "/#create-qr" }: Props) {
-  const links = minimal ? [
-    { label: "Возможности", href: "/#features" },
-    { label: "Для кого", href: "/#use-cases" },
-    { label: "Типы QR", href: "/#types" },
-    { label: "Тарифы", href: "/pricing" },
-  { label: "Контакты", href: "/contacts" },
-  ] : navLinks;
+export function SiteHeaderClient({ session, isAdmin, createHref = "/#create-qr" }: Props) {
+  const links = navLinks;
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -41,38 +37,27 @@ export function SiteHeaderClient({ session, isAdmin, minimal = false, createHref
 
   return (
     <header
-      className={minimal ? s.header : undefined}
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 200,
-        background: minimal ? "var(--surface-page)" : "color-mix(in srgb, var(--surface-page) 82%, transparent)",
-        backdropFilter: minimal ? undefined : "saturate(180%) blur(14px)",
-        WebkitBackdropFilter: minimal ? undefined : "saturate(180%) blur(14px)",
-        borderBottom: "1px solid var(--border-subtle)",
-      }}
+      className={`qrs-public ${s.header}`}
+      style={{ position: "sticky", top: 0, zIndex: 200 }}
     >
       <div
-        className={`fk-container ${minimal ? s.bar : ""}`}
-        style={minimal ? undefined : { display: "flex", alignItems: "center", gap: "24px", height: "72px" }}
+        className={`fk-container ${s.bar}`}
       >
-        <Logo href="/" size="md" showTagline={!minimal} responsiveTagline className="mr-2 shrink-0" />
+        <Logo href="/" size="md" showTagline={false} responsiveTagline className="mr-2 shrink-0" />
 
         <nav
-          className={`qrs-desktop-nav ${minimal ? s.nav : ""}`}
+          className={`qrs-desktop-nav ${s.nav}`}
           aria-label="Основная навигация"
-          style={minimal ? undefined : { display: "flex", alignItems: "center", gap: "26px", marginLeft: "8px" }}
         >
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="qrs-navlink">
+            <Link key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined} className="qrs-navlink">
               {link.label}
             </Link>
           ))}
         </nav>
 
         <div
-          className={`qrs-desktop-nav ${minimal ? s.actions : ""}`}
-          style={minimal ? undefined : { marginLeft: "auto", display: "flex", alignItems: "center", gap: "14px" }}
+          className={`qrs-desktop-nav ${s.actions}`}
         >
           <ThemeToggle />
           {session ? (
@@ -103,7 +88,7 @@ export function SiteHeaderClient({ session, isAdmin, minimal = false, createHref
           )}
         </div>
 
-        {minimal && <div className={s.mobileTheme}><ThemeToggle /></div>}
+        <div className={s.mobileTheme}><ThemeToggle /></div>
         <button
           ref={buttonRef}
           type="button"

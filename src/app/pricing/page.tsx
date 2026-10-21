@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { PricingPageGoal } from "@/components/landing/page-goal";
+import { PublicBreadcrumb, PublicPageHeading } from "@/components/public/page-heading";
 import s from "./pricing.module.css";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
@@ -38,14 +39,13 @@ export default async function PricingPage() {
     ["API", "Нет", "Нет", "Да"],
     ["Поддержка", "По электронной почте", "По электронной почте", "По электронной почте"],
   ];
-  return <><SiteHeader session={session} /><main className={`fk-container ${s.page}`}><PricingPageGoal />
-    <h1>Тарифы QR-S: бесплатно, Про за {rubles(pro.priceRub)} и Бизнес</h1>
-    <p className={s.lead}>Начните с бесплатных кодов. Про — {COMMERCIAL.trialDays} дней, без карты и автосписаний.</p>
-    <div className={s.plans}>{plans.map(plan => <section key={plan.id} className={s.plan}><h2>{plan.name}</h2><p className={s.price}>{rubles(plan.priceRub)}<small> / месяц</small></p><p>{plan.description}</p><ul>{plan.limitLabels.map(label => <li key={label}>{label}</li>)}</ul><Button href={session ? `/dashboard/billing?plan=${plan.id.toLowerCase()}` : `/register?plan=${plan.id.toLowerCase()}`} variant={plan.id === "PRO" ? "primary" : "secondary"}>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать Про ${COMMERCIAL.trialDays} дней` : "Выбрать Бизнес"}</Button></section>)}</div>
-    <h2>Сравнение возможностей</h2><div className={s.tableWrap}><table><thead><tr><th scope="col">Возможности</th>{plans.map(p => <th scope="col" key={p.id}>{p.name}</th>)}</tr></thead><tbody>{rows.map(([label, ...values]) => <tr key={label}><th scope="row">{label}</th>{values.map((v, i) => <td key={i}>{v}</td>)}</tr>)}</tbody></table></div>
-    <p>PDF и EPS содержат растровое изображение. SVG — векторный формат.</p>
-    <section className={s.faq}><h2>Вопросы об оплате</h2>{faqs.map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</section>
-    <p><Link href="/terms-of-service#payment">Оплата и доступ</Link> · <Link href="/terms-of-service#refund">Возврат денег</Link> · <Link href="/terms-of-service">Публичная оферта</Link></p>
+  return <div className="qrs-public"><SiteHeader session={session} /><main className={`fk-container ${s.page}`}><PricingPageGoal /><PublicBreadcrumb current="Тарифы" />
+    <PublicPageHeading title={`Тарифы QR-S: бесплатно, Про за ${rubles(pro.priceRub)} и Бизнес`}><p>Начните с бесплатных кодов. Про — {COMMERCIAL.trialDays} дней, без карты и автосписаний.</p></PublicPageHeading>
+    <div className={s.plans}>{plans.map(plan => <section key={plan.id} className={`${s.plan} ${plan.id === "PRO" ? s.featured : ""}`}><div className={s.planHeading}><h2>{plan.name}</h2>{plan.id === "PRO" && <span>{COMMERCIAL.trialDays} дней без карты</span>}</div><p className={s.price}>{rubles(plan.priceRub)}<small> / месяц</small></p><p>{plan.description}</p><ul>{plan.limitLabels.map(label => <li key={label}><span aria-hidden="true">✓</span><span>{label}</span></li>)}</ul><Button href={session ? `/dashboard/billing?plan=${plan.id.toLowerCase()}` : `/register?plan=${plan.id.toLowerCase()}`} variant={plan.id === "PRO" ? "primary" : "secondary"}>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать Про ${COMMERCIAL.trialDays} дней` : "Выбрать Бизнес"}</Button></section>)}</div>
+    <section className={s.comparison} aria-labelledby="comparison-title"><h2 id="comparison-title">Сравнение возможностей</h2><div className={s.tableWrap} role="region" aria-label="Сравнение тарифов — таблица с горизонтальной прокруткой" tabIndex={0}><table><thead><tr><th scope="col">Возможности</th>{plans.map(p => <th scope="col" key={p.id}>{p.name}</th>)}</tr></thead><tbody>{rows.map(([label, ...values]) => <tr key={label}><th scope="row">{label}</th>{values.map((v, i) => <td key={i}>{v}</td>)}</tr>)}</tbody></table></div>
+    <p className={s.note}>PDF и EPS содержат растровое изображение. SVG — векторный формат.</p></section>
+    <section className={s.faq}><h2>Вопросы об оплате</h2><div>{faqs.map(([q, a]) => <details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
+    <p className={s.legalLinks}><Link href="/terms-of-service#payment">Оплата и доступ</Link> · <Link href="/terms-of-service#refund">Возврат денег</Link> · <Link href="/terms-of-service">Публичная оферта</Link></p>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({"@context":"https://schema.org","@type":"FAQPage", mainEntity:faqs.map(([name,text])=>({"@type":"Question",name,acceptedAnswer:{"@type":"Answer",text}}))}).replace(/</g,"\\u003c")}} />
-  </main><SiteFooter session={session} /></>;
+  </main><SiteFooter session={session} /></div>;
 }

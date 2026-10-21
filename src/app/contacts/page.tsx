@@ -9,6 +9,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { LEGAL_OPERATOR } from "@/lib/legal-documents";
 import { publicSiteUrl } from "@/lib/public-url";
 import { serializeArticleJsonLd } from "@/lib/blog-structured-data";
+import { PublicBreadcrumb, PublicPageHeading } from "@/components/public/page-heading";
 import styles from "./contacts.module.css";
 
 export const metadata: Metadata = {
@@ -30,12 +31,12 @@ export default async function ContactsPage() {
     name: seller.name, taxID: seller.inn, email: seller.email, telephone: seller.phone,
     address: { "@type": "PostalAddress", addressLocality: LEGAL_OPERATOR.city, addressCountry: "RU" },
     url: publicSiteUrl("/contacts"), sameAs: ["https://t.me/m_mvmolkov"] };
-  return <>
+  return <div className="qrs-public">
     <SiteHeader session={session} />
-    <main className={styles.page}>
+    <main className={`fk-container ${styles.page}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeArticleJsonLd(person) }} />
-      <h1>Контакты и реквизиты</h1>
-      <p className={styles.intro}>Вопросы о QR-кодах, доступе или оплате — напишите удобным способом.</p>
+      <PublicBreadcrumb current="Контакты" /><PublicPageHeading title="Контакты и реквизиты"><p>Вопросы о QR-кодах, доступе или оплате — напишите удобным способом.</p></PublicPageHeading>
+      <div className={styles.grid}>
       <section aria-labelledby="seller-title">
         <h2 id="seller-title">Продавец</h2>
         <dl className={styles.details}>
@@ -53,7 +54,8 @@ export default async function ContactsPage() {
           <div><dt>Telegram</dt><dd><a href="https://t.me/m_mvmolkov" target="_blank" rel="noopener noreferrer">@m_mvmolkov<span className="sr-only"> — откроется в новой вкладке</span></a></dd></div>
         </dl>
       </section>
-      <section aria-labelledby="payment-title">
+      </div>
+      <section className={styles.payment} aria-labelledby="payment-title">
         <h2 id="payment-title">Как оплатить</h2>
         <p>Выберите тариф на <Link href="/pricing">странице тарифов</Link> и оплатите его через Робокассу. Доступ включится после подтверждения оплаты. Автоматических повторных списаний нет.</p>
         <p>Сейчас принимаем оплату от физических лиц. Если нужна оплата от компании или ИП, напишите на email.</p>
@@ -61,5 +63,5 @@ export default async function ContactsPage() {
       </section>
     </main>
     <SiteFooter session={session} />
-  </>;
+  </div>;
 }
