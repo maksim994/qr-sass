@@ -22,19 +22,24 @@ def command(args):
 
 
 def app_config():
-    names = command(['docker', 'ps', '-a', '--format', '{{.Names}}']).splitlines()
-    app = next((n for n in names if n.startswith('app-' + RESOURCE + '-')), None)
     cache = STATE / 'email-smtp.json'
-    if app:
-        data = json.loads(command(['docker', 'inspect', app]))[0]
-        env = dict(v.split('=', 1) for v in data['Config']['Env'] if '=' in v)
-        smtp = {k: v for k, v in env.items() if k.startswith('SMTP_')}
-        if all(smtp.get(k) for k in ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM']):
-            temp = cache.with_suffix('.tmp')
-            temp.write_text(json.dumps(smtp))
-            temp.chmod(0o600)
-            temp.replace(cache)
-        return app, json.loads(cache.read_text()) if cache.exists() else smtp
+    try:
+        names = command(['docker', 'ps', '-a', '--format', '{{.Names}}']).splitlines()
+        app = next((n for n in names if n.startswith('app-' + RESOURCE + '-')), None)
+        if app:
+            data = json.loads(command(['docker', 'inspect', app]))[0]
+            env = dict(v.split('=', 1) for v in data['Config']['Env'] if '=' in v)
+            smtp = {k: v for k, v in env.items() if k.startswith('SMTP_')}
+            if all(smtp.get(k) for k in ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM']):
+                temp = cache.with_suffix('.tmp')
+                temp.write_text(json.dumps(smtp))
+                temp.chmod(0o600)
+                temp.replace(cache)
+            return app, json.loads(cache.read_text()) if cache.exists() else smtp
+    except (subprocess.SubprocessError, OSError, ValueError, KeyError):
+        # A stopped Docker daemon must not prevent independent email delivery.
+        if not cache.exists():
+            raise
     return None, json.loads(cache.read_text())
 
 
