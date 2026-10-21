@@ -1,0 +1,14 @@
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "notifications_test_integrated_20261021", schema "public" at "127.0.0.1:5432"
+
+20 migrations found in prisma/migrations
+
+Applying migration `20261021150000_email_notifications`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261021150000_email_notifications/
+    └─ migration.sql
+
+All migrations have been successfully applied.

@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { signupSourceLabel } from "@/lib/signup-source";
+import { emailSourceSummary } from "@/lib/email-source-summary";
 import type { EmailOutbox } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { decryptIntegrationSecret } from "@/lib/integration-secrets";
@@ -299,6 +301,27 @@ export async function scheduleEmailNotifications(now = new Date()) {
         ]);
         const count = (name: string) =>
           events.find((e) => e.name === name)?._count ?? 0;
+        const [registrations, payments] = await Promise.all([
+          tx.businessEvent.findMany({
+            where: { name: "registration_completed", isTest: false, createdAt: { gte: window.start, lt: window.end } },
+            select: { userId: true },
+          }),
+          tx.payment.findMany({
+            where: { isTest: false, status: "SUCCEEDED", paidAt: { gte: window.start, lt: window.end } },
+            select: { amount: true, signupSourceUserId: true },
+          }),
+        ]);
+        const ids = [...new Set([
+          ...registrations.map(event => event.userId),
+          ...payments.map(payment => payment.signupSourceUserId),
+        ].filter((id): id is string => !!id))];
+        const sources = await tx.userSignupSource.findMany({ where: { userId: { in: ids } } });
+        const labels = new Map(sources.map(source => [source.userId, signupSourceLabel(source)]));
+        const sourceLabel = (id: string | null) => id ? labels.get(id) ?? "нет данных" : "нет данных";
+        const sourceSummary = emailSourceSummary(
+          registrations.map(event => sourceLabel(event.userId)),
+          payments.map(payment => ({ source: sourceLabel(payment.signupSourceUserId), amount: payment.amount })),
+        );
         await queueEmail(tx, {
           key: `digest:${window.day}`,
           kind: "owner_digest",
@@ -306,7 +329,7 @@ export async function scheduleEmailNotifications(now = new Date()) {
           expiresAt: new Date(now.getTime() + DAY_MS),
           message: serviceMessage(
             "Сводка за день",
-            `За ${window.start.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow" })}.\nРегистрации: ${count("registration_completed")}.\nЗапуски пробного периода: ${count("trial_started")}.\nОплаты: ${money._count}.\nВыручка: ${money._sum.amount ?? 0} ₽.`,
+            `За ${window.start.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow" })}.\nРегистрации: ${count("registration_completed")}.\nЗапуски пробного периода: ${count("trial_started")}.\nОплаты: ${money._count}.\nВыручка: ${money._sum.amount ?? 0} ₽.\n\n${sourceSummary}`,
             "/admin/business",
             "Открыть отчёт",
           ),

@@ -130,12 +130,13 @@ export async function queueOwnerAlert(
   key: string,
   title: string,
   text: string,
+  path = "/admin",
 ) {
   await queueEmail(tx, {
     key,
     kind: "owner_alert",
     to: OWNER_EMAIL,
-    message: serviceMessage(title, text, "/admin", "Открыть админку"),
+    message: serviceMessage(title, text, path, "Открыть админку"),
   });
 }
 export async function queuePaymentEmail(
@@ -173,13 +174,25 @@ export async function enqueueOwnerEvent(
   name: string,
   key: string,
   payload: Prisma.InputJsonObject,
+  path = "/admin",
 ) {
+  if (name === "registration_completed") {
+    await queueOwnerAlert(
+      tx,
+      `owner:${key}`,
+      "Новый пользователь",
+      `Способ регистрации: ${payload.source ?? "нет данных"}.\nИсточник: ${payload.signupSourceLabel ?? "нет данных"}.`,
+      path,
+    );
+    return;
+  }
   if (name !== "payment_succeeded") return;
   await queueOwnerAlert(
     tx,
     `owner:${key}`,
     "Получена оплата",
-    `${payload.firstPayment ? "Первая" : "Повторная"} оплата: ${payload.amount} ₽. Тариф: ${payload.plan}.\nДоступ до: ${payload.periodEnd}.`,
+    `${payload.firstPayment ? "Первая" : "Повторная"} оплата: ${payload.amount} ₽. Тариф: ${payload.plan}.\nДоступ до: ${payload.periodEnd}.\nИсточник: ${payload.signupSourceLabel ?? "нет данных"}.`,
+    path,
   );
 }
 export async function emailHealth() {

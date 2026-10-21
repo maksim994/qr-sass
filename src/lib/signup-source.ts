@@ -10,7 +10,7 @@ export type SignupSource = {
 };
 const clean = (v: unknown) => typeof v === "string" ? v.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, LIMIT) || null : null;
 export function sourceCaptureAllowed(path: string) {
-  return !/^\/(r|p|v|g|preview|mini|admin|api|dashboard|login|forgot-password|reset-password)(\/|$)/.test(path);
+  return !/^\/(r|p|v|g|preview|mini|admin|api|dashboard|login|forgot-password|reset-password|verify-email)(\/|$)/.test(path);
 }
 export function sourceReferrer(value: unknown, ownOrigin: string) {
   if (typeof value !== "string") return null;

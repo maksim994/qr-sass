@@ -21,13 +21,22 @@ export async function recordBusinessEvent(
   tx: Prisma.TransactionClient,
   event: EventInput,
 ) {
-  const payload = event.payload ?? {};
+  const payload = { ...event.payload };
+  if (["registration_completed", "payment_succeeded"].includes(event.name)) {
+    const userId = event.paymentId
+      ? (await tx.payment.findUnique({ where: { id: event.paymentId }, select: { signupSourceUserId: true } }))?.signupSourceUserId
+      : event.userId;
+    const source = userId ? await tx.userSignupSource.findUnique({ where: { userId } }) : null;
+    payload.signupSourceLabel = signupSourceLabel(source);
+  }
   const created = await tx.businessEvent.createMany({
     data: { ...event, payload },
     skipDuplicates: true,
   });
   if (!created.count || event.isTest) return;
-  await enqueueOwnerEvent(tx, event.name, event.key, payload);
+  const ownerPath = event.paymentId ? `/admin/payments/${event.paymentId}`
+    : event.userId ? `/admin/users/${event.userId}` : "/admin";
+  await enqueueOwnerEvent(tx, event.name, event.key, payload, ownerPath);
   const config = await tx.telegramSettings.findUnique({
     where: { id: "default" },
   });
@@ -58,9 +67,7 @@ export async function recordBusinessEvent(
       `Доступ до: ${new Date(payload.periodEnd).toLocaleString("ru-RU", { timeZone: "Europe/Moscow" })} МСК`,
     );
   if (["registration_completed", "payment_succeeded"].includes(event.name)) {
-    const userId = event.userId ?? (event.paymentId ? (await tx.payment.findUnique({ where: { id: event.paymentId }, select: { signupSourceUserId: true } }))?.signupSourceUserId : null);
-    const source = userId ? await tx.userSignupSource.findUnique({ where: { userId } }) : null;
-    lines.push(`Источник: ${signupSourceLabel(source)}`);
+    lines.push(`Источник: ${payload.signupSourceLabel}`);
   }
   lines.push(new URL(link, env.APP_URL).toString());
   await tx.notificationOutbox.createMany({

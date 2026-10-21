@@ -1,0 +1,5 @@
+(node:24999) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-email-notifications/scripts/test-email-notifications.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-email-notifications/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"ok":true,"checks":18,"transport":"stub","externalMessages":0}

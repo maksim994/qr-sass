@@ -6,17 +6,29 @@ import { legalReceipt, oauthStateHash } from "./legal-acceptance.ts";
 import { legalSnapshot as previousLegalSnapshot } from "./legal-history/2026-10-01.ts";
 import { parseCookieChoice } from "./cookie-consent.ts";
 import { legalSnapshot } from "./legal-documents.ts";
-import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.1.ts";
+import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.2-consent.ts";
+import { legalSnapshot as analyticsEdition } from "./legal-history/2026-10-21.2-analytics.ts";
 
-test("PD document update preserves terms, analytics text and prior receipt edition", () => {
+test("integrated legal edition combines attribution and processors without altering prior receipts", () => {
   const before = beforePdChanges();
   const current = legalSnapshot();
   assert.notEqual(current.version, before.version);
   assert.notEqual(current.privacyVersion, before.privacyVersion);
   assert.deepEqual(current.terms, before.terms);
-  const analytics = (snapshot: ReturnType<typeof legalSnapshot>) =>
-    snapshot.privacy.filter(section => section.id?.startsWith("section-4"));
-  assert.deepEqual(analytics(current), analytics(before));
+  assert.equal(current.version, "2026-10-21.3");
+  assert.equal(current.privacyVersion, "2026-10-21.3");
+  assert.equal(before.version, analyticsEdition().version);
+  assert.notDeepEqual(before.privacy, analyticsEdition().privacy);
+  const privacy = JSON.stringify(current.privacy), consent = JSON.stringify(current.consent);
+  for (const name of ["Бегет", "Яндекс", "РОБОКАССА", "ВК"]) {
+    assert.ok(privacy.includes(`«${name}»`));
+    assert.ok(consent.includes(`«${name}»`));
+  }
+  assert.match(privacy, /30\.06\.2026/);
+  assert.doesNotMatch(privacy, /01\.01\.2023/);
+  assert.match(privacy, /Вебвизор/);
+  assert.match(privacy, /first-touch/);
+  assert.match(privacy, /Служебные уведомления Telegram отключены/);
   assert.equal(registrationLegalSchema.safeParse({
     termsAccepted: true, consent: true, legalVersion: before.version,
   }).success, false);
