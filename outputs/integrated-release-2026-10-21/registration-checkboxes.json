@@ -1,0 +1,30 @@
+{
+  "/register": [
+    {
+      "id": "_R_mjanpfdb_",
+      "name": null,
+      "required": true,
+      "checked": false
+    },
+    {
+      "id": "_R_qjanpfdb_",
+      "name": null,
+      "required": true,
+      "checked": false
+    }
+  ],
+  "/register/yandex": [
+    {
+      "id": "_R_kpbsnpfdb_",
+      "name": null,
+      "required": true,
+      "checked": false
+    },
+    {
+      "id": "_R_spbsnpfdb_",
+      "name": null,
+      "required": true,
+      "checked": false
+    }
+  ]
+}

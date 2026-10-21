@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/",
+    "status": 200
+  },
+  {
+    "path": "/privacy-policy",
+    "status": 200
+  },
+  {
+    "path": "/personal-data-consent",
+    "status": 200
+  },
+  {
+    "path": "/login",
+    "status": 200
+  },
+  {
+    "path": "/register",
+    "status": 200
+  },
+  {
+    "path": "/register/yandex",
+    "status": 200
+  },
+  {
+    "path": "/pricing",
+    "status": 200
+  },
+  {
+    "path": "/skaner-qr-koda",
+    "status": 200
+  },
+  {
+    "path": "/qr-s-logotipom",
+    "status": 200
+  },
+  {
+    "path": "/api/health",
+    "status": 200
+  },
+  {
+    "path": "/verify-email",
+    "status": 200
+  },
+  {
+    "path": "/reset-password",
+    "status": 200
+  }
+]
