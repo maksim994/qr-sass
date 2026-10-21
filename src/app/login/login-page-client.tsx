@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useId, useState } from "react";
 import {
   AuthDivider,
@@ -143,7 +144,7 @@ export function LoginPageClient({ initialError = "", nextPath = "/dashboard", ya
       <div className="qrs-auth-social">
         <YandexAuthButton mode="login" nextPath={nextPath} />
         <p className="qrs-auth-social-note">
-          Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
+          Входя, вы принимаете <Link href="/terms-of-service">Условия сервиса</Link>. Обработка данных описана в <Link href="/privacy-policy">Политике конфиденциальности</Link>.
         </p>
       </div></>}
 

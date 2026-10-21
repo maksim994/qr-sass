@@ -1,0 +1,12 @@
+▲ Next.js 16.3.8
+- Local:         http://127.0.0.1:3020
+- Network:       http://127.0.0.1:3020
+✓ Ready in 94ms
+✓ Running next.config.ts took 84ms
+⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+{"timestamp":"2026-10-21T14:15:24.784Z","level":"info","area":"api","route":"/api/auth/register","message":"User registered","requestId":"668f9ead-0572-4371-9e76-39a8e3c7c6b3","status":200}
+{"timestamp":"2026-10-21T14:15:24.793Z","level":"error","area":"api","route":"/api/auth/yandex/callback","requestId":"164a147e-b628-4f93-8dcd-4e9f29ace76c","message":"Yandex auth failed","code":"YANDEX_AUTH_FAILED","status":302,"details":{"message":"Для нового аккаунта сначала подтвердите условия регистрации."}}
+{"timestamp":"2026-10-21T14:15:24.808Z","level":"error","area":"api","route":"/api/auth/yandex/callback","requestId":"37915e9d-a7ba-4c7b-85ef-b76c44729818","message":"Yandex auth failed","code":"YANDEX_AUTH_FAILED","status":302,"details":{"message":"Для нового аккаунта сначала подтвердите условия регистрации."}}
+{"timestamp":"2026-10-21T14:15:24.819Z","level":"error","area":"api","route":"/api/auth/yandex/callback","requestId":"f055bf08-139b-4f08-9be9-f3186a3fbb30","message":"Yandex auth failed","code":"YANDEX_AUTH_FAILED","status":302,"details":{"message":"Для нового аккаунта сначала подтвердите условия регистрации."}}
+{"timestamp":"2026-10-21T14:15:24.890Z","level":"info","area":"api","route":"/api/auth/yandex/callback","requestId":"77af906b-4636-4af9-9e71-a2cba63d0beb","message":"Yandex auth success","status":302}
+{"timestamp":"2026-10-21T14:15:24.895Z","level":"error","area":"api","route":"/api/auth/yandex/callback","requestId":"7c87ef48-9499-4106-a351-161ec2dc2a80","message":"Yandex auth failed","code":"YANDEX_AUTH_FAILED","status":302,"details":{"message":"Для нового аккаунта сначала подтвердите условия регистрации."}}

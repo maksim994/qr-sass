@@ -5,6 +5,28 @@ import { LEGAL_VERSION } from "./legal-documents.ts";
 import { legalReceipt, oauthStateHash } from "./legal-acceptance.ts";
 import { legalSnapshot as previousLegalSnapshot } from "./legal-history/2026-10-01.ts";
 import { parseCookieChoice } from "./cookie-consent.ts";
+import { legalSnapshot } from "./legal-documents.ts";
+import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.1.ts";
+
+test("PD document update preserves terms, analytics text and prior receipt edition", () => {
+  const before = beforePdChanges();
+  const current = legalSnapshot();
+  assert.notEqual(current.version, before.version);
+  assert.notEqual(current.privacyVersion, before.privacyVersion);
+  assert.deepEqual(current.terms, before.terms);
+  const analytics = (snapshot: ReturnType<typeof legalSnapshot>) =>
+    snapshot.privacy.filter(section => section.id?.startsWith("section-4"));
+  assert.deepEqual(analytics(current), analytics(before));
+  assert.equal(registrationLegalSchema.safeParse({
+    termsAccepted: true, consent: true, legalVersion: before.version,
+  }).success, false);
+  for (const source of ["email", "yandex"] as const) {
+    const receipt = legalReceipt(source);
+    assert.equal(receipt.termsAccepted, true);
+    assert.equal(receipt.dataConsent, true);
+    assert.deepEqual(receipt.documents, current);
+  }
+});
 
 test("registration requires two explicit confirmations and the displayed document version", () => {
   const valid = { termsAccepted: true, consent: true, legalVersion: LEGAL_VERSION };

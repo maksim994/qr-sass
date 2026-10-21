@@ -1,0 +1,73 @@
+[
+  {
+    "name": "/privacy-policy",
+    "status": 200
+  },
+  {
+    "name": "/personal-data-consent",
+    "status": 200
+  },
+  {
+    "name": "/login",
+    "status": 200
+  },
+  {
+    "name": "/register",
+    "status": 200
+  },
+  {
+    "name": "/register/yandex",
+    "status": 200
+  },
+  {
+    "name": "server refuses missing/false confirmations and stale version",
+    "rejected": 8,
+    "usersCreated": 0,
+    "intentsCreated": 0
+  },
+  {
+    "name": "new Yandex login without receipt",
+    "status": 307,
+    "destination": "/register/yandex",
+    "usersCreated": 0
+  },
+  {
+    "name": "Yandex expired receipt",
+    "destination": "/register/yandex",
+    "usersCreated": 0
+  },
+  {
+    "name": "Yandex old-version receipt",
+    "destination": "/register/yandex",
+    "usersCreated": 0
+  },
+  {
+    "name": "Yandex one-use receipt",
+    "destination": "/dashboard",
+    "replayUsersCreated": 0
+  },
+  {
+    "name": "existing local QR redirect",
+    "shortCode": "tz10-1792566299558-0",
+    "status": 307,
+    "target": "https://example.com/edited-cmvhrowy30008z8c0qxod6mq7"
+  },
+  {
+    "name": "existing local QR redirect",
+    "shortCode": "tz10-1792566299558-1",
+    "status": 307,
+    "target": "https://example.com/edited-cmvhrowy5000az8c0vt2md9oo"
+  },
+  {
+    "name": "existing local QR redirect",
+    "shortCode": "tz10-1792566299558-2",
+    "status": 307,
+    "target": "https://example.com/original-2"
+  },
+  {
+    "name": "existing QR data unchanged",
+    "count": 28,
+    "beforeSha256": "198182d360e3c63eb11050d94d6565b37e7417bf20a8176dba6bdbb4e14164c1",
+    "afterSha256": "198182d360e3c63eb11050d94d6565b37e7417bf20a8176dba6bdbb4e14164c1"
+  }
+]
