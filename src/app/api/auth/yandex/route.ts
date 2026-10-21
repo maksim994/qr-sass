@@ -1,3 +1,4 @@
+import { registrationSource } from "@/lib/signup-source";
 import { getDb } from "@/lib/db";
 import { legalReceipt, oauthStateHash } from "@/lib/legal-acceptance";
 import { registrationLegalSchema, getValidationErrorMessage } from "@/lib/validation";
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
     const db = getDb();
     await db.oAuthLegalIntent.deleteMany({ where: { expiresAt: { lt: new Date() } } });
     await db.oAuthLegalIntent.create({ data: {
+      signupSource: registrationSource((raw as Record<string, unknown>).signupSource, request),
       stateHash: oauthStateHash(state), version: receipt.version, documents: receipt.documents,
       acceptedAt: receipt.acceptedAt, expiresAt: new Date(Date.now() + STATE_MAX_AGE * 1000),
     } });

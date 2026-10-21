@@ -166,7 +166,7 @@ export function AdminShell({ children, user }: Props) {
 
   return (
     <div
-      className="flex min-h-dvh"
+      className="flex min-h-dvh ym-hide-content"
       style={{
         background: "var(--surface-subtle)",
         color: "var(--text-default)",

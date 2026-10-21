@@ -8,7 +8,7 @@ test("goals require current consent and a ready counter; payments cannot be forg
   const original = Object.getOwnPropertyDescriptor(globalThis, "window");
   const calls: unknown[][] = [];
   let choice = "declined";
-  const fake = { __qrsYmId: "106988416", ym: (...args: unknown[]) => calls.push(args), localStorage: {
+  const fake = { location: { pathname: "/" }, __qrsYmId: "106988416", ym: (...args: unknown[]) => calls.push(args), localStorage: {
     getItem: () => JSON.stringify({ choice, version: LEGAL_VERSION, at: Date.now() }),
   } };
   Object.defineProperty(globalThis, "window", { value: fake, configurable: true });

@@ -1,0 +1,58 @@
+[
+  {
+    "scenario": "old",
+    "counter": null,
+    "notice": false,
+    "scripts": 0
+  },
+  {
+    "scenario": "legacy",
+    "counter": null,
+    "notice": false,
+    "scripts": 0
+  },
+  {
+    "scenario": "expired",
+    "counter": null,
+    "notice": false,
+    "scripts": 0
+  },
+  {
+    "scenario": "mobile-light",
+    "bottom": 616.09375,
+    "overflow": false,
+    "top": 50.90625
+  },
+  {
+    "scenario": "disabled-after-reload",
+    "counter": null,
+    "scripts": 0
+  },
+  {
+    "scenario": "reenabled",
+    "counter": "999999999",
+    "events": "[[\"999999999\",\"init\",{\"defer\":true,\"clickmap\":true,\"trackLinks\":false,\"accurateTrackBounce\":true,\"webvisor\":true}],[\"999999999\",\"hit\",\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\",{\"title\":\"Сканер QR-кода онлайн: с камеры, по фото и скриншоту | qr-s.ru\",\"referer\":\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\"}]]"
+  },
+  {
+    "scenario": "spa-navigation",
+    "events": "[[\"999999999\",\"init\",{\"defer\":true,\"clickmap\":true,\"trackLinks\":false,\"accurateTrackBounce\":true,\"webvisor\":true}],[\"999999999\",\"hit\",\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\",{\"title\":\"Сканер QR-кода онлайн: с камеры, по фото и скриншоту | qr-s.ru\",\"referer\":\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\"}]]"
+  },
+  {
+    "scenario": "spa-settled",
+    "events": "[[\"999999999\",\"init\",{\"defer\":true,\"clickmap\":true,\"trackLinks\":false,\"accurateTrackBounce\":true,\"webvisor\":true}],[\"999999999\",\"hit\",\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\",{\"title\":\"Сканер QR-кода онлайн: с камеры, по фото и скриншоту | qr-s.ru\",\"referer\":\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\"}],[\"999999999\",\"reachGoal\",\"pricing_view\",{\"where\":\"pricing\"}],[\"999999999\",\"hit\",\"http://127.0.0.1:3013/pricing\",{\"title\":\"Тарифы QR-S: динамические QR-коды от 299 ₽ в месяц | qr-s.ru\",\"referer\":\"http://127.0.0.1:3013/skaner-qr-koda?ref=tz11-demo\"}]]"
+  },
+  {
+    "scenario": "refusal-from-another-tab",
+    "counter": null,
+    "scripts": 0
+  },
+  {
+    "scenario": "policy-link-after-review",
+    "result": {
+      "dialogs": 0,
+      "inert": 0,
+      "overflow": "",
+      "url": "http://127.0.0.1:3013/privacy-policy#section-4"
+    }
+  }
+]

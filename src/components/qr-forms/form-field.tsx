@@ -20,7 +20,7 @@ export function FormField({ label, className, hint, children }: Props) {
   });
 
   return (
-    <div className={className}>
+    <div className={`ym-hide-content ${className ?? ""}`}>
       <label className="label" htmlFor={(control.props as { id?: string }).id}>
         {label}
       </label>

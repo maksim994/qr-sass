@@ -185,7 +185,7 @@ export function QrScanner() {
       <textarea id="scan-content" className={`fk-input ${s.raw}`} value={result.raw} readOnly rows={result.type === "URL" ? 2 : 4} spellCheck={false} dir="auto" />
       <div className={s.actions}>
         <Button type="button" onClick={() => void copy(result.raw, "content")}>{copied === "content" ? "Скопировано" : "Скопировать"}</Button>
-        {result.url && <a className="fk-button fk-button--secondary" href={result.url} target="_blank" rel="noopener noreferrer nofollow" referrerPolicy="no-referrer">Открыть <span aria-hidden="true">↗</span></a>}
+        {result.url && <a className="fk-button fk-button--secondary ym-disable-tracklink" href={result.url} target="_blank" rel="noopener noreferrer nofollow" referrerPolicy="no-referrer">Открыть <span aria-hidden="true">↗</span></a>}
         {result.wifi?.password && <Button type="button" variant="secondary" onClick={() => void copy(result.wifi!.password, "password")}>{copied === "password" ? "Пароль скопирован" : "Скопировать пароль"}</Button>}
         <Button type="button" variant="ghost" onClick={reset}>Сканировать ещё</Button>
       </div>

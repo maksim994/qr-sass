@@ -141,7 +141,7 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
       <h1 id="generator-title" tabIndex={-1}>{heading}</h1>
       <p><button type="button" onClick={() => chooseKind("DYNAMIC")}>Меняйте ссылку после печати — 2 кода бесплатно</button></p>
     </header>}
-    <form className={styles.generator} noValidate onSubmit={event => { event.preventDefault(); if (dynamic) continueDynamic(); else void download("png"); }}>
+    <form className={`${styles.generator} ym-hide-content`} noValidate onSubmit={event => { event.preventDefault(); if (dynamic) continueDynamic(); else void download("png"); }}>
       <div className={styles.inputPanel}>
         <div className={styles.contentFields}>
           {type === "URL" ? <label htmlFor={`${id}-url`}>{type === initialType || !initialType ? urlLabel : "Ссылка"}<Input data-generator-url id={`${id}-url`} type={inputMode === "whatsapp" ? "tel" : "text"} inputMode={inputMode === "whatsapp" ? "tel" : "url"} autoComplete={inputMode === "whatsapp" ? "tel" : "url"} placeholder={urlPlaceholder} value={String(rawPayload.url ?? "")} aria-invalid={hasInput && !prepared.ok ? true : undefined} aria-describedby={`${id}-hint`} onChange={event => { setPayloads(current => ({...current,URL:{url:event.target.value}})); setError(""); setNotice(""); }} /></label>

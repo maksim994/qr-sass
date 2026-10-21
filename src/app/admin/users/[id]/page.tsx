@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+import { signupSourceLabel } from "@/lib/signup-source";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
@@ -13,6 +15,7 @@ export default async function UserPage({
   const user = await getDb().user.findUnique({
     where: { id: (await params).id },
     select: {
+      signupSource: true,
       id: true,
       email: true,
       name: true,
@@ -48,6 +51,20 @@ export default async function UserPage({
               <dt>Права</dt>
               <dd>{user.isAdmin ? "Администратор" : "Пользователь"}</dd>
             </dl>
+          </section>
+          <section className={styles.panel}>
+            <h2 className={styles.title}>Источник</h2>
+            <p>{signupSourceLabel(user.signupSource)}</p>
+            {user.signupSource && <dl className={styles.meta}>
+              {Object.entries({
+                utm_source: user.signupSource.utmSource, utm_medium: user.signupSource.utmMedium,
+                utm_campaign: user.signupSource.utmCampaign, utm_content: user.signupSource.utmContent,
+                utm_term: user.signupSource.utmTerm, "Тип click ID": user.signupSource.clickIdType,
+                "Click ID": user.signupSource.clickId, "Сайт перехода": user.signupSource.referrer,
+                "Первая страница": user.signupSource.landingPath,
+                "Первый заход · МСК": adminDate(user.signupSource.firstTouchAt),
+              }).map(([label, value]) => <Fragment key={label}><dt>{label}</dt><dd>{value || "нет данных"}</dd></Fragment>)}
+            </dl>}
           </section>
           <section className={styles.panel}>
             <h2 className={styles.title}>

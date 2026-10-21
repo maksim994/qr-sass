@@ -51,6 +51,7 @@ enum QrContentType {
 
 model User {
   emailVerificationTokens EmailVerificationToken[]
+  signupSource UserSignupSource?
   metrikaRegistrationPending Boolean @default(false)
   id           String       @id @default(cuid())
   email        String       @unique
@@ -365,6 +366,7 @@ model Subscription {
 }
 
 model Payment {
+  signupSourceUserId String?
   metrikaUserId String?
   metrikaClientId String?
   metrikaCounterId String?
@@ -530,6 +532,7 @@ model OAuthLegalIntent {
   acceptedAt DateTime @default(now())
   expiresAt DateTime
   documents Json
+  signupSource Json?
   @@index([expiresAt])
 }
 
@@ -693,4 +696,27 @@ model EmailVerificationToken {
   createdAt DateTime @default(now())
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId, createdAt])
+}
+
+// Additive first-touch storage. Existing users deliberately have no row.
+model UserSignupSource {
+  userId String @id @map("user_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  utmSource String? @db.VarChar(255) @map("signup_utm_source")
+  utmMedium String? @db.VarChar(255) @map("signup_utm_medium")
+  utmCampaign String? @db.VarChar(255) @map("signup_utm_campaign")
+  utmContent String? @db.VarChar(255) @map("signup_utm_content")
+  utmTerm String? @db.VarChar(255) @map("signup_utm_term")
+  clickId String? @db.VarChar(255) @map("signup_click_id")
+  clickIdType String? @db.VarChar(8) @map("signup_click_id_type")
+  referrer String? @db.VarChar(255) @map("signup_referrer")
+  landingPath String? @db.VarChar(255) @map("signup_landing_path")
+  firstTouchAt DateTime @map("signup_first_touch_at")
+  @@map("user_signup_source")
+}
+
+// VK delivery is independent of Metrika's browser/offline receipt.
+model AdvertisingConversionReceipt {
+  key String @id
+  createdAt DateTime @default(now())
 }

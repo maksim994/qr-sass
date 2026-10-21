@@ -1,0 +1,9 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ТЗ11 — проверка целей</title><script src="/__tz11-observe.js"></script></head><body><h1>ТЗ11 · реальные SDK</h1><p>Синтетические события из исходной функции приложения trackGoal().</p><button id="enable">Включить обе категории</button><button data-goal="registration_completed">Регистрация</button><button data-goal="dynamic_enabled">Динамический QR</button><button data-goal="pricing_view">Тарифы</button><button data-goal="checkout_started">Начало оплаты</button><button data-goal="payment_succeeded">Успешная оплата</button><pre id="status">Загрузка исходников приложения…</pre><script type="module">
+import {trackGoal} from '/__tz11-module/lib/product-analytics.ts';
+import {startMetrika} from '/__tz11-module/lib/metrika-runtime.ts';
+import {startAdvertising} from '/__tz11-module/lib/advertising-runtime.ts';
+import {saveCookiePreferences} from '/__tz11-module/lib/cookie-consent.ts';
+document.getElementById('enable').onclick=()=>{saveCookiePreferences(true,true);startMetrika('106988416');startAdvertising();document.getElementById('status').textContent='Оба SDK запущены';};
+for(const button of document.querySelectorAll('[data-goal]'))button.onclick=()=>{const ok=trackGoal(button.dataset.goal,{revenue:299,email:'synthetic-do-not-send@example.test',userId:'DO-NOT-SEND',paymentId:'DO-NOT-SEND',utmSource:'DO-NOT-SEND'});document.getElementById('status').textContent=button.dataset.goal+': '+ok;};
+document.getElementById('status').textContent='Готово';
+</script></body></html>

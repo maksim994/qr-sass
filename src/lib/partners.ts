@@ -1,3 +1,4 @@
+import { ANALYTICS_OPTOUT_COOKIE } from "@/lib/analytics-policy";
 import { activatedWorkspaces } from "@/lib/qr-activation";
 import { cookies } from "next/headers";
 import type { Prisma } from "@prisma/client";
@@ -7,7 +8,7 @@ import { PARTNER_COOKIE, eligiblePartnerVisit } from "@/lib/partner-rules";
 /** Called only when creating a new account, never during login or team acceptance. */
 export async function readRegistrationPartner() {
   let id: string | undefined;
-  try { id = (await cookies()).get(PARTNER_COOKIE)?.value; } catch { return null; }
+  try { const jar = await cookies(); if (jar.get(ANALYTICS_OPTOUT_COOKIE)?.value === "1") return null; id = jar.get(PARTNER_COOKIE)?.value; } catch { return null; }
   if (!id || !/^[a-f0-9-]{36}$/.test(id)) return null;
   return id;
 }
@@ -15,7 +16,7 @@ export async function readRegistrationPartner() {
 export async function registrationPartnerData(tx: Prisma.TransactionClient, visitId: string | null) {
   if (!visitId) return {};
   const visit = await tx.partnerVisit.findUnique({ where: { id: visitId }, include: { partner: { select: { enabled: true } } } });
-  // The recorded consent version is historical evidence; a terms revision must
+  // The recorded collection policy is historical; a terms revision must
   // not erase an already captured first touch within its original 30-day window.
   return eligiblePartnerVisit(visit) && visit ? { partnerId: visit.partnerId, partnerIsTest: visit.isTest } : {};
 }

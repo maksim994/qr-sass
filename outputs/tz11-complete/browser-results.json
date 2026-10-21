@@ -1,0 +1,36 @@
+[
+  {
+    "state": "ym-only",
+    "scripts": [
+      "https://mc.yandex.ru/metrika/tag.js"
+    ],
+    "vk": false,
+    "ym": "106988416"
+  },
+  {
+    "state": "vk-only",
+    "scripts": [
+      "https://top-fwz1.mail.ru/js/code.js",
+      "https://top-fwz1.mail.ru/js/dyn-goal-config.js?ids=3807133"
+    ],
+    "vk": true,
+    "ym": null
+  },
+  {
+    "state": "both-off-after-reload",
+    "scripts": [],
+    "vk": false,
+    "ym": null
+  },
+  {
+    "state": "vk-reenabled",
+    "vk": true,
+    "ym": null
+  },
+  {
+    "state": "admin",
+    "scripts": [],
+    "vk": false,
+    "ym": null
+  }
+]

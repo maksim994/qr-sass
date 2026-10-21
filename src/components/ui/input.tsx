@@ -20,6 +20,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
 ) {
   const classes = [
     "fk-input",
+    "ym-disable-keys",
     sizeClass[inputSize],
     withIcon ? "fk-input--with-icon" : "",
     withSuffix ? "fk-input--with-suffix" : "",

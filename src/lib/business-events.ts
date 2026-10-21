@@ -1,4 +1,5 @@
 import { enqueueOwnerEvent } from "@/lib/email-notifications";
+import { signupSourceLabel } from "@/lib/signup-source";
 import type { Prisma } from "@prisma/client";
 import { env } from "@/lib/env";
 export const BUSINESS_EVENT_LABELS: Record<string, string> = {
@@ -56,6 +57,11 @@ export async function recordBusinessEvent(
     lines.push(
       `Доступ до: ${new Date(payload.periodEnd).toLocaleString("ru-RU", { timeZone: "Europe/Moscow" })} МСК`,
     );
+  if (["registration_completed", "payment_succeeded"].includes(event.name)) {
+    const userId = event.userId ?? (event.paymentId ? (await tx.payment.findUnique({ where: { id: event.paymentId }, select: { signupSourceUserId: true } }))?.signupSourceUserId : null);
+    const source = userId ? await tx.userSignupSource.findUnique({ where: { userId } }) : null;
+    lines.push(`Источник: ${signupSourceLabel(source)}`);
+  }
   lines.push(new URL(link, env.APP_URL).toString());
   await tx.notificationOutbox.createMany({
     data: {

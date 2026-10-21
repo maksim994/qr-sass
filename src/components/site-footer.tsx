@@ -1,3 +1,4 @@
+import { CookieSettingsButton } from "@/components/cookie-settings-button";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { getDb } from "@/lib/db";
@@ -148,7 +149,7 @@ export async function SiteFooter({ session, children }: Props) {
             <Link href="/privacy-policy" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
               Политика конфиденциальности
             </Link>
-            <Link href="/privacy-policy#cookie-settings" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>Настройки cookie</Link>
+            <CookieSettingsButton inline />
             <Link href="/terms-of-service" className="hover:opacity-80 transition-opacity" style={{ color: "var(--text-muted)" }}>
               Публичная оферта и соглашение
             </Link>

@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Content-Security-Policy: frame-ancestors 'self' https://metrika.yandex.ru https://analytics.yandex.by https://analytics.yandex.com https://analytics.yandex.com.tr https://analytics.yandex.kz https://analytics.yandex.ru https://metr.yandex.by https://metr.yandex.com https://metr.yandex.com.tr https://metr.yandex.kz https://metr.yandex.ru https://metrica.ya.ru https://metrica.yandex https://metrica.yandex.by https://metrica.yandex.com https://metrica.yandex.com.tr https://metrica.yandex.kz https://metrica.yandex.ru https://metrika.ya.ru https://metrika.yandex https://metrika.yandex.by https://metrika.yandex.com https://metrika.yandex.com.tr https://metrika.yandex.kz https://metrika.yandex.uz https://webvisor.com https://*.webvisor.com
+X-Frame-Options: SAMEORIGIN
+Strict-Transport-Security: max-age=31536000
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+set-cookie: [redacted local test CSRF cookie]
+Vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+Link: </_next/static/media/a343f882a40d2cc9-s.p.1sj6eobyi31rd.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/media/d3fe2f289711ac3f-s.p.1l2zhvq5eocqf.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2", </_next/static/chunks/3xt588s4u7o15.css>; rel=preload; as="style", </_next/static/chunks/1k88xdw-m7ypl.css>; rel=preload; as="style"
+Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate
+Content-Type: text/html; charset=utf-8
+Date: Wed, 21 Oct 2026 15:34:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5

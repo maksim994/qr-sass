@@ -7,6 +7,7 @@ import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 type Props = {
   open: boolean;
+  className?: string;
   onClose: () => void;
   closeDisabled?: boolean;
   title: ReactNode;
@@ -16,7 +17,7 @@ type Props = {
   children: ReactNode;
 };
 
-export function Modal({ open, onClose, closeDisabled = false, title, subtitle, size = "md", footer, children }: Props) {
+export function Modal({ className = "", open, onClose, closeDisabled = false, title, subtitle, size = "md", footer, children }: Props) {
   const titleId = useId();
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -58,7 +59,7 @@ export function Modal({ open, onClose, closeDisabled = false, title, subtitle, s
     >
       <div
         ref={dialogRef}
-        className={`fk-modal ${sizeClass}`.trim()}
+        className={`fk-modal ${sizeClass} ${className}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

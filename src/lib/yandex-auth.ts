@@ -1,3 +1,4 @@
+import type { SignupSource } from "@/lib/signup-source";
 import { readRegistrationPartner, registrationPartnerData } from "@/lib/partners";
 import type { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
@@ -84,6 +85,7 @@ export async function getYandexProfile(accessToken: string) {
 export async function findOrCreateYandexUser(
   profile: Awaited<ReturnType<typeof getYandexProfile>>,
   receipt?: ReturnType<typeof legalReceipt>,
+  signupSource?: SignupSource,
 ) {
   const db = getDb();
 
@@ -133,6 +135,7 @@ export async function findOrCreateYandexUser(
         name: profile.name,
         passwordHash,
         legalAcceptances: { create: receipt },
+        ...(signupSource ? { signupSource: { create: { ...signupSource, firstTouchAt: new Date(signupSource.firstTouchAt) } } } : {}),
         metrikaRegistrationPending: true,
         emailVerifiedAt: new Date(),
         memberships: {

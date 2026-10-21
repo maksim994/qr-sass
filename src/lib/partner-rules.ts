@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { LEGAL_VERSION } from "@/lib/legal-documents";
+import { ANALYTICS_POLICY_VERSION } from "@/lib/analytics-policy";
 
 export const PARTNER_COOKIE = "qrs_partner_visit";
 export const PARTNER_WINDOW_MS = 30 * 86400_000;
@@ -23,3 +25,8 @@ export function summarizePartnerPayments(payments: PartnerPayment[]) {
   }
   return { firstPayments, renewals, grossRub, refundedRub, netRub: grossRub - refundedRub };
 }
+
+export const partnerVisitSchema = z.union([
+  z.object({ code: partnerCodeSchema, analyticsEnabled: z.literal(true), policyVersion: z.literal(ANALYTICS_POLICY_VERSION) }),
+  z.object({ code: partnerCodeSchema, consent: z.literal(true), consentVersion: z.literal(LEGAL_VERSION) }).transform(value => ({ code: value.code, analyticsEnabled: true as const, policyVersion: `opt-in:${value.consentVersion}` })),
+]);
