@@ -1,62 +1,48 @@
 import { env } from "@/lib/env";
-import { logger } from "@/lib/logger";
-
-type MailPayload = {
+import { OWNER_EMAIL } from "@/lib/email-notification-policy";
+export type MailPayload = {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  messageId?: string;
 };
-
-function smtpConfigured() {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM);
+export function smtpConfigured() {
+  return Boolean(
+    env.SMTP_HOST && env.SMTP_FROM && env.SMTP_USER && env.SMTP_PASS,
+  );
 }
-
-/**
- * Sends email when SMTP_* is set. Without SMTP the caller still succeeds:
- * no reset token or reset URL is logged or returned to the client.
- */
-export async function sendMail(payload: MailPayload): Promise<{ sent: boolean }> {
-  if (!smtpConfigured()) {
-    logger.info({
-      area: "runtime",
-      message: "SMTP is not configured; email was not sent",
-      details: { to: payload.to, subject: payload.subject },
-    });
-    return { sent: false };
-  }
-
+export async function sendMail(
+  payload: MailPayload,
+): Promise<{ sent: boolean }> {
+  if (!smtpConfigured()) return { sent: false };
   const nodemailer = await import("nodemailer");
-  const port = Number(process.env.SMTP_PORT || "465");
+  const port = env.SMTP_PORT;
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: env.SMTP_HOST,
     port,
     secure: port === 465,
+    requireTLS: port !== 465,
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 20_000,
-    auth:
-      process.env.SMTP_USER && process.env.SMTP_PASS
-        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-        : undefined,
+    auth: { user: env.SMTP_USER!, pass: env.SMTP_PASS! },
   });
-
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM,
-    to: payload.to,
-    subject: payload.subject,
-    text: payload.text,
-    html: payload.html,
-  });
-
-  logger.info({
-    area: "runtime",
-    message: "Email sent",
-    details: { to: payload.to, subject: payload.subject },
-  });
-  return { sent: true };
+  try {
+    const info = await transporter.sendMail({
+      from: env.SMTP_FROM,
+      replyTo: OWNER_EMAIL,
+      ...payload,
+      disableFileAccess: true,
+      disableUrlAccess: true,
+    });
+    if (!info.accepted?.length)
+      throw new Error("SMTP did not accept the recipient");
+    return { sent: true };
+  } finally {
+    transporter.close();
+  }
 }
-
 export function appUrl() {
   return env.APP_URL.replace(/\/$/, "");
 }

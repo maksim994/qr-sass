@@ -1,3 +1,4 @@
+import { queueVerification } from "@/lib/email-notifications";
 import { readRegistrationPartner, registrationPartnerData } from "@/lib/partners";
 import { legalReceipt } from "@/lib/legal-acceptance";
 import { recordBusinessEvent } from "@/lib/business-events";
@@ -133,6 +134,7 @@ export async function POST(request: Request) {
           payload: { source: "email" },
         });
       }
+      await queueVerification(tx, user);
       return user;
     });
     const token = await createSessionToken({

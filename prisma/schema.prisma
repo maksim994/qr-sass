@@ -50,6 +50,7 @@ enum QrContentType {
 }
 
 model User {
+  emailVerificationTokens EmailVerificationToken[]
   metrikaRegistrationPending Boolean @default(false)
   id           String       @id @default(cuid())
   email        String       @unique
@@ -653,4 +654,43 @@ model BlogPendingRevision {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   previewTokens BlogPreviewToken[]
+}
+
+model EmailControl {
+  id String @id @default("default")
+  enabledSince DateTime @default(now())
+  lastSeenAt DateTime?
+  lastScheduledAt DateTime?
+}
+model EmailOutbox {
+  id String @id @default(cuid())
+  key String @unique
+  kind String
+  toEmail String
+  userId String?
+  workspaceId String?
+  context Json @default("{}")
+  payloadCipher String?
+  status String @default("PENDING")
+  attempts Int @default(0)
+  nextAttemptAt DateTime @default(now())
+  expiresAt DateTime?
+  leaseUntil DateTime?
+  leaseToken String?
+  errorCode String?
+  createdAt DateTime @default(now())
+  sentAt DateTime?
+  @@index([status, nextAttemptAt])
+  @@index([userId, kind, createdAt])
+}
+model EmailVerificationToken {
+  id String @id @default(cuid())
+  userId String
+  email String
+  tokenHash String @unique
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
 }

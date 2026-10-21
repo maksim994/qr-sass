@@ -1,4 +1,10 @@
 import {
+  queueEmail,
+  queuePasswordChanged,
+  queueVerification,
+  serviceMessage,
+} from "@/lib/email-notifications";
+import {
   createSessionToken,
   getSession,
   hashPassword,
@@ -6,7 +12,12 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { MSG } from "@/lib/user-messages";
-import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
+import {
+  apiError,
+  apiSuccess,
+  getRequestId,
+  readJsonBody,
+} from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { profileUpdateSchema } from "@/lib/validation";
 
@@ -14,13 +25,25 @@ export async function GET(req: Request) {
   const requestId = getRequestId(req);
   const session = await getSession();
   if (!session?.sub) {
-    return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
+    return apiError(
+      MSG.UNAUTHORIZED,
+      "UNAUTHORIZED",
+      401,
+      undefined,
+      requestId,
+    );
   }
 
   const db = getDb();
   const user = await db.user.findUnique({
     where: { id: session.sub },
-    select: { id: true, email: true, name: true, avatarUrl: true, yandexId: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      avatarUrl: true,
+      yandexId: true,
+    },
   });
 
   if (!user) {
@@ -38,7 +61,7 @@ export async function GET(req: Request) {
       },
     },
     200,
-    requestId
+    requestId,
   );
 }
 
@@ -46,7 +69,13 @@ export async function PATCH(req: Request) {
   const requestId = getRequestId(req);
   const session = await getSession();
   if (!session?.sub) {
-    return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
+    return apiError(
+      MSG.UNAUTHORIZED,
+      "UNAUTHORIZED",
+      401,
+      undefined,
+      requestId,
+    );
   }
 
   const raw = await readJsonBody(req);
@@ -61,7 +90,7 @@ export async function PATCH(req: Request) {
       "VALIDATION_ERROR",
       400,
       parsed.error.flatten(),
-      requestId
+      requestId,
     );
   }
 
@@ -69,7 +98,13 @@ export async function PATCH(req: Request) {
   const db = getDb();
   const existing = await db.user.findUnique({
     where: { id: session.sub },
-    select: { id: true, email: true, name: true, passwordHash: true, sessionVersion: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      passwordHash: true,
+      sessionVersion: true,
+    },
   });
 
   if (!existing) {
@@ -96,19 +131,40 @@ export async function PATCH(req: Request) {
           "FORBIDDEN",
           403,
           undefined,
-          requestId
+          requestId,
         );
       }
       if (!data.currentPassword) {
-        return apiError("Укажите текущий пароль, чтобы сменить email.", "VALIDATION_ERROR", 400, undefined, requestId);
+        return apiError(
+          "Укажите текущий пароль, чтобы сменить email.",
+          "VALIDATION_ERROR",
+          400,
+          undefined,
+          requestId,
+        );
       }
-      const valid = await verifyPassword(data.currentPassword, existing.passwordHash);
+      const valid = await verifyPassword(
+        data.currentPassword,
+        existing.passwordHash,
+      );
       if (!valid) {
-        return apiError("Неверный текущий пароль.", "VALIDATION_ERROR", 400, undefined, requestId);
+        return apiError(
+          "Неверный текущий пароль.",
+          "VALIDATION_ERROR",
+          400,
+          undefined,
+          requestId,
+        );
       }
       const conflict = await db.user.findUnique({ where: { email } });
       if (conflict) {
-        return apiError("Такой email уже используется.", "CONFLICT", 409, undefined, requestId);
+        return apiError(
+          "Такой email уже используется.",
+          "CONFLICT",
+          409,
+          undefined,
+          requestId,
+        );
       }
       updates.email = email;
       updates.emailVerifiedAt = null;
@@ -124,13 +180,22 @@ export async function PATCH(req: Request) {
         "FORBIDDEN",
         403,
         undefined,
-        requestId
+        requestId,
       );
     }
 
-    const valid = await verifyPassword(data.currentPassword, existing.passwordHash);
+    const valid = await verifyPassword(
+      data.currentPassword,
+      existing.passwordHash,
+    );
     if (!valid) {
-      return apiError("Неверный текущий пароль.", "VALIDATION_ERROR", 400, undefined, requestId);
+      return apiError(
+        "Неверный текущий пароль.",
+        "VALIDATION_ERROR",
+        400,
+        undefined,
+        requestId,
+      );
     }
 
     updates.passwordHash = await hashPassword(data.newPassword);
@@ -141,24 +206,58 @@ export async function PATCH(req: Request) {
     return apiSuccess(
       { user: { id: existing.id, email: existing.email, name: existing.name } },
       200,
-      requestId
+      requestId,
     );
   }
 
-  const updated = await db.user.update({
-    where: { id: session.sub },
-    data: updates,
-    select: { id: true, email: true, name: true, sessionVersion: true },
+  const updated = await db.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "User" WHERE id=${session.sub} FOR UPDATE`;
+    if (updates.email || updates.passwordHash)
+      await tx.passwordResetToken.updateMany({
+        where: { userId: session.sub, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+    const user = await tx.user.update({
+      where: { id: session.sub, sessionVersion: existing.sessionVersion },
+      data: updates,
+      select: { id: true, email: true, name: true, sessionVersion: true },
+    });
+
+    if (updates.email) {
+      await queueVerification(tx, user);
+      await queueEmail(tx, {
+        key: `email-changed:${user.id}:${user.sessionVersion}`,
+        kind: "email_changed",
+        to: existing.email,
+        userId: user.id,
+        message: serviceMessage(
+          "Email аккаунта изменён",
+          "Адрес входа в ваш аккаунт QR-S.ru изменён. Если вы этого не делали, обратитесь в поддержку.",
+        ),
+      });
+    }
+    if (updates.passwordHash) {
+      await queuePasswordChanged(
+        tx,
+        { ...user, email: existing.email },
+        `password-profile:${user.id}:${user.sessionVersion}`,
+      );
+    }
+    return user;
   });
 
   if (updates.email || updates.passwordHash) {
-    const token = await createSessionToken({ sub: updated.id, email: updated.email, sv: updated.sessionVersion });
+    const token = await createSessionToken({
+      sub: updated.id,
+      email: updated.email,
+      sv: updated.sessionVersion,
+    });
     await setAuthCookie(token);
   }
 
   return apiSuccess(
     { user: { id: updated.id, email: updated.email, name: updated.name } },
     200,
-    requestId
+    requestId,
   );
 }

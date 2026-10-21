@@ -100,6 +100,30 @@ services:
       disable: true
     restart: unless-stopped
 
+  email-worker:
+    build:
+      context: .
+      target: runner
+    entrypoint: ["node", "--experimental-strip-types", "--import", "./scripts/register-src-alias.mjs", "scripts/email-worker.ts"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - APP_URL=${APP_URL}
+      - ADMIN_INTEGRATIONS_KEY=${ADMIN_INTEGRATIONS_KEY:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
   metrika-worker:
     build:
       context: .

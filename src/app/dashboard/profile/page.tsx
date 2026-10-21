@@ -1,3 +1,4 @@
+import { EmailVerification } from "./email-verification";
 import styles from "./profile.module.css";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
@@ -45,6 +46,7 @@ export default async function ProfilePage() {
           subtitle={`${roleLabel(!!user.isAdmin, membership?.role ?? "MEMBER")} · ${workspace.name}`}
         />
       </Suspense>
+      {!user.emailVerifiedAt && canChangePassword ? <EmailVerification /> : null}
       {membership && ["OWNER", "ADMIN"].includes(membership.role) ? (
         <WorkspaceNameForm key={workspace.id} workspaceId={workspace.id} initialName={workspace.name} />
       ) : null}

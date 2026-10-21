@@ -1,45 +1,113 @@
+import {
+  emailDate,
+  queueEmail,
+  serviceMessage,
+} from "@/lib/email-notifications";
 import { getDb } from "@/lib/db";
 import { MSG } from "@/lib/user-messages";
 import { getWorkspaceAdminOrNull } from "@/lib/workspace-auth";
-import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
+import {
+  apiError,
+  apiSuccess,
+  getRequestId,
+  readJsonBody,
+} from "@/lib/api-response";
 import { getEntitlements } from "@/lib/entitlements";
 import { z } from "zod";
-import { consumeRateLimit, getClientIp, inviteRateLimiter } from "@/lib/rate-limit";
+import {
+  consumeRateLimit,
+  getClientIp,
+  inviteRateLimiter,
+} from "@/lib/rate-limit";
 import {
   inviteCreateBlock,
   inviteExpiresAt,
   normalizeInviteEmail,
 } from "@/lib/workspace-invite";
 
-function inviteError(block: NonNullable<ReturnType<typeof inviteCreateBlock>>, requestId: string) {
-  if (block === "already_member") return apiError(MSG.MEMBER_ALREADY_IN_TEAM, "CONFLICT", 409, undefined, requestId);
-  if (block === "already_invited") return apiError(MSG.MEMBER_INVITE_PENDING, "CONFLICT", 409, undefined, requestId);
-  return apiError(MSG.USER_LIMIT_REACHED, "CONFLICT", 409, undefined, requestId);
+function inviteError(
+  block: NonNullable<ReturnType<typeof inviteCreateBlock>>,
+  requestId: string,
+) {
+  if (block === "already_member")
+    return apiError(
+      MSG.MEMBER_ALREADY_IN_TEAM,
+      "CONFLICT",
+      409,
+      undefined,
+      requestId,
+    );
+  if (block === "already_invited")
+    return apiError(
+      MSG.MEMBER_INVITE_PENDING,
+      "CONFLICT",
+      409,
+      undefined,
+      requestId,
+    );
+  return apiError(
+    MSG.USER_LIMIT_REACHED,
+    "CONFLICT",
+    409,
+    undefined,
+    requestId,
+  );
 }
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ workspaceId: string }> }
+  { params }: { params: Promise<{ workspaceId: string }> },
 ) {
   const { workspaceId } = await params;
   const requestId = getRequestId(req);
 
   const membership = await getWorkspaceAdminOrNull(workspaceId);
-  if (!membership) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
+  if (!membership)
+    return apiError(
+      MSG.UNAUTHORIZED,
+      "UNAUTHORIZED",
+      401,
+      undefined,
+      requestId,
+    );
 
-  const limit = await consumeRateLimit(inviteRateLimiter, `${membership.userId}:${getClientIp(req)}`);
-  if (!limit.success) return apiError(MSG.TOO_MANY_INVITES, "VALIDATION_ERROR", 429, undefined, requestId);
+  const limit = await consumeRateLimit(
+    inviteRateLimiter,
+    `${membership.userId}:${getClientIp(req)}`,
+  );
+  if (!limit.success)
+    return apiError(
+      MSG.TOO_MANY_INVITES,
+      "VALIDATION_ERROR",
+      429,
+      undefined,
+      requestId,
+    );
 
-  const parsed = z.object({ email: z.string().trim().email().max(254) }).safeParse(await readJsonBody(req));
+  const parsed = z
+    .object({ email: z.string().trim().email().max(254) })
+    .safeParse(await readJsonBody(req));
   if (!parsed.success) {
-    return apiError(MSG.EMAIL_REQUIRED, "VALIDATION_ERROR", 400, undefined, requestId);
+    return apiError(
+      MSG.EMAIL_REQUIRED,
+      "VALIDATION_ERROR",
+      400,
+      undefined,
+      requestId,
+    );
   }
   const email = normalizeInviteEmail(parsed.data.email);
 
   const db = getDb();
   const invitedUser = await db.user.findUnique({ where: { email } });
   if (!invitedUser) {
-    return apiError(MSG.MEMBER_NOT_REGISTERED, "NOT_FOUND", 404, undefined, requestId);
+    return apiError(
+      MSG.MEMBER_NOT_REGISTERED,
+      "NOT_FOUND",
+      404,
+      undefined,
+      requestId,
+    );
   }
 
   const now = new Date();
@@ -52,10 +120,17 @@ export async function POST(
       await tx.$queryRaw`SELECT id FROM "Workspace" WHERE id = ${workspaceId} FOR UPDATE`;
       const [existing, pending, memberCount, pendingCount] = await Promise.all([
         tx.membership.findUnique({
-          where: { userId_workspaceId: { userId: invitedUser.id, workspaceId } },
+          where: {
+            userId_workspaceId: { userId: invitedUser.id, workspaceId },
+          },
         }),
         tx.workspaceInvite.findFirst({
-          where: { workspaceId, email, status: "PENDING", expiresAt: { gt: now } },
+          where: {
+            workspaceId,
+            email,
+            status: "PENDING",
+            expiresAt: { gt: now },
+          },
         }),
         tx.membership.count({ where: { workspaceId } }),
         tx.workspaceInvite.count({
@@ -70,7 +145,7 @@ export async function POST(
         maxUsers: entitlements.plan.limits.maxUsers,
       });
       if (block) throw Object.assign(new Error(block), { block });
-      return tx.workspaceInvite.create({
+      const invite = await tx.workspaceInvite.create({
         data: {
           workspaceId,
           email,
@@ -79,10 +154,37 @@ export async function POST(
         },
         select: { id: true, email: true, expiresAt: true },
       });
+      const workspace = await tx.workspace.findUniqueOrThrow({
+        where: { id: workspaceId },
+      });
+      const inviter = await tx.user.findUniqueOrThrow({
+        where: { id: membership.userId },
+      });
+      await queueEmail(tx, {
+        key: `invite:${invite.id}`,
+        kind: "team_invite",
+        to: email,
+        userId: invitedUser.id,
+        workspaceId,
+        expiresAt: invite.expiresAt,
+        context: { inviteId: invite.id },
+        message: serviceMessage(
+          "Приглашение в команду",
+          `${inviter.name || inviter.email} приглашает вас в рабочее пространство «${workspace.name}».\nВойдите в аккаунт ${email} и примите приглашение в разделе команды. Приглашение действует до ${emailDate(invite.expiresAt)}.`,
+          "/dashboard/team",
+          "Посмотреть приглашение",
+        ),
+      });
+      return invite;
     });
-    return apiSuccess({ inviteId: invite.id, email: invite.email, expiresAt: invite.expiresAt }, 200, requestId);
+    return apiSuccess(
+      { inviteId: invite.id, email: invite.email, expiresAt: invite.expiresAt },
+      200,
+      requestId,
+    );
   } catch (error) {
-    const block = (error as { block?: ReturnType<typeof inviteCreateBlock> }).block;
+    const block = (error as { block?: ReturnType<typeof inviteCreateBlock> })
+      .block;
     if (block) return inviteError(block, requestId);
     throw error;
   }

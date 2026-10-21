@@ -1,3 +1,4 @@
+import { enqueueOwnerEvent } from "@/lib/email-notifications";
 import type { Prisma } from "@prisma/client";
 import { env } from "@/lib/env";
 export const BUSINESS_EVENT_LABELS: Record<string, string> = {
@@ -25,6 +26,7 @@ export async function recordBusinessEvent(
     skipDuplicates: true,
   });
   if (!created.count || event.isTest) return;
+  await enqueueOwnerEvent(tx, event.name, event.key, payload);
   const config = await tx.telegramSettings.findUnique({
     where: { id: "default" },
   });

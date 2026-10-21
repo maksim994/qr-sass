@@ -1,3 +1,4 @@
+import { queueOwnerAlert, queuePaymentEmail } from "@/lib/email-notifications";
 import { archivedPlanId, isComplimentary } from "@/lib/workspace-plan";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { PaymentStatus, Prisma, WorkspacePlan } from "@prisma/client";
@@ -192,7 +193,15 @@ export async function applySucceededPayment(
         firstPayment: previousPayments === 0,
       },
     });
+    await queuePaymentEmail(tx, { id: local.id, workspaceId: local.workspaceId, amount: local.amount,
+      plan: locked.planId, periodEnd: currentPeriodEnd, isTest: locked.isTest });
     return { applied: true, reason: "applied" };
+  }).catch(async error => {
+    try {
+      const payment = await db.payment.findUnique({ where: { id: paymentId } });
+      if (payment && !payment.isTest) await db.$transaction(tx => queueOwnerAlert(tx, `payment-apply-error:${paymentId}`, "Ошибка активации оплаты", `Не удалось применить подтверждённую оплату ${paymentId}. Проверьте статус у платёжного провайдера и права кабинета ${payment.workspaceId}.`));
+    } catch { /* The external monitor also detects application and DB outages. */ }
+    throw error;
   });
   return result;
 }

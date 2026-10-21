@@ -1,11 +1,25 @@
 import { MSG } from "@/lib/user-messages";
-import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
+import {
+  apiError,
+  apiSuccess,
+  getRequestId,
+  readJsonBody,
+} from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
-import { appUrl, sendMail } from "@/lib/mail";
-import { generateResetToken, hashResetToken, RESET_TOKEN_TTL_MS, canIssuePasswordReset } from "@/lib/password-reset";
-import { consumeRateLimit, forgotPasswordRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { queueEmail, serviceMessage } from "@/lib/email-notifications";
+import {
+  generateResetToken,
+  hashResetToken,
+  RESET_TOKEN_TTL_MS,
+  canIssuePasswordReset,
+} from "@/lib/password-reset";
+import {
+  consumeRateLimit,
+  forgotPasswordRateLimiter,
+  getClientIp,
+} from "@/lib/rate-limit";
 import { normalizeEmail } from "@/lib/email-normalize";
 import { forgotPasswordSchema } from "@/lib/validation";
 
@@ -23,13 +37,19 @@ export async function POST(request: Request) {
         "VALIDATION_ERROR",
         429,
         limit.retryAfterMs ? { retryAfterMs: limit.retryAfterMs } : undefined,
-        requestId
+        requestId,
       );
     }
 
     const raw = await readJsonBody(request);
     if (!raw) {
-      return apiError(MSG.INVALID_JSON, "BAD_REQUEST", 400, undefined, requestId);
+      return apiError(
+        MSG.INVALID_JSON,
+        "BAD_REQUEST",
+        400,
+        undefined,
+        requestId,
+      );
     }
     const parsed = forgotPasswordSchema.safeParse(raw);
     if (!parsed.success) {
@@ -37,7 +57,10 @@ export async function POST(request: Request) {
     }
 
     const email = normalizeEmail(parsed.data.email);
-    const emailLimit = await consumeRateLimit(forgotPasswordRateLimiter, `email:${email}`);
+    const emailLimit = await consumeRateLimit(
+      forgotPasswordRateLimiter,
+      `email:${email}`,
+    );
     if (!emailLimit.success) {
       return apiSuccess({ message: generic }, 200, requestId);
     }
@@ -48,42 +71,48 @@ export async function POST(request: Request) {
       return apiSuccess({ message: generic }, 200, requestId);
     }
 
-    await db.passwordResetToken.updateMany({
-      where: { userId: user.id, usedAt: null },
-      data: { usedAt: new Date() },
-    });
-
-    const token = generateResetToken();
-    await db.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: hashResetToken(token),
-        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
-      },
-    });
-
-    const resetUrl = `${appUrl()}/reset-password?token=${encodeURIComponent(token)}`;
-    const sent = await sendMail({
-      to: user.email,
-      subject: "Сброс пароля QR-S.ru",
-      text: `Чтобы задать новый пароль, откройте ссылку в течение часа:\n${resetUrl}\n\nЕсли вы не запрашивали сброс, проигнорируйте письмо.`,
-      html: `<p>Чтобы задать новый пароль, откройте ссылку в течение часа:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Если вы не запрашивали сброс, проигнорируйте письмо.</p>`,
-    });
-
-    if (!sent.sent && process.env.NODE_ENV !== "production") {
-      logger.info({
-        area: "api",
-        route,
-        requestId,
-        message: "Password reset token issued without SMTP",
-        details: { userId: user.id, resetUrl },
+    await db.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id=${user.id} FOR UPDATE`;
+      const fresh = await tx.user.findUnique({ where: { id: user.id } });
+      if (!fresh || fresh.email !== email || !canIssuePasswordReset(fresh))
+        return;
+      await tx.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: new Date() },
       });
-    }
+      const token = generateResetToken(),
+        expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+      const row = await tx.passwordResetToken.create({
+        data: { userId: user.id, tokenHash: hashResetToken(token), expiresAt },
+      });
+      const path = `/reset-password?token=${encodeURIComponent(token)}`;
+      await queueEmail(tx, {
+        key: `reset:${row.id}`,
+        kind: "password_reset",
+        to: user.email,
+        userId: user.id,
+        expiresAt,
+        context: { resetId: row.id, sessionVersion: fresh.sessionVersion },
+        message: serviceMessage(
+          "Сброс пароля",
+          "Вы запросили сброс пароля QR-S.ru. Ссылка одноразовая и действует один час. Если это были не вы, проигнорируйте письмо.",
+          path,
+          "Задать новый пароль",
+        ),
+      });
+    });
 
     return apiSuccess({ message: generic }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
-      logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
+      logger.error({
+        area: "api",
+        route,
+        requestId,
+        message: error.message,
+        code: error.code,
+        status: 500,
+      });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);
     }
     logger.error({
@@ -95,6 +124,12 @@ export async function POST(request: Request) {
       status: 500,
       details: error instanceof Error ? { message: error.message } : error,
     });
-    return apiError(MSG.INTERNAL_ERROR, "INTERNAL_ERROR", 500, undefined, requestId);
+    return apiError(
+      MSG.INTERNAL_ERROR,
+      "INTERNAL_ERROR",
+      500,
+      undefined,
+      requestId,
+    );
   }
 }

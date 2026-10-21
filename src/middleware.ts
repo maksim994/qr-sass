@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
     } catch { /* Keep existing routes available if the optional redirect lookup fails. */ }
   }
   const requestHeaders = new Headers(request.headers);
-  const privateSurface = request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";
+  const privateSurface = request.nextUrl.pathname === "/verify-email" || request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";
   // Trusted flag suppresses custom head and analytics on previews and one-time secret forms.
   requestHeaders.set("x-qrs-private-preview", privateSurface ? "1" : "0");
   const response = NextResponse.next({ request: { headers: requestHeaders } });
