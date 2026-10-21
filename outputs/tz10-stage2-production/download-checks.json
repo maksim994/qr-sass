@@ -1,0 +1,38 @@
+[
+  {
+    "surface": "home",
+    "format": "png",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/release-2026-10-21",
+    "logoPixels": 0,
+    "passed": true
+  },
+  {
+    "surface": "home",
+    "format": "svg",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/release-2026-10-21",
+    "logoPixels": 0,
+    "passed": true
+  },
+  {
+    "surface": "logo",
+    "format": "png",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/logo-release-2026-10-21",
+    "logoPixels": 9907,
+    "passed": true
+  },
+  {
+    "surface": "logo",
+    "format": "svg",
+    "width": 1200,
+    "height": 1200,
+    "payload": "https://example.com/logo-release-2026-10-21",
+    "logoPixels": 9923,
+    "passed": true
+  }
+]

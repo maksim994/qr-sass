@@ -1,0 +1,237 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "h1": "Генератор QR-кодов онлайн — бесплатно и без регистрации",
+      "passed": true
+    },
+    {
+      "path": "/qr-dlya-otzyvov-yandex-karty",
+      "status": 200,
+      "h1": "QR-код для отзывов на Яндекс Картах",
+      "passed": true
+    },
+    {
+      "path": "/qr-na-pdf",
+      "status": 200,
+      "h1": "QR-код на PDF-файл или документ",
+      "passed": true
+    },
+    {
+      "path": "/qr-dlya-vizitki",
+      "status": 200,
+      "h1": "QR-код для визитки с контактами",
+      "passed": true
+    },
+    {
+      "path": "/dynamic-qr",
+      "status": 200,
+      "h1": "Динамический QR-код: меняйте ссылку после печати",
+      "passed": true
+    },
+    {
+      "path": "/qr-dlya-telegram",
+      "status": 200,
+      "h1": "QR-код для Telegram: канал, группа или бот",
+      "passed": true
+    },
+    {
+      "path": "/qr-menu",
+      "status": 200,
+      "h1": "QR-код на меню для кафе и ресторана",
+      "passed": true
+    },
+    {
+      "path": "/qr-wifi",
+      "status": 200,
+      "h1": "QR-код для Wi-Fi: гости подключаются без ввода пароля",
+      "passed": true
+    },
+    {
+      "path": "/qr-dlya-otzyvov-2gis",
+      "status": 200,
+      "h1": "QR-код для отзывов в 2ГИС",
+      "passed": true
+    },
+    {
+      "path": "/qr-po-ssylke",
+      "status": 200,
+      "h1": "Создать QR-код по ссылке",
+      "passed": true
+    },
+    {
+      "path": "/qr-dlya-whatsapp",
+      "status": 200,
+      "h1": "QR-код для WhatsApp: чат по номеру телефона",
+      "passed": true
+    },
+    {
+      "path": "/qr-dlya-max",
+      "status": 200,
+      "h1": "QR-код для MAX: канал или ссылка на профиль",
+      "passed": true
+    },
+    {
+      "path": "/qr-for-packaging",
+      "status": 200,
+      "h1": "QR-код на упаковке товара",
+      "passed": true
+    },
+    {
+      "path": "/qr-for-agencies",
+      "status": 200,
+      "h1": "QR-коды для агентств и клиентских кампаний",
+      "passed": true
+    },
+    {
+      "path": "/qr-for-events",
+      "status": 200,
+      "h1": "QR-коды для мероприятий и событий",
+      "passed": true
+    },
+    {
+      "path": "/bulk-qr-generator",
+      "status": 200,
+      "h1": "Массовая генерация QR-кодов из CSV",
+      "passed": true
+    },
+    {
+      "path": "/qr-code-analytics",
+      "status": 200,
+      "h1": "QR-код со статистикой сканирований",
+      "passed": true
+    },
+    {
+      "path": "/pricing",
+      "status": 200,
+      "h1": "Тарифы QR-S: бесплатно, Про за 299 ₽ и Бизнес",
+      "passed": true
+    },
+    {
+      "path": "/contacts",
+      "status": 200,
+      "h1": "Контакты и реквизиты",
+      "passed": true
+    },
+    {
+      "path": "/privacy-policy",
+      "status": 200,
+      "h1": "Политика конфиденциальности",
+      "passed": true
+    },
+    {
+      "path": "/terms-of-service",
+      "status": 200,
+      "h1": "Публичная оферта и пользовательское соглашение",
+      "passed": true
+    },
+    {
+      "path": "/personal-data-consent",
+      "status": 200,
+      "h1": "Согласие на обработку персональных данных",
+      "passed": true
+    },
+    {
+      "path": "/qr-lifetime",
+      "status": 200,
+      "h1": "Как долго работает напечатанный QR-код",
+      "passed": true
+    },
+    {
+      "path": "/changelog",
+      "status": 200,
+      "h1": "История изменений",
+      "passed": true
+    },
+    {
+      "path": "/blog",
+      "status": 200,
+      "h1": "Статьи о QR-кодах",
+      "passed": true
+    },
+    {
+      "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+      "status": 200,
+      "h1": "Чем отличается статический QR-код от динамического и какой выбрать",
+      "passed": true
+    },
+    {
+      "path": "/blog/qr-kod-s-logotipom-brenda",
+      "status": 200,
+      "h1": "Как создать QR-код с логотипом внутри: без потери сканирования",
+      "passed": true
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "h1": "С возвращением",
+      "passed": true
+    },
+    {
+      "path": "/register",
+      "status": 200,
+      "h1": "Создать аккаунт",
+      "passed": true
+    },
+    {
+      "path": "/forgot-password",
+      "status": 200,
+      "h1": "Сброс пароля",
+      "passed": true
+    },
+    {
+      "path": "/reset-password",
+      "status": 200,
+      "h1": "Новый пароль",
+      "passed": true
+    },
+    {
+      "path": "/expired",
+      "status": 200,
+      "h1": "Срок действия истёк",
+      "passed": true
+    },
+    {
+      "path": "/unavailable",
+      "status": 200,
+      "h1": "QR-код не найден",
+      "passed": true
+    }
+  ],
+  "notFound": 404,
+  "wordDownload": 200,
+  "publicCssServed": true,
+  "invariants": [
+    {
+      "path": "src/lib/legal-documents.ts",
+      "sha256": "f07de32e802f4ddaf34f89ad36d0a1f43ef53294a7e195f9bca13850cdb7fb7c",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/commercial-config.ts",
+      "sha256": "9736ab312819534a2fa5773fb5de304115cfc2eb953fe9c6d68ed70a16dd7a8a",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/plans.ts",
+      "sha256": "85ad9094f2099deba099c0e57db7d3205f168df4dfd6c20a36cb9795d66f6e47",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/auth.ts",
+      "sha256": "ce43e4d0e9d84dfb6b7349310a4f8b0b09395cf422361bafecfcf9c23b742aab",
+      "unchanged": true
+    },
+    {
+      "path": "src/middleware.ts",
+      "sha256": "c89da9ebea53ddfcc82a2f80b898a6a8a5e0fa4d5fbdb3774194b2544a9da383",
+      "unchanged": true
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "af6de3c57d1642c0703463e2dd722b1a583914ccc51e4d25c98bc36f8ab27e5a",
+      "unchanged": true
+    }
+  ]
+}
