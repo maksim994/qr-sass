@@ -33,7 +33,8 @@ for (const slug of ["primenenie-qr-kodov-v-cafe", "qr-kod-menu-restoran-kafe", "
     const content = post.content.replace(/\]\((?:https?:\/\/(?:www\.)?qr-s\.ru)?\/dashboard\/(billing|create\/menu|create\/url)\)/g, (_, path) => `](${{ billing: "/pricing", "create/menu": "/qr-menu", "create/url": "/#create-qr" }[path]})`);
     if (content !== post.content) patch.content = content;
   }
-  if (slug === "qr-kod-dlya-kalendarya") patch.metaTitle = "QR-код для календаря: ссылка на событие | QR-S";
+  // The root metadata template adds " | qr-s.ru" once to the stored base title.
+  if (slug === "qr-kod-dlya-kalendarya") patch.metaTitle = "QR-код для календаря: ссылка на событие";
   if (Object.keys(patch).length) plans.push({ post, patch });
 }
 const relatedSlugs = ["qr-kod-s-analitikoj-i-korotkoj-ssylkoj", "qr-kod-s-utm-metkami"];
@@ -48,7 +49,7 @@ for (const { post, patch } of plans) {
     return count > 0 ? [{ from, to, count }] : [];
   }) : [];
   console.log(JSON.stringify({ slug: post.slug, url: `${origin}/blog/${post.slug}`, mode: apply ? "apply" : "dry-run", source: snapshot ? "read-only-production-snapshot" : "article-api", fields: Object.keys(patch), links,
-    ...(patch.metaTitle !== undefined ? { metaTitle: { before: post.metaTitle ?? null, after: patch.metaTitle } } : {}),
+    ...(patch.metaTitle !== undefined ? { metaTitle: { before: post.metaTitle ?? null, after: patch.metaTitle, renderedTitle: `${patch.metaTitle} | qr-s.ru` } } : {}),
     ...(patch.tags ? { tags: { before: post.tags ?? [], after: patch.tags } } : {}),
     ...(patch.relatedArticleIds ? { relatedArticles: related.map(item => ({ id: item.id, slug: item.slug, title: item.title })) } : {}),
   }));

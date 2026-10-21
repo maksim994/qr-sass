@@ -1,0 +1,68 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "title": "Генератор QR-кодов онлайн бесплатно — создать QR-код | QR-S",
+    "passed": true
+  },
+  {
+    "path": "/contacts",
+    "status": 200,
+    "title": "Контакты и реквизиты | QR-S | qr-s.ru",
+    "passed": true
+  },
+  {
+    "path": "/robots.txt",
+    "status": 200,
+    "title": null,
+    "passed": true
+  },
+  {
+    "path": "/qr-lifetime",
+    "status": 200,
+    "title": "Как долго работает напечатанный QR-код — qr-s.ru | qr-s.ru",
+    "passed": true
+  },
+  {
+    "path": "/qr-dlya-otzyvov-2gis",
+    "status": 200,
+    "title": "QR-код для отзывов в 2ГИС: создать бесплатно | QR-S",
+    "passed": true
+  },
+  {
+    "path": "/dynamic-qr",
+    "status": 200,
+    "title": "Динамический QR-код: создать и менять ссылку | QR-S",
+    "passed": true
+  },
+  {
+    "path": "/blog/qr-kod-dlya-kalendarya",
+    "status": 200,
+    "title": "QR-код для календаря: ссылка на событие | qr-s.ru",
+    "passed": true
+  },
+  {
+    "path": "/blog/primenenie-qr-kodov-v-cafe",
+    "status": 200,
+    "title": "QR-коды в кафе: электронное меню, оплата и автоматизация | qr-s.ru",
+    "passed": true
+  },
+  {
+    "path": "/login",
+    "status": 200,
+    "title": "Вход | qr-s.ru",
+    "passed": true
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 200,
+    "title": null,
+    "passed": true
+  },
+  {
+    "path": "/api/health",
+    "status": 200,
+    "title": null,
+    "passed": true
+  }
+]
