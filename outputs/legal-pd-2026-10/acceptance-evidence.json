@@ -1,0 +1,22 @@
+[
+  {
+    "source": "email",
+    "version": "2026-10-21.2",
+    "acceptedAt": "2026-10-21T14:15:24.767Z",
+    "termsAccepted": true,
+    "dataConsent": true,
+    "documentVersion": "2026-10-21.2",
+    "privacyVersion": "2026-10-21.2",
+    "documentsSha256": "71c3a27bdf2ed726e72b67031f1fd4aed3d583082ab88d1eac98a4430fd65b96"
+  },
+  {
+    "source": "yandex",
+    "version": "2026-10-21.2",
+    "acceptedAt": "2026-10-21T14:15:24.821Z",
+    "termsAccepted": true,
+    "dataConsent": true,
+    "documentVersion": "2026-10-21.2",
+    "privacyVersion": "2026-10-21.2",
+    "documentsSha256": "71c3a27bdf2ed726e72b67031f1fd4aed3d583082ab88d1eac98a4430fd65b96"
+  }
+]

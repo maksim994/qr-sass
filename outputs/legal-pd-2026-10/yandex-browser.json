@@ -1,0 +1,17 @@
+{
+  "fields": [
+    {
+      "checked": false,
+      "label": "Принимаю оферту и пользовательское соглашение",
+      "required": true,
+      "valid": false
+    },
+    {
+      "checked": false,
+      "label": "Даю согласие на обработку персональных данных для регистрации и работы аккаунта",
+      "required": true,
+      "valid": false
+    }
+  ],
+  "url": "http://127.0.0.1:3020/register/yandex"
+}

@@ -1,0 +1,2133 @@
+
+> qr-saas@0.1.0 test
+> node --experimental-strip-types --import ./scripts/register-src-alias.mjs --test src/lib/*.test.ts scripts/*.test.mjs
+
+TAP version 13
+# Subtest: new customers and scans do not break the release check
+ok 1 - new customers and scans do not break the release check
+  ---
+  duration_ms: 0.98125
+  type: 'test'
+  ...
+# Subtest: changing shortCode blocks release
+ok 2 - changing shortCode blocks release
+  ---
+  duration_ms: 0.127917
+  type: 'test'
+  ...
+# Subtest: changing kind blocks release
+ok 3 - changing kind blocks release
+  ---
+  duration_ms: 0.048208
+  type: 'test'
+  ...
+# Subtest: changing contentType blocks release
+ok 4 - changing contentType blocks release
+  ---
+  duration_ms: 0.099042
+  type: 'test'
+  ...
+# Subtest: changing workspaceId blocks release
+ok 5 - changing workspaceId blocks release
+  ---
+  duration_ms: 0.097792
+  type: 'test'
+  ...
+# Subtest: changing isArchived blocks release
+ok 6 - changing isArchived blocks release
+  ---
+  duration_ms: 0.040917
+  type: 'test'
+  ...
+# Subtest: changing hasTarget blocks release
+ok 7 - changing hasTarget blocks release
+  ---
+  duration_ms: 0.559667
+  type: 'test'
+  ...
+# Subtest: changing contractHash blocks release
+ok 8 - changing contractHash blocks release
+  ---
+  duration_ms: 0.033791
+  type: 'test'
+  ...
+# Subtest: replacement with equal QR count still detects lost printed code
+ok 9 - replacement with equal QR count still detects lost printed code
+  ---
+  duration_ms: 0.145833
+  type: 'test'
+  ...
+# Subtest: old snapshots, missing hashes, changed domain and critical flags fail closed
+ok 10 - old snapshots, missing hashes, changed domain and critical flags fail closed
+  ---
+  duration_ms: 0.291208
+  type: 'test'
+  ...
+# Subtest: hash includes full URLs beyond report preview, payload and access settings
+ok 11 - hash includes full URLs beyond report preview, payload and access settings
+  ---
+  duration_ms: 3.788083
+  type: 'test'
+  ...
+# (node:80373) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/access-reminder.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: reminds before and shortly after expiry, never for unlimited or distant access
+ok 12 - reminds before and shortly after expiry, never for unlimited or distant access
+  ---
+  duration_ms: 27.355042
+  type: 'test'
+  ...
+# (node:80374) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/admin-reconcile-result.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: missing provider response cannot be announced as success
+ok 13 - missing provider response cannot be announced as success
+  ---
+  duration_ms: 0.352375
+  type: 'test'
+  ...
+# Subtest: cancellation and pending have distinct truthful status messages
+ok 14 - cancellation and pending have distinct truthful status messages
+  ---
+  duration_ms: 0.108334
+  type: 'test'
+  ...
+# Subtest: failed fulfillment is not confused with already applied payment
+ok 15 - failed fulfillment is not confused with already applied payment
+  ---
+  duration_ms: 0.106834
+  type: 'test'
+  ...
+# (node:80375) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/analytics-metrics.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: parseAnalyticsDays
+ok 16 - parseAnalyticsDays
+  ---
+  duration_ms: 1.16375
+  type: 'test'
+  ...
+# Subtest: analyticsWindow uses Moscow calendar days including today
+ok 17 - analyticsWindow uses Moscow calendar days including today
+  ---
+  duration_ms: 1.510166
+  type: 'test'
+  ...
+# Subtest: mskDateKey around UTC midnight is still the Moscow date
+ok 18 - mskDateKey around UTC midnight is still the Moscow date
+  ---
+  duration_ms: 0.125208
+  type: 'test'
+  ...
+# Subtest: fillDailySeries does not drop days and does not cap rows
+ok 19 - fillDailySeries does not drop days and does not cap rows
+  ---
+  duration_ms: 0.10525
+  type: 'test'
+  ...
+# Subtest: formatGrowth does not invent +100% from a zero baseline
+ok 20 - formatGrowth does not invent +100% from a zero baseline
+  ---
+  duration_ms: 0.057791
+  type: 'test'
+  ...
+# Subtest: device labels stay honest
+ok 21 - device labels stay honest
+  ---
+  duration_ms: 0.049792
+  type: 'test'
+  ...
+# Subtest: MSK Friday label is Пт, not the previous UTC weekday
+ok 22 - MSK Friday label is Пт, not the previous UTC weekday
+  ---
+  duration_ms: 9.812792
+  type: 'test'
+  ...
+# (node:80376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/analytics-preferences.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: refusal survives old policy, expiry, and legacy storage without silently opting in
+ok 23 - refusal survives old policy, expiry, and legacy storage without silently opting in
+  ---
+  duration_ms: 129.685958
+  type: 'test'
+  ...
+# Subtest: new visitor starts one Webvisor counter; acknowledging the notice is not explicit consent
+ok 24 - new visitor starts one Webvisor counter; acknowledging the notice is not explicit consent
+  ---
+  duration_ms: 19.305667
+  type: 'test'
+  ...
+# Subtest: policy markers do not claim a fabricated consent click and reject stale/disabled referral input
+ok 25 - policy markers do not claim a fabricated consent click and reject stale/disabled referral input
+  ---
+  duration_ms: 2.152917
+  type: 'test'
+  ...
+# Subtest: new legal edition keeps the former privacy snapshot and stable public anchors
+ok 26 - new legal edition keeps the former privacy snapshot and stable public anchors
+  ---
+  duration_ms: 0.228166
+  type: 'test'
+  ...
+# Subtest: page views keep campaign attribution and omit QR content; SPA changes count once
+ok 27 - page views keep campaign attribution and omit QR content; SPA changes count once
+  ---
+  duration_ms: 7.109583
+  type: 'test'
+  ...
+# Subtest: a late ClientID result is discarded after opting out
+ok 28 - a late ClientID result is discarded after opting out
+  ---
+  duration_ms: 46.117958
+  type: 'test'
+  ...
+# Subtest: unreadable preferences fail closed; an explicit choice still works in session memory
+ok 29 - unreadable preferences fail closed; an explicit choice still works in session memory
+  ---
+  duration_ms: 6.447875
+  type: 'test'
+  ...
+# Subtest: the main-site counter does not run on hosted customer QR pages
+ok 30 - the main-site counter does not run on hosted customer QR pages
+  ---
+  duration_ms: 8.599042
+  type: 'test'
+  ...
+# Subtest: denied cookie access cannot crash preferences or prevent storing a refusal
+ok 31 - denied cookie access cannot crash preferences or prevent storing a refusal
+  ---
+  duration_ms: 6.993584
+  type: 'test'
+  ...
+# (node:80377) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/billing-period.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: nextPaidPeriodEnd
+    # Subtest: starts a month from now when there is no paid remainder
+    ok 1 - starts a month from now when there is no paid remainder
+      ---
+      duration_ms: 0.379791
+      type: 'test'
+      ...
+    # Subtest: stacks a second payment from the already extended paid end
+    ok 2 - stacks a second payment from the already extended paid end
+      ---
+      duration_ms: 0.051834
+      type: 'test'
+      ...
+    # Subtest: keeps unused time after cancel-at-period-end
+    ok 3 - keeps unused time after cancel-at-period-end
+      ---
+      duration_ms: 0.093833
+      type: 'test'
+      ...
+    # Subtest: does not stack an expired period
+    ok 4 - does not stack an expired period
+      ---
+      duration_ms: 0.036667
+      type: 'test'
+      ...
+    # Subtest: clamps 31 January to the last day of February
+    ok 5 - clamps 31 January to the last day of February
+      ---
+      duration_ms: 2.987042
+      type: 'test'
+      ...
+    # Subtest: keeps 29 February on a leap year
+    ok 6 - keeps 29 February on a leap year
+      ---
+      duration_ms: 0.675959
+      type: 'test'
+      ...
+    # Subtest: clamps 31 March to 30 April, not 1 May
+    ok 7 - clamps 31 March to 30 April, not 1 May
+      ---
+      duration_ms: 0.158208
+      type: 'test'
+      ...
+    1..7
+ok 32 - nextPaidPeriodEnd
+  ---
+  duration_ms: 5.01825
+  type: 'suite'
+  ...
+# Subtest: resolvePaidPlanId
+    # Subtest: uses local planId when present
+    ok 1 - uses local planId when present
+      ---
+      duration_ms: 0.339625
+      type: 'test'
+      ...
+    # Subtest: recovers plan from YooKassa metadata for legacy rows
+    ok 2 - recovers plan from YooKassa metadata for legacy rows
+      ---
+      duration_ms: 1.328625
+      type: 'test'
+      ...
+    # Subtest: recovers plan from checkout description
+    ok 3 - recovers plan from checkout description
+      ---
+      duration_ms: 1.033625
+      type: 'test'
+      ...
+    # Subtest: rejects conflicting local and metadata plans
+    ok 4 - rejects conflicting local and metadata plans
+      ---
+      duration_ms: 0.064917
+      type: 'test'
+      ...
+    1..4
+ok 33 - resolvePaidPlanId
+  ---
+  duration_ms: 3.28125
+  type: 'suite'
+  ...
+# (node:80378) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/billing-provider.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: billingActionFromRemoteStatus
+    # Subtest: applies a succeeded provider object even if the webhook event said canceled
+    ok 1 - applies a succeeded provider object even if the webhook event said canceled
+      ---
+      duration_ms: 0.997291
+      type: 'test'
+      ...
+    # Subtest: cancels only when the provider object itself is canceled
+    ok 2 - cancels only when the provider object itself is canceled
+      ---
+      duration_ms: 0.162167
+      type: 'test'
+      ...
+    # Subtest: ignores pending and unknown provider statuses
+    ok 3 - ignores pending and unknown provider statuses
+      ---
+      duration_ms: 0.299584
+      type: 'test'
+      ...
+    1..3
+ok 34 - billingActionFromRemoteStatus
+  ---
+  duration_ms: 2.596709
+  type: 'suite'
+  ...
+# (node:80379) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-api.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: article tokens use independent entropy/salt, never workspace prefix
+ok 35 - article tokens use independent entropy/salt, never workspace prefix
+  ---
+  duration_ms: 0.804542
+  type: 'test'
+  ...
+# Subtest: API allowlist rejects injected ownership, dates, counters and missing version
+ok 36 - API allowlist rejects injected ownership, dates, counters and missing version
+  ---
+  duration_ms: 3.172584
+  type: 'test'
+  ...
+# Subtest: served OpenAPI exactly matches committed YAML and strict request limits
+ok 37 - served OpenAPI exactly matches committed YAML and strict request limits
+  ---
+  duration_ms: 7.161625
+  type: 'test'
+  ...
+# (node:80380) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-editor.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: legacy save preserves source bytes and all editorial/publication dates
+ok 38 - legacy save preserves source bytes and all editorial/publication dates
+  ---
+  duration_ms: 17.292541
+  type: 'test'
+  ...
+# Subtest: read-only HTML cannot be silently overwritten or converted
+ok 39 - read-only HTML cannot be silently overwritten or converted
+  ---
+  duration_ms: 0.268458
+  type: 'test'
+  ...
+# Subtest: confirmed conversion retains exact legacy source on every subsequent save
+ok 40 - confirmed conversion retains exact legacy source on every subsequent save
+  ---
+  duration_ms: 4.07975
+  type: 'test'
+  ...
+# Subtest: substantive edits update date; whitespace, flags, category and minor edits do not
+ok 41 - substantive edits update date; whitespace, flags, category and minor edits do not
+  ---
+  duration_ms: 3.397917
+  type: 'test'
+  ...
+# Subtest: publication date survives publish, unpublish and republish; stale writes are rejected
+ok 42 - publication date survives publish, unpublish and republish; stale writes are rejected
+  ---
+  duration_ms: 13.298458
+  type: 'test'
+  ...
+# Subtest: new articles default to Markdown and are sanitized at save
+ok 43 - new articles default to Markdown and are sanitized at save
+  ---
+  duration_ms: 1.07375
+  type: 'test'
+  ...
+# Subtest: schema rejects malformed fields instead of throwing TypeError
+ok 44 - schema rejects malformed fields instead of throwing TypeError
+  ---
+  duration_ms: 1.54525
+  type: 'test'
+  ...
+# Subtest: HTML renderer preserves pre-existing heading IDs algorithm, table wrapper and figures policy
+ok 45 - HTML renderer preserves pre-existing heading IDs algorithm, table wrapper and figures policy
+  ---
+  duration_ms: 15.006584
+  type: 'test'
+  ...
+# Subtest: Markdown supports explicit H2/H3 anchors, transliteration and unique IDs
+ok 46 - Markdown supports explicit H2/H3 anchors, transliteration and unique IDs
+  ---
+  duration_ms: 2.507541
+  type: 'test'
+  ...
+# Subtest: GFM tables, strikethrough and task lists render safely
+ok 47 - GFM tables, strikethrough and task lists render safely
+  ---
+  duration_ms: 3.154709
+  type: 'test'
+  ...
+# Subtest: external links are isolated; internal links and UTM query values survive
+ok 48 - external links are isolated; internal links and UTM query values survive
+  ---
+  duration_ms: 9.559291
+  type: 'test'
+  ...
+# Subtest: FAQ appears once at marker before next section; codes containing marker are not replaced
+ok 49 - FAQ appears once at marker before next section; codes containing marker are not replaced
+  ---
+  duration_ms: 0.524541
+  type: 'test'
+  ...
+# Subtest: FAQ replaces an explicitly imported legacy section without changing stored source
+ok 50 - FAQ replaces an explicitly imported legacy section without changing stored source
+  ---
+  duration_ms: 1.676833
+  type: 'test'
+  ...
+# Subtest: server sanitization rejects XSS, data protocols, SVG, style and iframe on save/render
+ok 51 - server sanitization rejects XSS, data protocols, SVG, style and iframe on save/render
+  ---
+  duration_ms: 4.933583
+  type: 'test'
+  ...
+# Subtest: raw HTML whitelist does not allow custom headings, links or controls
+ok 52 - raw HTML whitelist does not allow custom headings, links or controls
+  ---
+  duration_ms: 2.284541
+  type: 'test'
+  ...
+# Subtest: conversion provides source and normalized rendered diff without mutating HTML
+ok 53 - conversion provides source and normalized rendered diff without mutating HTML
+  ---
+  duration_ms: 33.975
+  type: 'test'
+  ...
+# Subtest: field-owned BlogPosting/FAQPage win over manual nested duplicates and JSON-LD is script-safe
+ok 54 - field-owned BlogPosting/FAQPage win over manual nested duplicates and JSON-LD is script-safe
+  ---
+  duration_ms: 0.508541
+  type: 'test'
+  ...
+# Subtest: FAQ object key order from PostgreSQL does not change the editorial date on a full form save
+ok 55 - FAQ object key order from PostgreSQL does not change the editorial date on a full form save
+  ---
+  duration_ms: 0.487625
+  type: 'test'
+  ...
+# Subtest: targeted HTML image replacement preserves publication/editorial dates with minorEdit and blocks a broader overwrite
+ok 56 - targeted HTML image replacement preserves publication/editorial dates with minorEdit and blocks a broader overwrite
+  ---
+  duration_ms: 62.12725
+  type: 'test'
+  ...
+# (node:80381) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-image-remove.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: WhatsApp figure and caption are removed with all surrounding bytes intact
+ok 57 - WhatsApp figure and caption are removed with all surrounding bytes intact
+  ---
+  duration_ms: 34.182333
+  type: 'test'
+  ...
+# Subtest: empty link/paragraph wrappers disappear, but text, comments and other media survive
+ok 58 - empty link/paragraph wrappers disappear, but text, comments and other media survive
+  ---
+  duration_ms: 50.230833
+  type: 'test'
+  ...
+# Subtest: matches exact src or any srcset candidate, counting images rather than attributes
+ok 59 - matches exact src or any srcset candidate, counting images rather than attributes
+  ---
+  duration_ms: 35.203083
+  type: 'test'
+  ...
+# Subtest: Markdown removes inline images and uploaded raw figures; preserves literal/code examples
+ok 60 - Markdown removes inline images and uploaded raw figures; preserves literal/code examples
+  ---
+  duration_ms: 123.087375
+  type: 'test'
+  ...
+# Subtest: duplicate policy, missing URL and cover guard are identical for saves and previews
+ok 61 - duplicate policy, missing URL and cover guard are identical for saves and previews
+  ---
+  duration_ms: 17.403166
+  type: 'test'
+  ...
+# Subtest: HTML deletion allowlist preserves dates/legacy and prevents unrelated edits
+ok 62 - HTML deletion allowlist preserves dates/legacy and prevents unrelated edits
+  ---
+  duration_ms: 178.666959
+  type: 'test'
+  ...
+# Subtest: remove request strictly requires version and true discriminator and excludes replacement fields
+ok 63 - remove request strictly requires version and true discriminator and excludes replacement fields
+  ---
+  duration_ms: 4.205542
+  type: 'test'
+  ...
+# (node:80382) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-media.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public mapping is restricted, reversible for matching, and leaves other files/domains alone
+ok 64 - public mapping is restricted, reversible for matching, and leaves other files/domains alone
+  ---
+  duration_ms: 0.8285
+  type: 'test'
+  ...
+# Subtest: only image URL attributes change; text, links, layout, dimensions and source remain intact
+ok 65 - only image URL attributes change; text, links, layout, dimensions and source remain intact
+  ---
+  duration_ms: 79.053
+  type: 'test'
+  ...
+# Subtest: JSON-LD image objects and graph images change without rewriting dates or prose
+ok 66 - JSON-LD image objects and graph images change without rewriting dates or prose
+  ---
+  duration_ms: 0.909958
+  type: 'test'
+  ...
+# Subtest: stage-one deletion/replacement works with new public URLs against untouched legacy source
+ok 67 - stage-one deletion/replacement works with new public URLs against untouched legacy source
+  ---
+  duration_ms: 13.421667
+  type: 'test'
+  ...
+# Subtest: media GET/HEAD, immutable caching, conditional requests and cookie isolation
+ok 68 - media GET/HEAD, immutable caching, conditional requests and cookie isolation
+  ---
+  duration_ms: 4.461875
+  type: 'test'
+  ...
+# Subtest: media rejects traversal before storage; missing/error responses do not expose storage details
+ok 69 - media rejects traversal before storage; missing/error responses do not expose storage details
+  ---
+  duration_ms: 0.573875
+  type: 'test'
+  ...
+# Subtest: bounded media cache evicts old bodies and coalesces concurrent reads
+ok 70 - bounded media cache evicts old bodies and coalesces concurrent reads
+  ---
+  duration_ms: 0.399667
+  type: 'test'
+  ...
+# Subtest: robots explicitly permits media in all agent groups while retaining private-route rules
+ok 71 - robots explicitly permits media in all agent groups while retaining private-route rules
+  ---
+  duration_ms: 0.273834
+  type: 'test'
+  ...
+# (node:80383) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-pending-revision.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: pending edits reject identity, publication, timestamps and minorEdit
+ok 72 - pending edits reject identity, publication, timestamps and minorEdit
+  ---
+  duration_ms: 4.97675
+  type: 'test'
+  ...
+# Subtest: publishing requires both the reviewed pending revision and its live base
+ok 73 - publishing requires both the reviewed pending revision and its live base
+  ---
+  duration_ms: 0.420292
+  type: 'test'
+  ...
+# Subtest: OpenAPI exposes pending CRUD and link preview, without a publication method
+ok 74 - OpenAPI exposes pending CRUD and link preview, without a publication method
+  ---
+  duration_ms: 0.36525
+  type: 'test'
+  ...
+# (node:80384) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-publication.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Moscow scheduling is independent of browser/server timezone and rejects invalid calendar dates
+ok 75 - Moscow scheduling is independent of browser/server timezone and rejects invalid calendar dates
+  ---
+  duration_ms: 0.5805
+  type: 'test'
+  ...
+# Subtest: scheduled and draft articles never expose publishedAt; first publication is deferred
+ok 76 - scheduled and draft articles never expose publishedAt; first publication is deferred
+  ---
+  duration_ms: 15.943375
+  type: 'test'
+  ...
+# (node:80385) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-sanitize.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: blog editorial sanitize
+    # Subtest: rewrites gr-s.ru links and leftover brand text
+    ok 1 - rewrites gr-s.ru links and leftover brand text
+      ---
+      duration_ms: 0.645917
+      type: 'test'
+      ...
+    # Subtest: does not rewrite image hosts on g-qr.ru
+    ok 2 - does not rewrite image hosts on g-qr.ru
+      ---
+      duration_ms: 0.103166
+      type: 'test'
+      ...
+    # Subtest: strips Workflow, CTA and Bxx leftovers
+    ok 3 - strips Workflow, CTA and Bxx leftovers
+      ---
+      duration_ms: 1.260875
+      type: 'test'
+      ...
+    # Subtest: calendar article gets an honest product notice
+    ok 4 - calendar article gets an honest product notice
+      ---
+      duration_ms: 0.237334
+      type: 'test'
+      ...
+    # Subtest: sanitizeBlogFields covers excerpt and meta
+    ok 5 - sanitizeBlogFields covers excerpt and meta
+      ---
+      duration_ms: 0.111667
+      type: 'test'
+      ...
+    # Subtest: plain text helper trims leftover spaces after marker removal
+    ok 6 - plain text helper trims leftover spaces after marker removal
+      ---
+      duration_ms: 0.043916
+      type: 'test'
+      ...
+    1..6
+ok 77 - blog editorial sanitize
+  ---
+  duration_ms: 3.911417
+  type: 'suite'
+  ...
+# (node:80386) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-seo.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ranked print and VK article titles are preserved
+ok 78 - ranked print and VK article titles are preserved
+  ---
+  duration_ms: 4.624333
+  type: 'test'
+  ...
+# Subtest: previously rendered CSV notice is refreshed and repeated rendering stays idempotent
+ok 79 - previously rendered CSV notice is refreshed and repeated rendering stays idempotent
+  ---
+  duration_ms: 3.40225
+  type: 'test'
+  ...
+# Subtest: editorial redirects have no chains or self redirects
+ok 80 - editorial redirects have no chains or self redirects
+  ---
+  duration_ms: 1.719583
+  type: 'test'
+  ...
+# Subtest: internal article links avoid slash redirects while external links and query values stay intact
+ok 81 - internal article links avoid slash redirects while external links and query values stay intact
+  ---
+  duration_ms: 0.613541
+  type: 'test'
+  ...
+# (node:80387) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/blog-structured-data.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: editing a post without custom JSON-LD leaves the field empty
+ok 82 - editing a post without custom JSON-LD leaves the field empty
+  ---
+  duration_ms: 0.362958
+  type: 'test'
+  ...
+# Subtest: editing a post preserves nested JSON-LD and formats it for the textarea
+ok 83 - editing a post preserves nested JSON-LD and formats it for the textarea
+  ---
+  duration_ms: 0.382041
+  type: 'test'
+  ...
+# Subtest: editing a post with malformed JSON-LD keeps the original text for correction
+ok 84 - editing a post with malformed JSON-LD keeps the original text for correction
+  ---
+  duration_ms: 0.056292
+  type: 'test'
+  ...
+# (node:80388) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/bulk-preview.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: single URL column is valid despite delimiter auto-detection warning
+ok 85 - single URL column is valid despite delimiter auto-detection warning
+  ---
+  duration_ms: 2.952209
+  type: 'test'
+  ...
+# Subtest: BOM, semicolon, alias headers and UTM match the bulk API
+ok 86 - BOM, semicolon, alias headers and UTM match the bulk API
+  ---
+  duration_ms: 2.186625
+  type: 'test'
+  ...
+# Subtest: invalid and private URLs are reported rather than silently discarded
+ok 87 - invalid and private URLs are reported rather than silently discarded
+  ---
+  duration_ms: 0.539125
+  type: 'test'
+  ...
+# Subtest: missing column, no data, and malformed records block creation
+ok 88 - missing column, no data, and malformed records block creation
+  ---
+  duration_ms: 0.836875
+  type: 'test'
+  ...
+# Subtest: quoted commas and long names use the same naming rules as bulk API
+ok 89 - quoted commas and long names use the same naming rules as bulk API
+  ---
+  duration_ms: 0.256542
+  type: 'test'
+  ...
+# (node:80389) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/client-ip.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: clientIpFromHeaders ignores spoofed X-Forwarded-For without TRUST_PROXY
+ok 90 - clientIpFromHeaders ignores spoofed X-Forwarded-For without TRUST_PROXY
+  ---
+  duration_ms: 28.979084
+  type: 'test'
+  ...
+# Subtest: clientIpFromHeaders uses the first hop when TRUST_PROXY is on
+ok 91 - clientIpFromHeaders uses the first hop when TRUST_PROXY is on
+  ---
+  duration_ms: 0.583125
+  type: 'test'
+  ...
+# (node:80390) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/csv.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: csvEscape keeps ordinary text
+ok 92 - csvEscape keeps ordinary text
+  ---
+  duration_ms: 3.358542
+  type: 'test'
+  ...
+# Subtest: csvEscape quotes commas and doubled quotes
+ok 93 - csvEscape quotes commas and doubled quotes
+  ---
+  duration_ms: 0.317917
+  type: 'test'
+  ...
+# Subtest: csvEscape keeps spreadsheet formulas as text
+ok 94 - csvEscape keeps spreadsheet formulas as text
+  ---
+  duration_ms: 0.231125
+  type: 'test'
+  ...
+# Subtest: csvRow joins escaped cells
+ok 95 - csvRow joins escaped cells
+  ---
+  duration_ms: 0.164625
+  type: 'test'
+  ...
+# (node:80391) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/editorial-assets.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: redirect normalization preserves external case/query and rejects hidden system paths
+ok 96 - redirect normalization preserves external case/query and rejects hidden system paths
+  ---
+  duration_ms: 2.834792
+  type: 'test'
+  ...
+# Subtest: cycles and chains are rejected in both insertion orders with a final-address suggestion
+ok 97 - cycles and chains are rejected in both insertion orders with a final-address suggestion
+  ---
+  duration_ms: 0.826333
+  type: 'test'
+  ...
+# Subtest: responsive WebP variants have real dimensions, no enlargement and orientation correction
+ok 98 - responsive WebP variants have real dimensions, no enlargement and orientation correction
+  ---
+  duration_ms: 132.295333
+  type: 'test'
+  ...
+# Subtest: responsive figure survives Markdown sanitization; executable image attributes do not
+ok 99 - responsive figure survives Markdown sanitization; executable image attributes do not
+  ---
+  duration_ms: 8.052125
+  type: 'test'
+  ...
+# Subtest: alt updates target HTML/Markdown images without rewriting unrelated source
+ok 100 - alt updates target HTML/Markdown images without rewriting unrelated source
+  ---
+  duration_ms: 96.282167
+  type: 'test'
+  ...
+# Subtest: alt operation leaves Markdown code examples untouched
+ok 101 - alt operation leaves Markdown code examples untouched
+  ---
+  duration_ms: 6.993041
+  type: 'test'
+  ...
+# Subtest: image replacement preserves every unrelated HTML byte and updates responsive sources
+ok 102 - image replacement preserves every unrelated HTML byte and updates responsive sources
+  ---
+  duration_ms: 49.14775
+  type: 'test'
+  ...
+# Subtest: image replacement no-op stays byte-identical and never changes HTML code or similar URLs
+ok 103 - image replacement no-op stays byte-identical and never changes HTML code or similar URLs
+  ---
+  duration_ms: 26.833917
+  type: 'test'
+  ...
+# Subtest: Markdown replacement preserves title and code; new URLs cannot break destination syntax
+ok 104 - Markdown replacement preserves title and code; new URLs cannot break destination syntax
+  ---
+  duration_ms: 11.862
+  type: 'test'
+  ...
+# (node:80393) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/entitlements.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: transaction failure does not write FREE over a paid workspace
+ok 105 - transaction failure does not write FREE over a paid workspace
+  ---
+  duration_ms: 232.515125
+  type: 'test'
+  ...
+# (node:80394) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/funnel.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: funnel open classification
+    # Subtest: treats owner, bot and local IP as test, not activation
+    ok 1 - treats owner, bot and local IP as test, not activation
+      ---
+      duration_ms: 0.675709
+      type: 'test'
+      ...
+    # Subtest: detects private IPs used in self-tests
+    ok 2 - detects private IPs used in self-tests
+      ---
+      duration_ms: 0.111834
+      type: 'test'
+      ...
+    1..2
+ok 106 - funnel open classification
+  ---
+  duration_ms: 1.2825
+  type: 'suite'
+  ...
+# Subtest: funnel source sanitizer
+    # Subtest: keeps a path or utm token and drops secrets
+    ok 1 - keeps a path or utm token and drops secrets
+      ---
+      duration_ms: 0.180542
+      type: 'test'
+      ...
+    1..1
+ok 107 - funnel source sanitizer
+  ---
+  duration_ms: 0.231042
+  type: 'suite'
+  ...
+# Subtest: funnel copy
+    # Subtest: does not equate a widget click with payment
+    ok 1 - does not equate a widget click with payment
+      ---
+      duration_ms: 0.132459
+      type: 'test'
+      ...
+    1..1
+ok 108 - funnel copy
+  ---
+  duration_ms: 0.176708
+  type: 'suite'
+  ...
+# (node:80395) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/html-script.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: jsonForHtmlScript
+    # Subtest: keeps a normal https URL as a JSON string
+    ok 1 - keeps a normal https URL as a JSON string
+      ---
+      duration_ms: 1.18525
+      type: 'test'
+      ...
+    # Subtest: does not emit a literal </script> that would break an HTML script tag
+    ok 2 - does not emit a literal </script> that would break an HTML script tag
+      ---
+      duration_ms: 0.414459
+      type: 'test'
+      ...
+    # Subtest: neutralizes uppercase SCRIPT breakout and ampersands
+    ok 3 - neutralizes uppercase SCRIPT breakout and ampersands
+      ---
+      duration_ms: 0.267625
+      type: 'test'
+      ...
+    # Subtest: shows why JSON.stringify is not safe inside <script>
+    ok 4 - shows why JSON.stringify is not safe inside <script>
+      ---
+      duration_ms: 0.122958
+      type: 'test'
+      ...
+    1..4
+ok 109 - jsonForHtmlScript
+  ---
+  duration_ms: 2.757291
+  type: 'suite'
+  ...
+# Subtest: pixelRedirectDocument
+    # Subtest: does not let a https URL close the redirect script
+    ok 1 - does not let a https URL close the redirect script
+      ---
+      duration_ms: 0.192458
+      type: 'test'
+      ...
+    1..1
+ok 110 - pixelRedirectDocument
+  ---
+  duration_ms: 0.293417
+  type: 'suite'
+  ...
+# Subtest: htmlAttr
+    # Subtest: escapes quotes and angle brackets for meta refresh
+    ok 1 - escapes quotes and angle brackets for meta refresh
+      ---
+      duration_ms: 0.210583
+      type: 'test'
+      ...
+    1..1
+ok 111 - htmlAttr
+  ---
+  duration_ms: 0.722792
+  type: 'suite'
+  ...
+# (node:80396) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/interview-research.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: interview acceptance
+    # Subtest: counts planned segments independently of the current customer
+    ok 1 - counts planned segments independently of the current customer
+      ---
+      duration_ms: 1.313709
+      type: 'test'
+      ...
+    # Subtest: does not count blank cards as completed interviews
+    ok 2 - does not count blank cards as completed interviews
+      ---
+      duration_ms: 0.253
+      type: 'test'
+      ...
+    # Subtest: detects stale acceptance flags after substantive interviews
+    ok 3 - detects stale acceptance flags after substantive interviews
+      ---
+      duration_ms: 0.20175
+      type: 'test'
+      ...
+    1..3
+ok 112 - interview acceptance
+  ---
+  duration_ms: 2.718292
+  type: 'suite'
+  ...
+# (node:80397) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/landing-input.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Telegram keeps public, invite and bot start links and rejects lookalike hosts
+ok 113 - Telegram keeps public, invite and bot start links and rejects lookalike hosts
+  ---
+  duration_ms: 1.456416
+  type: 'test'
+  ...
+# Subtest: WhatsApp creates an international wa.me link and encodes the unsent message
+ok 114 - WhatsApp creates an international wa.me link and encodes the unsent message
+  ---
+  duration_ms: 0.205167
+  type: 'test'
+  ...
+# Subtest: generic links still reject executable schemes
+ok 115 - generic links still reject executable schemes
+  ---
+  duration_ms: 0.124875
+  type: 'test'
+  ...
+# (node:80398) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/landing-seo.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public landing SEO contract
+    # Subtest: keeps all published landings discoverable with distinct content and existing PNG previews
+    ok 1 - keeps all published landings discoverable with distinct content and existing PNG previews
+      ---
+      duration_ms: 3.564459
+      type: 'test'
+      ...
+    # Subtest: does not expand post-auth redirects beyond the two explicit destinations
+    ok 2 - does not expand post-auth redirects beyond the two explicit destinations
+      ---
+      duration_ms: 0.153625
+      type: 'test'
+      ...
+    # Subtest: uses the same canonical identity for metadata, sharing and structured breadcrumbs
+    ok 3 - uses the same canonical identity for metadata, sharing and structured breadcrumbs
+      ---
+      duration_ms: 1.402292
+      type: 'test'
+      ...
+    1..3
+ok 116 - public landing SEO contract
+  ---
+  duration_ms: 5.652916
+  type: 'suite'
+  ...
+# (node:80399) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/legal-consent.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: PD document update preserves terms, analytics text and prior receipt edition
+ok 117 - PD document update preserves terms, analytics text and prior receipt edition
+  ---
+  duration_ms: 2.751458
+  type: 'test'
+  ...
+# Subtest: registration requires two explicit confirmations and the displayed document version
+ok 118 - registration requires two explicit confirmations and the displayed document version
+  ---
+  duration_ms: 1.466292
+  type: 'test'
+  ...
+# Subtest: new acceptance cannot alter a previous edition or another acceptance receipt
+ok 119 - new acceptance cannot alter a previous edition or another acceptance receipt
+  ---
+  duration_ms: 0.581333
+  type: 'test'
+  ...
+# Subtest: acceptance evidence includes the complete versioned text and original acceptance time
+ok 120 - acceptance evidence includes the complete versioned text and original acceptance time
+  ---
+  duration_ms: 0.461708
+  type: 'test'
+  ...
+# Subtest: optional analytics permission expires and rejects old, malformed and future consent
+ok 121 - optional analytics permission expires and rejects old, malformed and future consent
+  ---
+  duration_ms: 0.12375
+  type: 'test'
+  ...
+# Subtest: TZ01 only corrects the payment recipient in privacy; terms and consent are unchanged
+ok 122 - TZ01 only corrects the payment recipient in privacy; terms and consent are unchanged
+  ---
+  duration_ms: 0.109417
+  type: 'test'
+  ...
+# (node:80400) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/metrika-upload.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: attribution rejects foreign counters, malformed IDs and stale consent
+ok 123 - attribution rejects foreign counters, malformed IDs and stale consent
+  ---
+  duration_ms: 4.400958
+  type: 'test'
+  ...
+# Subtest: conversion payload uses paid time and real money, with no customer or workspace data
+ok 124 - conversion payload uses paid time and real money, with no customer or workspace data
+  ---
+  duration_ms: 0.435333
+  type: 'test'
+  ...
+# Subtest: uploader distinguishes acceptance, definite rejection and ambiguous outcome
+ok 125 - uploader distinguishes acceptance, definite rejection and ambiguous outcome
+  ---
+  duration_ms: 35.978667
+  type: 'test'
+  ...
+# (node:80401) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/migrate-adopt.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: P3005 adopt is recognized only for the empty-history case
+ok 126 - P3005 adopt is recognized only for the empty-history case
+  ---
+  duration_ms: 1.534625
+  type: 'test'
+  ...
+# (node:80402) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/migrations-idempotent.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: migrations start with an idempotent baseline and deploy has no generic resolve
+ok 127 - migrations start with an idempotent baseline and deploy has no generic resolve
+  ---
+  duration_ms: 4.866167
+  type: 'test'
+  ...
+# Subtest: CI workflow lives inside the qr-saas repository
+ok 128 - CI workflow lives inside the qr-saas repository
+  ---
+  duration_ms: 0.570917
+  type: 'test'
+  ...
+# (node:80403) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/partner-rules.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: partner codes are normalized and cannot contain URLs or query injection
+ok 129 - partner codes are normalized and cannot contain URLs or query injection
+  ---
+  duration_ms: 1.862792
+  type: 'test'
+  ...
+# Subtest: attribution requires an active partner and an unexpired 30-day window
+ok 130 - attribution requires an active partner and an unexpired 30-day window
+  ---
+  duration_ms: 0.094041
+  type: 'test'
+  ...
+# Subtest: first payments are per workspace; refunds remain distinct from renewals and net revenue
+ok 131 - first payments are per workspace; refunds remain distinct from renewals and net revenue
+  ---
+  duration_ms: 0.186958
+  type: 'test'
+  ...
+# (node:80404) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/plans.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: plan marketing labels stay honest
+    # Subtest: FREE does not list White Label, geo, or SLA as included
+    ok 1 - FREE does not list White Label, geo, or SLA as included
+      ---
+      duration_ms: 0.504375
+      type: 'test'
+      ...
+    # Subtest: PRO does not list White Label, geo, or SLA as included
+    ok 2 - PRO does not list White Label, geo, or SLA as included
+      ---
+      duration_ms: 0.110208
+      type: 'test'
+      ...
+    # Subtest: BUSINESS does not list White Label, geo, or SLA as included
+    ok 3 - BUSINESS does not list White Label, geo, or SLA as included
+      ---
+      duration_ms: 0.106583
+      type: 'test'
+      ...
+    # Subtest: paid exports are not sold as vector PDF or EPS
+    ok 4 - paid exports are not sold as vector PDF or EPS
+      ---
+      duration_ms: 0.0655
+      type: 'test'
+      ...
+    1..4
+ok 132 - plan marketing labels stay honest
+  ---
+  duration_ms: 1.251875
+  type: 'suite'
+  ...
+# Subtest: current public prices come from one config and PRO retains its team
+ok 133 - current public prices come from one config and PRO retains its team
+  ---
+  duration_ms: 0.081083
+  type: 'test'
+  ...
+# Subtest: FREE admits two dynamic codes and rejects further creation without touching old codes
+ok 134 - FREE admits two dynamic codes and rejects further creation without touching old codes
+  ---
+  duration_ms: 0.24925
+  type: 'test'
+  ...
+# Subtest: archive quota and bulk dynamic quota include every requested row
+ok 135 - archive quota and bulk dynamic quota include every requested row
+  ---
+  duration_ms: 0.081417
+  type: 'test'
+  ...
+# (node:80407) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/product-analytics.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: goals require current consent and a ready counter; payments cannot be forged by the client
+ok 136 - goals require current consent and a ready counter; payments cannot be forged by the client
+  ---
+  duration_ms: 1.818458
+  type: 'test'
+  ...
+# Subtest: failed downloads and HTML/JSON error responses do not count as received files
+ok 137 - failed downloads and HTML/JSON error responses do not count as received files
+  ---
+  duration_ms: 31.72875
+  type: 'test'
+  ...
+# Subtest: funnel parameters never include identities, URLs, QR contents or Wi-Fi secrets
+ok 138 - funnel parameters never include identities, URLs, QR contents or Wi-Fi secrets
+  ---
+  duration_ms: 0.183916
+  type: 'test'
+  ...
+# Subtest: public goal identifiers match the ten configured Metrika events
+ok 139 - public goal identifiers match the ten configured Metrika events
+  ---
+  duration_ms: 0.061875
+  type: 'test'
+  ...
+# Subtest: media QR type MP3 retains its type dimension
+ok 140 - media QR type MP3 retains its type dimension
+  ---
+  duration_ms: 0.08825
+  type: 'test'
+  ...
+# Subtest: scanner success carries only its type and surface, never decoded secrets
+ok 141 - scanner success carries only its type and surface, never decoded secrets
+  ---
+  duration_ms: 0.053416
+  type: 'test'
+  ...
+# (node:80410) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/public-logo-qr.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public logo codes use H and a four-module quiet zone without changing existing defaults
+ok 142 - public logo codes use H and a four-module quiet zone without changing existing defaults
+  ---
+  duration_ms: 14.468333
+  type: 'test'
+  ...
+# Subtest: logo PNG/SVG exports contain the logo and decode to the original short, long and Cyrillic URL
+ok 143 - logo PNG/SVG exports contain the logo and decode to the original short, long and Cyrillic URL
+  ---
+  duration_ms: 1136.74125
+  type: 'test'
+  ...
+# (node:80411) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/public-url.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: publicSiteUrl never emits a double slash after the host
+ok 144 - publicSiteUrl never emits a double slash after the host
+  ---
+  duration_ms: 0.851208
+  type: 'test'
+  ...
+# (node:80412) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-a6.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: A6 print has physical page dimensions and a decodable 60 mm code
+ok 145 - A6 print has physical page dimensions and a decodable 60 mm code
+  ---
+  duration_ms: 574.514
+  type: 'test'
+  ...
+# (node:80413) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-activation.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: independent static download activates without an impossible external scan
+ok 146 - independent static download activates without an impossible external scan
+  ---
+  duration_ms: 1.837458
+  type: 'test'
+  ...
+# Subtest: managed QR and legacy hosted vCard require an external open of the same code
+ok 147 - managed QR and legacy hosted vCard require an external open of the same code
+  ---
+  duration_ms: 0.5055
+  type: 'test'
+  ...
+# Subtest: events from different codes or deleted unknown codes do not produce a false activation
+ok 148 - events from different codes or deleted unknown codes do not produce a false activation
+  ---
+  duration_ms: 0.137667
+  type: 'test'
+  ...
+# (node:80414) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-consent.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: pixel changes bump consent version so old cookies do not apply
+ok 149 - pixel changes bump consent version so old cookies do not apply
+  ---
+  duration_ms: 0.586083
+  type: 'test'
+  ...
+# Subtest: requiredConsentVersion stays 0 without pixels or a GDPR gate
+ok 150 - requiredConsentVersion stays 0 without pixels or a GDPR gate
+  ---
+  duration_ms: 0.088
+  type: 'test'
+  ...
+# Subtest: cookie name is per short code
+ok 151 - cookie name is per short code
+  ---
+  duration_ms: 0.061708
+  type: 'test'
+  ...
+# (node:80415) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-draft.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: qr draft
+    # Subtest: adds https and rejects unsafe schemes
+    ok 1 - adds https and rejects unsafe schemes
+      ---
+      duration_ms: 1.166958
+      type: 'test'
+      ...
+    # Subtest: names a QR from the destination host
+    ok 2 - names a QR from the destination host
+      ---
+      duration_ms: 0.100708
+      type: 'test'
+      ...
+    # Subtest: parses a stored draft and ignores junk
+    ok 3 - parses a stored draft and ignores junk
+      ---
+      duration_ms: 0.5085
+      type: 'test'
+      ...
+    # Subtest: builds a continue path that post-auth redirect will accept
+    ok 4 - builds a continue path that post-auth redirect will accept
+      ---
+      duration_ms: 0.271875
+      type: 'test'
+      ...
+    # Subtest: reads prefill from search params
+    ok 5 - reads prefill from search params
+      ---
+      duration_ms: 0.127625
+      type: 'test'
+      ...
+    1..5
+ok 152 - qr draft
+  ---
+  duration_ms: 2.704792
+  type: 'suite'
+  ...
+# Subtest: safePostAuthPath
+    # Subtest: allows dashboard create and drops open redirects
+    ok 1 - allows dashboard create and drops open redirects
+      ---
+      duration_ms: 0.138125
+      type: 'test'
+      ...
+    1..1
+ok 153 - safePostAuthPath
+  ---
+  duration_ms: 0.257208
+  type: 'suite'
+  ...
+# (node:80416) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-frame.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: every frame retains decodable QR and Cyrillic outlines in all exports
+ok 154 - every frame retains decodable QR and Cyrillic outlines in all exports
+  ---
+  duration_ms: 2413.21725
+  type: 'test'
+  ...
+# Subtest: caption contrast is included in final image quality
+ok 155 - caption contrast is included in final image quality
+  ---
+  duration_ms: 0.369792
+  type: 'test'
+  ...
+# Subtest: filled frames choose readable captions and reject a matching caption color
+ok 156 - filled frames choose readable captions and reject a matching caption color
+  ---
+  duration_ms: 0.157458
+  type: 'test'
+  ...
+# Subtest: new templates enforce a four-module quiet zone even for small legacy pixel margins
+ok 157 - new templates enforce a four-module quiet zone even for small legacy pixel margins
+  ---
+  duration_ms: 0.530166
+  type: 'test'
+  ...
+# (node:80417) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-hosted-media.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: upload landing rewrites own files to asset path and keeps YouTube
+ok 158 - upload landing rewrites own files to asset path and keeps YouTube
+  ---
+  duration_ms: 2.566792
+  type: 'test'
+  ...
+# Subtest: upload landing download chain keeps public access and dirty download gates
+ok 159 - upload landing download chain keeps public access and dirty download gates
+  ---
+  duration_ms: 0.26875
+  type: 'test'
+  ...
+# (node:80418) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-lifetime-policy.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: qr lifetime policy
+    # Subtest: warns that deleting a dynamic QR stops the printed short link
+    ok 1 - warns that deleting a dynamic QR stops the printed short link
+      ---
+      duration_ms: 0.539542
+      type: 'test'
+      ...
+    # Subtest: does not claim a static printed image can be switched off
+    ok 2 - does not claim a static printed image can be switched off
+      ---
+      duration_ms: 0.090125
+      type: 'test'
+      ...
+    # Subtest: builds an honest archived landing path
+    ok 3 - builds an honest archived landing path
+      ---
+      duration_ms: 0.146292
+      type: 'test'
+      ...
+    1..3
+ok 160 - qr lifetime policy
+  ---
+  duration_ms: 1.357375
+  type: 'suite'
+  ...
+# Subtest: library query
+    # Subtest: parses search, kind and page from the URL
+    ok 1 - parses search, kind and page from the URL
+      ---
+      duration_ms: 1.102875
+      type: 'test'
+      ...
+    # Subtest: keeps filters in pagination links so page 2 does not drop old matches
+    ok 2 - keeps filters in pagination links so page 2 does not drop old matches
+      ---
+      duration_ms: 0.424333
+      type: 'test'
+      ...
+    # Subtest: shows the live target for dynamic codes
+    ok 3 - shows the live target for dynamic codes
+      ---
+      duration_ms: 0.210084
+      type: 'test'
+      ...
+    # Subtest: shows the encoded URL for a static code instead of a placeholder
+    ok 4 - shows the encoded URL for a static code instead of a placeholder
+      ---
+      duration_ms: 0.123
+      type: 'test'
+      ...
+    # Subtest: uses the public hosted path, not a bare short code
+    ok 5 - uses the public hosted path, not a bare short code
+      ---
+      duration_ms: 0.260167
+      type: 'test'
+      ...
+    1..5
+ok 161 - library query
+  ---
+  duration_ms: 2.6775
+  type: 'suite'
+  ...
+# Subtest: yookassa amount
+    # Subtest: accepts whole-ruble provider amounts and rejects kopecks
+    ok 1 - accepts whole-ruble provider amounts and rejects kopecks
+      ---
+      duration_ms: 0.232959
+      type: 'test'
+      ...
+    # Subtest: reads trusted metadata strings
+    ok 2 - reads trusted metadata strings
+      ---
+      duration_ms: 0.190916
+      type: 'test'
+      ...
+    1..2
+ok 162 - yookassa amount
+  ---
+  duration_ms: 0.4935
+  type: 'suite'
+  ...
+# (node:80419) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-public-access.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public access blocks archive, expiry, scan limit and password
+ok 163 - public access blocks archive, expiry, scan limit and password
+  ---
+  duration_ms: 0.656083
+  type: 'test'
+  ...
+# Subtest: view grant keeps media of the last allowed scan and blocks a new direct fetch
+ok 164 - view grant keeps media of the last allowed scan and blocks a new direct fetch
+  ---
+  duration_ms: 17.075125
+  type: 'test'
+  ...
+# (node:80420) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-public-dto.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public QR payload keeps the protection flag and drops the hash
+ok 165 - public QR payload keeps the protection flag and drops the hash
+  ---
+  duration_ms: 0.671042
+  type: 'test'
+  ...
+# (node:80421) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-scan-result.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: scanner parses short QR-S links without resolving or following them
+ok 166 - scanner parses short QR-S links without resolving or following them
+  ---
+  duration_ms: 1.006208
+  type: 'test'
+  ...
+# Subtest: executable schemes, markup, control-character URLs and malformed links stay inert
+ok 167 - executable schemes, markup, control-character URLs and malformed links stay inert
+  ---
+  duration_ms: 0.867667
+  type: 'test'
+  ...
+# Subtest: suspicious URLs preserve the real hostname and block embedded credentials
+ok 168 - suspicious URLs preserve the real hostname and block embedded credentials
+  ---
+  duration_ms: 2.16975
+  type: 'test'
+  ...
+# Subtest: Wi-Fi escaped separators and passwords remain intact
+ok 169 - Wi-Fi escaped separators and passwords remain intact
+  ---
+  duration_ms: 2.249375
+  type: 'test'
+  ...
+# Subtest: vCard handles folded names, grouped fields, multiple contacts and escaped text
+ok 170 - vCard handles folded names, grouped fields, multiple contacts and escaped text
+  ---
+  duration_ms: 1.868917
+  type: 'test'
+  ...
+# Subtest: bundled QR decoder reads URL, Cyrillic text, Wi-Fi and vCard, including degraded images
+ok 171 - bundled QR decoder reads URL, Cyrillic text, Wi-Fi and vCard, including degraded images
+  ---
+  duration_ms: 776.527834
+  type: 'test'
+  ...
+# (node:80422) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/qr-styled-render.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: styled exports round-trip UTF-8 text, emoji, Wi-Fi and contacts
+ok 172 - styled exports round-trip UTF-8 text, emoji, Wi-Fi and contacts
+  ---
+  duration_ms: 607.854291
+  type: 'test'
+  ...
+# Subtest: logoMargin shrinks the drawn logo inside the reserved module box
+ok 173 - logoMargin shrinks the drawn logo inside the reserved module box
+  ---
+  duration_ms: 0.598417
+  type: 'test'
+  ...
+# Subtest: server SVG logo geometry matches qr-code-styling preview
+ok 174 - server SVG logo geometry matches qr-code-styling preview
+  ---
+  duration_ms: 125.169958
+  type: 'test'
+  ...
+# Subtest: server PNG export changes when logoMargin changes
+ok 175 - server PNG export changes when logoMargin changes
+  ---
+  duration_ms: 49.407916
+  type: 'test'
+  ...
+# Subtest: DNS rebinding does not send logo HTTP to loopback after a public lookup
+ok 176 - DNS rebinding does not send logo HTTP to loopback after a public lookup
+  ---
+  duration_ms: 1.09475
+  type: 'test'
+  ...
+# (node:80423) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/request-body-limit.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: bulk rejects missing and oversized Content-Length before the body is read
+ok 177 - bulk rejects missing and oversized Content-Length before the body is read
+  ---
+  duration_ms: 0.556875
+  type: 'test'
+  ...
+# Subtest: capped body reader stops before buffering more than the limit
+ok 178 - capped body reader stops before buffering more than the limit
+  ---
+  duration_ms: 31.38275
+  type: 'test'
+  ...
+# Subtest: upload caps undeclared chunked bodies and cancels overflow
+ok 179 - upload caps undeclared chunked bodies and cancels overflow
+  ---
+  duration_ms: 4.227083
+  type: 'test'
+  ...
+# Subtest: upload accepts a bounded multipart without Content-Length
+ok 180 - upload accepts a bounded multipart without Content-Length
+  ---
+  duration_ms: 14.427292
+  type: 'test'
+  ...
+# (node:80424) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/reserved-email.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: telegram identity namespace cannot be registered as a normal email
+ok 181 - telegram identity namespace cannot be registered as a normal email
+  ---
+  duration_ms: 0.586167
+  type: 'test'
+  ...
+# (node:80426) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/review-f08-f12.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: password recovery is allowed for unverified password accounts, not telegram-auth
+ok 182 - password recovery is allowed for unverified password accounts, not telegram-auth
+  ---
+  duration_ms: 0.483583
+  type: 'test'
+  ...
+# Subtest: Yandex linking does not verify a mismatched local email
+ok 183 - Yandex linking does not verify a mismatched local email
+  ---
+  duration_ms: 2.190917
+  type: 'test'
+  ...
+# Subtest: dirty editor does not bind a persisted download id
+ok 184 - dirty editor does not bind a persisted download id
+  ---
+  duration_ms: 0.086042
+  type: 'test'
+  ...
+# (node:80427) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/robokassa.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Robokassa signed payment and receipt
+    # Subtest: matches the documented encoded Receipt signature and round-trips through POST
+    ok 1 - matches the documented encoded Receipt signature and round-trips through POST
+      ---
+      duration_ms: 1.424208
+      type: 'test'
+      ...
+    # Subtest: supports the selected SHA algorithm
+    ok 2 - supports the selected SHA algorithm
+      ---
+      duration_ms: 0.168
+      type: 'test'
+      ...
+    # Subtest: keeps invoice IDs precise and in the documented range
+    ok 3 - keeps invoice IDs precise and in the documented range
+      ---
+      duration_ms: 1.743167
+      type: 'test'
+      ...
+    # Subtest: rejects invalid amounts and receipt names
+    ok 4 - rejects invalid amounts and receipt names
+      ---
+      duration_ms: 0.172459
+      type: 'test'
+      ...
+    1..4
+ok 185 - Robokassa signed payment and receipt
+  ---
+  duration_ms: 4.172375
+  type: 'suite'
+  ...
+# Subtest: Robokassa ResultURL verification
+    # Subtest: accepts case-insensitive hashes and six-decimal RUB amounts
+    ok 1 - accepts case-insensitive hashes and six-decimal RUB amounts
+      ---
+      duration_ms: 0.856375
+      type: 'test'
+      ...
+    # Subtest: rejects signed notifications for another amount, invoice, order or mode
+    ok 2 - rejects signed notifications for another amount, invoice, order or mode
+      ---
+      duration_ms: 0.655459
+      type: 'test'
+      ...
+    # Subtest: rejects missing or malformed signatures and duplicate parameters
+    ok 3 - rejects missing or malformed signatures and duplicate parameters
+      ---
+      duration_ms: 0.495917
+      type: 'test'
+      ...
+    # Subtest: cannot confirm a live order with test keys or the checkout password
+    ok 4 - cannot confirm a live order with test keys or the checkout password
+      ---
+      duration_ms: 0.677625
+      type: 'test'
+      ...
+    # Subtest: requires RUB and the correct provider
+    ok 5 - requires RUB and the correct provider
+      ---
+      duration_ms: 0.372
+      type: 'test'
+      ...
+    # Subtest: rejects non-zero sub-kopeck precision, exponent, signs and garbage
+    ok 6 - rejects non-zero sub-kopeck precision, exponent, signs and garbage
+      ---
+      duration_ms: 0.390416
+      type: 'test'
+      ...
+    1..6
+ok 186 - Robokassa ResultURL verification
+  ---
+  duration_ms: 3.864083
+  type: 'suite'
+  ...
+# (node:80428) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/safe-egress.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: HTTP 204 205 redirect oversize and abort reject without killing the process
+ok 187 - HTTP 204 205 redirect oversize and abort reject without killing the process
+  ---
+  duration_ms: 89.207
+  type: 'test'
+  ...
+# Subtest: valid PNG is returned through pinned HTTP
+ok 188 - valid PNG is returned through pinned HTTP
+  ---
+  duration_ms: 12.157875
+  type: 'test'
+  ...
+# (node:80429) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/scannability.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: white gradient and finders are not safe to use
+ok 189 - white gradient and finders are not safe to use
+  ---
+  duration_ms: 5.331125
+  type: 'test'
+  ...
+# Subtest: transparent gradient and finders are not safe to use
+ok 190 - transparent gradient and finders are not safe to use
+  ---
+  duration_ms: 0.230791
+  type: 'test'
+  ...
+# Subtest: styleSchema rejects mapped-loopback logo URLs
+ok 191 - styleSchema rejects mapped-loopback logo URLs
+  ---
+  duration_ms: 9.093958
+  type: 'test'
+  ...
+# Subtest: styleSchema rejects transparent gradient and finder colors
+ok 192 - styleSchema rejects transparent gradient and finder colors
+  ---
+  duration_ms: 7.005875
+  type: 'test'
+  ...
+# Subtest: empty MENU, VCARD and LOCATION payloads are rejected
+ok 193 - empty MENU, VCARD and LOCATION payloads are rejected
+  ---
+  duration_ms: 1.938916
+  type: 'test'
+  ...
+# (node:80430) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/scenario-landings.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: scenario landings
+    # Subtest: covers exactly two public scenarios with unique headings
+    ok 1 - covers exactly two public scenarios with unique headings
+      ---
+      duration_ms: 7.089375
+      type: 'test'
+      ...
+    # Subtest: pre-fills a dynamic URL form without stuffing a fake destination
+    ok 2 - pre-fills a dynamic URL form without stuffing a fake destination
+      ---
+      duration_ms: 0.458625
+      type: 'test'
+      ...
+    # Subtest: keeps hosted-type next paths inside post-auth allowlist
+    ok 3 - keeps hosted-type next paths inside post-auth allowlist
+      ---
+      duration_ms: 0.55025
+      type: 'test'
+      ...
+    # Subtest: stays aligned with SEO titles for the same URLs
+    ok 4 - stays aligned with SEO titles for the same URLs
+      ---
+      duration_ms: 0.140708
+      type: 'test'
+      ...
+    1..4
+ok 194 - scenario landings
+  ---
+  duration_ms: 9.293334
+  type: 'suite'
+  ...
+# Subtest: popular QR types
+    # Subtest: puts URL, menu, Wi-Fi and vCard first
+    ok 1 - puts URL, menu, Wi-Fi and vCard first
+      ---
+      duration_ms: 0.477583
+      type: 'test'
+      ...
+    1..1
+ok 195 - popular QR types
+  ---
+  duration_ms: 0.615959
+  type: 'suite'
+  ...
+# Subtest: printed QR after trial
+    # Subtest: states that printed dynamic codes keep opening
+    ok 1 - states that printed dynamic codes keep opening
+      ---
+      duration_ms: 0.342417
+      type: 'test'
+      ...
+    1..1
+ok 196 - printed QR after trial
+  ---
+  duration_ms: 0.894583
+  type: 'suite'
+  ...
+# (node:80431) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/seo-hygiene.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: sitemap deny list
+    # Subtest: never lists login, register, cabinet or customer QR destinations
+    ok 1 - never lists login, register, cabinet or customer QR destinations
+      ---
+      duration_ms: 1.701042
+      type: 'test'
+      ...
+    1..1
+ok 197 - sitemap deny list
+  ---
+  duration_ms: 2.54175
+  type: 'suite'
+  ...
+# Subtest: default robots.txt
+    # Subtest: closes private surfaces and keeps login crawlable so noindex can be read
+    ok 1 - closes private surfaces and keeps login crawlable so noindex can be read
+      ---
+      duration_ms: 0.279667
+      type: 'test'
+      ...
+    1..1
+ok 198 - default robots.txt
+  ---
+  duration_ms: 0.426209
+  type: 'suite'
+  ...
+# Subtest: noindex headers
+    # Subtest: marks auth, cabinet and printed QR hops, not marketing pages
+    ok 1 - marks auth, cabinet and printed QR hops, not marketing pages
+      ---
+      duration_ms: 0.146625
+      type: 'test'
+      ...
+    1..1
+ok 199 - noindex headers
+  ---
+  duration_ms: 0.331375
+  type: 'suite'
+  ...
+# Subtest: blog list indexing
+    # Subtest: indexes only the first unfiltered listing
+    ok 1 - indexes only the first unfiltered listing
+      ---
+      duration_ms: 0.118
+      type: 'test'
+      ...
+    1..1
+ok 200 - blog list indexing
+  ---
+  duration_ms: 0.183333
+  type: 'suite'
+  ...
+# (node:80432) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/session-jwt.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rotation accepts an unexpired legacy session only during its original lifetime
+ok 201 - rotation accepts an unexpired legacy session only during its original lifetime
+  ---
+  duration_ms: 14.951041
+  type: 'test'
+  ...
+# Subtest: old key cannot mint post-rotation or extended sessions; new key works
+ok 202 - old key cannot mint post-rotation or extended sessions; new key works
+  ---
+  duration_ms: 5.079833
+  type: 'test'
+  ...
+# (node:80433) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/static-qr.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: all public static formats encode useful independent content
+ok 203 - all public static formats encode useful independent content
+  ---
+  duration_ms: 45.292875
+  type: 'test'
+  ...
+# Subtest: Wi-Fi preserves spaces and escapes separators instead of changing credentials
+ok 204 - Wi-Fi preserves spaces and escapes separators instead of changing credentials
+  ---
+  duration_ms: 7.166583
+  type: 'test'
+  ...
+# Subtest: vCard escapes line/property injection and direct variant does not convert old /v codes
+ok 205 - vCard escapes line/property injection and direct variant does not convert old /v codes
+  ---
+  duration_ms: 10.271541
+  type: 'test'
+  ...
+# Subtest: invalid, private, unsupported and oversized inputs do not produce a misleading code
+ok 206 - invalid, private, unsupported and oversized inputs do not produce a misleading code
+  ---
+  duration_ms: 0.393208
+  type: 'test'
+  ...
+# Subtest: archive drafts whitelist payloads, expire and cannot import remote logos
+ok 207 - archive drafts whitelist payloads, expire and cannot import remote logos
+  ---
+  duration_ms: 2.544084
+  type: 'test'
+  ...
+# Subtest: four-module quiet zone scales with new archives; legacy pixel margins stay unchanged
+ok 208 - four-module quiet zone scales with new archives; legacy pixel margins stay unchanged
+  ---
+  duration_ms: 0.774083
+  type: 'test'
+  ...
+# (node:80434) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/telegram-identity.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Telegram subject is a positive safe integer owned by the provider
+ok 209 - Telegram subject is a positive safe integer owned by the provider
+  ---
+  duration_ms: 0.7905
+  type: 'test'
+  ...
+# Subtest: legacy Telegram binding requires the original verified provider-only account
+ok 210 - legacy Telegram binding requires the original verified provider-only account
+  ---
+  duration_ms: 0.140792
+  type: 'test'
+  ...
+# (node:80435) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/tenant.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: owned workspace fileId is accepted and a foreign file is rejected
+ok 211 - owned workspace fileId is accepted and a foreign file is rejected
+  ---
+  duration_ms: 1.09275
+  type: 'test'
+  ...
+# (node:80437) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/tz10-editorial.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: related articles: manual order, category, common tag count, date, exclude self/drafts
+ok 212 - related articles: manual order, category, common tag count, date, exclude self/drafts
+  ---
+  duration_ms: 1.393042
+  type: 'test'
+  ...
+# Subtest: legacy HTML link maintenance preserves images/bytes and rejects unrelated changes
+ok 213 - legacy HTML link maintenance preserves images/bytes and rejects unrelated changes
+  ---
+  duration_ms: 0.533459
+  type: 'test'
+  ...
+# Subtest: configured robots keep public API files crawlable and put Sitemap last
+ok 214 - configured robots keep public API files crawlable and put Sitemap last
+  ---
+  duration_ms: 1.115458
+  type: 'test'
+  ...
+# Subtest: editorial fields normalize tags and reject duplicate related IDs
+ok 215 - editorial fields normalize tags and reject duplicate related IDs
+  ---
+  duration_ms: 1.854375
+  type: 'test'
+  ...
+# Subtest: Metrika frame policy trusts explicit HTTPS domains while private routes stay same-origin
+ok 216 - Metrika frame policy trusts explicit HTTPS domains while private routes stay same-origin
+  ---
+  duration_ms: 0.132167
+  type: 'test'
+  ...
+# (node:80438) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/url.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rejects IPv4-mapped loopback in http URLs
+ok 217 - rejects IPv4-mapped loopback in http URLs
+  ---
+  duration_ms: 4.537
+  type: 'test'
+  ...
+# Subtest: policy links reject unsafe schemes and private hosts
+ok 218 - policy links reject unsafe schemes and private hosts
+  ---
+  duration_ms: 0.673166
+  type: 'test'
+  ...
+# Subtest: policy edits preserve QR content and can explicitly clear a link
+ok 219 - policy edits preserve QR content and can explicitly clear a link
+  ---
+  duration_ms: 0.216833
+  type: 'test'
+  ...
+# Subtest: hosted asset path is displayable but not a generic public URL
+ok 220 - hosted asset path is displayable but not a generic public URL
+  ---
+  duration_ms: 0.188167
+  type: 'test'
+  ...
+# (node:80439) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/validation.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: registration and email changes cannot claim a Telegram identity
+ok 221 - registration and email changes cannot claim a Telegram identity
+  ---
+  duration_ms: 2.301542
+  type: 'test'
+  ...
+# Subtest: workspace upload path is accepted for PDF IMAGE MP3 VIDEO create and patch checks
+ok 222 - workspace upload path is accepted for PDF IMAGE MP3 VIDEO create and patch checks
+  ---
+  duration_ms: 1.773834
+  type: 'test'
+  ...
+# Subtest: payload media URLs still reject relative, hosted-asset and mismatched fileId
+ok 223 - payload media URLs still reject relative, hosted-asset and mismatched fileId
+  ---
+  duration_ms: 1.054875
+  type: 'test'
+  ...
+# (node:80440) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/workspace-file-path.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: private uploads are addressed by an authenticated workspace path
+ok 224 - private uploads are addressed by an authenticated workspace path
+  ---
+  duration_ms: 0.759167
+  type: 'test'
+  ...
+# (node:80441) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/workspace-invite.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: invite does not occupy a seat until the person accepts
+ok 225 - invite does not occupy a seat until the person accepts
+  ---
+  duration_ms: 1.240042
+  type: 'test'
+  ...
+# Subtest: only the invited account can accept a live invite
+ok 226 - only the invited account can accept a live invite
+  ---
+  duration_ms: 0.2225
+  type: 'test'
+  ...
+# (node:80442) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/workspace-plan.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: archive keeps its price and limits when public plans change
+ok 227 - archive keeps its price and limits when public plans change
+  ---
+  duration_ms: 2.120458
+  type: 'test'
+  ...
+# Subtest: corrupt or wrong-tier archives fail closed
+ok 228 - corrupt or wrong-tier archives fail closed
+  ---
+  duration_ms: 0.974958
+  type: 'test'
+  ...
+# Subtest: friends is free, unlimited and absent from the public catalog
+ok 229 - friends is free, unlimited and absent from the public catalog
+  ---
+  duration_ms: 1.050042
+  type: 'test'
+  ...
+# (node:80443) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-pd-2026-10/src/lib/yandex-auth-config.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-pd-2026-10/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Yandex availability requires the flag, both credentials and the exact public callback
+ok 230 - Yandex availability requires the flag, both credentials and the exact public callback
+  ---
+  duration_ms: 0.688583
+  type: 'test'
+  ...
+1..230
+# tests 279
+# suites 27
+# pass 279
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6453.219792
