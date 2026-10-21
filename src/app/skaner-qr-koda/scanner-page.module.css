@@ -1,0 +1,18 @@
+.page { padding-bottom:72px; }
+.page>header { padding-bottom:24px; padding-top:28px; }
+.page>header p { max-width:80ch; }
+.reading { max-width:900px; }
+.reading section { margin-top:64px; }
+.reading h2 { font-size:clamp(26px,3vw,38px); line-height:1.25; font-weight:750; letter-spacing:-.03em; margin-bottom:24px; }
+.reading h3 { font-size:18px; font-weight:700; line-height:1.4; margin-bottom:12px; }
+.reading p,.reading li { font-size:16px; line-height:1.85; max-width:75ch; }
+.reading p+p { margin-top:18px; }
+.reading ul { padding-left:22px; display:grid; gap:12px; }
+.reading ul+p { margin-top:22px; }
+.reading a { color:var(--text-link); text-decoration:underline; text-underline-offset:4px; }
+.steps { list-style:decimal; padding-left:22px; display:grid; gap:28px; }
+.steps li { padding-left:10px; }
+.faq details { padding:20px 0; border-bottom:1px solid var(--border-default); }
+.faq summary { cursor:pointer; font-size:16px; line-height:1.6; font-weight:650; }
+.faq p { margin-top:16px; color:var(--text-muted); }
+@media(max-width:560px) { .page { padding-bottom:48px; }.page>header { padding-block:24px 20px; }.page>header h1 { font-size:32px; }.page>header p { font-size:14px; margin-top:14px; }.reading section { margin-top:48px; }.reading p,.reading li { font-size:15px; }.faq summary { font-size:15px; } }

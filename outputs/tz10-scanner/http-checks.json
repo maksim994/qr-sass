@@ -1,0 +1,14 @@
+{
+  "status": 200,
+  "title": "Сканер QR-кода онлайн: с камеры, по фото и скриншоту | qr-s.ru",
+  "canonical": "http://127.0.0.1:3010/skaner-qr-koda",
+  "faqItems": 11,
+  "faqMatchesVisibleContent": true,
+  "sitemapOccurrences": 1,
+  "footersChecked": 31,
+  "headers": {
+    "csp": "frame-ancestors 'self' https://metrika.yandex.ru https://analytics.yandex.by https://analytics.yandex.com https://analytics.yandex.com.tr https://analytics.yandex.kz https://analytics.yandex.ru https://metr.yandex.by https://metr.yandex.com https://metr.yandex.com.tr https://metr.yandex.kz https://metr.yandex.ru https://metrica.ya.ru https://metrica.yandex https://metrica.yandex.by https://metrica.yandex.com https://metrica.yandex.com.tr https://metrica.yandex.kz https://metrica.yandex.ru https://metrika.ya.ru https://metrika.yandex https://metrika.yandex.by https://metrika.yandex.com https://metrika.yandex.com.tr https://metrika.yandex.kz https://metrika.yandex.uz https://webvisor.com https://*.webvisor.com",
+    "hsts": "max-age=31536000",
+    "poweredBy": null
+  }
+}

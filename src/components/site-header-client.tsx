@@ -13,6 +13,7 @@ const navLinks = [
   { label: "Возможности", href: "/#features" },
   { label: "Для кого", href: "/#use-cases" },
   { label: "Типы QR", href: "/#types" },
+  { label: "Сканер", href: "/skaner-qr-koda" },
   { label: "Тарифы", href: "/pricing" },
   { label: "Контакты", href: "/contacts" },
 ];

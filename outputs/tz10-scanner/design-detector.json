@@ -1,0 +1,211 @@
+[
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/app/skaner-qr-koda/scanner-page.module.css",
+    "line": 6,
+    "snippet": "font-size: clamp(26px,3vw,38px) has fluid endpoints 26px and 38px off the DESIGN.md type ramp",
+    "ignoreValue": "26px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/app/skaner-qr-koda/scanner-page.module.css",
+    "line": 7,
+    "snippet": "font-size: 18px is off the DESIGN.md type ramp",
+    "ignoreValue": "18px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/app/skaner-qr-koda/scanner-page.module.css",
+    "line": 18,
+    "snippet": "font-size: 32px is off the DESIGN.md type ramp",
+    "ignoreValue": "32px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/app/skaner-qr-koda/scanner-page.module.css",
+    "line": 18,
+    "snippet": "font-size: 15px is off the DESIGN.md type ramp",
+    "ignoreValue": "15px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 17,
+    "snippet": "font-size: 22px is off the DESIGN.md type ramp",
+    "ignoreValue": "22px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 26,
+    "snippet": "font-size: 12px is off the DESIGN.md type ramp",
+    "ignoreValue": "12px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 28,
+    "snippet": "font-size: 13px is off the DESIGN.md type ramp",
+    "ignoreValue": "13px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 31,
+    "snippet": "font-size: 13px is off the DESIGN.md type ramp",
+    "ignoreValue": "13px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 32,
+    "snippet": "font-size: 11px is off the DESIGN.md type ramp",
+    "ignoreValue": "11px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 34,
+    "snippet": "font-size: 12px is off the DESIGN.md type ramp",
+    "ignoreValue": "12px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 39,
+    "snippet": "font-size: 13px is off the DESIGN.md type ramp",
+    "ignoreValue": "13px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 42,
+    "snippet": "font-size: clamp(25px,3vw,40px) has fluid endpoints 25px and 40px off the DESIGN.md type ramp",
+    "ignoreValue": "25px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 44,
+    "snippet": "font-size: 12px is off the DESIGN.md type ramp",
+    "ignoreValue": "12px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 45,
+    "snippet": "font-size: 15px is off the DESIGN.md type ramp",
+    "ignoreValue": "15px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 49,
+    "snippet": "font-size: 13px is off the DESIGN.md type ramp",
+    "ignoreValue": "13px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 50,
+    "snippet": "font-size: 15px is off the DESIGN.md type ramp",
+    "ignoreValue": "15px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 56,
+    "snippet": "font-size: 20px is off the DESIGN.md type ramp",
+    "ignoreValue": "20px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 56,
+    "snippet": "font-size: 13px is off the DESIGN.md type ramp",
+    "ignoreValue": "13px"
+  },
+  {
+    "antipattern": "design-system-font-size",
+    "name": "Font size outside DESIGN.md",
+    "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "/Users/mvmolkov/projects/qr/qr-robokassa-integration/src/components/qr-scanner/qr-scanner.module.css",
+    "line": 56,
+    "snippet": "font-size: 11px is off the DESIGN.md type ramp",
+    "ignoreValue": "11px"
+  }
+]

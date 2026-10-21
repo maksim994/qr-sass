@@ -100,6 +100,8 @@ export function AuthLegalFooter() {
         ·
       </span>
       <Link href="/terms-of-service">Условия</Link>
+      <span className="qrs-auth-legal__sep" aria-hidden="true">·</span>
+      <Link href="/skaner-qr-koda">Сканер QR-кода</Link>
     </footer>
   );
 }

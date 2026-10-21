@@ -52,3 +52,8 @@ test("public goal identifiers match the ten configured Metrika events",()=>{
 });
 
 test("media QR type MP3 retains its type dimension",()=>{assert.deepEqual(goalParams({type:"MP3"}),{type:"MP3"});});
+
+test("scanner success carries only its type and surface, never decoded secrets", () => {
+  assert.equal(PRODUCT_GOALS.scan_success,"scan_success");
+  assert.deepEqual(goalParams({type:"WIFI",where:"landing",raw:"WIFI:S:private;P:secret;;",password:"secret",domain:"private.example",contact:{name:"Private"}}),{type:"WIFI",where:"landing"});
+});

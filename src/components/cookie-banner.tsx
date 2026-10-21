@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
 import { Button } from "@/components/ui/button";
 import { METRIKA_READY_EVENT, setMetrikaCounterId } from "@/lib/product-analytics";
@@ -45,11 +46,14 @@ function stopMetrika() {
   return true;
 }
 export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) {
+  const pathname = usePathname();
   const consent = useSyncExternalStore(subscribe, readCookieChoice, () => "ssr" as const);
   const [open, setOpen] = useState(false);
   const dialog = useRef<HTMLDivElement>(null);
   const revocation = useRef<Promise<unknown> | null>(null);
-  const visible = consent === "none" || open;
+  // Keep the scanner's first task unobstructed. No consent still means no analytics;
+  // footer settings and an explicit COOKIE_SETTINGS_EVENT remain available.
+  const visible = (consent === "none" && pathname !== "/skaner-qr-koda") || open;
   useEffect(() => {
     const show = () => { setOpen(true); };
     window.addEventListener(COOKIE_SETTINGS_EVENT, show);

@@ -1,0 +1,14 @@
+{
+  "requests": 32,
+  "nonGet": [],
+  "requestBodies": [],
+  "shortLinkRequests": [
+    {
+      "at": "2026-10-21T09:52:03.073Z",
+      "method": "GET",
+      "path": "/r/scanner-no-match",
+      "bytes": 0,
+      "contentType": null
+    }
+  ]
+}

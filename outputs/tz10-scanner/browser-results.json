@@ -1,0 +1,66 @@
+[
+  {
+    "fixture": "qrs",
+    "heading": "qr-s.ru",
+    "open": [
+      {
+        "href": "https://qr-s.ru/r/scanner-demo-not-a-real-code",
+        "rel": "noopener noreferrer nofollow"
+      }
+    ],
+    "path": "/skaner-qr-koda",
+    "raw": "https://qr-s.ru/r/scanner-demo-not-a-real-code",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "fixture": "text",
+    "heading": "Содержимое QR-кода",
+    "open": [],
+    "path": "/skaner-qr-koda",
+    "raw": "Демонстрационный текст. Ссылка сама не открывается.",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "fixture": "wifi",
+    "heading": "Preview; Guest",
+    "open": [],
+    "path": "/skaner-qr-koda",
+    "raw": "WIFI:T:WPA;S:Preview\\; Guest;P:demo\\;password;;",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "fixture": "vcard",
+    "heading": "Тестовый контакт",
+    "open": [],
+    "path": "/skaner-qr-koda",
+    "raw": "BEGIN:VCARD\nVERSION:3.0\nFN:Тестовый контакт\nTEL:+79990000000\nEMAIL:scanner@example.test\nEND:VCARD",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "fixture": "unsafe",
+    "heading": "Содержимое QR-кода",
+    "open": [],
+    "path": "/skaner-qr-koda",
+    "raw": "javascript:alert(1)",
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "fixture": "angled",
+    "heading": "127.0.0.1",
+    "open": [
+      {
+        "href": "http://127.0.0.1:3012/r/scanner-no-match",
+        "rel": "noopener noreferrer nofollow"
+      }
+    ],
+    "path": "/skaner-qr-koda",
+    "raw": "http://127.0.0.1:3012/r/scanner-no-match",
+    "scroll": 390,
+    "width": 390
+  }
+]

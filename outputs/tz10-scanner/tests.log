@@ -1,0 +1,2053 @@
+
+> qr-saas@0.1.0 test
+> node --experimental-strip-types --import ./scripts/register-src-alias.mjs --test src/lib/*.test.ts scripts/*.test.mjs
+
+TAP version 13
+# Subtest: new customers and scans do not break the release check
+ok 1 - new customers and scans do not break the release check
+  ---
+  duration_ms: 1.629708
+  type: 'test'
+  ...
+# Subtest: changing shortCode blocks release
+ok 2 - changing shortCode blocks release
+  ---
+  duration_ms: 0.156334
+  type: 'test'
+  ...
+# Subtest: changing kind blocks release
+ok 3 - changing kind blocks release
+  ---
+  duration_ms: 0.052083
+  type: 'test'
+  ...
+# Subtest: changing contentType blocks release
+ok 4 - changing contentType blocks release
+  ---
+  duration_ms: 0.569125
+  type: 'test'
+  ...
+# Subtest: changing workspaceId blocks release
+ok 5 - changing workspaceId blocks release
+  ---
+  duration_ms: 0.689334
+  type: 'test'
+  ...
+# Subtest: changing isArchived blocks release
+ok 6 - changing isArchived blocks release
+  ---
+  duration_ms: 0.351084
+  type: 'test'
+  ...
+# Subtest: changing hasTarget blocks release
+ok 7 - changing hasTarget blocks release
+  ---
+  duration_ms: 6.578583
+  type: 'test'
+  ...
+# Subtest: changing contractHash blocks release
+ok 8 - changing contractHash blocks release
+  ---
+  duration_ms: 0.080875
+  type: 'test'
+  ...
+# Subtest: replacement with equal QR count still detects lost printed code
+ok 9 - replacement with equal QR count still detects lost printed code
+  ---
+  duration_ms: 0.188834
+  type: 'test'
+  ...
+# Subtest: old snapshots, missing hashes, changed domain and critical flags fail closed
+ok 10 - old snapshots, missing hashes, changed domain and critical flags fail closed
+  ---
+  duration_ms: 0.319583
+  type: 'test'
+  ...
+# Subtest: hash includes full URLs beyond report preview, payload and access settings
+ok 11 - hash includes full URLs beyond report preview, payload and access settings
+  ---
+  duration_ms: 4.641667
+  type: 'test'
+  ...
+# (node:26404) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/access-reminder.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: reminds before and shortly after expiry, never for unlimited or distant access
+ok 12 - reminds before and shortly after expiry, never for unlimited or distant access
+  ---
+  duration_ms: 13.068417
+  type: 'test'
+  ...
+# (node:26405) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/admin-reconcile-result.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: missing provider response cannot be announced as success
+ok 13 - missing provider response cannot be announced as success
+  ---
+  duration_ms: 0.807042
+  type: 'test'
+  ...
+# Subtest: cancellation and pending have distinct truthful status messages
+ok 14 - cancellation and pending have distinct truthful status messages
+  ---
+  duration_ms: 0.296833
+  type: 'test'
+  ...
+# Subtest: failed fulfillment is not confused with already applied payment
+ok 15 - failed fulfillment is not confused with already applied payment
+  ---
+  duration_ms: 0.235625
+  type: 'test'
+  ...
+# (node:26406) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/analytics-metrics.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: parseAnalyticsDays
+ok 16 - parseAnalyticsDays
+  ---
+  duration_ms: 0.926958
+  type: 'test'
+  ...
+# Subtest: analyticsWindow uses Moscow calendar days including today
+ok 17 - analyticsWindow uses Moscow calendar days including today
+  ---
+  duration_ms: 2.917541
+  type: 'test'
+  ...
+# Subtest: mskDateKey around UTC midnight is still the Moscow date
+ok 18 - mskDateKey around UTC midnight is still the Moscow date
+  ---
+  duration_ms: 0.249958
+  type: 'test'
+  ...
+# Subtest: fillDailySeries does not drop days and does not cap rows
+ok 19 - fillDailySeries does not drop days and does not cap rows
+  ---
+  duration_ms: 0.239167
+  type: 'test'
+  ...
+# Subtest: formatGrowth does not invent +100% from a zero baseline
+ok 20 - formatGrowth does not invent +100% from a zero baseline
+  ---
+  duration_ms: 0.128083
+  type: 'test'
+  ...
+# Subtest: device labels stay honest
+ok 21 - device labels stay honest
+  ---
+  duration_ms: 0.122208
+  type: 'test'
+  ...
+# Subtest: MSK Friday label is Пт, not the previous UTC weekday
+ok 22 - MSK Friday label is Пт, not the previous UTC weekday
+  ---
+  duration_ms: 12.172125
+  type: 'test'
+  ...
+# (node:26407) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/billing-period.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: nextPaidPeriodEnd
+    # Subtest: starts a month from now when there is no paid remainder
+    ok 1 - starts a month from now when there is no paid remainder
+      ---
+      duration_ms: 0.4205
+      type: 'test'
+      ...
+    # Subtest: stacks a second payment from the already extended paid end
+    ok 2 - stacks a second payment from the already extended paid end
+      ---
+      duration_ms: 0.053209
+      type: 'test'
+      ...
+    # Subtest: keeps unused time after cancel-at-period-end
+    ok 3 - keeps unused time after cancel-at-period-end
+      ---
+      duration_ms: 0.040667
+      type: 'test'
+      ...
+    # Subtest: does not stack an expired period
+    ok 4 - does not stack an expired period
+      ---
+      duration_ms: 0.034334
+      type: 'test'
+      ...
+    # Subtest: clamps 31 January to the last day of February
+    ok 5 - clamps 31 January to the last day of February
+      ---
+      duration_ms: 4.021083
+      type: 'test'
+      ...
+    # Subtest: keeps 29 February on a leap year
+    ok 6 - keeps 29 February on a leap year
+      ---
+      duration_ms: 0.076875
+      type: 'test'
+      ...
+    # Subtest: clamps 31 March to 30 April, not 1 May
+    ok 7 - clamps 31 March to 30 April, not 1 May
+      ---
+      duration_ms: 0.046833
+      type: 'test'
+      ...
+    1..7
+ok 23 - nextPaidPeriodEnd
+  ---
+  duration_ms: 5.150459
+  type: 'suite'
+  ...
+# Subtest: resolvePaidPlanId
+    # Subtest: uses local planId when present
+    ok 1 - uses local planId when present
+      ---
+      duration_ms: 1.288917
+      type: 'test'
+      ...
+    # Subtest: recovers plan from YooKassa metadata for legacy rows
+    ok 2 - recovers plan from YooKassa metadata for legacy rows
+      ---
+      duration_ms: 0.190042
+      type: 'test'
+      ...
+    # Subtest: recovers plan from checkout description
+    ok 3 - recovers plan from checkout description
+      ---
+      duration_ms: 0.20775
+      type: 'test'
+      ...
+    # Subtest: rejects conflicting local and metadata plans
+    ok 4 - rejects conflicting local and metadata plans
+      ---
+      duration_ms: 0.038709
+      type: 'test'
+      ...
+    1..4
+ok 24 - resolvePaidPlanId
+  ---
+  duration_ms: 2.151
+  type: 'suite'
+  ...
+# (node:26408) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/billing-provider.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: billingActionFromRemoteStatus
+    # Subtest: applies a succeeded provider object even if the webhook event said canceled
+    ok 1 - applies a succeeded provider object even if the webhook event said canceled
+      ---
+      duration_ms: 0.680667
+      type: 'test'
+      ...
+    # Subtest: cancels only when the provider object itself is canceled
+    ok 2 - cancels only when the provider object itself is canceled
+      ---
+      duration_ms: 0.108875
+      type: 'test'
+      ...
+    # Subtest: ignores pending and unknown provider statuses
+    ok 3 - ignores pending and unknown provider statuses
+      ---
+      duration_ms: 0.082416
+      type: 'test'
+      ...
+    1..3
+ok 25 - billingActionFromRemoteStatus
+  ---
+  duration_ms: 1.73
+  type: 'suite'
+  ...
+# (node:26409) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-api.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: article tokens use independent entropy/salt, never workspace prefix
+ok 26 - article tokens use independent entropy/salt, never workspace prefix
+  ---
+  duration_ms: 0.649292
+  type: 'test'
+  ...
+# Subtest: API allowlist rejects injected ownership, dates, counters and missing version
+ok 27 - API allowlist rejects injected ownership, dates, counters and missing version
+  ---
+  duration_ms: 1.720292
+  type: 'test'
+  ...
+# Subtest: served OpenAPI exactly matches committed YAML and strict request limits
+ok 28 - served OpenAPI exactly matches committed YAML and strict request limits
+  ---
+  duration_ms: 6.200292
+  type: 'test'
+  ...
+# (node:26410) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-editor.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: legacy save preserves source bytes and all editorial/publication dates
+ok 29 - legacy save preserves source bytes and all editorial/publication dates
+  ---
+  duration_ms: 16.423625
+  type: 'test'
+  ...
+# Subtest: read-only HTML cannot be silently overwritten or converted
+ok 30 - read-only HTML cannot be silently overwritten or converted
+  ---
+  duration_ms: 0.199167
+  type: 'test'
+  ...
+# Subtest: confirmed conversion retains exact legacy source on every subsequent save
+ok 31 - confirmed conversion retains exact legacy source on every subsequent save
+  ---
+  duration_ms: 8.871125
+  type: 'test'
+  ...
+# Subtest: substantive edits update date; whitespace, flags, category and minor edits do not
+ok 32 - substantive edits update date; whitespace, flags, category and minor edits do not
+  ---
+  duration_ms: 5.168917
+  type: 'test'
+  ...
+# Subtest: publication date survives publish, unpublish and republish; stale writes are rejected
+ok 33 - publication date survives publish, unpublish and republish; stale writes are rejected
+  ---
+  duration_ms: 3.781083
+  type: 'test'
+  ...
+# Subtest: new articles default to Markdown and are sanitized at save
+ok 34 - new articles default to Markdown and are sanitized at save
+  ---
+  duration_ms: 3.515083
+  type: 'test'
+  ...
+# Subtest: schema rejects malformed fields instead of throwing TypeError
+ok 35 - schema rejects malformed fields instead of throwing TypeError
+  ---
+  duration_ms: 8.925375
+  type: 'test'
+  ...
+# Subtest: HTML renderer preserves pre-existing heading IDs algorithm, table wrapper and figures policy
+ok 36 - HTML renderer preserves pre-existing heading IDs algorithm, table wrapper and figures policy
+  ---
+  duration_ms: 3.93675
+  type: 'test'
+  ...
+# Subtest: Markdown supports explicit H2/H3 anchors, transliteration and unique IDs
+ok 37 - Markdown supports explicit H2/H3 anchors, transliteration and unique IDs
+  ---
+  duration_ms: 0.928291
+  type: 'test'
+  ...
+# Subtest: GFM tables, strikethrough and task lists render safely
+ok 38 - GFM tables, strikethrough and task lists render safely
+  ---
+  duration_ms: 1.396792
+  type: 'test'
+  ...
+# Subtest: external links are isolated; internal links and UTM query values survive
+ok 39 - external links are isolated; internal links and UTM query values survive
+  ---
+  duration_ms: 6.195
+  type: 'test'
+  ...
+# Subtest: FAQ appears once at marker before next section; codes containing marker are not replaced
+ok 40 - FAQ appears once at marker before next section; codes containing marker are not replaced
+  ---
+  duration_ms: 0.954792
+  type: 'test'
+  ...
+# Subtest: FAQ replaces an explicitly imported legacy section without changing stored source
+ok 41 - FAQ replaces an explicitly imported legacy section without changing stored source
+  ---
+  duration_ms: 4.794
+  type: 'test'
+  ...
+# Subtest: server sanitization rejects XSS, data protocols, SVG, style and iframe on save/render
+ok 42 - server sanitization rejects XSS, data protocols, SVG, style and iframe on save/render
+  ---
+  duration_ms: 5.178
+  type: 'test'
+  ...
+# Subtest: raw HTML whitelist does not allow custom headings, links or controls
+ok 43 - raw HTML whitelist does not allow custom headings, links or controls
+  ---
+  duration_ms: 1.696083
+  type: 'test'
+  ...
+# Subtest: conversion provides source and normalized rendered diff without mutating HTML
+ok 44 - conversion provides source and normalized rendered diff without mutating HTML
+  ---
+  duration_ms: 20.251666
+  type: 'test'
+  ...
+# Subtest: field-owned BlogPosting/FAQPage win over manual nested duplicates and JSON-LD is script-safe
+ok 45 - field-owned BlogPosting/FAQPage win over manual nested duplicates and JSON-LD is script-safe
+  ---
+  duration_ms: 0.892542
+  type: 'test'
+  ...
+# Subtest: FAQ object key order from PostgreSQL does not change the editorial date on a full form save
+ok 46 - FAQ object key order from PostgreSQL does not change the editorial date on a full form save
+  ---
+  duration_ms: 1.149666
+  type: 'test'
+  ...
+# Subtest: targeted HTML image replacement preserves publication/editorial dates with minorEdit and blocks a broader overwrite
+ok 47 - targeted HTML image replacement preserves publication/editorial dates with minorEdit and blocks a broader overwrite
+  ---
+  duration_ms: 48.143875
+  type: 'test'
+  ...
+# (node:26411) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-image-remove.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: WhatsApp figure and caption are removed with all surrounding bytes intact
+ok 48 - WhatsApp figure and caption are removed with all surrounding bytes intact
+  ---
+  duration_ms: 14.278041
+  type: 'test'
+  ...
+# Subtest: empty link/paragraph wrappers disappear, but text, comments and other media survive
+ok 49 - empty link/paragraph wrappers disappear, but text, comments and other media survive
+  ---
+  duration_ms: 73.180625
+  type: 'test'
+  ...
+# Subtest: matches exact src or any srcset candidate, counting images rather than attributes
+ok 50 - matches exact src or any srcset candidate, counting images rather than attributes
+  ---
+  duration_ms: 41.075125
+  type: 'test'
+  ...
+# Subtest: Markdown removes inline images and uploaded raw figures; preserves literal/code examples
+ok 51 - Markdown removes inline images and uploaded raw figures; preserves literal/code examples
+  ---
+  duration_ms: 66.178834
+  type: 'test'
+  ...
+# Subtest: duplicate policy, missing URL and cover guard are identical for saves and previews
+ok 52 - duplicate policy, missing URL and cover guard are identical for saves and previews
+  ---
+  duration_ms: 18.551041
+  type: 'test'
+  ...
+# Subtest: HTML deletion allowlist preserves dates/legacy and prevents unrelated edits
+ok 53 - HTML deletion allowlist preserves dates/legacy and prevents unrelated edits
+  ---
+  duration_ms: 33.07325
+  type: 'test'
+  ...
+# Subtest: remove request strictly requires version and true discriminator and excludes replacement fields
+ok 54 - remove request strictly requires version and true discriminator and excludes replacement fields
+  ---
+  duration_ms: 3.2485
+  type: 'test'
+  ...
+# (node:26412) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-media.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public mapping is restricted, reversible for matching, and leaves other files/domains alone
+ok 55 - public mapping is restricted, reversible for matching, and leaves other files/domains alone
+  ---
+  duration_ms: 6.417209
+  type: 'test'
+  ...
+# Subtest: only image URL attributes change; text, links, layout, dimensions and source remain intact
+ok 56 - only image URL attributes change; text, links, layout, dimensions and source remain intact
+  ---
+  duration_ms: 68.744542
+  type: 'test'
+  ...
+# Subtest: JSON-LD image objects and graph images change without rewriting dates or prose
+ok 57 - JSON-LD image objects and graph images change without rewriting dates or prose
+  ---
+  duration_ms: 0.628333
+  type: 'test'
+  ...
+# Subtest: stage-one deletion/replacement works with new public URLs against untouched legacy source
+ok 58 - stage-one deletion/replacement works with new public URLs against untouched legacy source
+  ---
+  duration_ms: 22.910792
+  type: 'test'
+  ...
+# Subtest: media GET/HEAD, immutable caching, conditional requests and cookie isolation
+ok 59 - media GET/HEAD, immutable caching, conditional requests and cookie isolation
+  ---
+  duration_ms: 5.715125
+  type: 'test'
+  ...
+# Subtest: media rejects traversal before storage; missing/error responses do not expose storage details
+ok 60 - media rejects traversal before storage; missing/error responses do not expose storage details
+  ---
+  duration_ms: 0.549292
+  type: 'test'
+  ...
+# Subtest: bounded media cache evicts old bodies and coalesces concurrent reads
+ok 61 - bounded media cache evicts old bodies and coalesces concurrent reads
+  ---
+  duration_ms: 0.402
+  type: 'test'
+  ...
+# Subtest: robots explicitly permits media in all agent groups while retaining private-route rules
+ok 62 - robots explicitly permits media in all agent groups while retaining private-route rules
+  ---
+  duration_ms: 0.5215
+  type: 'test'
+  ...
+# (node:26413) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-pending-revision.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: pending edits reject identity, publication, timestamps and minorEdit
+ok 63 - pending edits reject identity, publication, timestamps and minorEdit
+  ---
+  duration_ms: 6.002958
+  type: 'test'
+  ...
+# Subtest: publishing requires both the reviewed pending revision and its live base
+ok 64 - publishing requires both the reviewed pending revision and its live base
+  ---
+  duration_ms: 0.37875
+  type: 'test'
+  ...
+# Subtest: OpenAPI exposes pending CRUD and link preview, without a publication method
+ok 65 - OpenAPI exposes pending CRUD and link preview, without a publication method
+  ---
+  duration_ms: 0.328125
+  type: 'test'
+  ...
+# (node:26414) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-publication.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Moscow scheduling is independent of browser/server timezone and rejects invalid calendar dates
+ok 66 - Moscow scheduling is independent of browser/server timezone and rejects invalid calendar dates
+  ---
+  duration_ms: 0.541208
+  type: 'test'
+  ...
+# Subtest: scheduled and draft articles never expose publishedAt; first publication is deferred
+ok 67 - scheduled and draft articles never expose publishedAt; first publication is deferred
+  ---
+  duration_ms: 5.275
+  type: 'test'
+  ...
+# (node:26415) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-sanitize.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: blog editorial sanitize
+    # Subtest: rewrites gr-s.ru links and leftover brand text
+    ok 1 - rewrites gr-s.ru links and leftover brand text
+      ---
+      duration_ms: 0.755
+      type: 'test'
+      ...
+    # Subtest: does not rewrite image hosts on g-qr.ru
+    ok 2 - does not rewrite image hosts on g-qr.ru
+      ---
+      duration_ms: 2.577125
+      type: 'test'
+      ...
+    # Subtest: strips Workflow, CTA and Bxx leftovers
+    ok 3 - strips Workflow, CTA and Bxx leftovers
+      ---
+      duration_ms: 1.38475
+      type: 'test'
+      ...
+    # Subtest: calendar article gets an honest product notice
+    ok 4 - calendar article gets an honest product notice
+      ---
+      duration_ms: 0.221416
+      type: 'test'
+      ...
+    # Subtest: sanitizeBlogFields covers excerpt and meta
+    ok 5 - sanitizeBlogFields covers excerpt and meta
+      ---
+      duration_ms: 0.112084
+      type: 'test'
+      ...
+    # Subtest: plain text helper trims leftover spaces after marker removal
+    ok 6 - plain text helper trims leftover spaces after marker removal
+      ---
+      duration_ms: 0.0415
+      type: 'test'
+      ...
+    1..6
+ok 68 - blog editorial sanitize
+  ---
+  duration_ms: 5.725125
+  type: 'suite'
+  ...
+# (node:26416) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-seo.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ranked print and VK article titles are preserved
+ok 69 - ranked print and VK article titles are preserved
+  ---
+  duration_ms: 1.232959
+  type: 'test'
+  ...
+# Subtest: previously rendered CSV notice is refreshed and repeated rendering stays idempotent
+ok 70 - previously rendered CSV notice is refreshed and repeated rendering stays idempotent
+  ---
+  duration_ms: 0.486958
+  type: 'test'
+  ...
+# Subtest: editorial redirects have no chains or self redirects
+ok 71 - editorial redirects have no chains or self redirects
+  ---
+  duration_ms: 0.059084
+  type: 'test'
+  ...
+# Subtest: internal article links avoid slash redirects while external links and query values stay intact
+ok 72 - internal article links avoid slash redirects while external links and query values stay intact
+  ---
+  duration_ms: 1.166708
+  type: 'test'
+  ...
+# (node:26417) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/blog-structured-data.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: editing a post without custom JSON-LD leaves the field empty
+ok 73 - editing a post without custom JSON-LD leaves the field empty
+  ---
+  duration_ms: 0.632916
+  type: 'test'
+  ...
+# Subtest: editing a post preserves nested JSON-LD and formats it for the textarea
+ok 74 - editing a post preserves nested JSON-LD and formats it for the textarea
+  ---
+  duration_ms: 0.665209
+  type: 'test'
+  ...
+# Subtest: editing a post with malformed JSON-LD keeps the original text for correction
+ok 75 - editing a post with malformed JSON-LD keeps the original text for correction
+  ---
+  duration_ms: 0.099208
+  type: 'test'
+  ...
+# (node:26418) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/bulk-preview.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: single URL column is valid despite delimiter auto-detection warning
+ok 76 - single URL column is valid despite delimiter auto-detection warning
+  ---
+  duration_ms: 1.470375
+  type: 'test'
+  ...
+# Subtest: BOM, semicolon, alias headers and UTM match the bulk API
+ok 77 - BOM, semicolon, alias headers and UTM match the bulk API
+  ---
+  duration_ms: 0.531709
+  type: 'test'
+  ...
+# Subtest: invalid and private URLs are reported rather than silently discarded
+ok 78 - invalid and private URLs are reported rather than silently discarded
+  ---
+  duration_ms: 0.42925
+  type: 'test'
+  ...
+# Subtest: missing column, no data, and malformed records block creation
+ok 79 - missing column, no data, and malformed records block creation
+  ---
+  duration_ms: 0.219417
+  type: 'test'
+  ...
+# Subtest: quoted commas and long names use the same naming rules as bulk API
+ok 80 - quoted commas and long names use the same naming rules as bulk API
+  ---
+  duration_ms: 0.168334
+  type: 'test'
+  ...
+# (node:26419) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/client-ip.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: clientIpFromHeaders ignores spoofed X-Forwarded-For without TRUST_PROXY
+ok 81 - clientIpFromHeaders ignores spoofed X-Forwarded-For without TRUST_PROXY
+  ---
+  duration_ms: 17.612584
+  type: 'test'
+  ...
+# Subtest: clientIpFromHeaders uses the first hop when TRUST_PROXY is on
+ok 82 - clientIpFromHeaders uses the first hop when TRUST_PROXY is on
+  ---
+  duration_ms: 0.433458
+  type: 'test'
+  ...
+# (node:26420) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/csv.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: csvEscape keeps ordinary text
+ok 83 - csvEscape keeps ordinary text
+  ---
+  duration_ms: 1.145417
+  type: 'test'
+  ...
+# Subtest: csvEscape quotes commas and doubled quotes
+ok 84 - csvEscape quotes commas and doubled quotes
+  ---
+  duration_ms: 0.197208
+  type: 'test'
+  ...
+# Subtest: csvEscape keeps spreadsheet formulas as text
+ok 85 - csvEscape keeps spreadsheet formulas as text
+  ---
+  duration_ms: 0.136125
+  type: 'test'
+  ...
+# Subtest: csvRow joins escaped cells
+ok 86 - csvRow joins escaped cells
+  ---
+  duration_ms: 0.246583
+  type: 'test'
+  ...
+# (node:26421) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/editorial-assets.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: redirect normalization preserves external case/query and rejects hidden system paths
+ok 87 - redirect normalization preserves external case/query and rejects hidden system paths
+  ---
+  duration_ms: 0.976791
+  type: 'test'
+  ...
+# Subtest: cycles and chains are rejected in both insertion orders with a final-address suggestion
+ok 88 - cycles and chains are rejected in both insertion orders with a final-address suggestion
+  ---
+  duration_ms: 0.245416
+  type: 'test'
+  ...
+# Subtest: responsive WebP variants have real dimensions, no enlargement and orientation correction
+ok 89 - responsive WebP variants have real dimensions, no enlargement and orientation correction
+  ---
+  duration_ms: 91.491291
+  type: 'test'
+  ...
+# Subtest: responsive figure survives Markdown sanitization; executable image attributes do not
+ok 90 - responsive figure survives Markdown sanitization; executable image attributes do not
+  ---
+  duration_ms: 6.512375
+  type: 'test'
+  ...
+# Subtest: alt updates target HTML/Markdown images without rewriting unrelated source
+ok 91 - alt updates target HTML/Markdown images without rewriting unrelated source
+  ---
+  duration_ms: 48.0825
+  type: 'test'
+  ...
+# Subtest: alt operation leaves Markdown code examples untouched
+ok 92 - alt operation leaves Markdown code examples untouched
+  ---
+  duration_ms: 3.024416
+  type: 'test'
+  ...
+# Subtest: image replacement preserves every unrelated HTML byte and updates responsive sources
+ok 93 - image replacement preserves every unrelated HTML byte and updates responsive sources
+  ---
+  duration_ms: 67.194584
+  type: 'test'
+  ...
+# Subtest: image replacement no-op stays byte-identical and never changes HTML code or similar URLs
+ok 94 - image replacement no-op stays byte-identical and never changes HTML code or similar URLs
+  ---
+  duration_ms: 18.322792
+  type: 'test'
+  ...
+# Subtest: Markdown replacement preserves title and code; new URLs cannot break destination syntax
+ok 95 - Markdown replacement preserves title and code; new URLs cannot break destination syntax
+  ---
+  duration_ms: 18.95125
+  type: 'test'
+  ...
+# (node:26422) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/entitlements.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: transaction failure does not write FREE over a paid workspace
+ok 96 - transaction failure does not write FREE over a paid workspace
+  ---
+  duration_ms: 6.550792
+  type: 'test'
+  ...
+# (node:26423) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/funnel.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: funnel open classification
+    # Subtest: treats owner, bot and local IP as test, not activation
+    ok 1 - treats owner, bot and local IP as test, not activation
+      ---
+      duration_ms: 0.599375
+      type: 'test'
+      ...
+    # Subtest: detects private IPs used in self-tests
+    ok 2 - detects private IPs used in self-tests
+      ---
+      duration_ms: 0.081041
+      type: 'test'
+      ...
+    1..2
+ok 97 - funnel open classification
+  ---
+  duration_ms: 1.249291
+  type: 'suite'
+  ...
+# Subtest: funnel source sanitizer
+    # Subtest: keeps a path or utm token and drops secrets
+    ok 1 - keeps a path or utm token and drops secrets
+      ---
+      duration_ms: 0.138208
+      type: 'test'
+      ...
+    1..1
+ok 98 - funnel source sanitizer
+  ---
+  duration_ms: 0.178041
+  type: 'suite'
+  ...
+# Subtest: funnel copy
+    # Subtest: does not equate a widget click with payment
+    ok 1 - does not equate a widget click with payment
+      ---
+      duration_ms: 0.372166
+      type: 'test'
+      ...
+    1..1
+ok 99 - funnel copy
+  ---
+  duration_ms: 0.517083
+  type: 'suite'
+  ...
+# (node:26424) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/html-script.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: jsonForHtmlScript
+    # Subtest: keeps a normal https URL as a JSON string
+    ok 1 - keeps a normal https URL as a JSON string
+      ---
+      duration_ms: 0.389792
+      type: 'test'
+      ...
+    # Subtest: does not emit a literal </script> that would break an HTML script tag
+    ok 2 - does not emit a literal </script> that would break an HTML script tag
+      ---
+      duration_ms: 0.056333
+      type: 'test'
+      ...
+    # Subtest: neutralizes uppercase SCRIPT breakout and ampersands
+    ok 3 - neutralizes uppercase SCRIPT breakout and ampersands
+      ---
+      duration_ms: 0.078417
+      type: 'test'
+      ...
+    # Subtest: shows why JSON.stringify is not safe inside <script>
+    ok 4 - shows why JSON.stringify is not safe inside <script>
+      ---
+      duration_ms: 0.042125
+      type: 'test'
+      ...
+    1..4
+ok 100 - jsonForHtmlScript
+  ---
+  duration_ms: 0.924375
+  type: 'suite'
+  ...
+# Subtest: pixelRedirectDocument
+    # Subtest: does not let a https URL close the redirect script
+    ok 1 - does not let a https URL close the redirect script
+      ---
+      duration_ms: 0.072
+      type: 'test'
+      ...
+    1..1
+ok 101 - pixelRedirectDocument
+  ---
+  duration_ms: 0.106792
+  type: 'suite'
+  ...
+# Subtest: htmlAttr
+    # Subtest: escapes quotes and angle brackets for meta refresh
+    ok 1 - escapes quotes and angle brackets for meta refresh
+      ---
+      duration_ms: 0.079625
+      type: 'test'
+      ...
+    1..1
+ok 102 - htmlAttr
+  ---
+  duration_ms: 0.287292
+  type: 'suite'
+  ...
+# (node:26425) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/interview-research.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: interview acceptance
+    # Subtest: counts planned segments independently of the current customer
+    ok 1 - counts planned segments independently of the current customer
+      ---
+      duration_ms: 1.283625
+      type: 'test'
+      ...
+    # Subtest: does not count blank cards as completed interviews
+    ok 2 - does not count blank cards as completed interviews
+      ---
+      duration_ms: 0.299625
+      type: 'test'
+      ...
+    # Subtest: detects stale acceptance flags after substantive interviews
+    ok 3 - detects stale acceptance flags after substantive interviews
+      ---
+      duration_ms: 0.170458
+      type: 'test'
+      ...
+    1..3
+ok 103 - interview acceptance
+  ---
+  duration_ms: 2.641125
+  type: 'suite'
+  ...
+# (node:26426) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/landing-input.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Telegram keeps public, invite and bot start links and rejects lookalike hosts
+ok 104 - Telegram keeps public, invite and bot start links and rejects lookalike hosts
+  ---
+  duration_ms: 0.951291
+  type: 'test'
+  ...
+# Subtest: WhatsApp creates an international wa.me link and encodes the unsent message
+ok 105 - WhatsApp creates an international wa.me link and encodes the unsent message
+  ---
+  duration_ms: 0.153166
+  type: 'test'
+  ...
+# Subtest: generic links still reject executable schemes
+ok 106 - generic links still reject executable schemes
+  ---
+  duration_ms: 0.093042
+  type: 'test'
+  ...
+# (node:26427) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/landing-seo.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public landing SEO contract
+    # Subtest: keeps all published landings discoverable with distinct content and existing PNG previews
+    ok 1 - keeps all published landings discoverable with distinct content and existing PNG previews
+      ---
+      duration_ms: 4.833292
+      type: 'test'
+      ...
+    # Subtest: does not expand post-auth redirects beyond the two explicit destinations
+    ok 2 - does not expand post-auth redirects beyond the two explicit destinations
+      ---
+      duration_ms: 0.144166
+      type: 'test'
+      ...
+    # Subtest: uses the same canonical identity for metadata, sharing and structured breadcrumbs
+    ok 3 - uses the same canonical identity for metadata, sharing and structured breadcrumbs
+      ---
+      duration_ms: 0.5155
+      type: 'test'
+      ...
+    1..3
+ok 107 - public landing SEO contract
+  ---
+  duration_ms: 5.886375
+  type: 'suite'
+  ...
+# (node:26428) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/legal-consent.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: registration requires two explicit confirmations and the displayed document version
+ok 108 - registration requires two explicit confirmations and the displayed document version
+  ---
+  duration_ms: 7.823584
+  type: 'test'
+  ...
+# Subtest: new acceptance cannot alter a previous edition or another acceptance receipt
+ok 109 - new acceptance cannot alter a previous edition or another acceptance receipt
+  ---
+  duration_ms: 8.686209
+  type: 'test'
+  ...
+# Subtest: acceptance evidence includes the complete versioned text and original acceptance time
+ok 110 - acceptance evidence includes the complete versioned text and original acceptance time
+  ---
+  duration_ms: 0.55025
+  type: 'test'
+  ...
+# Subtest: optional analytics permission expires and rejects old, malformed and future consent
+ok 111 - optional analytics permission expires and rejects old, malformed and future consent
+  ---
+  duration_ms: 0.1315
+  type: 'test'
+  ...
+# Subtest: TZ01 only corrects the payment recipient in privacy; terms and consent are unchanged
+ok 112 - TZ01 only corrects the payment recipient in privacy; terms and consent are unchanged
+  ---
+  duration_ms: 0.558
+  type: 'test'
+  ...
+# (node:26429) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/metrika-upload.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: attribution rejects foreign counters, malformed IDs and stale consent
+ok 113 - attribution rejects foreign counters, malformed IDs and stale consent
+  ---
+  duration_ms: 1.32875
+  type: 'test'
+  ...
+# Subtest: conversion payload uses paid time and real money, with no customer or workspace data
+ok 114 - conversion payload uses paid time and real money, with no customer or workspace data
+  ---
+  duration_ms: 0.136167
+  type: 'test'
+  ...
+# Subtest: uploader distinguishes acceptance, definite rejection and ambiguous outcome
+ok 115 - uploader distinguishes acceptance, definite rejection and ambiguous outcome
+  ---
+  duration_ms: 39.921833
+  type: 'test'
+  ...
+# (node:26430) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/migrate-adopt.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: P3005 adopt is recognized only for the empty-history case
+ok 116 - P3005 adopt is recognized only for the empty-history case
+  ---
+  duration_ms: 1.7925
+  type: 'test'
+  ...
+# (node:26431) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/migrations-idempotent.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: migrations start with an idempotent baseline and deploy has no generic resolve
+ok 117 - migrations start with an idempotent baseline and deploy has no generic resolve
+  ---
+  duration_ms: 3.893542
+  type: 'test'
+  ...
+# Subtest: CI workflow lives inside the qr-saas repository
+ok 118 - CI workflow lives inside the qr-saas repository
+  ---
+  duration_ms: 0.378709
+  type: 'test'
+  ...
+# (node:26432) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/partner-rules.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: partner codes are normalized and cannot contain URLs or query injection
+ok 119 - partner codes are normalized and cannot contain URLs or query injection
+  ---
+  duration_ms: 1.510666
+  type: 'test'
+  ...
+# Subtest: attribution requires an active partner and an unexpired 30-day window
+ok 120 - attribution requires an active partner and an unexpired 30-day window
+  ---
+  duration_ms: 0.07825
+  type: 'test'
+  ...
+# Subtest: first payments are per workspace; refunds remain distinct from renewals and net revenue
+ok 121 - first payments are per workspace; refunds remain distinct from renewals and net revenue
+  ---
+  duration_ms: 0.153167
+  type: 'test'
+  ...
+# (node:26433) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/plans.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: plan marketing labels stay honest
+    # Subtest: FREE does not list White Label, geo, or SLA as included
+    ok 1 - FREE does not list White Label, geo, or SLA as included
+      ---
+      duration_ms: 0.385875
+      type: 'test'
+      ...
+    # Subtest: PRO does not list White Label, geo, or SLA as included
+    ok 2 - PRO does not list White Label, geo, or SLA as included
+      ---
+      duration_ms: 0.0855
+      type: 'test'
+      ...
+    # Subtest: BUSINESS does not list White Label, geo, or SLA as included
+    ok 3 - BUSINESS does not list White Label, geo, or SLA as included
+      ---
+      duration_ms: 0.079834
+      type: 'test'
+      ...
+    # Subtest: paid exports are not sold as vector PDF or EPS
+    ok 4 - paid exports are not sold as vector PDF or EPS
+      ---
+      duration_ms: 0.05025
+      type: 'test'
+      ...
+    1..4
+ok 122 - plan marketing labels stay honest
+  ---
+  duration_ms: 0.97825
+  type: 'suite'
+  ...
+# Subtest: current public prices come from one config and PRO retains its team
+ok 123 - current public prices come from one config and PRO retains its team
+  ---
+  duration_ms: 0.062375
+  type: 'test'
+  ...
+# Subtest: FREE admits two dynamic codes and rejects further creation without touching old codes
+ok 124 - FREE admits two dynamic codes and rejects further creation without touching old codes
+  ---
+  duration_ms: 0.194875
+  type: 'test'
+  ...
+# Subtest: archive quota and bulk dynamic quota include every requested row
+ok 125 - archive quota and bulk dynamic quota include every requested row
+  ---
+  duration_ms: 0.065375
+  type: 'test'
+  ...
+# (node:26434) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/product-analytics.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: goals require current consent and a ready counter; payments cannot be forged by the client
+ok 126 - goals require current consent and a ready counter; payments cannot be forged by the client
+  ---
+  duration_ms: 0.767041
+  type: 'test'
+  ...
+# Subtest: failed downloads and HTML/JSON error responses do not count as received files
+ok 127 - failed downloads and HTML/JSON error responses do not count as received files
+  ---
+  duration_ms: 11.353833
+  type: 'test'
+  ...
+# Subtest: funnel parameters never include identities, URLs, QR contents or Wi-Fi secrets
+ok 128 - funnel parameters never include identities, URLs, QR contents or Wi-Fi secrets
+  ---
+  duration_ms: 0.6985
+  type: 'test'
+  ...
+# Subtest: public goal identifiers match the ten configured Metrika events
+ok 129 - public goal identifiers match the ten configured Metrika events
+  ---
+  duration_ms: 0.113625
+  type: 'test'
+  ...
+# Subtest: media QR type MP3 retains its type dimension
+ok 130 - media QR type MP3 retains its type dimension
+  ---
+  duration_ms: 0.085792
+  type: 'test'
+  ...
+# Subtest: scanner success carries only its type and surface, never decoded secrets
+ok 131 - scanner success carries only its type and surface, never decoded secrets
+  ---
+  duration_ms: 0.053542
+  type: 'test'
+  ...
+# (node:26435) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/public-url.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: publicSiteUrl never emits a double slash after the host
+ok 132 - publicSiteUrl never emits a double slash after the host
+  ---
+  duration_ms: 0.392583
+  type: 'test'
+  ...
+# (node:26436) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-a6.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: A6 print has physical page dimensions and a decodable 60 mm code
+ok 133 - A6 print has physical page dimensions and a decodable 60 mm code
+  ---
+  duration_ms: 483.979666
+  type: 'test'
+  ...
+# (node:26437) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-activation.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: independent static download activates without an impossible external scan
+ok 134 - independent static download activates without an impossible external scan
+  ---
+  duration_ms: 0.457667
+  type: 'test'
+  ...
+# Subtest: managed QR and legacy hosted vCard require an external open of the same code
+ok 135 - managed QR and legacy hosted vCard require an external open of the same code
+  ---
+  duration_ms: 0.175375
+  type: 'test'
+  ...
+# Subtest: events from different codes or deleted unknown codes do not produce a false activation
+ok 136 - events from different codes or deleted unknown codes do not produce a false activation
+  ---
+  duration_ms: 0.058042
+  type: 'test'
+  ...
+# (node:26438) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-consent.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: pixel changes bump consent version so old cookies do not apply
+ok 137 - pixel changes bump consent version so old cookies do not apply
+  ---
+  duration_ms: 0.397958
+  type: 'test'
+  ...
+# Subtest: requiredConsentVersion stays 0 without pixels or a GDPR gate
+ok 138 - requiredConsentVersion stays 0 without pixels or a GDPR gate
+  ---
+  duration_ms: 0.060042
+  type: 'test'
+  ...
+# Subtest: cookie name is per short code
+ok 139 - cookie name is per short code
+  ---
+  duration_ms: 0.041292
+  type: 'test'
+  ...
+# (node:26439) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-draft.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: qr draft
+    # Subtest: adds https and rejects unsafe schemes
+    ok 1 - adds https and rejects unsafe schemes
+      ---
+      duration_ms: 0.865625
+      type: 'test'
+      ...
+    # Subtest: names a QR from the destination host
+    ok 2 - names a QR from the destination host
+      ---
+      duration_ms: 0.073791
+      type: 'test'
+      ...
+    # Subtest: parses a stored draft and ignores junk
+    ok 3 - parses a stored draft and ignores junk
+      ---
+      duration_ms: 0.364625
+      type: 'test'
+      ...
+    # Subtest: builds a continue path that post-auth redirect will accept
+    ok 4 - builds a continue path that post-auth redirect will accept
+      ---
+      duration_ms: 0.198792
+      type: 'test'
+      ...
+    # Subtest: reads prefill from search params
+    ok 5 - reads prefill from search params
+      ---
+      duration_ms: 0.092917
+      type: 'test'
+      ...
+    1..5
+ok 140 - qr draft
+  ---
+  duration_ms: 1.987417
+  type: 'suite'
+  ...
+# Subtest: safePostAuthPath
+    # Subtest: allows dashboard create and drops open redirects
+    ok 1 - allows dashboard create and drops open redirects
+      ---
+      duration_ms: 0.105959
+      type: 'test'
+      ...
+    1..1
+ok 141 - safePostAuthPath
+  ---
+  duration_ms: 0.138417
+  type: 'suite'
+  ...
+# (node:26440) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-frame.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: every frame retains decodable QR and Cyrillic outlines in all exports
+ok 142 - every frame retains decodable QR and Cyrillic outlines in all exports
+  ---
+  duration_ms: 1757.794666
+  type: 'test'
+  ...
+# Subtest: caption contrast is included in final image quality
+ok 143 - caption contrast is included in final image quality
+  ---
+  duration_ms: 0.33725
+  type: 'test'
+  ...
+# Subtest: filled frames choose readable captions and reject a matching caption color
+ok 144 - filled frames choose readable captions and reject a matching caption color
+  ---
+  duration_ms: 0.142584
+  type: 'test'
+  ...
+# Subtest: new templates enforce a four-module quiet zone even for small legacy pixel margins
+ok 145 - new templates enforce a four-module quiet zone even for small legacy pixel margins
+  ---
+  duration_ms: 0.473875
+  type: 'test'
+  ...
+# (node:26441) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-hosted-media.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: upload landing rewrites own files to asset path and keeps YouTube
+ok 146 - upload landing rewrites own files to asset path and keeps YouTube
+  ---
+  duration_ms: 1.124792
+  type: 'test'
+  ...
+# Subtest: upload landing download chain keeps public access and dirty download gates
+ok 147 - upload landing download chain keeps public access and dirty download gates
+  ---
+  duration_ms: 0.170625
+  type: 'test'
+  ...
+# (node:26442) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-lifetime-policy.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: qr lifetime policy
+    # Subtest: warns that deleting a dynamic QR stops the printed short link
+    ok 1 - warns that deleting a dynamic QR stops the printed short link
+      ---
+      duration_ms: 0.418583
+      type: 'test'
+      ...
+    # Subtest: does not claim a static printed image can be switched off
+    ok 2 - does not claim a static printed image can be switched off
+      ---
+      duration_ms: 0.928917
+      type: 'test'
+      ...
+    # Subtest: builds an honest archived landing path
+    ok 3 - builds an honest archived landing path
+      ---
+      duration_ms: 0.273417
+      type: 'test'
+      ...
+    1..3
+ok 148 - qr lifetime policy
+  ---
+  duration_ms: 2.147458
+  type: 'suite'
+  ...
+# Subtest: library query
+    # Subtest: parses search, kind and page from the URL
+    ok 1 - parses search, kind and page from the URL
+      ---
+      duration_ms: 0.322459
+      type: 'test'
+      ...
+    # Subtest: keeps filters in pagination links so page 2 does not drop old matches
+    ok 2 - keeps filters in pagination links so page 2 does not drop old matches
+      ---
+      duration_ms: 0.246292
+      type: 'test'
+      ...
+    # Subtest: shows the live target for dynamic codes
+    ok 3 - shows the live target for dynamic codes
+      ---
+      duration_ms: 0.129083
+      type: 'test'
+      ...
+    # Subtest: shows the encoded URL for a static code instead of a placeholder
+    ok 4 - shows the encoded URL for a static code instead of a placeholder
+      ---
+      duration_ms: 0.146042
+      type: 'test'
+      ...
+    # Subtest: uses the public hosted path, not a bare short code
+    ok 5 - uses the public hosted path, not a bare short code
+      ---
+      duration_ms: 0.486042
+      type: 'test'
+      ...
+    1..5
+ok 149 - library query
+  ---
+  duration_ms: 1.648959
+  type: 'suite'
+  ...
+# Subtest: yookassa amount
+    # Subtest: accepts whole-ruble provider amounts and rejects kopecks
+    ok 1 - accepts whole-ruble provider amounts and rejects kopecks
+      ---
+      duration_ms: 0.375625
+      type: 'test'
+      ...
+    # Subtest: reads trusted metadata strings
+    ok 2 - reads trusted metadata strings
+      ---
+      duration_ms: 0.270834
+      type: 'test'
+      ...
+    1..2
+ok 150 - yookassa amount
+  ---
+  duration_ms: 0.810792
+  type: 'suite'
+  ...
+# (node:26443) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-public-access.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public access blocks archive, expiry, scan limit and password
+ok 151 - public access blocks archive, expiry, scan limit and password
+  ---
+  duration_ms: 0.559
+  type: 'test'
+  ...
+# Subtest: view grant keeps media of the last allowed scan and blocks a new direct fetch
+ok 152 - view grant keeps media of the last allowed scan and blocks a new direct fetch
+  ---
+  duration_ms: 13.829791
+  type: 'test'
+  ...
+# (node:26444) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-public-dto.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: public QR payload keeps the protection flag and drops the hash
+ok 153 - public QR payload keeps the protection flag and drops the hash
+  ---
+  duration_ms: 0.359458
+  type: 'test'
+  ...
+# (node:26445) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-scan-result.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: scanner parses short QR-S links without resolving or following them
+ok 154 - scanner parses short QR-S links without resolving or following them
+  ---
+  duration_ms: 0.735167
+  type: 'test'
+  ...
+# Subtest: executable schemes, markup, control-character URLs and malformed links stay inert
+ok 155 - executable schemes, markup, control-character URLs and malformed links stay inert
+  ---
+  duration_ms: 0.282792
+  type: 'test'
+  ...
+# Subtest: suspicious URLs preserve the real hostname and block embedded credentials
+ok 156 - suspicious URLs preserve the real hostname and block embedded credentials
+  ---
+  duration_ms: 1.742208
+  type: 'test'
+  ...
+# Subtest: Wi-Fi escaped separators and passwords remain intact
+ok 157 - Wi-Fi escaped separators and passwords remain intact
+  ---
+  duration_ms: 0.529583
+  type: 'test'
+  ...
+# Subtest: vCard handles folded names, grouped fields, multiple contacts and escaped text
+ok 158 - vCard handles folded names, grouped fields, multiple contacts and escaped text
+  ---
+  duration_ms: 0.225666
+  type: 'test'
+  ...
+# Subtest: bundled QR decoder reads URL, Cyrillic text, Wi-Fi and vCard, including degraded images
+ok 159 - bundled QR decoder reads URL, Cyrillic text, Wi-Fi and vCard, including degraded images
+  ---
+  duration_ms: 643.883208
+  type: 'test'
+  ...
+# (node:26446) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/qr-styled-render.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: styled exports round-trip UTF-8 text, emoji, Wi-Fi and contacts
+ok 160 - styled exports round-trip UTF-8 text, emoji, Wi-Fi and contacts
+  ---
+  duration_ms: 398.280834
+  type: 'test'
+  ...
+# Subtest: logoMargin shrinks the drawn logo inside the reserved module box
+ok 161 - logoMargin shrinks the drawn logo inside the reserved module box
+  ---
+  duration_ms: 0.322583
+  type: 'test'
+  ...
+# Subtest: server SVG logo geometry matches qr-code-styling preview
+ok 162 - server SVG logo geometry matches qr-code-styling preview
+  ---
+  duration_ms: 97.293709
+  type: 'test'
+  ...
+# Subtest: server PNG export changes when logoMargin changes
+ok 163 - server PNG export changes when logoMargin changes
+  ---
+  duration_ms: 35.021958
+  type: 'test'
+  ...
+# Subtest: DNS rebinding does not send logo HTTP to loopback after a public lookup
+ok 164 - DNS rebinding does not send logo HTTP to loopback after a public lookup
+  ---
+  duration_ms: 0.781792
+  type: 'test'
+  ...
+# (node:26447) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/request-body-limit.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: bulk rejects missing and oversized Content-Length before the body is read
+ok 165 - bulk rejects missing and oversized Content-Length before the body is read
+  ---
+  duration_ms: 0.952042
+  type: 'test'
+  ...
+# Subtest: capped body reader stops before buffering more than the limit
+ok 166 - capped body reader stops before buffering more than the limit
+  ---
+  duration_ms: 24.539708
+  type: 'test'
+  ...
+# Subtest: upload caps undeclared chunked bodies and cancels overflow
+ok 167 - upload caps undeclared chunked bodies and cancels overflow
+  ---
+  duration_ms: 2.607375
+  type: 'test'
+  ...
+# Subtest: upload accepts a bounded multipart without Content-Length
+ok 168 - upload accepts a bounded multipart without Content-Length
+  ---
+  duration_ms: 5.730417
+  type: 'test'
+  ...
+# (node:26448) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/reserved-email.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: telegram identity namespace cannot be registered as a normal email
+ok 169 - telegram identity namespace cannot be registered as a normal email
+  ---
+  duration_ms: 0.398042
+  type: 'test'
+  ...
+# (node:26449) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/review-f08-f12.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: password recovery is allowed for unverified password accounts, not telegram-auth
+ok 170 - password recovery is allowed for unverified password accounts, not telegram-auth
+  ---
+  duration_ms: 0.357625
+  type: 'test'
+  ...
+# Subtest: Yandex linking does not verify a mismatched local email
+ok 171 - Yandex linking does not verify a mismatched local email
+  ---
+  duration_ms: 0.858333
+  type: 'test'
+  ...
+# Subtest: dirty editor does not bind a persisted download id
+ok 172 - dirty editor does not bind a persisted download id
+  ---
+  duration_ms: 0.070125
+  type: 'test'
+  ...
+# (node:26450) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/robokassa.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Robokassa signed payment and receipt
+    # Subtest: matches the documented encoded Receipt signature and round-trips through POST
+    ok 1 - matches the documented encoded Receipt signature and round-trips through POST
+      ---
+      duration_ms: 9.129083
+      type: 'test'
+      ...
+    # Subtest: supports the selected SHA algorithm
+    ok 2 - supports the selected SHA algorithm
+      ---
+      duration_ms: 0.313125
+      type: 'test'
+      ...
+    # Subtest: keeps invoice IDs precise and in the documented range
+    ok 3 - keeps invoice IDs precise and in the documented range
+      ---
+      duration_ms: 4.089875
+      type: 'test'
+      ...
+    # Subtest: rejects invalid amounts and receipt names
+    ok 4 - rejects invalid amounts and receipt names
+      ---
+      duration_ms: 0.207041
+      type: 'test'
+      ...
+    1..4
+ok 173 - Robokassa signed payment and receipt
+  ---
+  duration_ms: 14.725375
+  type: 'suite'
+  ...
+# Subtest: Robokassa ResultURL verification
+    # Subtest: accepts case-insensitive hashes and six-decimal RUB amounts
+    ok 1 - accepts case-insensitive hashes and six-decimal RUB amounts
+      ---
+      duration_ms: 1.216083
+      type: 'test'
+      ...
+    # Subtest: rejects signed notifications for another amount, invoice, order or mode
+    ok 2 - rejects signed notifications for another amount, invoice, order or mode
+      ---
+      duration_ms: 1.188583
+      type: 'test'
+      ...
+    # Subtest: rejects missing or malformed signatures and duplicate parameters
+    ok 3 - rejects missing or malformed signatures and duplicate parameters
+      ---
+      duration_ms: 1.766666
+      type: 'test'
+      ...
+    # Subtest: cannot confirm a live order with test keys or the checkout password
+    ok 4 - cannot confirm a live order with test keys or the checkout password
+      ---
+      duration_ms: 3.492958
+      type: 'test'
+      ...
+    # Subtest: requires RUB and the correct provider
+    ok 5 - requires RUB and the correct provider
+      ---
+      duration_ms: 0.143167
+      type: 'test'
+      ...
+    # Subtest: rejects non-zero sub-kopeck precision, exponent, signs and garbage
+    ok 6 - rejects non-zero sub-kopeck precision, exponent, signs and garbage
+      ---
+      duration_ms: 0.177333
+      type: 'test'
+      ...
+    1..6
+ok 174 - Robokassa ResultURL verification
+  ---
+  duration_ms: 8.259667
+  type: 'suite'
+  ...
+# (node:26452) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/safe-egress.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: HTTP 204 205 redirect oversize and abort reject without killing the process
+ok 175 - HTTP 204 205 redirect oversize and abort reject without killing the process
+  ---
+  duration_ms: 75.429417
+  type: 'test'
+  ...
+# Subtest: valid PNG is returned through pinned HTTP
+ok 176 - valid PNG is returned through pinned HTTP
+  ---
+  duration_ms: 13.118542
+  type: 'test'
+  ...
+# (node:26453) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/scannability.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: white gradient and finders are not safe to use
+ok 177 - white gradient and finders are not safe to use
+  ---
+  duration_ms: 1.25525
+  type: 'test'
+  ...
+# Subtest: transparent gradient and finders are not safe to use
+ok 178 - transparent gradient and finders are not safe to use
+  ---
+  duration_ms: 0.180875
+  type: 'test'
+  ...
+# Subtest: styleSchema rejects mapped-loopback logo URLs
+ok 179 - styleSchema rejects mapped-loopback logo URLs
+  ---
+  duration_ms: 6.645333
+  type: 'test'
+  ...
+# Subtest: styleSchema rejects transparent gradient and finder colors
+ok 180 - styleSchema rejects transparent gradient and finder colors
+  ---
+  duration_ms: 3.790167
+  type: 'test'
+  ...
+# Subtest: empty MENU, VCARD and LOCATION payloads are rejected
+ok 181 - empty MENU, VCARD and LOCATION payloads are rejected
+  ---
+  duration_ms: 1.457417
+  type: 'test'
+  ...
+# (node:26454) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/scenario-landings.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: scenario landings
+    # Subtest: covers exactly two public scenarios with unique headings
+    ok 1 - covers exactly two public scenarios with unique headings
+      ---
+      duration_ms: 0.692583
+      type: 'test'
+      ...
+    # Subtest: pre-fills a dynamic URL form without stuffing a fake destination
+    ok 2 - pre-fills a dynamic URL form without stuffing a fake destination
+      ---
+      duration_ms: 0.125958
+      type: 'test'
+      ...
+    # Subtest: keeps hosted-type next paths inside post-auth allowlist
+    ok 3 - keeps hosted-type next paths inside post-auth allowlist
+      ---
+      duration_ms: 0.162208
+      type: 'test'
+      ...
+    # Subtest: stays aligned with SEO titles for the same URLs
+    ok 4 - stays aligned with SEO titles for the same URLs
+      ---
+      duration_ms: 0.047542
+      type: 'test'
+      ...
+    1..4
+ok 182 - scenario landings
+  ---
+  duration_ms: 1.398542
+  type: 'suite'
+  ...
+# Subtest: popular QR types
+    # Subtest: puts URL, menu, Wi-Fi and vCard first
+    ok 1 - puts URL, menu, Wi-Fi and vCard first
+      ---
+      duration_ms: 0.092625
+      type: 'test'
+      ...
+    1..1
+ok 183 - popular QR types
+  ---
+  duration_ms: 0.130334
+  type: 'suite'
+  ...
+# Subtest: printed QR after trial
+    # Subtest: states that printed dynamic codes keep opening
+    ok 1 - states that printed dynamic codes keep opening
+      ---
+      duration_ms: 0.1525
+      type: 'test'
+      ...
+    1..1
+ok 184 - printed QR after trial
+  ---
+  duration_ms: 0.446666
+  type: 'suite'
+  ...
+# (node:26456) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/seo-hygiene.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: sitemap deny list
+    # Subtest: never lists login, register, cabinet or customer QR destinations
+    ok 1 - never lists login, register, cabinet or customer QR destinations
+      ---
+      duration_ms: 0.904042
+      type: 'test'
+      ...
+    1..1
+ok 185 - sitemap deny list
+  ---
+  duration_ms: 1.282208
+  type: 'suite'
+  ...
+# Subtest: default robots.txt
+    # Subtest: closes private surfaces and keeps login crawlable so noindex can be read
+    ok 1 - closes private surfaces and keeps login crawlable so noindex can be read
+      ---
+      duration_ms: 0.138125
+      type: 'test'
+      ...
+    1..1
+ok 186 - default robots.txt
+  ---
+  duration_ms: 0.176334
+  type: 'suite'
+  ...
+# Subtest: noindex headers
+    # Subtest: marks auth, cabinet and printed QR hops, not marketing pages
+    ok 1 - marks auth, cabinet and printed QR hops, not marketing pages
+      ---
+      duration_ms: 0.061542
+      type: 'test'
+      ...
+    1..1
+ok 187 - noindex headers
+  ---
+  duration_ms: 0.147125
+  type: 'suite'
+  ...
+# Subtest: blog list indexing
+    # Subtest: indexes only the first unfiltered listing
+    ok 1 - indexes only the first unfiltered listing
+      ---
+      duration_ms: 0.063917
+      type: 'test'
+      ...
+    1..1
+ok 188 - blog list indexing
+  ---
+  duration_ms: 0.111417
+  type: 'suite'
+  ...
+# (node:26458) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/session-jwt.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rotation accepts an unexpired legacy session only during its original lifetime
+ok 189 - rotation accepts an unexpired legacy session only during its original lifetime
+  ---
+  duration_ms: 9.125625
+  type: 'test'
+  ...
+# Subtest: old key cannot mint post-rotation or extended sessions; new key works
+ok 190 - old key cannot mint post-rotation or extended sessions; new key works
+  ---
+  duration_ms: 5.3015
+  type: 'test'
+  ...
+# (node:26459) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/static-qr.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: all public static formats encode useful independent content
+ok 191 - all public static formats encode useful independent content
+  ---
+  duration_ms: 13.82025
+  type: 'test'
+  ...
+# Subtest: Wi-Fi preserves spaces and escapes separators instead of changing credentials
+ok 192 - Wi-Fi preserves spaces and escapes separators instead of changing credentials
+  ---
+  duration_ms: 1.661542
+  type: 'test'
+  ...
+# Subtest: vCard escapes line/property injection and direct variant does not convert old /v codes
+ok 193 - vCard escapes line/property injection and direct variant does not convert old /v codes
+  ---
+  duration_ms: 4.397708
+  type: 'test'
+  ...
+# Subtest: invalid, private, unsupported and oversized inputs do not produce a misleading code
+ok 194 - invalid, private, unsupported and oversized inputs do not produce a misleading code
+  ---
+  duration_ms: 0.376834
+  type: 'test'
+  ...
+# Subtest: archive drafts whitelist payloads, expire and cannot import remote logos
+ok 195 - archive drafts whitelist payloads, expire and cannot import remote logos
+  ---
+  duration_ms: 3.466542
+  type: 'test'
+  ...
+# Subtest: four-module quiet zone scales with new archives; legacy pixel margins stay unchanged
+ok 196 - four-module quiet zone scales with new archives; legacy pixel margins stay unchanged
+  ---
+  duration_ms: 1.146292
+  type: 'test'
+  ...
+# (node:26460) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/telegram-identity.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Telegram subject is a positive safe integer owned by the provider
+ok 197 - Telegram subject is a positive safe integer owned by the provider
+  ---
+  duration_ms: 0.471167
+  type: 'test'
+  ...
+# Subtest: legacy Telegram binding requires the original verified provider-only account
+ok 198 - legacy Telegram binding requires the original verified provider-only account
+  ---
+  duration_ms: 0.092333
+  type: 'test'
+  ...
+# (node:26461) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/tenant.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: owned workspace fileId is accepted and a foreign file is rejected
+ok 199 - owned workspace fileId is accepted and a foreign file is rejected
+  ---
+  duration_ms: 0.730625
+  type: 'test'
+  ...
+# (node:26462) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/tz10-editorial.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: related articles: manual order, category, common tag count, date, exclude self/drafts
+ok 200 - related articles: manual order, category, common tag count, date, exclude self/drafts
+  ---
+  duration_ms: 0.706625
+  type: 'test'
+  ...
+# Subtest: legacy HTML link maintenance preserves images/bytes and rejects unrelated changes
+ok 201 - legacy HTML link maintenance preserves images/bytes and rejects unrelated changes
+  ---
+  duration_ms: 0.424917
+  type: 'test'
+  ...
+# Subtest: configured robots keep public API files crawlable and put Sitemap last
+ok 202 - configured robots keep public API files crawlable and put Sitemap last
+  ---
+  duration_ms: 1.194541
+  type: 'test'
+  ...
+# Subtest: editorial fields normalize tags and reject duplicate related IDs
+ok 203 - editorial fields normalize tags and reject duplicate related IDs
+  ---
+  duration_ms: 1.713458
+  type: 'test'
+  ...
+# Subtest: Metrika frame policy trusts explicit HTTPS domains while private routes stay same-origin
+ok 204 - Metrika frame policy trusts explicit HTTPS domains while private routes stay same-origin
+  ---
+  duration_ms: 0.127542
+  type: 'test'
+  ...
+# (node:26463) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/url.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: rejects IPv4-mapped loopback in http URLs
+ok 205 - rejects IPv4-mapped loopback in http URLs
+  ---
+  duration_ms: 1.158959
+  type: 'test'
+  ...
+# Subtest: policy links reject unsafe schemes and private hosts
+ok 206 - policy links reject unsafe schemes and private hosts
+  ---
+  duration_ms: 0.401208
+  type: 'test'
+  ...
+# Subtest: policy edits preserve QR content and can explicitly clear a link
+ok 207 - policy edits preserve QR content and can explicitly clear a link
+  ---
+  duration_ms: 0.136209
+  type: 'test'
+  ...
+# Subtest: hosted asset path is displayable but not a generic public URL
+ok 208 - hosted asset path is displayable but not a generic public URL
+  ---
+  duration_ms: 0.183625
+  type: 'test'
+  ...
+# (node:26464) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/validation.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: registration and email changes cannot claim a Telegram identity
+ok 209 - registration and email changes cannot claim a Telegram identity
+  ---
+  duration_ms: 1.631041
+  type: 'test'
+  ...
+# Subtest: workspace upload path is accepted for PDF IMAGE MP3 VIDEO create and patch checks
+ok 210 - workspace upload path is accepted for PDF IMAGE MP3 VIDEO create and patch checks
+  ---
+  duration_ms: 1.289959
+  type: 'test'
+  ...
+# Subtest: payload media URLs still reject relative, hosted-asset and mismatched fileId
+ok 211 - payload media URLs still reject relative, hosted-asset and mismatched fileId
+  ---
+  duration_ms: 0.763125
+  type: 'test'
+  ...
+# (node:26465) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/workspace-file-path.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: private uploads are addressed by an authenticated workspace path
+ok 212 - private uploads are addressed by an authenticated workspace path
+  ---
+  duration_ms: 1.065833
+  type: 'test'
+  ...
+# (node:26466) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/workspace-invite.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: invite does not occupy a seat until the person accepts
+ok 213 - invite does not occupy a seat until the person accepts
+  ---
+  duration_ms: 0.406834
+  type: 'test'
+  ...
+# Subtest: only the invited account can accept a live invite
+ok 214 - only the invited account can accept a live invite
+  ---
+  duration_ms: 0.126917
+  type: 'test'
+  ...
+# (node:26467) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/workspace-plan.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: archive keeps its price and limits when public plans change
+ok 215 - archive keeps its price and limits when public plans change
+  ---
+  duration_ms: 1.575041
+  type: 'test'
+  ...
+# Subtest: corrupt or wrong-tier archives fail closed
+ok 216 - corrupt or wrong-tier archives fail closed
+  ---
+  duration_ms: 0.427542
+  type: 'test'
+  ...
+# Subtest: friends is free, unlimited and absent from the public catalog
+ok 217 - friends is free, unlimited and absent from the public catalog
+  ---
+  duration_ms: 0.386583
+  type: 'test'
+  ...
+# (node:26468) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/mvmolkov/projects/qr/qr-robokassa-integration/src/lib/yandex-auth-config.test.ts is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to /Users/mvmolkov/projects/qr/qr-robokassa-integration/package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Yandex availability requires the flag, both credentials and the exact public callback
+ok 218 - Yandex availability requires the flag, both credentials and the exact public callback
+  ---
+  duration_ms: 1.003292
+  type: 'test'
+  ...
+1..218
+# tests 267
+# suites 27
+# pass 267
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4223.649375

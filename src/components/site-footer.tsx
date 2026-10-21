@@ -44,6 +44,7 @@ export async function SiteFooter({ session, children }: Props) {
             <ul className="mt-3 space-y-2" style={{ listStyle: "none", padding: 0, margin: "12px 0 0" }}>
               {[
                 { label: "Как работает", href: "/#how" },
+                { label: "Сканер QR-кода", href: "/skaner-qr-koda" },
                 { label: "Тарифы", href: "/pricing" },
                 { label: "FAQ", href: "/#faq" },
                 { label: "Блог", href: "/blog" },
