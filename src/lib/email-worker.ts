@@ -37,6 +37,16 @@ export async function emailStillRelevant(job: EmailOutbox, now = new Date()) {
     const user = await db.user.findUnique({ where: { id: job.userId } });
     if (!user || user.email !== job.toEmail) return false;
   }
+  if (job.kind === "payment_received" && job.workspaceId && job.userId) {
+    const owner = await db.membership.findFirst({
+      where: {
+        userId: job.userId,
+        workspaceId: job.workspaceId,
+        role: "OWNER",
+      },
+    });
+    if (!owner) return false;
+  }
   if (context.verificationId) {
     const token = await db.emailVerificationToken.findUnique({
       where: { id: String(context.verificationId) },

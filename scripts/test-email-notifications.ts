@@ -154,6 +154,21 @@ try {
     fulfilled.status === "SUCCEEDED" && !!fulfilled.subscriptionId,
     "Receipt is queued only with activated rights",
   );
+  const receipt = await db.emailOutbox.findUniqueOrThrow({
+    where: { key: `payment:${payment.id}:${user.id}` },
+  });
+  await db.membership.updateMany({
+    where: { userId: user.id, workspaceId: id },
+    data: { role: "MEMBER" },
+  });
+  check(
+    !(await emailStillRelevant(receipt)),
+    "Removed owner cannot receive delayed payment details",
+  );
+  await db.membership.updateMany({
+    where: { userId: user.id, workspaceId: id },
+    data: { role: "OWNER" },
+  });
   const invitation = await db.workspaceInvite.create({
     data: {
       workspaceId: id,
