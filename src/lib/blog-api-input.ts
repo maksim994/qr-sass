@@ -8,3 +8,7 @@ export const articleListSchema = z.object({ status: z.enum(["draft", "scheduled"
 export function forbiddenApiPublication(input: unknown) {
   return input !== null && typeof input === "object" && ["status", "published", "publishedAt", "scheduledAt", "firstPublishedAt"].some(key => Object.hasOwn(input, key));
 }
+
+// Keep publication, identity and editorial timestamps out of pending patches.
+export const articleRevisionFields = articleApiFields.omit({ slug: true, minorEdit: true });
+export const articleRevisionSchema = articleRevisionFields.extend({ version: z.number().int().min(0).optional() });

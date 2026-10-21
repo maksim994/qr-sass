@@ -98,7 +98,7 @@ export async function changePreviewToken(id: string, actor: BlogActor, revoke = 
     // Serialize concurrent rotations without changing the article's editorial timestamp.
     const rows = await tx.$queryRaw<{ id: string; title: string }[]>`SELECT "id", "title" FROM "BlogPost" WHERE "id" = ${id} FOR UPDATE`;
     if (!rows[0]) throw new BlogEditorError(MSG.POST_NOT_FOUND, 404);
-    await tx.blogPreviewToken.updateMany({ where: { postId: id, revokedAt: null }, data: { revokedAt: new Date() } });
+    await tx.blogPreviewToken.updateMany({ where: { postId: id, pendingRevisionId: null, revokedAt: null }, data: { revokedAt: new Date() } });
     if (!revoke) await tx.blogPreviewToken.create({ data: { postId: id, hash: hashPreviewToken(token) } });
     await tx.blogEvent.create({ data: { postId: id, postTitle: rows[0].title, ...actor, type: revoke ? "preview_revoke" : "preview_create", fields: [] } });
   });

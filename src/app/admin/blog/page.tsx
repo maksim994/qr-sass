@@ -19,6 +19,7 @@ export default async function AdminBlogPage() {
       scheduledAt: true,
       createdAt: true,
       updatedAt: true,
+      pendingRevision: { select: { id: true } },
     },
   });
 

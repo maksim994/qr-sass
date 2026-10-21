@@ -121,9 +121,6 @@ export default async function BlogListPage({ searchParams }: Props) {
   });
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const featured = currentPage === 1 && cleanPosts.length > 0 ? cleanPosts[0] : null;
-  const gridPosts = currentPage === 1 && featured ? cleanPosts.slice(1) : cleanPosts;
-  const featuredMeta = featured ? getBlogCardMeta(featured.category?.slug, 0) : null;
 
   return (
     <main style={{ background: "var(--surface-page)" }}>
@@ -163,87 +160,18 @@ export default async function BlogListPage({ searchParams }: Props) {
             <div className="p-12 text-center rounded-2xl" style={{ border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--text-muted)" }}>
               {activeCategory ? `В категории «${activeCategory.name}» пока нет статей.` : "Пока нет опубликованных статей."}
             </div>
-          ) : (
-            featured && (
-              <Link
-                href={`/blog/${featured.slug}`}
-                className="qrs-card-lift qrs-featured-grid"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.05fr 0.95fr",
-                  gap: 0,
-                  background: "var(--surface-card)",
-                  border: "1px solid var(--border-default)",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  boxShadow: "var(--shadow-sm)",
-                }}
-              >
-                <div style={{ position: "relative", minHeight: "300px", background: featuredMeta?.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ position: "absolute", top: "20px", left: "20px", padding: "6px 14px", borderRadius: "999px", background: "var(--color-accent)", color: "#fff", font: "var(--fw-bold) 11px/1 var(--font-sans)", letterSpacing: "0.04em" }}>
-                    РЕКОМЕНДУЕМ
-                  </span>
-                  {featured.coverImageUrl ? (
-                    <Image src={blogMediaImageSrc(featured.coverImageUrl)} alt={featured.title} fill className="object-cover" priority sizes="(max-width:900px) 100vw, 50vw" />
-                  ) : (
-                    <BlogCardIcon type={featuredMeta?.icon ?? "qr"} size={88} />
-                  )}
-                </div>
-                <div style={{ padding: "clamp(28px, 4vw, 44px)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ font: "var(--fw-bold) 11px/1 var(--font-sans)", letterSpacing: "0.05em", textTransform: "uppercase", color: featuredMeta?.color }}>
-                      {featured.category?.name ?? "Статья"}
-                    </span>
-                    <span style={{ width: "3px", height: "3px", borderRadius: "50%", background: "var(--text-subtle)" }} />
-                    {featured.readingTimeMinutes != null && (
-                      <span style={{ font: "var(--fw-medium) 13px/1 var(--font-sans)", color: "var(--text-muted)" }}>
-                        {featured.readingTimeMinutes} минут чтения
-                      </span>
-                    )}
-                  </div>
-                  <h2 style={{ marginTop: "14px", font: "var(--fw-bold) clamp(1.5rem, 3vw, 2rem)/1.2 var(--font-display)", letterSpacing: "-0.02em", color: "var(--text-strong)", textWrap: "balance" }}>
-                    {featured.title}
-                  </h2>
-                  {featured.excerpt && (
-                    <p style={{ marginTop: "14px", font: "var(--fw-regular) 1rem/1.65 var(--font-sans)", color: "var(--text-muted)" }}>
-                      {featured.excerpt}
-                    </p>
-                  )}
-                  <div style={{ marginTop: "24px", display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ width: "40px", height: "40px", borderRadius: "999px", background: "var(--color-primary-subtle)", color: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", font: "var(--fw-bold) 14px/1 var(--font-sans)" }}>
-                      {(featured.authorName ?? "QR").split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "QR"}
-                    </span>
-                    <div>
-                      <div style={{ font: "var(--fw-semibold) 14px/1.2 var(--font-sans)", color: "var(--text-strong)" }}>
-                        {featured.authorName ?? "Редакция QR-S"}
-                      </div>
-                      <div style={{ font: "var(--fw-regular) 12px/1.2 var(--font-sans)", color: "var(--text-muted)" }}>
-                        {featured.publishedAt ? formatPostDate(featured.publishedAt) : "Блог QR-S"}
-                      </div>
-                    </div>
-                    <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: "7px", font: "var(--fw-semibold) 14px/1 var(--font-sans)", color: "var(--color-primary)" }}>
-                      Читать
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M5 12h14" />
-                        <path d="m12 5 7 7-7 7" />
-                      </svg>
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            )
-          )}
+          ) : null}
         </div>
       </section>
 
-      {gridPosts.length > 0 && (
+      {cleanPosts.length > 0 && (
         <section style={{ paddingBottom: "var(--section-y)" }}>
           <div className="fk-container">
             <h2 style={{ font: "var(--fw-bold) clamp(1.4rem, 3vw, 1.9rem)/1.2 var(--font-display)", letterSpacing: "-0.02em", color: "var(--text-strong)", marginBottom: "28px" }}>
               Свежие статьи
             </h2>
-            <div className="qrs-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "24px" }}>
-              {gridPosts.map((post, index) => {
+            <div className="qrs-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gridAutoRows: "1fr", gap: "24px" }}>
+              {cleanPosts.map((post, index) => {
                 const meta = getBlogCardMeta(post.category?.slug, index);
                 return (
                   <article
@@ -251,7 +179,7 @@ export default async function BlogListPage({ searchParams }: Props) {
                     className="qrs-card-lift"
                     style={{ display: "flex", flexDirection: "column", background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "12px", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}
                   >
-                    <Link href={`/blog/${post.slug}`} className="block">
+                    <Link href={`/blog/${post.slug}`} style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                       {post.coverImageUrl ? (
                         <div className="relative" style={{ height: "168px", background: meta.bg }}>
                           <Image src={blogMediaImageSrc(post.coverImageUrl)} alt={post.title} fill sizes="(max-width:640px) 100vw, 33vw" className="object-cover" priority={index < 2} />
@@ -279,7 +207,7 @@ export default async function BlogListPage({ searchParams }: Props) {
                             {post.excerpt}
                           </p>
                         )}
-                        <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ marginTop: "auto", paddingTop: "16px", borderTop: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <time dateTime={post.publishedAt!.toISOString()} style={{ font: "var(--fw-medium) 12px/1 var(--font-sans)", color: "var(--text-subtle)" }}>
                             {formatPostDate(post.publishedAt!)}
                           </time>

@@ -121,6 +121,7 @@ model BlogPost {
   status            BlogStatus? // null: legacy publication inferred from publishedAt
   scheduledAt       DateTime?
   previewTokens     BlogPreviewToken[]
+  pendingRevision   BlogPendingRevision?
   publishedAt       DateTime?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
@@ -594,9 +595,12 @@ model BlogPreviewToken {
   hash String @id
   postId String
   post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  pendingRevisionId String?
+  pendingRevision BlogPendingRevision? @relation(fields: [pendingRevisionId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   revokedAt DateTime?
   @@index([postId, revokedAt])
+  @@index([pendingRevisionId])
 }
 
 // Global editorial API; deliberately separate from workspace QR keys.
@@ -633,4 +637,18 @@ model BlogImage {
   variants Json
   actorName String
   createdAt DateTime @default(now())
+}
+
+// One unpublished editorial patch per live article; never returned by public post queries.
+model BlogPendingRevision {
+  id String @id @default(cuid())
+  postId String @unique
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  input Json
+  snapshot Json
+  baseUpdatedAt DateTime
+  actorName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  previewTokens BlogPreviewToken[]
 }

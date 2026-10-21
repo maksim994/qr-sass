@@ -17,6 +17,7 @@ type Post = {
   scheduledAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  pendingRevision: { id: string } | null;
 };
 
 type Props = {
@@ -52,7 +53,7 @@ export function BlogList({ posts }: Props) {
         <tbody>
           {posts.map((post) => (
             <tr key={post.id}>
-              <td>{post.title}</td>
+              <td>{post.title}{post.pendingRevision && <div><Link href={`/admin/blog/${post.id}/edit#pending-revision`}><Badge variant="info">Есть черновик изменений</Badge></Link></div>}</td>
               <td className="tnum">{post.views}</td>
               <td style={{ color: "var(--text-muted)", fontWeight: "var(--fw-medium)" }}>
                 {post.readingTimeMinutes ? `${post.readingTimeMinutes} мин` : "—"}

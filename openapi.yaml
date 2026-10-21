@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QR-S Article API",
-    "version": "1.3.0",
-    "description": "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Все записи создают версию с автором API: <имя ключа>. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
+    "version": "1.4.0",
+    "description": "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Сохранение статьи создаёт версию с автором API: <имя ключа>. Черновик изменений хранится отдельно, история меняется только при публикации администратором. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
     "license": {
       "name": "Proprietary",
       "identifier": "LicenseRef-Proprietary"
@@ -1701,6 +1701,524 @@
           }
         }
       }
+    },
+    "/api/v1/articles/{id}/revision": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "saveArticlePendingRevision",
+        "summary": "Создать или обновить черновик изменений",
+        "security": [
+          {
+            "ArticleBearer": []
+          }
+        ],
+        "tags": [
+          "Articles"
+        ],
+        "description": "Только для опубликованной статьи. Один черновик; переданные поля объединяются с предыдущими. Отсутствующие поля сохраняются. slug и поля публикации запрещены. Формат/явная конвертация HTML, FAQ, JSON-LD и лимиты совпадают с PATCH. Живая статья, sitemap, даты и история версий не меняются. Изменение живой статьи после создания черновика даёт 409; сохраните нужный текст, отмените черновик и создайте новый. Публикация доступна только администратору в интерфейсе.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArticleRevisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Сохранённый черновик",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ArticlePendingRevision"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос / JSON-LD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нет действующего ключа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Запрещённая операция / опубликованный slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Статья не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт версии или slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "60 запросов в минуту",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Секунд до следующего окна",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "getArticlePendingRevision",
+        "summary": "Получить черновик изменений",
+        "security": [
+          {
+            "ArticleBearer": []
+          }
+        ],
+        "tags": [
+          "Articles"
+        ],
+        "responses": {
+          "200": {
+            "description": "Черновик",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ArticlePendingRevision"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос / JSON-LD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нет действующего ключа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Запрещённая операция / опубликованный slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Статья не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт версии или slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "60 запросов в минуту",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Секунд до следующего окна",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "cancelArticlePendingRevision",
+        "summary": "Отменить черновик изменений",
+        "security": [
+          {
+            "ArticleBearer": []
+          }
+        ],
+        "tags": [
+          "Articles"
+        ],
+        "description": "Удаляется только черновик и его секретные ссылки. Живая статья и история остаются. При отсутствии черновика — 404.",
+        "responses": {
+          "200": {
+            "description": "Черновик отменён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос / JSON-LD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нет действующего ключа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Запрещённая операция / опубликованный slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Статья не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт версии или slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "60 запросов в минуту",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Секунд до следующего окна",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{id}/revision/preview": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "previewArticlePendingRevision",
+        "summary": "Создать секретную ссылку на черновик изменений",
+        "security": [
+          {
+            "ArticleBearer": []
+          }
+        ],
+        "tags": [
+          "Articles"
+        ],
+        "description": "Возвращает абсолютный url и относительный path. Показывает последнее сохранение черновика, без авторизации по ссылке, noindex/nofollow и private,no-store. Новая ссылка отзывает предыдущую ссылку этого черновика. Ссылки на живую сохранённую статью независимы. После отмены/публикации черновика ссылка возвращает 404.",
+        "responses": {
+          "200": {
+            "description": "Секретная ссылка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "url",
+                        "path"
+                      ],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректный запрос / JSON-LD",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Нет действующего ключа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Запрещённая операция / опубликованный slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Статья не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт версии или slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "60 запросов в минуту",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Секунд до следующего окна",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2556,6 +3074,185 @@
           "comment": {
             "type": "string",
             "maxLength": 2000
+          }
+        }
+      },
+      "ArticleRevisionInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 1000000,
+            "description": "Исходный HTML или Markdown, inline images: ![alt](https://…). Старый HTML меняется только при явном переходе на Markdown с confirmConversion=true."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "html",
+              "markdown"
+            ]
+          },
+          "metaTitle": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "metaDescription": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "excerpt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 10000
+          },
+          "coverImageUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "HTTP(S) URL обложки; null/пустая строка убирает обложку."
+          },
+          "coverImageAlt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000
+          },
+          "authorName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300
+          },
+          "categoryId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "readingTimeMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 999
+          },
+          "structuredData": {
+            "description": "JSON-LD: объект, JSON-строка объекта, null или пустая строка для удаления. Невалидный JSON — 400.",
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "faq": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "question",
+                "answer"
+              ],
+              "properties": {
+                "question": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "answer": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 10000
+                }
+              }
+            }
+          },
+          "showPrintSizeIntro": {
+            "type": "boolean"
+          },
+          "confirmConversion": {
+            "type": "boolean",
+            "description": "Явное подтверждение html→markdown; исходный HTML сохраняется в legacyHtml."
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Необязательный номер живой версии для защиты от устаревшего чтения. Черновик не увеличивает номер истории."
+          }
+        }
+      },
+      "ArticlePendingRevision": {
+        "type": "object",
+        "required": [
+          "id",
+          "postId",
+          "input",
+          "snapshot",
+          "baseUpdatedAt",
+          "updatedAt",
+          "createdAt",
+          "actorName"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "postId": {
+            "type": "string"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ArticleRevisionInput"
+          },
+          "snapshot": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Полный снимок подготовленной версии для предпросмотра и сравнения."
+          },
+          "baseUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorName": {
+            "type": "string"
           }
         }
       }

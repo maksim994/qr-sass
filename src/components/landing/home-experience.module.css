@@ -64,3 +64,12 @@
 
 .designPlayground{min-width:0;max-width:100%}
 @media(max-width:800px){.orbit{width:100%;height:auto;aspect-ratio:1}}
+
+/* Scope foreground tokens to the dark CTA so heading rules in parent shells
+   inherit the same accessible palette in light and dark themes. */
+.footerStart {
+  --text-strong: var(--footer-paper);
+  --text-default: var(--footer-paper);
+  --text-muted: var(--footer-muted);
+}
+.footerCopy > h2 { color: var(--footer-paper); }

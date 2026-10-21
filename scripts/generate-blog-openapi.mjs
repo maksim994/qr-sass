@@ -136,7 +136,7 @@ const spec = {
     title: "QR-S Article API",
     version: "1.0.0",
     description:
-      "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Все записи создают версию с автором API: <имя ключа>. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
+      "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Сохранение статьи создаёт версию с автором API: <имя ключа>. Черновик изменений хранится отдельно, история меняется только при публикации администратором. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
     license: { name: "Proprietary", identifier: "LicenseRef-Proprietary" },
   },
   servers: [{ url: "https://qr-s.ru" }],
@@ -501,6 +501,42 @@ spec.paths["/media/blog/{kind}/{file}"] = {
     parameters:[{name:"If-None-Match",in:"header",schema:{type:"string"}},{name:"If-Modified-Since",in:"header",schema:{type:"string"}}],
     responses:{200:{description:"Изображение",headers:mediaHeaders,content:Object.fromEntries(["image/webp","image/png","image/jpeg","image/gif"].map(type=>[type,{schema:{type:"string",format:"binary"}}]))},304:{description:"Объект не изменён",headers:mediaHeaders},404:{description:"Нет изображения/недопустимый путь"},502:{description:"Хранилище временно недоступно, внутренние адреса не раскрываются"}}},
   head:{operationId:"headBlogMedia",summary:"Метаданные изображения без тела",tags:["Images"],security:[],responses:{200:{description:"Метаданные",headers:mediaHeaders},304:{description:"Объект не изменён",headers:mediaHeaders},404:{description:"Изображение не найдено"},502:{description:"Хранилище недоступно"}}},
+};
+// TZ-09: pending changes use a separate resource and can only be published in admin.
+spec.info.version = "1.4.0";
+const revisionFields = Object.fromEntries(Object.entries(fields).filter(([key]) => !["slug", "minorEdit"].includes(key)));
+spec.components.schemas.ArticleRevisionInput = {
+  type: "object", additionalProperties: false,
+  properties: { ...revisionFields, version: { ...version, description: "Необязательный номер живой версии для защиты от устаревшего чтения. Черновик не увеличивает номер истории." } },
+};
+spec.components.schemas.ArticlePendingRevision = {
+  type: "object", required: ["id", "postId", "input", "snapshot", "baseUpdatedAt", "updatedAt", "createdAt", "actorName"],
+  properties: {
+    id: {type:"string"}, postId: {type:"string"},
+    input: ref("ArticleRevisionInput"), snapshot: {type:"object",additionalProperties:true,description:"Полный снимок подготовленной версии для предпросмотра и сравнения."},
+    baseUpdatedAt: {type:"string",format:"date-time"}, updatedAt:{type:"string",format:"date-time"}, createdAt:{type:"string",format:"date-time"}, actorName:{type:"string"},
+  },
+};
+const revisionParams = [{name:"id",in:"path",required:true,schema:{type:"string"}}];
+spec.paths["/api/v1/articles/{id}/revision"] = {
+  parameters: revisionParams,
+  put: operation("saveArticlePendingRevision", "Создать или обновить черновик изменений", {
+    description:"Только для опубликованной статьи. Один черновик; переданные поля объединяются с предыдущими. Отсутствующие поля сохраняются. slug и поля публикации запрещены. Формат/явная конвертация HTML, FAQ, JSON-LD и лимиты совпадают с PATCH. Живая статья, sitemap, даты и история версий не меняются. Изменение живой статьи после создания черновика даёт 409; сохраните нужный текст, отмените черновик и создайте новый. Публикация доступна только администратору в интерфейсе.",
+    requestBody:{required:true,content:{"application/json":{schema:ref("ArticleRevisionInput")}}},
+    responses:{...errors,200:response("Сохранённый черновик",success(ref("ArticlePendingRevision")))},
+  }),
+  get: operation("getArticlePendingRevision", "Получить черновик изменений", {responses:{...errors,200:response("Черновик",success(ref("ArticlePendingRevision")))}}),
+  delete: operation("cancelArticlePendingRevision", "Отменить черновик изменений", {
+    description:"Удаляется только черновик и его секретные ссылки. Живая статья и история остаются. При отсутствии черновика — 404.",
+    responses:{...errors,200:response("Черновик отменён",success({type:"object",required:["id"],properties:{id:{type:"string"}}}))},
+  }),
+};
+spec.paths["/api/v1/articles/{id}/revision/preview"] = {
+  parameters:revisionParams,
+  post:operation("previewArticlePendingRevision", "Создать секретную ссылку на черновик изменений", {
+    description:"Возвращает абсолютный url и относительный path. Показывает последнее сохранение черновика, без авторизации по ссылке, noindex/nofollow и private,no-store. Новая ссылка отзывает предыдущую ссылку этого черновика. Ссылки на живую сохранённую статью независимы. После отмены/публикации черновика ссылка возвращает 404.",
+    responses:{...errors,200:response("Секретная ссылка",success({type:"object",required:["url","path"],properties:{url:{type:"string",format:"uri"},path:{type:"string"}}}))},
+  }),
 };
 writeFileSync("openapi.yaml", JSON.stringify(spec, null, 2) + "\n");
 writeFileSync(

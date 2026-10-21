@@ -1,4 +1,5 @@
 import Link from "next/link";
+import styles from "./blog-pagination.module.css";
 
 type Props = {
   currentPage: number;
@@ -20,7 +21,7 @@ export function BlogPagination({ currentPage, totalPages, category }: Props) {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <nav aria-label="Пагинация блога" className="mt-12 flex justify-center gap-2 flex-wrap">
+    <nav aria-label="Пагинация блога" className={styles.pagination}>
       {currentPage > 1 && (
         <Link
           href={pageHref(currentPage - 1, category)}

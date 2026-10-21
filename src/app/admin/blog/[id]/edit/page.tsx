@@ -1,3 +1,4 @@
+import { PendingRevisionPanel } from "@/components/admin/blog-pending-revision-panel";
 import { PreviewLinkControl } from "@/components/admin/blog-workflow-actions";
 import { articleStatus } from "@/lib/blog-workflow";
 import { formatMoscowInput } from "@/lib/blog-publication";
@@ -18,7 +19,7 @@ export default async function EditBlogPostPage({ params }: Props) {
   const { id } = await params;
   const db = getDb();
   const [post, categories] = await Promise.all([
-    db.blogPost.findUnique({ where: { id } }),
+    db.blogPost.findUnique({ where: { id }, include: { pendingRevision: true } }),
     ensureBlogCategories(),
   ]);
   if (!post) notFound();
@@ -34,8 +35,10 @@ export default async function EditBlogPostPage({ params }: Props) {
           </Button>
         }
       />
+      {post.pendingRevision && <PendingRevisionPanel post={post} pending={post.pendingRevision} />}
       <AdminCard>
         <BlogPostForm
+          key={post.updatedAt.toISOString()}
           mode="edit"
           initialBody={renderArticleBody(post.format === "markdown" ? post.content : sanitizeBlogFields({ slug: post.slug, content: post.content }).content, post.format === "markdown" ? "markdown" : "html", post.faq)}
           categories={categories}
@@ -65,7 +68,7 @@ export default async function EditBlogPostPage({ params }: Props) {
         />
       </AdminCard>
       <AdminCard>
-        <PreviewLinkControl id={post.id} active={!!await db.blogPreviewToken.findFirst({ where: { postId: post.id, revokedAt: null }, select: { hash: true } })} />
+        <PreviewLinkControl id={post.id} active={!!await db.blogPreviewToken.findFirst({ where: { postId: post.id, pendingRevisionId: null, revokedAt: null }, select: { hash: true } })} />
         {post.publishedAt && <p><a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">Посмотреть на сайте →</a></p>}
       </AdminCard>
     </div>

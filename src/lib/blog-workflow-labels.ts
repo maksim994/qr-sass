@@ -1,4 +1,5 @@
 export const blogEventLabels: Record<string, string> = {
+  pending_save: "Сохранён черновик изменений", pending_cancel: "Черновик изменений отменён", pending_publish: "Черновик изменений опубликован", pending_preview: "Предпросмотр черновика изменений",
   image_remove: "Удалено изображение",
   create: "Создана статья", update: "Сохранены изменения", publish: "Опубликована", unpublish: "Снята с публикации", schedule: "Назначена публикация", restore: "Восстановлена версия", delete: "Статья удалена", preview_create: "Создана ссылка предпросмотра", preview_revoke: "Отозвана ссылка предпросмотра", token_create: "Создан API-токен", token_revoke: "Отозван API-токен", redirect_create: "Создан редирект", redirect_delete:"Удалён редирект",image_upload:"Загружено изображение",
 };
