@@ -106,7 +106,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <main>
         <PricingGoal />
         <HomeHero />
-        <section id="create-qr" className={styles.generatorSection} aria-labelledby="generator-title"><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} dynamicRemaining={dynamicRemaining} trialUsed={trialUsed} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} enabledTypes={enabledTypes.map(item=>item.type)} /></section>
+        <section id="create-qr" className={`${styles.generatorSection} ym-hide-content`} aria-labelledby="generator-title"><HomeQuickStart key={publicType} initialType={publicType} initialUrl={initialUrl} dynamicRemaining={dynamicRemaining} trialUsed={trialUsed} signedIn={Boolean(session)} enabledStaticTypes={enabledStaticTypes} enabledTypes={enabledTypes.map(item=>item.type)} /></section>
         <div className={`${styles.container} ${styles.valueStrip}`} aria-label="Возможности сервиса">
           <span><Check /> От ссылки до электронного меню</span><span><Check /> Дизайн под ваш бренд</span><span><Check /> Смена ссылки после печати</span><span><Check /> Статистика открытий</span>
         </div>

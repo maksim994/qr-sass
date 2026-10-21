@@ -122,7 +122,7 @@ export function AuthShell({
     <div className={`qrs-public ${styles.shell}`}>
       <SiteHeader session={null} minimal />
       <main className={styles.layout}>
-        <div className={styles.formPanel}>
+        <div className={`${styles.formPanel} ym-hide-content`}>
           <div className={styles.formBody}>
             <div className={styles.heading}><h1>{title}</h1><p>{subtitle}</p></div>
             {children}

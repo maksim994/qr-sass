@@ -1,4 +1,4 @@
-import { readCookieChoice } from "@/lib/cookie-consent";
+import { isAnalyticsEnabled } from "@/lib/cookie-consent";
 /** Client-side product funnel goals for Yandex Metrika reachGoal. */
 
 export const PRODUCT_GOALS = {
@@ -45,7 +45,7 @@ function getMetrikaId(): string | undefined {
   return w.__qrsYmId || document.documentElement.dataset.ymId || undefined;
 }
 
-/** Call after Metrika script is initialized (cookie consent accepted). */
+/** Call after Metrika script is initialized (analytics enabled). */
 export function setMetrikaCounterId(id: string) {
   if (typeof window === "undefined") return;
   (window as YmWindow).__qrsYmId = id;
@@ -72,7 +72,7 @@ export function goalParams(params: Record<string, unknown> = {}) {
 }
 export function trackGoal(goal: ProductGoal, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return false;
-  if (goal === PRODUCT_GOALS.subscription_paid || readCookieChoice() !== "accepted") return false;
+  if (goal === PRODUCT_GOALS.subscription_paid || !isAnalyticsEnabled()) return false;
   const id = getMetrikaId();
   const ym = (window as YmWindow).ym;
   if (!id || typeof ym !== "function") return false;

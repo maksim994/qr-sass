@@ -1,3 +1,4 @@
+import { ANALYTICS_OPTOUT_COOKIE } from "@/lib/analytics-policy";
 import { parseMetrikaAttribution } from "@/lib/metrika-attribution";
 import { getSiteSettings } from "@/lib/site-settings";
 import { NextRequest, NextResponse } from "next/server";
@@ -62,8 +63,9 @@ export async function POST(req: NextRequest) {
     const amount = plan.priceRub;
     let counter: string | null = null;
     try { counter = (await getSiteSettings()).yandexMetrikaId; } catch { /* Optional attribution. */ }
-    const metrika = parseMetrikaAttribution(body.metrika, counter);
-    const attribution = metrika ? { metrikaUserId: user.id, metrikaClientId: metrika.clientId, metrikaCounterId: metrika.counterId, metrikaConsentAt: new Date(), metrikaConsentVersion: metrika.consentVersion } : {};
+    const metrika = req.cookies.get(ANALYTICS_OPTOUT_COOKIE)?.value === "1" ? null : parseMetrikaAttribution(body.metrika, counter);
+    // Legacy column names: store the collection-policy mode, never a fabricated consent click.
+    const attribution = metrika ? { metrikaUserId: user.id, metrikaClientId: metrika.clientId, metrikaCounterId: metrika.counterId, metrikaConsentAt: new Date(), metrikaConsentVersion: metrika.policyVersion } : {};
 
     if (env.BILLING_PROVIDER === "robokassa") {
       const config = getRobokassaConfig();

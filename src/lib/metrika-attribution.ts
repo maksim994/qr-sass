@@ -1,11 +1,15 @@
 import { z } from "zod";
+import { ANALYTICS_POLICY_VERSION } from "@/lib/analytics-policy";
 import { LEGAL_VERSION } from "@/lib/legal-documents";
 
-export const metrikaAttributionSchema = z.object({
+const ids = {
   clientId: z.string().regex(/^\d{1,30}$/),
   counterId: z.string().regex(/^[1-9]\d{0,19}$/),
-  consentVersion: z.literal(LEGAL_VERSION),
-});
+};
+export const metrikaAttributionSchema = z.union([
+  z.object({ ...ids, policyVersion: z.literal(ANALYTICS_POLICY_VERSION), collectionMode: z.literal("opt-out") }),
+  z.object({ ...ids, consentVersion: z.literal(LEGAL_VERSION) }).transform(value => ({ clientId: value.clientId, counterId: value.counterId, policyVersion: `opt-in:${value.consentVersion}`, collectionMode: "opt-in" as const })),
+]);
 export type MetrikaAttribution = z.infer<typeof metrikaAttributionSchema>;
 
 export function parseMetrikaAttribution(value: unknown, counterId: string | null) {

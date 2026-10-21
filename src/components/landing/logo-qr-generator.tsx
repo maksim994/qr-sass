@@ -99,7 +99,7 @@ export function LogoQrGenerator({ enabled }: { enabled: boolean }) {
   }
 
   if (!enabled) return <p role="status">Создание этого типа QR сейчас недоступно. <Link href="/#create-qr">Выбрать другой тип</Link>.</p>;
-  return <form className={s.generator} id="create-qr" noValidate onSubmit={event => { event.preventDefault(); void download("png"); }} aria-label="Генератор QR-кода с логотипом">
+  return <form className={`${s.generator} ym-hide-content`} id="create-qr" noValidate onSubmit={event => { event.preventDefault(); void download("png"); }} aria-label="Генератор QR-кода с логотипом">
     <div className={s.inputs}>
       <label className={s.field} htmlFor="logo-qr-url">Ссылка<Input id="logo-qr-url" inputMode="url" autoComplete="url" value={url} disabled={pending !== null} placeholder="https://example.com" aria-invalid={url.trim() && !prepared.ok ? true : undefined} aria-describedby="logo-qr-url-hint" onChange={event => { setUrl(event.target.value); setNotice(""); setError(""); }}/></label>
       <p id="logo-qr-url-hint" className={s.hint}>{url.trim() && !prepared.ok ? prepared.error : "Адрес сайта, меню, каталога или формы"}</p>

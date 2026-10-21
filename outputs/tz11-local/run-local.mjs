@@ -1,0 +1,12 @@
+import {spawn} from 'node:child_process';
+import {randomBytes} from 'node:crypto';
+process.env.DATABASE_URL='postgresql://mvmolkov@127.0.0.1:5432/qr_design?schema=public';
+process.env.NEXT_PUBLIC_APP_URL='http://127.0.0.1:3010';
+process.env.APP_URL='http://127.0.0.1:3010';
+process.env.JWT_SECRET=randomBytes(32).toString('hex');
+for (const key of ['JWT_PREVIOUS_SECRET','JWT_ROTATED_AT','METRIKA_OAUTH_TOKEN','YANDEX_CLIENT_SECRET','TELEGRAM_BOT_TOKEN']) delete process.env[key];
+process.env.YANDEX_AUTH_ENABLED='false';
+const mode=process.argv[2];
+const args=mode==='build'?['node_modules/next/dist/bin/next','build']:['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port','3010'];
+const child=spawn(process.execPath,args,{env:process.env,stdio:'inherit'});
+child.on('exit',code=>process.exit(code??1));

@@ -1,0 +1,185 @@
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 16ms
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "11mb"
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+
+  To migrate automatically, run:
+  npx @next/codemod@canary middleware-to-proxy .
+
+  Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.0s
+  Running TypeScript ...
+  Finished TypeScript in 4.9s ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/81) ...
+  Generating static pages using 9 workers (20/81)
+  Generating static pages using 9 workers (40/81)
+  Generating static pages using 9 workers (60/81)
+✓ Generating static pages using 9 workers (81/81) in 144ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /[slug]
+├ ƒ /admin
+├ ƒ /admin/admins
+├ ƒ /admin/blog
+├ ƒ /admin/blog/[id]/edit
+├ ƒ /admin/blog/[id]/versions
+├ ƒ /admin/blog/history
+├ ƒ /admin/blog/new
+├ ƒ /admin/blog/redirects
+├ ƒ /admin/blog/tokens
+├ ƒ /admin/business
+├ ƒ /admin/funnel
+├ ƒ /admin/history
+├ ƒ /admin/notifications
+├ ƒ /admin/partners
+├ ƒ /admin/payments
+├ ƒ /admin/payments/[id]
+├ ƒ /admin/plans
+├ ƒ /admin/qr
+├ ƒ /admin/qr-types
+├ ƒ /admin/qr/[id]
+├ ƒ /admin/site-settings
+├ ƒ /admin/users
+├ ƒ /admin/users/[id]
+├ ƒ /admin/workspaces/[id]
+├ ƒ /api/admin/billing/reconcile
+├ ƒ /api/admin/blog
+├ ƒ /api/admin/blog/[id]
+├ ƒ /api/admin/blog/[id]/convert
+├ ƒ /api/admin/blog/[id]/merge
+├ ƒ /api/admin/blog/[id]/preview-token
+├ ƒ /api/admin/blog/[id]/restore
+├ ƒ /api/admin/blog/[id]/revision
+├ ƒ /api/admin/blog/[id]/revision/preview
+├ ƒ /api/admin/blog/preview
+├ ƒ /api/admin/blog/redirects
+├ ƒ /api/admin/blog/redirects/[id]
+├ ƒ /api/admin/blog/tokens
+├ ƒ /api/admin/blog/tokens/[id]
+├ ƒ /api/admin/blog/upload
+├ ƒ /api/admin/blog/upload-content
+├ ƒ /api/admin/notifications
+├ ƒ /api/admin/partners
+├ ƒ /api/admin/plans
+├ ƒ /api/admin/plans/[planId]
+├ ƒ /api/admin/site-settings
+├ ƒ /api/admin/site-settings/upload-favicon
+├ ƒ /api/admin/users/[userId]/admin
+├ ƒ /api/admin/workspaces/[workspaceId]/plan
+├ ƒ /api/admin/workspaces/[workspaceId]/subscription
+├ ƒ /api/analytics/export
+├ ƒ /api/analytics/owner-open
+├ ƒ /api/analytics/payment
+├ ƒ /api/analytics/registration
+├ ƒ /api/analytics/revoke
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/register
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/yandex
+├ ƒ /api/auth/yandex/callback
+├ ƒ /api/billing/checkout
+├ ƒ /api/billing/robokassa/return
+├ ƒ /api/billing/trial
+├ ƒ /api/billing/webhook
+├ ƒ /api/billing/webhook/robokassa
+├ ƒ /api/blog/[slug]/like
+├ ƒ /api/blog/[slug]/view
+├ ƒ /api/gdpr/consent
+├ ƒ /api/health
+├ ƒ /api/indexnow-key/[key]
+├ ƒ /api/invites/[inviteId]
+├ ƒ /api/qr
+├ ƒ /api/qr/[id]
+├ ƒ /api/qr/[id]/ab-test
+├ ƒ /api/qr/[id]/asset
+├ ƒ /api/qr/[id]/download
+├ ƒ /api/qr/[id]/duplicate
+├ ƒ /api/qr/[id]/settings
+├ ƒ /api/qr/[id]/smart-redirect
+├ ƒ /api/qr/[id]/target
+├ ƒ /api/qr/[id]/tracking-pixels
+├ ƒ /api/qr/bulk
+├ ƒ /api/qr/verify-password
+├ ƒ /api/referrals/visit
+├ ƒ /api/telegram/auth
+├ ƒ /api/upload
+├ ƒ /api/upload/[id]/file
+├ ƒ /api/user/profile
+├ ƒ /api/user/profile/avatar
+├ ƒ /api/user/profile/yandex
+├ ƒ /api/v1/articles
+├ ƒ /api/v1/articles/[id]
+├ ƒ /api/v1/articles/[id]/images
+├ ƒ /api/v1/articles/[id]/preview
+├ ƒ /api/v1/articles/[id]/revision
+├ ƒ /api/v1/articles/[id]/revision/preview
+├ ƒ /api/v1/images
+├ ƒ /api/v1/openapi.json
+├ ƒ /api/v1/redirects
+├ ƒ /api/workspace/select
+├ ƒ /api/workspaces/[workspaceId]
+├ ƒ /api/workspaces/[workspaceId]/api-keys
+├ ƒ /api/workspaces/[workspaceId]/api-keys/[keyId]
+├ ƒ /api/workspaces/[workspaceId]/invites/[inviteId]
+├ ƒ /api/workspaces/[workspaceId]/members
+├ ƒ /api/workspaces/[workspaceId]/members/[userId]
+├ ƒ /blog
+├ ƒ /blog/[slug]
+├ ƒ /changelog
+├ ƒ /contacts
+├ ƒ /dashboard
+├ ƒ /dashboard/analytics
+├ ƒ /dashboard/api-docs
+├ ƒ /dashboard/api-keys
+├ ƒ /dashboard/billing
+├ ƒ /dashboard/bulk
+├ ƒ /dashboard/create
+├ ƒ /dashboard/create/[type]
+├ ƒ /dashboard/library
+├ ƒ /dashboard/profile
+├ ƒ /dashboard/qr/[id]
+├ ƒ /dashboard/qr/[id]/edit
+├ ƒ /dashboard/team
+├ ƒ /expired
+├ ƒ /forgot-password
+├ ƒ /g/[slug]
+├ ƒ /login
+├ ƒ /media/blog/[...path]
+├ ƒ /mini
+├ ○ /opengraph-image.png
+├ ƒ /p/[code]
+├ ƒ /personal-data-consent
+├ ƒ /preview/[token]
+├ ƒ /preview/landings
+├ ƒ /pricing
+├ ƒ /privacy-policy
+├ ƒ /qr-for-packaging
+├ ƒ /qr-lifetime
+├ ƒ /qr-menu
+├ ƒ /qr-s-logotipom
+├ ƒ /r/[slug]
+├ ƒ /register
+├ ƒ /register/yandex
+├ ƒ /reset-password
+├ ƒ /robots.txt
+├ ƒ /sitemap.xml
+├ ƒ /skaner-qr-koda
+├ ƒ /terms-of-service
+├ ƒ /unavailable
+└ ƒ /v/[code]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

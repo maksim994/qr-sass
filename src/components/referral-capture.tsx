@@ -2,8 +2,8 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { fetchApi } from "@/lib/client-api";
-import { COOKIE_CHANGE_EVENT, readCookieChoice } from "@/lib/cookie-consent";
-import { LEGAL_VERSION } from "@/lib/legal-documents";
+import { COOKIE_CHANGE_EVENT, isAnalyticsEnabled } from "@/lib/cookie-consent";
+import { ANALYTICS_POLICY_VERSION } from "@/lib/analytics-policy";
 import { partnerCodeSchema } from "@/lib/partner-rules";
 
 export function ReferralCapture() {
@@ -15,15 +15,15 @@ export function ReferralCapture() {
     if (!parsed.success) return;
     const value = parsed.data;
     async function capture() {
-      if (readCookieChoice() !== "accepted" || sent.current.has(value)) return;
+      if (!isAnalyticsEnabled() || sent.current.has(value)) return;
       sent.current.add(value);
       try {
         const response = await fetchApi("/api/referrals/visit", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: value, consent: true, consentVersion: LEGAL_VERSION }),
+          body: JSON.stringify({ code: value, analyticsEnabled: true, policyVersion: ANALYTICS_POLICY_VERSION }),
         });
         if (!response.ok) sent.current.delete(value);
-        if (readCookieChoice() !== "accepted") await fetchApi("/api/analytics/revoke", { method: "POST" });
+        if (!isAnalyticsEnabled()) await fetchApi("/api/analytics/revoke", { method: "POST", keepalive: true });
       } catch { sent.current.delete(value); }
     }
     void capture();

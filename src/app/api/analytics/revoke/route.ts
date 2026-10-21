@@ -5,7 +5,8 @@ import { apiSuccess } from "@/lib/api-response";
 import { getDb } from "@/lib/db";
 
 export async function POST() {
-  (await cookies()).delete(PARTNER_COOKIE);
+  const jar = await cookies();
+  jar.delete(PARTNER_COOKIE);
   const actor = await getApiUser();
   if (actor?.kind === "session") await getDb().payment.updateMany({
     where: { metrikaUserId: actor.id, metrikaState: { in: ["PENDING", "EXPIRED", "REVIEW"] } },

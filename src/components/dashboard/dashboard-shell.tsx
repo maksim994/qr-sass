@@ -50,7 +50,7 @@ export function DashboardShell({ children, user, workspace, workspaces }: Props)
   const current = dashboardNavItems.find((item) => item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href));
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ym-hide-content`}>
       {upgrade && <UpgradePrompt place={upgrade} trialUsed={workspace.trialUsed} onClose={() => setUpgrade(null)} />}
       <a href={`#${contentId}`} className={styles.skip}>К содержимому</a>
       {overlayNav && sidebarOpen && <div className={styles.scrim} onClick={closeSidebar} aria-hidden="true" />}

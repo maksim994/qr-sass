@@ -1,100 +1,70 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isSiteAnalyticsSurface } from "@/lib/analytics-policy";
 import { fetchApi } from "@/lib/client-api";
 import { Button } from "@/components/ui/button";
-import { METRIKA_READY_EVENT, setMetrikaCounterId } from "@/lib/product-analytics";
-import { COOKIE_CHANGE_EVENT, COOKIE_SETTINGS_EVENT, readCookieChoice, saveCookieChoice } from "@/lib/cookie-consent";
-
-type Ym = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
-type AnalyticsWindow = Window & { ym?: Ym; __qrsYmId?: string };
+import { Modal } from "@/components/ui/modal";
+import { startMetrika, stopMetrika, trackMetrikaPageView } from "@/lib/metrika-runtime";
+import { COOKIE_CHANGE_EVENT, COOKIE_SETTINGS_EVENT, acknowledgeCookieNotice, isAnalyticsEnabled, readCookieChoice, readCookieNotice, saveCookieChoice, syncAnalyticsOptOut } from "@/lib/cookie-consent";
 function subscribe(listener: () => void) {
   window.addEventListener(COOKIE_CHANGE_EVENT, listener);
   window.addEventListener("storage", listener);
   return () => { window.removeEventListener(COOKIE_CHANGE_EVENT, listener); window.removeEventListener("storage", listener); };
 }
-function startMetrika(id: string) {
-  if (!/^\d+$/.test(id)) return;
-  const w = window as AnalyticsWindow;
-  if (w.__qrsYmId === id) return;
-  if (!w.ym) {
-    const queue: Ym = (...args) => { (queue.a ??= []).push(args); };
-    queue.l = Date.now(); w.ym = queue;
-  }
-  const script = document.createElement("script");
-  script.src = "https://mc.yandex.ru/metrika/tag.js";
-  script.async = true; script.dataset.qrsAnalytics = "true";
-  document.head.appendChild(script);
-  w.ym(id, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false });
-  setMetrikaCounterId(id);
-  window.dispatchEvent(new Event(METRIKA_READY_EVENT));
-}
-function stopMetrika() {
-  const w = window as AnalyticsWindow;
-  if (!w.__qrsYmId) return false;
-  try { w.ym?.(w.__qrsYmId, "destruct"); } catch { /* Reload below ends the third-party runtime. */ }
-  delete w.__qrsYmId; delete document.documentElement.dataset.ymId;
-  document.querySelectorAll("script[data-qrs-analytics]").forEach(s => s.remove());
-  // Delete only analytics cookies accessible to this origin; never session/CSRF cookies.
-  const domains = ["", window.location.hostname, `.${window.location.hostname}`];
-  for (const pair of document.cookie.split(";")) {
-    const name = pair.trim().split("=")[0];
-    if (!name.startsWith("_ym_")) continue;
-    for (const domain of domains) document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax${domain ? `; Domain=${domain}` : ""}`;
-  }
-  return true;
-}
 export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) {
   const pathname = usePathname();
-  const consent = useSyncExternalStore(subscribe, readCookieChoice, () => "ssr" as const);
+  const choice = useSyncExternalStore(subscribe, readCookieChoice, () => "ssr" as const);
+  const noticed = useSyncExternalStore(subscribe, readCookieNotice, () => true);
   const [open, setOpen] = useState(false);
-  const dialog = useRef<HTMLDivElement>(null);
-  const revocation = useRef<Promise<unknown> | null>(null);
-  // Keep the scanner's first task unobstructed. No consent still means no analytics;
-  // footer settings and an explicit COOKIE_SETTINGS_EVENT remain available.
-  const visible = (consent === "none" && pathname !== "/skaner-qr-koda") || open;
+  const [analytics, setAnalytics] = useState(true);
+  const banner = useRef<HTMLDivElement>(null);
+  const revoking = useRef<Promise<unknown> | null>(null);
+  const close = useCallback(() => setOpen(false), []);
+  const visible = isSiteAnalyticsSurface(pathname) && !noticed && choice !== "ssr" && choice !== "declined";
   useEffect(() => {
-    const show = () => { setOpen(true); };
+    const show = () => { setAnalytics(isAnalyticsEnabled()); setOpen(true); };
     window.addEventListener(COOKIE_SETTINGS_EVENT, show);
     return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, show);
   }, []);
-  useEffect(() => { if (open) dialog.current?.focus(); }, [open]);
   useEffect(() => {
     document.documentElement.classList.toggle("has-cookie-banner", visible);
-    // Presentation only: keep the mobile download above the actual banner height.
-    const node = dialog.current;
-    const measure = () => document.documentElement.style.setProperty("--qrs-cookie-height", `${node?.getBoundingClientRect().height ?? 0}px`);
+    const measure = () => document.documentElement.style.setProperty("--qrs-cookie-height", `${banner.current?.getBoundingClientRect().height ?? 0}px`);
     const observer = new ResizeObserver(measure);
-    if (node && visible) { observer.observe(node); measure(); }
+    if (banner.current && visible) { observer.observe(banner.current); measure(); }
     return () => { observer.disconnect(); document.documentElement.classList.remove("has-cookie-banner"); document.documentElement.style.removeProperty("--qrs-cookie-height"); };
   }, [visible]);
   useEffect(() => {
-    if (consent === "accepted" && yandexMetrikaId) startMetrika(yandexMetrikaId);
-    else if (consent !== "ssr" && stopMetrika()) {
-      void (revocation.current ?? Promise.resolve()).finally(() => window.location.reload());
+    if (!isSiteAnalyticsSurface(pathname)) { if (stopMetrika()) window.location.reload(); return; }
+    if (isAnalyticsEnabled(choice)) {
+      revoking.current = null;
+      if (yandexMetrikaId) { startMetrika(yandexMetrikaId); trackMetrikaPageView(yandexMetrikaId); }
+      return;
     }
-  }, [consent, yandexMetrikaId]);
-  function choose(choice: "accepted" | "declined") {
-    if (choice === "declined") {
-      // Local refusal is immediate; allow a bounded revoke request before reload.
-      revocation.current = fetchApi("/api/analytics/revoke", { method: "POST", signal: AbortSignal.timeout(2000) }).catch(() => undefined);
-    }
-    saveCookieChoice(choice); setOpen(false);
+    if (choice === "ssr") return;
+    if (choice === "declined") syncAnalyticsOptOut(true);
+    const active = stopMetrika();
+    if (!revoking.current) revoking.current = fetchApi("/api/analytics/revoke", { method: "POST", keepalive: true, signal: AbortSignal.timeout(1500) }).catch(() => undefined);
+    if (active) void revoking.current.finally(() => window.location.reload());
+  }, [choice, yandexMetrikaId, pathname]);
+  function save() {
+    saveCookieChoice(analytics ? "accepted" : "declined");
+    acknowledgeCookieNotice();
+    close();
   }
-  if (!visible) return null;
-  return <div ref={dialog} tabIndex={-1} className="qrs-cookie-banner" role="region" aria-label="Настройки cookie">
-    <div className="fk-container py-3 sm:py-4">
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm qrs-text-default">
-          Аналитику включаем только с вашего согласия. <Link href="/privacy-policy#cookie-settings" className="underline">Подробнее</Link>.
-        </p>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button type="button" variant="secondary" size="sm" onClick={() => choose("declined")}>Без аналитики</Button>
-          <Button type="button" variant="primary" size="sm" onClick={() => choose("accepted")}>Разрешить</Button>
-          {open && consent !== "none" && <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(false)}>Закрыть</Button>}
-        </div>
-      </div>
-    </div>
-  </div>;
+  return <>
+    {visible && <div ref={banner} className="qrs-cookie-banner qrs-public" role="region" aria-label="Уведомление о cookie">
+      <div className="fk-container py-3 sm:py-4"><div className="qrs-cookie-notice">
+        <p>Мы используем cookie и Яндекс Метрику с Вебвизором. Аналитику можно отключить в настройках. <Link href="/privacy-policy#section-4" className="underline">Подробнее в политике</Link>.</p>
+        <div className="qrs-cookie-actions"><Button type="button" variant="secondary" onClick={() => { setAnalytics(isAnalyticsEnabled()); setOpen(true); }}>Настроить</Button><Button type="button" variant="primary" onClick={acknowledgeCookieNotice}>Понятно</Button></div>
+      </div></div>
+    </div>}
+    <Modal className="qrs-public qrs-cookie-settings" open={open} onClose={close} title="Настройки cookie" size="sm" subtitle="Выберите, разрешать ли аналитику на этом устройстве." footer={<><Button type="button" variant="secondary" onClick={close}>Отмена</Button><Button type="button" variant="primary" onClick={save}>Сохранить</Button></>}>
+      <div className="qrs-cookie-category"><div><label htmlFor="cookie-necessary">Необходимые</label><p id="cookie-necessary-hint">Вход, сессия, оплата и сохранение настроек. Всегда включены.</p></div><label className="qrs-cookie-control" htmlFor="cookie-necessary"><input id="cookie-necessary" type="checkbox" role="switch" checked disabled aria-describedby="cookie-necessary-hint" /></label></div>
+      <div className="qrs-cookie-category"><div><label htmlFor="cookie-analytics">Аналитика</label><p id="cookie-analytics-hint">Яндекс Метрика, Вебвизор и учёт партнёрских переходов. Можно отключить — сервис продолжит работать.</p></div><label className="qrs-cookie-control" htmlFor="cookie-analytics"><input id="cookie-analytics" type="checkbox" role="switch" checked={analytics} onChange={event => setAnalytics(event.target.checked)} aria-describedby="cookie-analytics-hint" /></label></div>
+      {choice === "unavailable" && <p className="qrs-cookie-storage-hint" role="status">Браузер ограничивает доступ к настройкам. Аналитика может оставаться выключенной; сохранение между посещениями может быть недоступно.</p>}
+      <p className="qrs-cookie-policy"><Link href="/privacy-policy#section-4" onClick={close}>Что собирает аналитика</Link></p>
+    </Modal>
+  </>;
 }
