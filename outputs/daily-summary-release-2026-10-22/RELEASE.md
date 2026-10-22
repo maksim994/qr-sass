@@ -13,7 +13,7 @@
 
 ## Независимый монитор
 
-Обновлена именно установленная host-копия `/opt/qr-s-backup/email-monitor.py`. SHA-256: `3677bbcbc9685d9bc16af5dc8d4ff3e1fd538dd0ae670f8f09d02c0d27896dc28`, совпадает с источником выпущенного коммита. Старый файл сохранён для отката. SMTP-кэш, учётные данные, systemd unit и существующий timer не менялись.
+Обновлена именно установленная host-копия `/opt/qr-s-backup/email-monitor.py`. SHA-256: `3677bbbc9685d9bc16af5dc8d4ff3e1fd538dd0ae670f8f09d02c0d27896dc28`, совпадает с источником выпущенного коммита. Старый файл сохранён для отката. SMTP-кэш, учётные данные, systemd unit и существующий timer не менялись.
 
 `qr-s-email-monitor.service`: **Result=success, ExecMainStatus=0**. Timer **active**, проверка каждые 5 минут. Монитор читает возвраты Beget по IMAP с проверкой TLS, только в режиме чтения, и сопоставляет точные исходные Message-ID известных сводок. Поддерживается реальный формат Beget `text/rfc822-headers`.
 
