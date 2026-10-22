@@ -64,6 +64,8 @@ Open `http://localhost:3000`.
 | [`docs/PRD.md`](docs/PRD.md) | Scope / JTBD (исторический MVP-черновик) |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Архитектурные решения |
 | [`docs/BLOG_API.md`](docs/BLOG_API.md) | Blog API |
+| [`docs/QR-API-V1.md`](docs/QR-API-V1.md) | QR API v1, ключи и контракт модуля Битрикс |
+| [`docs/QR-API-V1-VALIDATION.md`](docs/QR-API-V1-VALIDATION.md) | Локальная приёмка QR API |
 | [`AGENTS.md`](AGENTS.md) | Хаб для Cursor-агентов + gold-файлы |
 
 ## Не забыть (ops / продукт)
@@ -112,6 +114,8 @@ ID счётчика — в админке Site Settings.
 Детали: секция Data Safety в `docs/VISUAL-ROLLOUT-PLAN.md`.
 
 ## API overview
+
+Публичный QR API v1: `/api/v1/qr`, ключи `qrs_api_`, scopes, все тарифы в пределах общих лимитов. [Контракт и примеры](docs/QR-API-V1.md). Объединённая публичная схема: `/api/v1/openapi.json`.
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`

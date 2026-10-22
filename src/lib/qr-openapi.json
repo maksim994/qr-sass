@@ -1,0 +1,1524 @@
+{
+  "paths": {
+    "/api/v1/qr": {
+      "get": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Список своих активных QR",
+        "description": "Разрешение: qr:read. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/QrApiQr"
+                          }
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "offset": {
+                          "type": "integer"
+                        },
+                        "nextOffset": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "default": 0
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Создать динамический URL QR",
+        "description": "Разрешение: qr:write. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Успех",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QrApiQr"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QrApiCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qr/{id}": {
+      "get": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Получить QR",
+        "description": "Разрешение: qr:read. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QrApiQr"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Изменить целевой URL без замены напечатанного QR",
+        "description": "Разрешение: qr:write. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QrApiQr"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QrApiUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qr/key": {
+      "get": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Проверить ключ и узнать доступные разрешения",
+        "description": "Разрешение: любой действующий ключ. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "workspaceId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "scopes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "qr:read",
+                              "qr:write",
+                              "stats:read"
+                            ]
+                          }
+                        },
+                        "rateLimit": {
+                          "type": "integer"
+                        },
+                        "plan": {
+                          "enum": [
+                            "FREE",
+                            "PRO",
+                            "BUSINESS"
+                          ]
+                        },
+                        "limits": {
+                          "type": "object",
+                          "properties": {
+                            "maxDynamicQr": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ]
+                            },
+                            "maxQrCodes": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qr/{id}/image": {
+      "get": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Экспортировать PNG/SVG с цветами и коррекцией H",
+        "description": "Разрешение: qr:read. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "QR без внешних логотипов, quiet zone 4 модуля. Низкий контраст отклоняется. Цвет # в query кодировать как %23.",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "png",
+                "svg"
+              ],
+              "default": "png"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 128,
+              "maximum": 2048,
+              "default": 600
+            }
+          },
+          {
+            "name": "foreground",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$",
+              "default": "#111111"
+            }
+          },
+          {
+            "name": "background",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$",
+              "default": "#ffffff"
+            }
+          },
+          {
+            "name": "errorCorrectionLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "L",
+                "M",
+                "Q",
+                "H"
+              ],
+              "default": "H"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/qr/{id}/stats": {
+      "get": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Открытия по дням и устройствам без данных посетителей",
+        "description": "Разрешение: stats:read. Кабинет определяется ключом. 60 запросов/минуту на ключ, единый счётчик между репликами.",
+        "security": [
+          {
+            "QrApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "const": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "to": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "timezone": {
+                          "const": "UTC"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "byDay": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "date": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "byDevice": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "device": {
+                                "enum": [
+                                  "mobile",
+                                  "desktop",
+                                  "tablet",
+                                  "unknown"
+                                ]
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка валидации",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверный/отозванный ключ",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Недостаточный scope или лимит тарифа",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Код не найден",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Лимит запросов",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Секунд до следующего окна"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ошибка сервиса",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "private, no-store, max-age=0"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrApiError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Включительно, UTC; период до 366 дней",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "Включительно, UTC; период до 366 дней",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "QrApiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "qrs_api_…",
+        "description": "Ключ кабинета QR API; QR endpoints не принимают cookie, qre_ или редакционные ключи."
+      }
+    },
+    "schemas": {
+      "QrApiQr": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "contentType",
+          "shortCode",
+          "shortUrl",
+          "targetUrl",
+          "source",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "shortCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "shortUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "targetUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "QrApiCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "targetUrl"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "targetUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "pattern": "^https?://",
+            "description": "HTTP(S) без логина и пароля в URL"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "api",
+              "bitrix_module"
+            ],
+            "default": "api"
+          }
+        }
+      },
+      "QrApiUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "targetUrl"
+        ],
+        "properties": {
+          "targetUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "pattern": "^https?://"
+          }
+        }
+      },
+      "QrApiError": {
+        "type": "object",
+        "required": [
+          "ok",
+          "error",
+          "code"
+        ],
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "details": {}
+        }
+      }
+    }
+  }
+}

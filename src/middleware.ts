@@ -11,6 +11,8 @@ const CSRF_SKIP_PREFIXES = [
   "/api/auth/logout",
   "/api/qr/verify-password",
   "/api/gdpr/consent",
+  // QR v1 is Bearer-only and never accepts session cookies.
+  "/api/v1/qr",
   // Articles v1 accepts only explicit Bearer credentials, never session cookies.
   "/api/v1/articles",
   // Editorial REST endpoints accept Bearer only, never cookie sessions.
@@ -22,7 +24,7 @@ const CSRF_SKIP_PREFIXES = [
 function csrfBlockedResponse() {
   return new NextResponse(JSON.stringify({ error: MSG.INVALID_CSRF }), {
     status: 403,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "private, no-store, max-age=0" },
   });
 }
 
@@ -43,7 +45,7 @@ export async function middleware(request: NextRequest) {
     } catch { /* Keep existing routes available if the optional redirect lookup fails. */ }
   }
   const requestHeaders = new Headers(request.headers);
-  const privateSurface = ["/verify-email", "/reset-password"].includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";
+  const privateSurface = ["/verify-email", "/reset-password", "/dashboard/api-keys"].includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";
   // Trusted flag suppresses custom head and analytics on previews and one-time secret forms.
   requestHeaders.set("x-qrs-private-preview", privateSurface ? "1" : "0");
   const response = NextResponse.next({ request: { headers: requestHeaders } });
@@ -53,6 +55,11 @@ export async function middleware(request: NextRequest) {
 
   if (privateSurface) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    response.headers.set("Referrer-Policy", "no-referrer");
+  }
+
+  if (request.nextUrl.pathname === "/api/v1/qr" || request.nextUrl.pathname.startsWith("/api/v1/qr/") || /\/api\/workspaces\/[^/]+\/qr-api-keys(?:\/|$)/.test(request.nextUrl.pathname)) {
     response.headers.set("Cache-Control", "private, no-store, max-age=0");
     response.headers.set("Referrer-Policy", "no-referrer");
   }

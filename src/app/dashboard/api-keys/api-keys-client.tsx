@@ -19,13 +19,14 @@ export function ApiKeysWorkspaceBar({ workspaceId }: { workspaceId: string }) {
   return <section className={styles.workspace}><div><h2>Идентификатор кабинета</h2><p>Передавайте его в поле <code>workspaceId</code> при запросах к API.</p><code className={styles.code}>{workspaceId}</code></div><CopyButton value={workspaceId} label="Скопировать ID" /></section>;
 }
 
-type KeyItem = { id: string; name: string; prefix: string; createdAt: string };
-export function ApiKeysClient({ workspaceId }: { workspaceId: string }) {
+type KeyItem = { id: string; name: string; prefix: string; createdAt: string; scopes?: string[]; rateLimit?: number };
+export function ApiKeysClient({ workspaceId, qrApi = false }: { workspaceId: string; qrApi?: boolean }) {
+  const [scopes, setScopes] = useState<string[]>([]);
   const [keys, setKeys] = useState<KeyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [newKey, setNewKey] = useState<{key: string; name: string} | null>(null);
+  const [newKey, setNewKey] = useState<{key: string; name: string; id?: string} | null>(null);
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<KeyItem | null>(null);
   const [error, setError] = useState("");
@@ -34,7 +35,7 @@ export function ApiKeysClient({ workspaceId }: { workspaceId: string }) {
   const pending = useRef(false);
   const feedback = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
-  const endpoint = `/api/workspaces/${workspaceId}/api-keys`;
+  const endpoint = `/api/workspaces/${workspaceId}/${qrApi ? "qr-api-keys" : "api-keys"}`;
   useEffect(() => { if (error || newKey || notice) feedback.current?.focus(); }, [error, newKey, notice]);
 
   const loadKeys = useCallback(async (signal?: AbortSignal) => {
@@ -60,11 +61,11 @@ export function ApiKeysClient({ workspaceId }: { workspaceId: string }) {
     if (pending.current || newKey || !name.trim()) return;
     pending.current = true; setBusy(true); setError(""); setNotice("");
     try {
-      const result = await parseApiResponse<{key: string; name: string}>(await fetchApi(endpoint, {
-        method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name: name.trim()}),
+      const result = await parseApiResponse<{key: string; name: string; id?: string}>(await fetchApi(endpoint, {
+        method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({name: name.trim(), ...(qrApi ? {scopes} : {})}),
       }));
       if (!result.ok || !result.data?.key) { setError(result.error ?? MSG.API_KEY_CREATE_FAILED); return; }
-      setNewKey({key: result.data.key, name: result.data.name}); setName("");
+      setNewKey({key: result.data.key, name: result.data.name, id: result.data.id}); setName("");
       trackGoal(PRODUCT_GOALS.api_key_created);
       await loadKeys();
     } catch { setError(MSG.API_KEY_CREATE_FAILED); }
@@ -77,7 +78,7 @@ export function ApiKeysClient({ workspaceId }: { workspaceId: string }) {
       const result = await parseApiResponse(await fetchApi(`${endpoint}/${selected.id}`, {method: "DELETE"}));
       if (!result.ok) { setRevokeError(result.error ?? MSG.API_KEY_REVOKE_FAILED); return; }
       setKeys(current => current.filter(key => key.id !== selected.id));
-      if (newKey?.name === selected.name) setNewKey(null);
+      if (newKey && (qrApi ? newKey.id === selected.id : newKey.name === selected.name)) setNewKey(null);
       setNotice(`Ключ «${selected.name}» отозван.`); setSelected(null);
     } catch { setRevokeError(MSG.API_KEY_REVOKE_FAILED); }
     finally { pending.current = false; setBusy(false); }
@@ -86,11 +87,11 @@ export function ApiKeysClient({ workspaceId }: { workspaceId: string }) {
     {(error || notice || newKey) && <div ref={feedback} tabIndex={-1} className={styles.feedback}>
       {error && <Alert variant="danger" onClose={() => setError("")}>{error}</Alert>}
       {notice && <Alert variant="success" onClose={() => setNotice("")}>{notice}</Alert>}
-      {newKey && <section className={styles.panel}><h2>Сохраните ключ «{newKey.name}»</h2><p className={styles.hint}>Полный ключ показан только сейчас. Сохраните его перед закрытием страницы. Не размещайте ключ в открытом коде сайта.</p><code className={styles.secret}>{newKey.key}</code><div className={styles.actions}><CopyButton value={newKey.key} label="Скопировать ключ" /><button type="button" className="fk-button fk-button--ghost" disabled={busy} onClick={() => { setNewKey(null); nameRef.current?.focus(); }}>Я сохранил ключ</button></div></section>}
+      {newKey && <section className={styles.panel}><h2>Сохраните ключ «{newKey.name}»</h2><p className={styles.hint}>Полный ключ показан только сейчас. Сохраните его перед закрытием страницы. Не размещайте ключ в открытом коде сайта.</p><code className={`${styles.secret} ym-hide-content`}>{newKey.key}</code><div className={styles.actions}><CopyButton value={newKey.key} label="Скопировать ключ" /><button type="button" className="fk-button fk-button--ghost" disabled={busy} onClick={() => { setNewKey(null); nameRef.current?.focus(); }}>Я сохранил ключ</button></div></section>}
     </div>}
-    <section className={styles.panel}><h2>Создать ключ</h2><p className={styles.hint}>Отдельный ключ для каждого подключения поможет управлять доступом.</p><form onSubmit={createKey} className={styles.form}><div><label htmlFor="api-key-name">Название подключения</label><input ref={nameRef} id="api-key-name" className="fk-input" placeholder="Например, CRM или интернет-магазин" value={name} onChange={event => setName(event.target.value)} maxLength={64} required disabled={busy || !!newKey} /></div><button type="submit" className="fk-button fk-button--primary" disabled={busy || !!newKey || !name.trim()}>{busy && !selected ? "Создаём ключ…" : "Создать ключ"}</button></form>{newKey && <p className={styles.hint}>Сначала сохраните созданный ключ.</p>}</section>
+    <section className={styles.panel}><h2>Создать ключ</h2><p className={styles.hint}>Отдельный ключ для каждого подключения поможет управлять доступом.</p><form onSubmit={createKey} className={`${styles.form} ${qrApi ? styles.qrForm : ""}`}><div><label htmlFor={qrApi ? "qr-api-key-name" : "api-key-name"}>Название подключения</label><input ref={nameRef} id={qrApi ? "qr-api-key-name" : "api-key-name"} className="fk-input" placeholder="Например, CRM или интернет-магазин" value={name} onChange={event => setName(event.target.value)} maxLength={64} required disabled={busy || !!newKey} /></div>{qrApi && <fieldset className={styles.scopes} disabled={busy || !!newKey}><legend>Разрешения ключа</legend>{[["qr:read", "Чтение и экспорт кодов"], ["qr:write", "Создание и смена ссылки"], ["stats:read", "Статистика открытий"]].map(([scope, label]) => <label key={scope}><input type="checkbox" checked={scopes.includes(scope)} onChange={event => setScopes(current => event.target.checked ? [...current, scope] : current.filter(value => value !== scope))} />{label}</label>)}<p className={styles.hint}>60 запросов в минуту на ключ. Выберите хотя бы одно разрешение.</p></fieldset>}<button type="submit" className="fk-button fk-button--primary" disabled={busy || !!newKey || !name.trim() || (qrApi && !scopes.length)}>{busy && !selected ? "Создаём ключ…" : "Создать ключ"}</button></form>{newKey && <p className={styles.hint}>Сначала сохраните созданный ключ.</p>}</section>
     <section className={styles.panel}><h2>Ключи кабинета{!loading && !loadError ? ` · ${keys.length}` : ""}</h2>
-      {loading ? <p className={styles.hint} role="status">Загружаем ключи…</p> : loadError ? <div className={styles.loadError}><Alert variant="danger">{loadError}</Alert><button type="button" className="fk-button fk-button--secondary" onClick={() => void loadKeys()}>Повторить загрузку</button></div> : !keys.length ? <p className={styles.hint}>Ключей пока нет. Создайте первый для подключения своего приложения.</p> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th scope="col">Подключение</th><th scope="col">Префикс ключа</th><th scope="col">Создан</th><th scope="col"><span className="sr-only">Действия</span></th></tr></thead><tbody>{keys.map(key => <tr key={key.id}><td>{key.name}</td><td data-label="Префикс"><code>{key.prefix}</code></td><td data-label="Создан"><time dateTime={key.createdAt}>{new Date(key.createdAt).toLocaleDateString("ru-RU", {day:"numeric", month:"short", year:"numeric", timeZone:"Europe/Moscow"})}</time></td><td><button type="button" className={styles.revoke} disabled={busy} aria-label={`Отозвать ключ ${key.name}`} onClick={() => { setSelected(key); setRevokeError(""); }}>Отозвать</button></td></tr>)}</tbody></table></div>}
+      {loading ? <p className={styles.hint} role="status">Загружаем ключи…</p> : loadError ? <div className={styles.loadError}><Alert variant="danger">{loadError}</Alert><button type="button" className="fk-button fk-button--secondary" onClick={() => void loadKeys()}>Повторить загрузку</button></div> : !keys.length ? <p className={styles.hint}>Ключей пока нет. Создайте первый для подключения своего приложения.</p> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th scope="col">Подключение</th><th scope="col">Префикс ключа</th><th scope="col">Создан</th><th scope="col"><span className="sr-only">Действия</span></th></tr></thead><tbody>{keys.map(key => <tr key={key.id}><td>{key.name}{key.scopes && <small className={styles.keyMeta}>{key.scopes.join(", ")} · {key.rateLimit}/мин</small>}</td><td data-label="Префикс"><code>{key.prefix}</code></td><td data-label="Создан"><time dateTime={key.createdAt}>{new Date(key.createdAt).toLocaleDateString("ru-RU", {day:"numeric", month:"short", year:"numeric", timeZone:"Europe/Moscow"})}</time></td><td><button type="button" className={styles.revoke} disabled={busy} aria-label={`Отозвать ключ ${key.name}`} onClick={() => { setSelected(key); setRevokeError(""); }}>Отозвать</button></td></tr>)}</tbody></table></div>}
     </section>
     <Modal open={!!selected} onClose={() => { if (!pending.current) setSelected(null); }} closeDisabled={busy} title="Отозвать API-ключ?" size="sm" footer={<><button type="button" className="fk-button fk-button--secondary" disabled={busy} onClick={() => setSelected(null)}>Отмена</button><button type="button" className="fk-button fk-button--danger" disabled={busy} onClick={() => void revokeKey()}>{busy ? "Отзываем…" : "Отозвать ключ"}</button></>}><p className={styles.dialogText}>Подключение «{selected?.name}» потеряет доступ к API. Для восстановления понадобится создать новый ключ и обновить его в приложении.</p>{revokeError && <Alert variant="danger">{revokeError}</Alert>}</Modal>
   </div>;

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { generateBlogApiToken, hashBlogApiToken } from "./blog-api-tokens.ts";
 import { articleCreateSchema, articlePatchSchema, forbiddenApiPublication } from "./blog-api-input.ts";
+import { publicOpenApi } from "./public-openapi.ts";
 import spec from "./blog-openapi.json" with { type: "json" };
 import { readFileSync } from "node:fs";
 test("article tokens use independent entropy/salt, never workspace prefix", () => {
@@ -16,7 +17,7 @@ test("API allowlist rejects injected ownership, dates, counters and missing vers
   for(const field of ["status","scheduledAt","firstPublishedAt","publishedAt","published"]) assert.equal(forbiddenApiPublication({[field]:null}),true);
 });
 test("served OpenAPI exactly matches committed YAML and strict request limits", () => {
-  assert.deepEqual(JSON.parse(readFileSync("openapi.yaml","utf8")),spec);
+  assert.deepEqual(JSON.parse(readFileSync("openapi.yaml","utf8")),publicOpenApi);
   assert.equal(spec.openapi,"3.1.0");
   assert.equal(spec.components.schemas.ArticlePatch.properties.faq.items.properties.question.maxLength,500);
   assert.equal(spec.components.schemas.ArticlePatch.properties.faq.items.properties.answer.maxLength,10000);

@@ -21,6 +21,7 @@ alwaysApply: false
 - `/api/auth/logout`
 - `/api/qr/verify-password`
 - `/api/gdpr/consent`
+- `/api/v1/qr` — отдельная авторизация только qrs_api_ Bearer, cookies не принимаются
 - `/api/v1/articles` — отдельная авторизация только Bearer, cookies не принимаются
 - `/api/v1/redirects` — отдельная авторизация только Bearer, cookies не принимаются
 - `/api/v1/images` — отдельная авторизация только Bearer, cookies не принимаются

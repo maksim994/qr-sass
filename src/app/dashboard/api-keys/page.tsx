@@ -21,10 +21,13 @@ export default async function ApiKeysPage() {
     <div className="qrs-apikeys-page">
       <DashboardPageHeader
         title="API-ключи"
-        description="Ключи для программного доступа к API. Доступны на тарифе Бизнес."
+        description="QR API доступен на всех тарифах. На Бесплатном — в пределах двух динамических кодов."
       />
 
       <div className="mb-6"><Link href="/dashboard/api-docs" className="fk-button fk-button--secondary">Открыть документацию API</Link></div>
+      <p>Ключ QR API привязан к этому кабинету: передавать workspaceId в запросах не нужно.</p>
+      {canManageKeys ? <ApiKeysClient workspaceId={workspace.id} qrApi /> : <ApiKeysPermissionBanner />}
+      <details className="mt-8"><summary>Прежние ключи qre_ для API кабинета · Бизнес</summary>
       <ApiKeysWorkspaceBar workspaceId={workspace.id} />
 
       {!allowsApi ? (
@@ -34,6 +37,7 @@ export default async function ApiKeysPage() {
       ) : (
         <ApiKeysClient workspaceId={workspace.id} />
       )}
+      </details>
     </div>
   );
 }

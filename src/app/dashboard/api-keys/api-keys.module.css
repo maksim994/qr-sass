@@ -23,7 +23,7 @@
 .table :is(td,th):last-child { text-align: right; padding-right: 0; }
 .table td:nth-child(3) { white-space: nowrap; color: var(--text-muted); }
 .table tbody tr:last-child td { border-bottom: 0; }
-.revoke { border: 0; background: none; color: var(--color-danger); min-height: 44px; padding: 8px; cursor: pointer; font: inherit; }
+.revoke { border: 0; background: none; color: color-mix(in srgb, var(--color-danger) 65%, var(--text-strong)); min-height: 44px; padding: 8px; cursor: pointer; font: inherit; }
 .revoke:hover { text-decoration: underline; }
 .revoke:disabled { opacity: .5; cursor: wait; }
 .loadError { display: grid; justify-items: start; gap: 16px; margin-top: 20px; }
@@ -41,3 +41,13 @@
  .table td[data-label]::before { content: attr(data-label) ": "; color: var(--text-muted); font-size: .8125rem; }
  .revoke { padding-left: 0; }
 }
+
+.qrForm { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.qrForm > div { grid-column: 1 / -1; }
+.scopes { border: 0; padding: 0; min-width: 0; }
+.scopes legend { font-size: .875rem; font-weight: 600; margin-bottom: 8px; }
+.scopes label { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0; }
+.scopes input { width: 18px; height: 18px; flex: none; accent-color: var(--text-link); }
+.scopes .hint { margin-bottom: 0; }
+.keyMeta { display: block; font-weight: 400; color: var(--text-muted); font-size: .75rem; margin-top: 6px; }
+@media(max-width:760px) { .qrForm { grid-template-columns: minmax(0, 1fr); } }

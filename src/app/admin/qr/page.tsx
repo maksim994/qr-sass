@@ -54,6 +54,7 @@ export default async function AdminQrPage({
       id: true,
       name: true,
       shortCode: true,
+      creationSource: true,
       contentType: true,
       isArchived: true,
       createdAt: true,
@@ -114,6 +115,7 @@ export default async function AdminQrPage({
                   <td data-label="QR-код">
                     <Link href={`/admin/qr/${qr.id}`}>{qr.name}</Link>
                     <small>{qr.shortCode ?? "Без короткой ссылки"}</small>
+                    {qr.creationSource && <small>Источник: {qr.creationSource}</small>}
                   </td>
                   <td data-label="Тип и статус">
                     {contentTypeLabels[qr.contentType]}

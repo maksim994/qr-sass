@@ -55,6 +55,7 @@ export function buildLimitLabels(limits: PlanLimits, planId: PlanId): string[] {
   parts.push(analyticsLimitLabel(limits));
   parts.push(exportLimitLabel(limits.exportFormats));
   parts.push(usersLimitLabel(limits));
+  parts.push("QR API");
   if (planId === "BUSINESS") {
     parts.push("API-ключи");
   }
@@ -79,6 +80,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       `Статические + ${COMMERCIAL.free.dynamic} динамических`,
       "Экспорт PNG и SVG",
       "1 пользователь",
+      "QR API",
     ],
   },
   PRO: {
@@ -97,6 +99,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       "Динамика: смена ссылки и открытия по дням",
       "PNG и SVG; PDF и EPS — растровая картинка",
       "До 5 участников команды",
+      "QR API",
     ],
   },
   BUSINESS: {
@@ -115,6 +118,7 @@ export const PLAN_DEFAULTS: Record<PlanId, Omit<PlanInfo, "id">> = {
       "Динамика: смена ссылки и открытия по дням",
       "PNG и SVG; PDF и EPS — растровая картинка",
       "Участники: уже зарегистрированные пользователи",
+      "QR API",
       "API-ключи",
     ],
   },

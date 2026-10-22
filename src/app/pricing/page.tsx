@@ -36,7 +36,7 @@ export default async function PricingPage() {
     ["Рамки с призывом", "Да", "Да", "Да"],
     ["CSV за один запрос", "Нет", `До ${COMMERCIAL.pro.csvRows} строк`, `До ${COMMERCIAL.business.csvRows} строк`],
     ["Команда", ...plans.map(p => p.limits.maxUsers === 1 ? "1 пользователь" : p.limits.maxUsers == null ? "Без лимита" : `До ${p.limits.maxUsers} участников`)],
-    ["API", "Нет", "Нет", "Да"],
+    ["QR API", "Да, в пределах 2 динамических кодов", "Да", "Да"],
     ["Поддержка", "По электронной почте", "По электронной почте", "По электронной почте"],
   ];
   return <div className="qrs-public"><SiteHeader session={session} /><main className={`fk-container ${s.page}`}><PricingPageGoal /><PublicBreadcrumb current="Тарифы" />

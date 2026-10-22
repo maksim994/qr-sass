@@ -91,11 +91,11 @@ export function DashboardShell({ children, user, workspace, workspaces }: Props)
                 const item = dashboardNavItems.find((entry) => entry.href === href)!;
                 const active = current?.href === href || (href === "/dashboard/library" && pathname.startsWith("/dashboard/qr/"));
                 return (
-                  <Link key={href} href={href} className={styles.navLink} aria-current={active ? "page" : undefined} onClick={event => { const locked = href.includes("api-") && workspace.plan !== "BUSINESS" || href === "/dashboard/team" && workspace.plan === "FREE"; if (locked) { event.preventDefault(); setUpgrade(href.includes("api-") ? "api" : "team"); } else closeSidebar(); }}>
+                  <Link key={href} href={href} className={styles.navLink} aria-current={active ? "page" : undefined} onClick={event => { const locked = href === "/dashboard/team" && workspace.plan === "FREE"; if (locked) { event.preventDefault(); setUpgrade("team"); } else closeSidebar(); }}>
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       {(Array.isArray(item.icon) ? item.icon : [item.icon]).map((d, i) => <path key={i} d={d} />)}
                     </svg>
-                    {item.label}{(href.includes("api-") && workspace.plan !== "BUSINESS" || href === "/dashboard/team" && workspace.plan === "FREE") && <small className="fk-badge">Бизнес</small>}
+                    {item.label}{(href === "/dashboard/team" && workspace.plan === "FREE") && <small className="fk-badge">Бизнес</small>}
                   </Link>
                 );
               })}
