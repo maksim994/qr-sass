@@ -16,6 +16,7 @@
     "blog:sanitize": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/sanitize-blog.ts",
     "seo:hygiene": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/seo-hygiene.ts",
     "verify:qr": "node scripts/verify-qr-health.mjs",
+    "email:digest": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/email-digest.ts",
     "notifications:worker": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/notification-worker.ts",
     "analytics:deliver": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/metrika-worker.ts"
   },

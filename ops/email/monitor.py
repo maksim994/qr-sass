@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Independent host monitor. SMTP secrets stay on this server, never in logs."""
 import datetime as dt
+import email
 import email.message
 import fcntl
+import imaplib
 import json
 import os
 from pathlib import Path
@@ -59,7 +61,50 @@ def send(config, text, subject='QR-S.ru: требуется внимание'):
             raise RuntimeError('Recipient rejected')
 
 
-def issues(app):
+def rejected_digest(raw, message_ids):
+    """Only a failed DSN containing an exact original Message-ID counts."""
+    message = email.message_from_bytes(raw)
+    failed = any(
+        part.get_content_type() == 'message/delivery-status'
+        and any(block.get('Action', '').lower() == 'failed' for block in part.get_payload())
+        for part in message.walk()
+    )
+    if not failed:
+        return False
+    for part in message.walk():
+        if part.get('Message-ID', '').strip() in message_ids:
+            return True
+        # Exim/Beget can attach only the original headers instead of the full mail.
+        if part.get_content_type() in ('text/rfc822-headers', 'message/global-headers'):
+            headers = email.message_from_bytes(part.get_payload(decode=True) or b'')
+            if headers.get('Message-ID', '').strip() in message_ids:
+                return True
+    return False
+
+
+def digest_bounced(config, message_ids):
+    if not message_ids:
+        return False
+    # Same Beget mailbox credentials as SMTP, official incoming-mail server.
+    # Never mark mail as read or log its headers, body, addresses or raw errors.
+    with imaplib.IMAP4_SSL('imap.beget.com', ssl_context=ssl.create_default_context(), timeout=15) as mailbox:
+        mailbox.login(config['SMTP_USER'], config['SMTP_PASS'])
+        if mailbox.select('INBOX', readonly=True)[0] != 'OK':
+            raise RuntimeError('Bounce mailbox unavailable')
+        since = '-'.join(email.utils.format_datetime(dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7)).split()[1:4])
+        status, data = mailbox.search(None, 'SINCE', since)
+        if status != 'OK':
+            raise RuntimeError('Bounce search unavailable')
+        for mid in data[0].split()[-100:]:
+            status, parts = mailbox.fetch(mid, '(BODY.PEEK[]<0.262144>)')
+            if status != 'OK':
+                raise RuntimeError('Bounce message unavailable')
+            if any(isinstance(part, tuple) and rejected_digest(part[1], message_ids) for part in parts):
+                return True
+    return False
+
+
+def issues(app, config=None):
     result = []
     # Existing backup monitor checks freshness, restore verification and systemd failures.
     sys.path.insert(0, '/opt/qr-s-backup')
@@ -81,6 +126,15 @@ def issues(app):
                 result.append('Почтовый обработчик не отвечает')
             if health.get('failed'):
                 result.append('Есть недоставленные письма; проверьте очередь в админке')
+            if health.get('digestOverdue'):
+                result.append('Ежедневная сводка не принята SMTP после 09:10 МСК; проверьте очередь')
+            if config and health.get('digestMessageIds'):
+                try:
+                    if digest_bounced(config, set(health['digestMessageIds'])):
+                        print('Daily digest delivery-status failure detected', file=sys.stderr)
+                        result.append('Почтовый провайдер вернул ежедневную сводку после приёма SMTP; нужен ручной повтор')
+                except Exception:
+                    result.append('Не удалось проверить почтовые возвраты ежедневной сводки')
         except Exception:
             result.append('Не удалось проверить почтовый обработчик')
     else:
@@ -100,7 +154,7 @@ def main():
             return
         path = STATE / 'email-monitor-state.json'
         previous = json.loads(path.read_text()) if path.exists() else {}
-        current, now = issues(app), dt.datetime.now(dt.timezone.utc).timestamp()
+        current, now = issues(app, config), dt.datetime.now(dt.timezone.utc).timestamp()
         if current and (current != previous.get('issues', []) or now - previous.get('sent_at', 0) >= 86400):
             send(config, 'QR-S.ru: требуется проверка.\n' + '\n'.join(current) + '\nhttps://qr-s.ru/admin/notifications')
         elif not current and previous.get('issues'):

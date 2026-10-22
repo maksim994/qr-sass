@@ -1,4 +1,6 @@
 import { getDb } from "../src/lib/db.ts";
+import { logger } from "../src/lib/logger.ts";
+import { smtpErrorCode } from "../src/lib/email-notification-policy.ts";
 import {
   deliverNextEmail,
   scheduleEmailNotifications,
@@ -18,10 +20,12 @@ while (!stopping) {
       where: { id: "default" },
       data: { lastSeenAt: new Date() },
     });
-  } catch {
-    console.error(
-      "Email worker iteration failed; no credentials or message content logged.",
-    );
+  } catch (error) {
+    logger.error({ area: "runtime", message: "Email worker iteration failed", code: smtpErrorCode(error) });
+    // A scheduler error must not block retries of already queued messages.
+    try { await deliverNextEmail(); } catch {
+      logger.error({ area: "runtime", message: "Email queue unavailable", code: "EMAIL_QUEUE_ERROR" });
+    }
   }
   if (process.argv.includes("--once")) break;
   await new Promise((resolve) => setTimeout(resolve, 4000));

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { signupSourceLabel } from "@/lib/signup-source";
-import { emailSourceSummary } from "@/lib/email-source-summary";
+import { queueOwnerDigest } from "@/lib/email-digest";
+import { logger } from "@/lib/logger";
 import type { EmailOutbox } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { decryptIntegrationSecret } from "@/lib/integration-secrets";
@@ -17,7 +17,6 @@ import {
   DAY_MS,
   digestWindow,
   EMAIL_MAX_ATTEMPTS,
-  OWNER_EMAIL,
   periodNoticeStage,
   permanentSmtpError,
   retryDelay,
@@ -173,6 +172,8 @@ export async function deliverNextEmail(transport = sendMail) {
   } catch (error) {
     const failed =
       job.attempts >= EMAIL_MAX_ATTEMPTS || permanentSmtpError(error);
+    logger.error({ area: "runtime", message: failed ? "Email delivery failed" : "Email delivery retry scheduled",
+      code: smtpErrorCode(error), details: { kind: job.kind, attempt: job.attempts } });
     await db.emailOutbox.updateMany({
       where,
       data: {
@@ -280,60 +281,7 @@ export async function scheduleEmailNotifications(now = new Date()) {
       const window = digestWindow(now);
       if (window.start < since) window.start = since;
       if (window.ready && window.end > since) {
-        const [events, money] = await Promise.all([
-          tx.businessEvent.groupBy({
-            by: ["name"],
-            where: {
-              isTest: false,
-              createdAt: { gte: window.start, lt: window.end },
-            },
-            _count: true,
-          }),
-          tx.payment.aggregate({
-            where: {
-              isTest: false,
-              status: "SUCCEEDED",
-              paidAt: { gte: window.start, lt: window.end },
-            },
-            _sum: { amount: true },
-            _count: true,
-          }),
-        ]);
-        const count = (name: string) =>
-          events.find((e) => e.name === name)?._count ?? 0;
-        const [registrations, payments] = await Promise.all([
-          tx.businessEvent.findMany({
-            where: { name: "registration_completed", isTest: false, createdAt: { gte: window.start, lt: window.end } },
-            select: { userId: true },
-          }),
-          tx.payment.findMany({
-            where: { isTest: false, status: "SUCCEEDED", paidAt: { gte: window.start, lt: window.end } },
-            select: { amount: true, signupSourceUserId: true },
-          }),
-        ]);
-        const ids = [...new Set([
-          ...registrations.map(event => event.userId),
-          ...payments.map(payment => payment.signupSourceUserId),
-        ].filter((id): id is string => !!id))];
-        const sources = await tx.userSignupSource.findMany({ where: { userId: { in: ids } } });
-        const labels = new Map(sources.map(source => [source.userId, signupSourceLabel(source)]));
-        const sourceLabel = (id: string | null) => id ? labels.get(id) ?? "нет данных" : "нет данных";
-        const sourceSummary = emailSourceSummary(
-          registrations.map(event => sourceLabel(event.userId)),
-          payments.map(payment => ({ source: sourceLabel(payment.signupSourceUserId), amount: payment.amount })),
-        );
-        await queueEmail(tx, {
-          key: `digest:${window.day}`,
-          kind: "owner_digest",
-          to: OWNER_EMAIL,
-          expiresAt: new Date(now.getTime() + DAY_MS),
-          message: serviceMessage(
-            "Сводка за день",
-            `За ${window.start.toLocaleDateString("ru-RU", { timeZone: "Europe/Moscow" })}.\nРегистрации: ${count("registration_completed")}.\nЗапуски пробного периода: ${count("trial_started")}.\nОплаты: ${money._count}.\nВыручка: ${money._sum.amount ?? 0} ₽.\n\n${sourceSummary}`,
-            "/admin/business",
-            "Открыть отчёт",
-          ),
-        });
+        await queueOwnerDigest(tx, window, `digest:${window.day}`);
       }
       const [failedEmails, blockedPayments] = await Promise.all([
         tx.emailOutbox.count({
