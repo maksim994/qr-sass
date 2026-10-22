@@ -1,0 +1,90 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/v1/openapi.json",
+      "status": 200,
+      "cacheControl": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/qr",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/qr/key",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/qr/nonexistent",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/qr/nonexistent/image",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/qr/nonexistent/stats?from=2026-10-01&to=2026-10-22",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/qr",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/qr/nonexistent",
+      "status": 401,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "method": "GET",
+      "path": "/pricing",
+      "status": 200,
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "method": "GET",
+      "path": "/privacy-policy",
+      "status": 200,
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "method": "GET",
+      "path": "/register",
+      "status": 200,
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate"
+    },
+    {
+      "method": "GET",
+      "path": "/verify-email",
+      "status": 200,
+      "cacheControl": "private, no-store, max-age=0"
+    },
+    {
+      "method": "GET",
+      "path": "/reset-password",
+      "status": 200,
+      "cacheControl": "private, no-store, max-age=0"
+    }
+  ],
+  "schemaVersion": "1.5.0"
+}
