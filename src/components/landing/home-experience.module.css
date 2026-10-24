@@ -75,3 +75,13 @@
 .footerCopy > h2 { color: var(--footer-paper); }
 
 .typeGrid>button{background:none;border:0;border-bottom:1px solid var(--border-default);text-align:left;font:inherit;color:inherit;cursor:pointer}.typeGrid>button:focus-visible{outline:2px solid var(--color-primary);outline-offset:-2px}
+
+.typeTile { min-width: 0; padding: 24px 20px; border-bottom: 1px solid var(--border-default); border-radius: 10px; }
+.typeTile:hover { background: var(--surface-subtle); }
+.typeTileMain { display: flex; align-items: flex-start; gap: 14px; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: none; }
+.typeTileMain > svg { flex: none; width: 25px; height: 25px; color: var(--color-primary); }
+.typeTileMain > div { min-width: 0; }
+.typeTileMain > span { margin-left: auto; color: var(--text-muted); }
+.typeTileMore { display: inline-block; margin-top: 14px; font-size: 12px; color: var(--color-primary); text-decoration: underline; text-underline-offset: 3px; }
+.typeTileMain:focus-visible, .typeTileMore:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+@media (max-width: 560px) { .typeTile { padding: 20px 17px; } .typeTileMain { align-items: center; gap: 15px; } .typeTileMain > svg { width: 23px; height: 23px; } .typeTileMore { font-size: 12px; } }

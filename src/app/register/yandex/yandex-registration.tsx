@@ -12,6 +12,7 @@ import { MSG } from "@/lib/user-messages";
 export function YandexRegistration({ nextPath }: { nextPath: string }) {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function submit(e: React.FormEvent) {
@@ -19,7 +20,7 @@ export function YandexRegistration({ nextPath }: { nextPath: string }) {
     setBusy(true); setError("");
     try {
       const response = await fetchApi("/api/auth/yandex", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ termsAccepted, consent, signupSource: readFirstTouch(), legalVersion: LEGAL_VERSION, next: nextPath }) });
+        body: JSON.stringify({ termsAccepted, consent, newsletter, signupSource: readFirstTouch(), legalVersion: LEGAL_VERSION, next: nextPath }) });
       const parsed = await parseApiResponse<{ url: string }>(response);
       if (!parsed.ok || !parsed.data?.url) { setError(parsed.error ?? MSG.YANDEX_AUTH_FAILED); setBusy(false); return; }
       window.location.assign(parsed.data.url);
@@ -30,7 +31,8 @@ export function YandexRegistration({ nextPath }: { nextPath: string }) {
       {error && <Alert variant="danger">{error}</Alert>}
       <ConsentField kind="terms" checked={termsAccepted} onChange={setTermsAccepted} disabled={busy} />
       <ConsentField checked={consent} onChange={setConsent} disabled={busy} />
-      <p className="qrs-auth-social-note"><Link href="/privacy-policy">Как обрабатываются данные</Link>. Эти подтверждения не подписывают вас на рекламу.</p>
+      <ConsentField kind="newsletter" checked={newsletter} onChange={setNewsletter} disabled={busy} />
+      <p className="qrs-auth-social-note"><Link href="/privacy-policy">Как обрабатываются данные</Link>. Новости отправляем только при отдельном согласии.</p>
       <Button type="submit" block disabled={busy}>{busy ? "Открываем Яндекс…" : "Продолжить через Яндекс"}</Button>
       <Link href={`/register?next=${encodeURIComponent(nextPath)}`}>Регистрация по email</Link>
     </form>

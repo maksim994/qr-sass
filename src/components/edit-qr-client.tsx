@@ -47,7 +47,7 @@ type QrData = {
   hasPassword: boolean;
 };
 
-export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; initialQr: QrData }) {
+export function EditQrClient({ workspaceId, initialQr, dynamicRemaining }: { workspaceId: string; initialQr: QrData; dynamicRemaining: number | null }) {
   const router = useRouter();
   const typeInfo = getQrTypeInfo(initialQr.contentType);
   const initialPayload = initialQr.payload;
@@ -304,6 +304,8 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
         </div>
 
         <QrWizardPreview
+          downloadUpsell={initialQr.contentType === "URL" && initialQr.kind === "STATIC" && dynamicRemaining !== null
+            ? { name, payload, dynamicRemaining } : undefined}
           kindLabel={initialQr.kind === "DYNAMIC" ? "Динамический" : "Статический"}
           qrRef={qrRef}
           hostedPreview={initialQr.contentType === "BUSINESS" ? <BusinessLanding payload={payload} /> : undefined}

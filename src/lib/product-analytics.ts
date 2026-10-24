@@ -3,6 +3,7 @@ import { isAnalyticsEnabled } from "@/lib/cookie-consent";
 /** Client-side product funnel goals for Yandex Metrika reachGoal. */
 
 export const PRODUCT_GOALS = {
+  download_upsell_click: "download_upsell_click",
   scan_success: "scan_success",
   hero_cta_click: "hero_cta_click",
   hero_create_qr_click: "hero_create_qr_click",

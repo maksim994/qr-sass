@@ -26,7 +26,11 @@ test("legacy HTML link maintenance preserves images/bytes and rejects unrelated 
   assert.ok(!isPublicLinkMaintenance(html, html));
   assert.equal(replacePrivateArticleLinks('<a href="https://evil.test/dashboard/billing">x</a>'), '<a href="https://evil.test/dashboard/billing">x</a>');
 });
-test("configured robots keep public API files crawlable and put Sitemap last", () => {
+test("configured robots keep public API files crawlable and put Sitemap last", (context) => {
+  // This fixture exercises production canonicals independently of a developer's local APP_URL.
+  const previous = process.env.APP_URL;
+  process.env.APP_URL = "https://qr-s.ru/";
+  context.after(() => { if (previous === undefined) delete process.env.APP_URL; else process.env.APP_URL = previous; });
   for (const source of [getDefaultRobotsTxt(), "User-agent: *\nDisallow: /dashboard/\nDisallow: /admin/\nDisallow: /api/\nSitemap: https://qr-s.ru/sitemap.xml"]) {
     const txt = applyPublicRobotsPolicy(allowBlogMediaRobots(source));
     assert.match(txt, /^User-agent: \*/);

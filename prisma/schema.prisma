@@ -523,12 +523,14 @@ model LegalAcceptance {
   acceptedAt DateTime @default(now())
   termsAccepted Boolean
   dataConsent Boolean
+  newsletterOptIn Boolean @default(false)
   documents Json
   @@index([userId, acceptedAt])
 }
 
 // Short-lived, one-use OAuth state, created only by a CSRF-protected explicit POST.
 model OAuthLegalIntent {
+  newsletterOptIn Boolean @default(false)
   stateHash String @id
   version String
   acceptedAt DateTime @default(now())

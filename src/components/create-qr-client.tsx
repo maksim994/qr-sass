@@ -28,6 +28,7 @@ import {
   clearQrCreateDraft,
   nameFromUrl,
   parseQrCreateDraft,
+  resolveQrCreateDraft,
   readQrDraftSnapshot,
   subscribeQrDraft,
   type QrCreateDraft,
@@ -84,13 +85,14 @@ export function CreateQrClient({
 
   const storedRaw = useSyncExternalStore(subscribeQrDraft, readQrDraftSnapshot, () => null);
   const storedDraft = typeParam === "URL" ? parseQrCreateDraft(storedRaw) : null;
-  const draft = typeParam === "URL" ? initialDraft ?? storedDraft : null;
+  const draft = typeParam === "URL" ? resolveQrCreateDraft(initialDraft, storedDraft) : null;
 
   useProductPageGoal(PRODUCT_GOALS.qr_creation_started, "editor", typeParam);
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [kindOverride, setKindOverride] = useState<"STATIC" | "DYNAMIC" | null>(null);
   const [payload, setPayload] = useState<Record<string, unknown>>({});
-  const [style, setStyle] = useState<QrStyle>(defaultStyle);
+  const [styleOverride, setStyle] = useState<QrStyle | null>(null);
+  const style = styleOverride ?? draft?.style ?? defaultStyle;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [upgrade, setUpgrade] = useState<UpgradePlace | null>(null);
@@ -116,7 +118,7 @@ export function CreateQrClient({
   const kind: "STATIC" | "DYNAMIC" = requestedKind;
   const wantedDynamic = typeParam === "URL" && requestedKind === "DYNAMIC" && !planGate.allowsDynamic;
   const defaultName = typeInfo?.label ? `${typeInfo.label} QR` : "Новый QR";
-  const name = nameOverride ?? (resolvedUrl ? nameFromUrl(resolvedUrl) : defaultName);
+  const name = nameOverride ?? draft?.name ?? (resolvedUrl ? nameFromUrl(resolvedUrl) : defaultName);
 
   const actualKindPreview = typeInfo?.needsHostedPage ? "DYNAMIC" : canChooseKind ? kind : "STATIC";
   const canonical = canonicalQrData({
@@ -208,7 +210,6 @@ export function CreateQrClient({
       setSaving(false);
 
       if (!parsed.ok) {
-        if (response.status === 403) setUpgrade(planGate.qrLimitReached ? "archive_limit" : "dynamic_limit");
         setError(parsed.error ?? MSG.COULD_NOT_CREATE_QR);
         return;
       }
@@ -370,6 +371,8 @@ export function CreateQrClient({
         </div>
 
         <QrWizardPreview
+          downloadUpsell={typeParam === "URL" && actualKindPreview === "STATIC" && planGate.dynamicRemaining !== null
+            ? { name, payload: formPayload, dynamicRemaining: planGate.allowsDynamic ? planGate.dynamicRemaining : 0 } : undefined}
           id="create-preview"
           kindLabel={canonical.isDynamic ? "Динамический" : "Статический"}
           previewReady={canonical.ready}

@@ -96,7 +96,7 @@ export async function POST(request: Request) {
           name,
           passwordHash,
           metrikaRegistrationPending: true,
-          legalAcceptances: { create: legalReceipt("email") },
+          legalAcceptances: { create: legalReceipt("email", new Date(), parsed.data.newsletter) },
           signupSource: { create: { ...signupSource, firstTouchAt: new Date(signupSource.firstTouchAt) } },
           memberships: {
             create: {

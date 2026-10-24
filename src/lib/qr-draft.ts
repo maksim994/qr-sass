@@ -1,6 +1,10 @@
 import { isSafeUrl } from "@/lib/url";
 import { safePostAuthPath } from "@/lib/safe-redirect";
 import { parseStaticQrDraft, readStaticDraftSnapshot } from "@/lib/static-qr-draft";
+import { styleSchema } from "@/lib/validation";
+import type { QrStyle } from "@/components/qr-designer";
+import { parseStyleConfig } from "@/lib/qr-style-config";
+import { getQrTypeInfo } from "@/lib/qr-types";
 
 export const QR_DRAFT_STORAGE_KEY = "qrs-create-draft";
 export const QR_DRAFT_EVENT = "qrs-create-draft";
@@ -11,6 +15,9 @@ export type QrCreateDraft = {
   contentType: "URL";
   url: string;
   kind: "STATIC" | "DYNAMIC";
+  name?: string;
+  style?: QrStyle;
+  createdAt?: number;
 };
 
 export function normalizeDraftUrl(input: string): string | null {
@@ -31,9 +38,10 @@ export function nameFromUrl(url: string): string {
   }
 }
 
-export function parseQrCreateDraft(raw: unknown): QrCreateDraft | null {
+export function parseQrCreateDraft(raw: unknown, now = Date.now()): QrCreateDraft | null {
   let value = raw;
   if (typeof value === "string") {
+    if (value.length > 24000) return null;
     try {
       value = JSON.parse(value) as unknown;
     } catch {
@@ -47,7 +55,21 @@ export function parseQrCreateDraft(raw: unknown): QrCreateDraft | null {
   if (!url) return null;
   const kind = draft.kind === "STATIC" || draft.kind === "DYNAMIC" ? draft.kind : null;
   if (!kind) return null;
-  return { v: 1, contentType: "URL", url, kind };
+  if (draft.createdAt !== undefined && (typeof draft.createdAt !== "number" || !Number.isFinite(draft.createdAt) || draft.createdAt > now || now - draft.createdAt > 3600000)) return null;
+  if (draft.name !== undefined && (typeof draft.name !== "string" || draft.name.length > 120)) return null;
+  const style = draft.style === undefined ? undefined : styleSchema.safeParse(draft.style);
+  if (style && !style.success) return null;
+  return { v: 1, contentType: "URL", url, kind,
+    ...(typeof draft.name === "string" ? { name: draft.name } : {}),
+    ...(style?.success ? { style: parseStyleConfig(style.data) } : {}),
+    ...(typeof draft.createdAt === "number" ? { createdAt: draft.createdAt } : {}),
+  };
+}
+
+// Query parameters win; restore appearance only for the same URL and requested kind.
+export function resolveQrCreateDraft(prefill: QrCreateDraft | null, stored: QrCreateDraft | null) {
+  if (!prefill) return stored;
+  return stored?.url === prefill.url && stored.kind === prefill.kind ? { ...stored, ...prefill } : prefill;
 }
 
 export function createQrContinuePath(draft: QrCreateDraft): string {
@@ -55,6 +77,13 @@ export function createQrContinuePath(draft: QrCreateDraft): string {
   next.searchParams.set("kind", draft.kind);
   next.searchParams.set("url", draft.url);
   return `${next.pathname}${next.search}`;
+}
+
+/** Keep old PR links useful without allowing arbitrary post-registration redirects. */
+export function legacyQrIntentPath(query: { from?: string; intent?: string; type?: string }): string | undefined {
+  if (query.from === "download") return "/dashboard/create/url?kind=DYNAMIC";
+  const type = query.type?.toUpperCase();
+  return query.intent === "create" && type && getQrTypeInfo(type) ? `/dashboard/create/${type.toLowerCase()}` : undefined;
 }
 
 export function parseCreatePrefill(searchParams: {
@@ -95,13 +124,18 @@ export function readQrCreateDraft(): QrCreateDraft | null {
   return parseQrCreateDraft(readQrDraftSnapshot());
 }
 
-export function writeQrCreateDraft(draft: QrCreateDraft): void {
-  if (typeof window === "undefined") return;
+export function writeQrCreateDraft(draft: QrCreateDraft): boolean {
+  if (typeof window === "undefined") return false;
+  const parsed = parseQrCreateDraft(draft);
+  if (!parsed) return false;
   try {
-    localStorage.setItem(QR_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    const serialized = JSON.stringify(parsed);
+    if (serialized.length > 24000) return false;
+    localStorage.setItem(QR_DRAFT_STORAGE_KEY, serialized);
     window.dispatchEvent(new Event(QR_DRAFT_EVENT));
+    return true;
   } catch {
-    /* quota / private mode */
+    return false;
   }
 }
 

@@ -13,13 +13,23 @@ Robokassa подключается через `BILLING_PROVIDER=robokassa`; по
 
 ## Quick start
 
+Для новой задачи сначала выполните `git fetch origin` и создайте ветку от `origin/main`. С 24.10.2026 `main` содержит актуальный production-код; старые PR могут быть основаны на прежнем интерфейсе. Выкладка на production выполняется отдельно по `DEPLOY.md`.
+
 1. Copy environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Start PostgreSQL and update `DATABASE_URL` in `.env`.
+2. Start a separate local PostgreSQL database and update `DATABASE_URL` and `APP_URL=http://localhost:3000` in `.env`. Install dependencies with `npm ci`.
+
+Set `JWT_SECRET` to a random string of at least 32 characters. Set `ADMIN_INTEGRATIONS_KEY` to a random base64-encoded 32-byte key; registration uses it to encrypt queued verification messages even when SMTP is disabled. Generate a local key with:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+```
+
+Generate separate values for the two keys. Keep SMTP, payment credentials and background workers disabled for local testing.
 
 3. Push Prisma schema and generate client:
 
@@ -36,12 +46,7 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Локальный пользователь (только dev, не production):
-
-- логин: `user@local.ru`
-- пароль: `eRwoxcWdVNW0XYzc`
-
-Вход: `/login`.
+В пустой локальной БД пользователи не создаются автоматически. Создайте тестовый аккаунт через `/register`, вход — `/login`.
 
 ## Important routes
 

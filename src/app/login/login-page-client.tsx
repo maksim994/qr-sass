@@ -87,7 +87,7 @@ export function LoginPageClient({ initialError = "", nextPath = "/dashboard", ya
           </Alert>
         ) : null}
 
-        <Field label="Email" htmlFor={emailId} required>
+        <Field label="Эл. почта" htmlFor={emailId} required>
           <Input
             id={emailId}
             type="email"

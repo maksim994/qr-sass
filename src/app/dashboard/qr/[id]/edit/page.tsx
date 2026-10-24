@@ -1,3 +1,4 @@
+import { getEntitlements } from "@/lib/entitlements";
 import { redirect, notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
@@ -23,9 +24,17 @@ export default async function EditQrPage({ params }: Props) {
   if (!qr || qr.workspaceId !== workspace.id) notFound();
   if ((qr.kind === "DYNAMIC" || qr.shortCode) && !await canEditManagedQr(qr)) redirect("/pricing");
 
+  const [entitlements, dynamicCount] = await Promise.all([
+    getEntitlements(workspace.id),
+    db.qrCode.count({ where: { workspaceId: workspace.id, isArchived: false, OR: [{ kind: "DYNAMIC" }, { shortCode: { not: null } }] } }),
+  ]);
+  const plan = entitlements.plan;
+  const dynamicRemaining = !plan.limits.allowsDynamic ? 0 : plan.limits.maxDynamicQr == null ? null : Math.max(0, plan.limits.maxDynamicQr - dynamicCount);
+
   return (
     <EditQrClient
       workspaceId={workspace.id}
+      dynamicRemaining={dynamicRemaining}
       initialQr={{
         id: qr.id,
         name: qr.name,

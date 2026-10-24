@@ -48,7 +48,7 @@ export async function SiteFooter({ session, children }: Props) {
                 { label: "Сканер QR-кода", href: "/skaner-qr-koda" },
                 { label: "QR с логотипом", href: "/qr-s-logotipom" },
                 { label: "Тарифы", href: "/pricing" },
-                { label: "FAQ", href: "/#faq" },
+                { label: "Вопросы и ответы", href: "/#faq" },
                 { label: "Блог", href: "/blog" },
                 { label: "Контакты и реквизиты", href: "/contacts" },
                 { label: "История изменений", href: "/changelog" },
