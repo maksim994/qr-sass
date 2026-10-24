@@ -41,7 +41,15 @@ type QrData = {
   hasPassword: boolean;
 };
 
-export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; initialQr: QrData }) {
+export function EditQrClient({
+  workspaceId,
+  initialQr,
+  allowsDynamic = false,
+}: {
+  workspaceId: string;
+  initialQr: QrData;
+  allowsDynamic?: boolean;
+}) {
   const router = useRouter();
   const typeInfo = getQrTypeInfo(initialQr.contentType);
   const initialPayload = initialQr.payload;
@@ -266,6 +274,11 @@ export function EditQrClient({ workspaceId, initialQr }: { workspaceId: string; 
           shortLink={shortLink}
           previewData={previewData}
           style={style}
+          contentType={initialQr.contentType}
+          qrName={name}
+          payload={payload}
+          allowsDynamic={allowsDynamic}
+          isAuthenticated
         />
       </div>
     </div>

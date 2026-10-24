@@ -137,7 +137,7 @@ export function TeamPageClient({ workspaceId, members, canInvite, isAdmin, planL
             <table className="qrs-data-table">
               <thead>
                 <tr>
-                  <th>Email</th>
+                  <th>Эл. почта</th>
                   <th>Имя</th>
                   <th>Роль</th>
                   {isAdmin ? <th aria-label="Действия" /> : null}

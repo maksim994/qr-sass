@@ -8,6 +8,7 @@ import {
   AuthSwitchLink,
   YandexAuthButton,
 } from "@/components/auth/auth-shell";
+import { PersonalDataConsentField } from "@/components/auth/consent-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [personalDataConsent, setPersonalDataConsent] = useState(false);
   const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +40,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
     const response = await fetchApi("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, personalDataConsent }),
     });
     const parsed = await parseApiResponse<{ userId?: string }>(response);
     setLoading(false);
@@ -71,7 +73,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
           </Alert>
         ) : null}
 
-        <Field label="Email" htmlFor={emailId} required>
+        <Field label="Эл. почта" htmlFor={emailId} required>
           <Input
             id={emailId}
             type="email"
@@ -89,6 +91,8 @@ export function LoginPageClient({ initialError = "" }: Props) {
           showForgotLink
           autoComplete="current-password"
         />
+
+        <PersonalDataConsentField checked={personalDataConsent} onChange={setPersonalDataConsent} />
 
         <label className="fk-choice fk-choice--checkbox qrs-auth-remember" htmlFor={rememberId}>
           <input
@@ -124,7 +128,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
       <div className="qrs-auth-social">
         <YandexAuthButton mode="login" />
         <p className="qrs-auth-social-note">
-          Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
+          При входе через Яндекс действуют отдельные условия провайдера. Для входа по email отметьте согласие выше.
         </p>
       </div>
 

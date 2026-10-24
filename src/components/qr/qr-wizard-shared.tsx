@@ -7,7 +7,10 @@ import { Alert, Button } from "@/components/ui";
 import { QrTypeIcon } from "@/components/qr-type-icon";
 import type { QrStyle } from "@/components/qr-designer";
 import { downloadQrPreview } from "@/lib/qr-preview-download";
+import { isDownloadUpsellDismissed } from "@/lib/download-qr-draft";
+import { DownloadDynamicUpsell } from "@/components/qr/download-dynamic-upsell";
 import { markOnboardingDownloaded } from "@/lib/product-analytics";
+import { supportsDynamicKind } from "@/lib/qr-types";
 
 const WIZARD_SUBTITLES: Partial<Record<string, string>> = {
   URL: "Редирект на любой URL с аналитикой и защитой.",
@@ -184,6 +187,11 @@ export function QrWizardPreview({
   previewData,
   style,
   readable = true,
+  contentType,
+  qrName,
+  payload,
+  allowsDynamic = false,
+  isAuthenticated = true,
 }: {
   kindLabel: string;
   qrRef: RefObject<HTMLDivElement | null>;
@@ -196,8 +204,14 @@ export function QrWizardPreview({
   previewData?: string;
   style?: QrStyle;
   readable?: boolean;
+  contentType?: string;
+  qrName?: string;
+  payload?: Record<string, unknown>;
+  allowsDynamic?: boolean;
+  isAuthenticated?: boolean;
 }) {
   const [downloading, setDownloading] = useState<"png" | "svg" | null>(null);
+  const [upsellVisible, setUpsellVisible] = useState(false);
 
   const previewFrameStyle = useMemo(() => {
     if (!style) return undefined;
@@ -210,12 +224,19 @@ export function QrWizardPreview({
     return { background: style.bgColor };
   }, [style]);
 
+  const showUpsellEligible =
+    Boolean(contentType && style && kindLabel === "Статический" && !allowsDynamic) &&
+    supportsDynamicKind(contentType ?? "");
+
   async function handleDownload(format: "png" | "svg") {
     if (!previewData || !style) return;
     setDownloading(format);
     try {
       await downloadQrPreview(previewData, style, format);
       markOnboardingDownloaded();
+      if (showUpsellEligible && !isDownloadUpsellDismissed()) {
+        setUpsellVisible(true);
+      }
     } finally {
       setDownloading(null);
     }
@@ -277,6 +298,17 @@ export function QrWizardPreview({
               {downloading === "svg" ? "…" : "SVG"}
             </button>
           </div>
+        ) : null}
+
+        {upsellVisible && showUpsellEligible && contentType && style ? (
+          <DownloadDynamicUpsell
+            contentType={contentType}
+            name={qrName ?? "Новый QR"}
+            payload={payload ?? {}}
+            style={style}
+            isAuthenticated={isAuthenticated ?? true}
+            onClose={() => setUpsellVisible(false)}
+          />
         ) : null}
 
         <div className="qrs-preview-save">

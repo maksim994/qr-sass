@@ -318,6 +318,11 @@ export function CreateQrClient({
           error={error}
           previewData={previewData}
           style={style}
+          contentType={typeParam}
+          qrName={name}
+          payload={payload}
+          allowsDynamic={planGate.allowsDynamic}
+          isAuthenticated
         />
       </div>
     </div>

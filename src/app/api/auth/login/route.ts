@@ -5,7 +5,7 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { consumeRateLimit, getClientIp, loginRateLimiter } from "@/lib/rate-limit";
-import { loginSchema } from "@/lib/validation";
+import { getValidationErrorMessage, loginSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -30,7 +30,8 @@ export async function POST(request: Request) {
 
     const parsed = loginSchema.safeParse(raw);
     if (!parsed.success) {
-      return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      const message = getValidationErrorMessage(parsed.error) ?? MSG.INVALID_PAYLOAD;
+      return apiError(message, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
     }
 
     const db = getDb();

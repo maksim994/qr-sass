@@ -26,7 +26,7 @@ type Props = {
 };
 
 const contentTypeLabels: Record<string, string> = {
-  URL: "Ссылка", TEXT: "Текст", EMAIL: "Email", PHONE: "Телефон", SMS: "SMS",
+  URL: "Ссылка", TEXT: "Текст", EMAIL: "Эл. почта", PHONE: "Телефон", SMS: "SMS",
   WIFI: "Wi-Fi", VCARD: "Визитка", LOCATION: "Геолокация", PDF: "PDF",
   IMAGE: "Изображение", VIDEO: "Видео", MP3: "MP3", MENU: "Меню",
   BUSINESS: "Бизнес", LINK_LIST: "Список ссылок", COUPON: "Купон",
@@ -270,7 +270,7 @@ export function QrStudio({ workspace, initialItems }: Props) {
       return (
         <div className="grid gap-3">
           <div>
-            <label className="label">Email</label>
+            <label className="label">Эл. почта</label>
             <input
               className="input"
               value={payload.email ?? ""}

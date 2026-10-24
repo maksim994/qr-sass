@@ -12,7 +12,7 @@ export function EmailForm({ payload, onChange }: Props) {
   return (
     <div className="grid gap-4">
       <div>
-        <label className="label">Email</label>
+        <label className="label">Эл. почта</label>
         <input
           className="input"
           type="email"

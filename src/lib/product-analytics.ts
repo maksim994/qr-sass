@@ -11,6 +11,7 @@ export const PRODUCT_GOALS = {
   subscription_paid: "subscription_paid",
   member_invited: "member_invited",
   api_key_created: "api_key_created",
+  download_upsell_click: "download_upsell_click",
 } as const;
 
 export type ProductGoal = (typeof PRODUCT_GOALS)[keyof typeof PRODUCT_GOALS];

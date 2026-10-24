@@ -8,7 +8,11 @@ import {
   AuthSwitchLink,
   YandexAuthButton,
 } from "@/components/auth/auth-shell";
-import { ConsentField } from "@/components/auth/consent-field";
+import {
+  NewsletterConsentField,
+  PersonalDataConsentField,
+  TermsConsentField,
+} from "@/components/auth/consent-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -21,9 +25,10 @@ import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 type Props = {
   planName: string;
   features: string[];
+  fromDownload?: boolean;
 };
 
-export function RegisterPageClient({ planName, features }: Props) {
+export function RegisterPageClient({ planName, features, fromDownload = false }: Props) {
   const router = useRouter();
   const nameId = useId();
   const workspaceId = useId();
@@ -32,7 +37,9 @@ export function RegisterPageClient({ planName, features }: Props) {
   const [workspaceName, setWorkspaceName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [consent, setConsent] = useState(false);
+  const [personalDataConsent, setPersonalDataConsent] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -43,7 +50,15 @@ export function RegisterPageClient({ planName, features }: Props) {
     const response = await fetchApi("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, workspaceName, email, password, consent }),
+      body: JSON.stringify({
+        name,
+        workspaceName,
+        email,
+        password,
+        personalDataConsent,
+        termsAccepted,
+        newsletter,
+      }),
     });
     const parsed = await parseApiResponse<{ userId?: string }>(response);
     setLoading(false);
@@ -61,7 +76,7 @@ export function RegisterPageClient({ planName, features }: Props) {
     }
 
     trackGoal(PRODUCT_GOALS.registration_completed);
-    router.push("/dashboard");
+    router.push(fromDownload ? "/dashboard?from=download" : "/dashboard");
     router.refresh();
   }
 
@@ -109,7 +124,7 @@ export function RegisterPageClient({ planName, features }: Props) {
           />
         </Field>
 
-        <Field label="Email" htmlFor={emailId} required>
+        <Field label="Эл. почта" htmlFor={emailId} required>
           <Input
             id={emailId}
             type="email"
@@ -128,7 +143,9 @@ export function RegisterPageClient({ planName, features }: Props) {
           autoComplete="new-password"
         />
 
-        <ConsentField checked={consent} onChange={setConsent} />
+        <PersonalDataConsentField checked={personalDataConsent} onChange={setPersonalDataConsent} />
+        <TermsConsentField checked={termsAccepted} onChange={setTermsAccepted} />
+        <NewsletterConsentField checked={newsletter} onChange={setNewsletter} />
 
         <Button
           type="submit"
@@ -148,7 +165,7 @@ export function RegisterPageClient({ planName, features }: Props) {
       <div className="qrs-auth-social">
         <YandexAuthButton mode="register" />
         <p className="qrs-auth-social-note">
-          Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
+          При входе через Яндекс действуют отдельные условия провайдера. Для регистрации по email отметьте чекбоксы выше.
         </p>
       </div>
 
