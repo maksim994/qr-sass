@@ -17,6 +17,7 @@
 .how li{padding-left:12px}
 .how li::marker{font-size:20px;color:var(--text-link);font-weight:700}
 .how li>div{display:inline-block;vertical-align:top;width:calc(100% - 440px);padding-right:48px}
+.howTextOnly li>div{display:block;width:100%;max-width:75ch;padding-right:0}
 .how p,.textSection p,.choice p{font-size:16px;line-height:1.7;max-width:75ch;margin-top:12px}
 .how figure{display:inline-block;width:400px;vertical-align:top}
 .how img{width:100%;height:auto;border:1px solid var(--border-subtle);border-radius:12px}

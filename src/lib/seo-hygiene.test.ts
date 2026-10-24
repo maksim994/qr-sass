@@ -18,6 +18,8 @@ describe("sitemap deny list", () => {
     assert.equal(paths.includes("/qr-lifetime"), true);
     assert.equal(paths.includes("/privacy-policy"), true);
     assert.equal(paths.includes("/qr-menu"), true);
+    assert.equal(paths.includes("/qr-kod-s-tekstom"), true);
+    assert.equal(paths.includes("/qr-kod-dlya-1c-bitrix"), false);
     for (const deny of SITEMAP_DENY_PATHS) {
       assert.equal(paths.some((path) => path === deny || path.startsWith(`${deny}/`)), false, deny);
     }
@@ -51,6 +53,7 @@ describe("noindex headers", () => {
     assert.equal(pathNeedsNoindexHeader("/preview/landings"), true);
     assert.equal(pathNeedsNoindexHeader("/"), false);
     assert.equal(pathNeedsNoindexHeader("/qr-menu"), false);
+    assert.equal(pathNeedsNoindexHeader("/qr-kod-dlya-1c-bitrix"), true);
     assert.equal(pathNeedsNoindexHeader("/blog"), false);
   });
 });
