@@ -165,7 +165,7 @@ export function RegisterPageClient({ planName, features, fromDownload = false }:
       <div className="qrs-auth-social">
         <YandexAuthButton mode="register" />
         <p className="qrs-auth-social-note">
-          При входе через Яндекс действуют отдельные условия провайдера. Для регистрации по email отметьте чекбоксы выше.
+          Регистрация через Яндекс ID: для нового аккаунта потребуется отдельное согласие на следующем шаге.
         </p>
       </div>
 

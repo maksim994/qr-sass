@@ -49,10 +49,21 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
+});
+
+const legalBundleSchema = z.object({
   personalDataConsent: z.boolean().refine((val) => val === true, {
     message: "Необходимо согласие на обработку персональных данных",
   }),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "Необходимо принять пользовательское соглашение",
+  }),
+  newsletter: z.boolean().optional(),
 });
+
+export const yandexConsentCompleteSchema = legalBundleSchema;
+
+export const legalConsentRenewSchema = legalBundleSchema;
 
 export const profileUpdateSchema = z
   .object({

@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { consumeRateLimit, getClientIp, loginRateLimiter } from "@/lib/rate-limit";
+import { postLoginRedirect, userNeedsConsentRenewal } from "@/lib/legal-consent";
 import { getValidationErrorMessage, loginSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -49,8 +50,9 @@ export async function POST(request: Request) {
 
     const token = await createSessionToken({ sub: user.id, email: user.email });
     await setAuthCookie(token);
+    const needsRenewal = await userNeedsConsentRenewal(user.id);
     logger.info({ area: "api", route, message: "User logged in", requestId, status: 200 });
-    return apiSuccess({ userId: user.id }, 200, requestId);
+    return apiSuccess({ userId: user.id, redirectTo: postLoginRedirect(needsRenewal) }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
       logger.error({

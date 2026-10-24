@@ -8,7 +8,7 @@ import {
   AuthSwitchLink,
   YandexAuthButton,
 } from "@/components/auth/auth-shell";
-import { PersonalDataConsentField } from "@/components/auth/consent-field";
+import { LoginEntryLegalNote } from "@/components/auth/login-entry-legal-note";
 import { PasswordField } from "@/components/auth/password-field";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ export function LoginPageClient({ initialError = "" }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
-  const [personalDataConsent, setPersonalDataConsent] = useState(false);
   const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
 
@@ -40,9 +39,9 @@ export function LoginPageClient({ initialError = "" }: Props) {
     const response = await fetchApi("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, personalDataConsent }),
+      body: JSON.stringify({ email, password }),
     });
-    const parsed = await parseApiResponse<{ userId?: string }>(response);
+    const parsed = await parseApiResponse<{ userId?: string; redirectTo?: string }>(response);
     setLoading(false);
     if (!parsed.ok) {
       logger.warn({
@@ -56,7 +55,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
       setError(parsed.error ?? "Не удалось войти. Проверьте данные.");
       return;
     }
-    router.push("/dashboard");
+    router.push(parsed.data?.redirectTo ?? "/dashboard");
     router.refresh();
   }
 
@@ -92,8 +91,6 @@ export function LoginPageClient({ initialError = "" }: Props) {
           autoComplete="current-password"
         />
 
-        <PersonalDataConsentField checked={personalDataConsent} onChange={setPersonalDataConsent} />
-
         <label className="fk-choice fk-choice--checkbox qrs-auth-remember" htmlFor={rememberId}>
           <input
             id={rememberId}
@@ -121,15 +118,14 @@ export function LoginPageClient({ initialError = "" }: Props) {
         >
           Войти
         </Button>
+
+        <LoginEntryLegalNote />
       </form>
 
       <AuthDivider />
 
       <div className="qrs-auth-social">
         <YandexAuthButton mode="login" />
-        <p className="qrs-auth-social-note">
-          При входе через Яндекс действуют отдельные условия провайдера. Для входа по email отметьте согласие выше.
-        </p>
       </div>
 
       <AuthSwitchLink mode="login" />

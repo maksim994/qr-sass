@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { userNeedsConsentRenewal } from "@/lib/legal-consent";
 import { selectWorkspace } from "@/lib/workspace-select";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
@@ -16,6 +17,9 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
+  if (await userNeedsConsentRenewal(user.id)) {
+    redirect("/consent/renew");
+  }
   const workspace = await selectWorkspace(user.memberships);
 
   if (!workspace) {

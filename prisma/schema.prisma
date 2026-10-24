@@ -52,9 +52,24 @@ model User {
   isAdmin      Boolean      @default(false)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  memberships  Membership[]
-  qrCodes      QrCode[]     @relation("CreatedByQrCodes")
-  blogPosts    BlogPost[]   @relation("CreatedBlogPosts")
+  memberships     Membership[]
+  qrCodes         QrCode[]           @relation("CreatedByQrCodes")
+  blogPosts       BlogPost[]         @relation("CreatedBlogPosts")
+  legalConsents   UserLegalConsent[]
+}
+
+/// Журнал согласий с ПДн и офертой (152-ФЗ): версия текста, IP, время, источник.
+model UserLegalConsent {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consentVersion  String
+  ipAddress       String?
+  source          String
+  newsletterOptIn Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model BlogCategory {
