@@ -287,7 +287,7 @@ export function ProfileForm({
           </label>
 
           <label className="qrs-profile-label" htmlFor="email">
-            <span className="qrs-profile-label-text">Email</span>
+            <span className="qrs-profile-label-text">Эл. почта</span>
             <input
               id="email"
               type="email"

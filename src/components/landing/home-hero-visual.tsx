@@ -75,7 +75,7 @@ export function HomeHeroVisual() {
               style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
               <span className="fk-badge__dot" />
-              Online
+              В сети
             </span>
           </div>
           <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid var(--neutral-100)", padding: "18px" }}>

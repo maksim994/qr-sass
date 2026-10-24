@@ -5,7 +5,8 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { consumeRateLimit, getClientIp, loginRateLimiter } from "@/lib/rate-limit";
-import { loginSchema } from "@/lib/validation";
+import { postLoginRedirect, userNeedsConsentRenewal } from "@/lib/legal-consent";
+import { getValidationErrorMessage, loginSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
 
     const parsed = loginSchema.safeParse(raw);
     if (!parsed.success) {
-      return apiError(MSG.INVALID_PAYLOAD, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
+      const message = getValidationErrorMessage(parsed.error) ?? MSG.INVALID_PAYLOAD;
+      return apiError(message, "VALIDATION_ERROR", 400, parsed.error.flatten(), requestId);
     }
 
     const db = getDb();
@@ -48,8 +50,9 @@ export async function POST(request: Request) {
 
     const token = await createSessionToken({ sub: user.id, email: user.email });
     await setAuthCookie(token);
+    const needsRenewal = await userNeedsConsentRenewal(user.id);
     logger.info({ area: "api", route, message: "User logged in", requestId, status: 200 });
-    return apiSuccess({ userId: user.id }, 200, requestId);
+    return apiSuccess({ userId: user.id, redirectTo: postLoginRedirect(needsRenewal) }, 200, requestId);
   } catch (error) {
     if (error instanceof ConfigError) {
       logger.error({

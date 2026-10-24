@@ -8,6 +8,7 @@ import {
   AuthSwitchLink,
   YandexAuthButton,
 } from "@/components/auth/auth-shell";
+import { LoginEntryLegalNote } from "@/components/auth/login-entry-legal-note";
 import { PasswordField } from "@/components/auth/password-field";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const parsed = await parseApiResponse<{ userId?: string }>(response);
+    const parsed = await parseApiResponse<{ userId?: string; redirectTo?: string }>(response);
     setLoading(false);
     if (!parsed.ok) {
       logger.warn({
@@ -54,7 +55,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
       setError(parsed.error ?? "Не удалось войти. Проверьте данные.");
       return;
     }
-    router.push("/dashboard");
+    router.push(parsed.data?.redirectTo ?? "/dashboard");
     router.refresh();
   }
 
@@ -71,7 +72,7 @@ export function LoginPageClient({ initialError = "" }: Props) {
           </Alert>
         ) : null}
 
-        <Field label="Email" htmlFor={emailId} required>
+        <Field label="Эл. почта" htmlFor={emailId} required>
           <Input
             id={emailId}
             type="email"
@@ -117,15 +118,14 @@ export function LoginPageClient({ initialError = "" }: Props) {
         >
           Войти
         </Button>
+
+        <LoginEntryLegalNote />
       </form>
 
       <AuthDivider />
 
       <div className="qrs-auth-social">
         <YandexAuthButton mode="login" />
-        <p className="qrs-auth-social-note">
-          Продолжая, вы соглашаетесь с обработкой персональных данных и условиями сервиса.
-        </p>
       </div>
 
       <AuthSwitchLink mode="login" />

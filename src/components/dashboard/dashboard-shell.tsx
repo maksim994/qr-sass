@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { FulfillDownloadDraft } from "@/components/dashboard/fulfill-download-draft";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { dashboardNavItems } from "@/lib/dashboard-nav";
@@ -146,6 +147,12 @@ export function DashboardShell({ children, user, workspace, workspaces }: Props)
         </header>
 
         <main className="qrs-scroll flex-1 overflow-y-auto" style={{ padding: "clamp(20px, 3vw, 40px)" }}>
+          <Suspense fallback={null}>
+            <FulfillDownloadDraft
+              workspaceId={workspace.id}
+              allowsDynamic={workspace.plan !== "FREE"}
+            />
+          </Suspense>
           <div className="qrs-dash-main-inner">{children}</div>
         </main>
       </div>

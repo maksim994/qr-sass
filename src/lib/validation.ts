@@ -37,18 +37,33 @@ export const registerSchema = z.object({
       const trimmed = (val ?? "").trim();
       return trimmed || DEFAULT_WORKSPACE_NAME;
     }),
-  consent: z.boolean().refine(val => val === true, {
+  personalDataConsent: z.boolean().refine((val) => val === true, {
     message: "Необходимо согласие на обработку персональных данных",
   }),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "Необходимо принять пользовательское соглашение",
+  }),
+  newsletter: z.boolean().optional(),
 });
 
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
-  consent: z.boolean().refine(val => val === true, {
-    message: "Необходимо согласие на обработку персональных данных",
-  }).optional(), // Optional for backward compatibility with API, but required on frontend
 });
+
+const legalBundleSchema = z.object({
+  personalDataConsent: z.boolean().refine((val) => val === true, {
+    message: "Необходимо согласие на обработку персональных данных",
+  }),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "Необходимо принять пользовательское соглашение",
+  }),
+  newsletter: z.boolean().optional(),
+});
+
+export const yandexConsentCompleteSchema = legalBundleSchema;
+
+export const legalConsentRenewSchema = legalBundleSchema;
 
 export const profileUpdateSchema = z
   .object({

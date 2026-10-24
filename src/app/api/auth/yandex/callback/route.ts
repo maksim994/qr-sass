@@ -3,10 +3,16 @@ import { NextResponse } from "next/server";
 import { createSessionToken, getSession, setAuthCookie } from "@/lib/auth";
 import {
   exchangeYandexCode,
-  findOrCreateYandexUser,
   getYandexProfile,
   linkYandexToUser,
 } from "@/lib/yandex-auth";
+import {
+  createYandexPendingToken,
+  postLoginRedirect,
+  setYandexPendingCookie,
+  userNeedsConsentRenewal,
+} from "@/lib/legal-consent";
+import { findExistingYandexUser } from "@/lib/yandex-user";
 import { MSG } from "@/lib/user-messages";
 import { logger } from "@/lib/logger";
 import { getRequestId } from "@/lib/api-response";
@@ -67,11 +73,26 @@ export async function GET(request: Request) {
       return profileRedirect(request, { yandex: "linked" });
     }
 
-    const user = await findOrCreateYandexUser(profile);
+    const existing = await findExistingYandexUser(profile);
+    if (!existing) {
+      const pendingToken = await createYandexPendingToken(profile);
+      await setYandexPendingCookie(pendingToken);
+      logger.info({
+        area: "api",
+        route: "/api/auth/yandex/callback",
+        requestId,
+        message: "Yandex new user pending consent",
+        status: 302,
+      });
+      return NextResponse.redirect(new URL("/auth/yandex-consent", request.url));
+    }
+
+    const user = existing;
     const token = await createSessionToken({ sub: user.id, email: user.email });
     await setAuthCookie(token);
+    const needsRenewal = await userNeedsConsentRenewal(user.id);
     logger.info({ area: "api", route: "/api/auth/yandex/callback", requestId, message: "Yandex auth success", status: 302 });
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL(postLoginRedirect(needsRenewal), request.url));
   } catch (authError) {
     logger.error({
       area: "api",

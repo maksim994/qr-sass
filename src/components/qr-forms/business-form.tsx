@@ -146,7 +146,7 @@ export function BusinessForm({ payload, onChange, workspaceId }: Props) {
         </div>
 
         <div>
-          <label className="label">Email</label>
+          <label className="label">Эл. почта</label>
           <input
             className="input"
             type="email"

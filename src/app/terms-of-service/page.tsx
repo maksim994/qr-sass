@@ -72,7 +72,7 @@ export default async function TermsOfServicePage() {
         <br />
         ИНН: {settings?.requisitesInn ? settings.requisitesInn : "—"}
         <br />
-        Email: {settings?.contactEmail ? <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a> : "—"}
+        Эл. почта: {settings?.contactEmail ? <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a> : "—"}
         <br />
         Телефон: {settings?.contactPhone ? <a href={`tel:${settings.contactPhone}`}>{settings.contactPhone}</a> : "—"}
       </p>

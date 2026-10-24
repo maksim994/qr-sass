@@ -12,6 +12,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { FaqAccordion } from "@/components/landing/faq-accordion";
 import { HomeHeroVisual } from "@/components/landing/home-hero-visual";
+import { HomeTypeTiles } from "@/components/landing/home-type-tiles";
 import { BlogCardIcon } from "@/components/blog/blog-card-icon";
 import { getBlogCardMeta } from "@/lib/blog-card-meta";
 
@@ -450,25 +451,7 @@ export default async function HomePage() {
         <section id="types" style={{ paddingBlock: "var(--section-y)", background: "var(--surface-subtle)", borderBlock: "1px solid var(--border-subtle)" }}>
           <div className="fk-container">
             <SectionHeader eyebrow="Типы кодов" title="Один QR-код под каждую задачу" description="Выберите тип контента — сервис соберёт код, страницу редиректа и аналитику автоматически." />
-            <div
-              className="qrs-grid-3"
-              style={{
-                marginTop: "44px",
-                display: "grid",
-                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {enabledTypes.map((t) => (
-                <div key={t.type} style={{ background: "var(--surface-card)", border: "1px solid var(--border-default)", borderRadius: "10px", padding: "18px 18px 20px" }}>
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="var(--color-primary)" strokeLinecap="round" strokeLinejoin="round">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={t.icon} />
-                  </svg>
-                  <div style={{ marginTop: "12px", font: "var(--fw-bold) 15px/1.2 var(--font-display)", color: "var(--text-strong)" }}>{t.label}</div>
-                  <div style={{ marginTop: "4px", font: "var(--fw-regular) 13px/1.4 var(--font-sans)", color: "var(--text-muted)" }}>{t.description}</div>
-                </div>
-              ))}
-            </div>
+            <HomeTypeTiles types={enabledTypes} isAuthenticated={!!session} />
           </div>
         </section>
 
@@ -634,7 +617,7 @@ export default async function HomePage() {
         {/* FAQ */}
         <section id="faq" style={{ paddingBlock: "var(--section-y)", background: "var(--surface-subtle)", borderBlock: "1px solid var(--border-subtle)" }}>
           <div className="fk-container" style={{ maxWidth: "820px" }}>
-            <SectionHeader eyebrow="FAQ" title="Частые вопросы" />
+            <SectionHeader eyebrow="Вопросы и ответы" title="Частые вопросы" />
             <div style={{ marginTop: "40px" }}>
               <FaqAccordion items={faqs} />
             </div>

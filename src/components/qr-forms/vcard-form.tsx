@@ -58,7 +58,7 @@ export function VcardForm({ payload, onChange }: Props) {
         />
       </div>
       <div>
-        <label className="label">Email</label>
+        <label className="label">Эл. почта</label>
         <input
           className="input"
           type="email"

@@ -1,7 +1,5 @@
-import { nanoid } from "nanoid";
 import { getDb } from "@/lib/db";
 import { env } from "@/lib/env";
-import { hashPassword } from "@/lib/auth";
 import { MSG } from "@/lib/user-messages";
 
 const YANDEX_TOKEN_URL = "https://oauth.yandex.ru/token";
@@ -84,54 +82,6 @@ export async function getYandexProfile(accessToken: string) {
     email: email.toLowerCase(),
     name: data.real_name || data.display_name || data.login || email,
   };
-}
-
-export async function findOrCreateYandexUser(profile: Awaited<ReturnType<typeof getYandexProfile>>) {
-  const db = getDb();
-
-  const existingByYandex = await db.user.findUnique({ where: { yandexId: profile.yandexId } });
-  if (existingByYandex) {
-    return db.user.update({
-      where: { id: existingByYandex.id },
-      data: {
-        name: existingByYandex.name || profile.name,
-      },
-    });
-  }
-
-  const existingByEmail = await db.user.findUnique({ where: { email: profile.email } });
-  if (existingByEmail) {
-    return db.user.update({
-      where: { id: existingByEmail.id },
-      data: {
-        yandexId: profile.yandexId,
-        name: existingByEmail.name || profile.name,
-      },
-    });
-  }
-
-  const passwordHash = await hashPassword(crypto.randomUUID());
-  const workspaceSlug = `yandex-${profile.yandexId}-${nanoid(6)}`;
-
-  return db.user.create({
-    data: {
-      email: profile.email,
-      yandexId: profile.yandexId,
-      name: profile.name,
-      passwordHash,
-      memberships: {
-        create: {
-          role: "OWNER",
-          workspace: {
-            create: {
-              name: "Моя команда",
-              slug: workspaceSlug,
-            },
-          },
-        },
-      },
-    },
-  });
 }
 
 export async function linkYandexToUser(

@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { ConfigError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { consumeRateLimit, getClientIp, registerRateLimiter } from "@/lib/rate-limit";
+import { recordUserLegalConsent } from "@/lib/legal-consent";
 import { registerSchema, getValidationErrorMessage } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -62,6 +63,13 @@ export async function POST(request: Request) {
           },
         },
       },
+    });
+
+    await recordUserLegalConsent({
+      userId: user.id,
+      ipAddress: ip,
+      source: "REGISTER",
+      newsletterOptIn: parsed.data.newsletter ?? false,
     });
 
     const token = await createSessionToken({ sub: user.id, email: user.email });

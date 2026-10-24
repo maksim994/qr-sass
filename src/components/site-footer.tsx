@@ -40,7 +40,7 @@ export async function SiteFooter({ session }: Props) {
                 { label: "Возможности", href: "/#features" },
                 { label: "Типы кодов", href: "/#types" },
                 { label: "Тарифы", href: "/#pricing" },
-                { label: "FAQ", href: "/#faq" },
+                { label: "Вопросы и ответы", href: "/#faq" },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:opacity-80 transition-opacity" style={linkStyle}>

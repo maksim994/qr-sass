@@ -191,7 +191,7 @@ export function SiteSettingsForm({
             />
           </Field>
 
-          <Field label="Контактный Email" htmlFor="contactEmail">
+          <Field label="Контактная эл. почта" htmlFor="contactEmail">
             <Input
               id="contactEmail"
               type="email"
