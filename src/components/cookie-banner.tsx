@@ -67,10 +67,10 @@ export function CookieBanner({ yandexMetrikaId }: { yandexMetrikaId?: string }) 
   }
   return <>
     {visible && <div ref={banner} className="qrs-cookie-banner qrs-public" role="region" aria-label="Уведомление о cookie">
-      <div className="fk-container py-3 sm:py-4"><div className="qrs-cookie-notice">
+      <div className="qrs-cookie-notice">
         <p>Мы используем cookie, Яндекс Метрику с Вебвизором и пиксель VK Рекламы. Аналитику и рекламу можно отключить в настройках. <Link href="/privacy-policy#section-4" className="underline">Подробнее в политике</Link>.</p>
         <div className="qrs-cookie-actions"><Button type="button" variant="secondary" onClick={() => { setAnalytics(isAnalyticsEnabled()); setAdvertising(isAdvertisingEnabled()); setOpen(true); }}>Настроить</Button><Button type="button" variant="primary" onClick={acknowledgeCookieNotice}>Понятно</Button></div>
-      </div></div>
+      </div>
     </div>}
     <Modal className="qrs-public qrs-cookie-settings" open={open} onClose={close} title="Настройки cookie" size="sm" subtitle="Выберите, разрешать ли аналитику и рекламу на этом устройстве." footer={<><Button type="button" variant="secondary" onClick={close}>Отмена</Button><Button type="button" variant="primary" onClick={save}>Сохранить</Button></>}>
       <div className="qrs-cookie-category"><div><label htmlFor="cookie-necessary">Необходимые</label><p id="cookie-necessary-hint">Вход, сессия, оплата и сохранение настроек. Всегда включены.</p></div><label className="qrs-cookie-control" htmlFor="cookie-necessary"><input id="cookie-necessary" type="checkbox" role="switch" checked disabled aria-describedby="cookie-necessary-hint" /></label></div>
