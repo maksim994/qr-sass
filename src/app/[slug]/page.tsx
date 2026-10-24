@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const searchPage = getSearchLanding(slug);
-  if (searchPage) return landingMetadata({...searchPage, keywords:[]});
+  if (searchPage) return landingMetadata({ ...searchPage, keywords: [], noindex: searchPage.noindex });
   const page = getSeoPage(slug);
   if (!page || isScenarioLandingSlug(slug)) notFound();
   return landingMetadata(page);

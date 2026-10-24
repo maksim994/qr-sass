@@ -13,10 +13,12 @@ type Props = {
 };
 
 export async function SiteFooter({ session, children }: Props) {
-  const db = getDb();
-  const settings = await db.siteSettings.findUnique({
-    where: { id: "default" },
-  });
+  let settings: Awaited<ReturnType<ReturnType<typeof getDb>["siteSettings"]["findUnique"]>> = null;
+  try {
+    settings = await getDb().siteSettings.findUnique({ where: { id: "default" } });
+  } catch {
+    /* Public pages stay available when optional settings storage is offline. */
+  }
 
   const linkStyle = {
     font: "var(--fw-regular) var(--fs-sm)/1.4 var(--font-sans)",

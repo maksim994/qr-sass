@@ -60,7 +60,8 @@ export function isDeniedSitemapPath(urlOrPath: string): boolean {
 
 export function buildIndexableStaticPaths(): string[] {
   const fromLandings = getSeoPages().map((page) => `/${page.slug}`);
-  return [...new Set([...INDEXABLE_STATIC_PATHS, ...fromLandings, ...searchLandings.map(page=>`/${page.slug}`)])].filter((path) => !isDeniedSitemapPath(path));
+  const fromSearch = searchLandings.filter((page) => !page.noindex).map((page) => `/${page.slug}`);
+  return [...new Set([...INDEXABLE_STATIC_PATHS, ...fromLandings, ...fromSearch])].filter((path) => !isDeniedSitemapPath(path));
 }
 
 export function findSitemapServiceUrls(urls: string[]): string[] {
@@ -88,6 +89,7 @@ Sitemap: ${origin}/sitemap.xml`;
 export function pathNeedsNoindexHeader(pathname: string): boolean {
   const path = sitemapPathname(pathname);
   if (CUSTOMER_QR_PATH.test(path)) return true;
+  if (searchLandings.some((page) => page.noindex && path === `/${page.slug}`)) return true;
   return (
     path === "/login" ||
     path === "/register" ||

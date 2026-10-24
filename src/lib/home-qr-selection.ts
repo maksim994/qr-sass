@@ -1,6 +1,15 @@
 export const HOME_QR_TYPE_EVENT = "qr-s:select-static-type";
 export function staticQrLanding(type: string): string | undefined {
-  return ({ URL: "/qr-po-ssylke", WIFI: "/qr-wifi", VCARD: "/qr-dlya-vizitki" } as Record<string, string>)[type];
+  return ({
+    URL: "/qr-po-ssylke",
+    WIFI: "/qr-wifi",
+    VCARD: "/qr-dlya-vizitki",
+    TEXT: "/qr-kod-s-tekstom",
+    EMAIL: "/qr-kod-email",
+    PHONE: "/qr-kod-telefona",
+    SMS: "/qr-kod-sms",
+    LOCATION: "/qr-kod-geolokacii",
+  } as Record<string, string>)[type];
 }
 export function selectHomeQrType(type: string) {
   window.dispatchEvent(new CustomEvent(HOME_QR_TYPE_EVENT, { detail: type }));

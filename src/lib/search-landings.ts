@@ -2,16 +2,13 @@ import { COMMERCIAL, PRINTED_QR_COPY } from "@/lib/commercial-config";
 import type { StaticQrType } from "@/lib/static-qr";
 import type { LandingInputMode } from "@/lib/landing-input";
 
+import { guideLandings } from "@/lib/guide-landings";
+import { qrTypeLandings } from "@/lib/qr-type-landings";
+import type { SearchLanding } from "@/lib/search-landing-types";
+
+export type { SearchLanding } from "@/lib/search-landing-types";
+
 type Faq = { question: string; answer: string };
-export type SearchLanding = {
-  slug: string; label: string; title: string; heading: string; description: string;
-  type: StaticQrType; inputMode?: LandingInputMode; inputLabel?: string; placeholder?: string; frame?: string;
-  steps: [string, string][]; sections: { heading: string; text: string }[];
-  staticCopy: string; dynamicCopy: string;
-  articles: [string, string][]; related: string[]; faqs: Faq[];
-  hosted?: { type: string; label: string; text: string };
-  source?: { url: string; label: string };
-};
 const common: Faq[] = [
   { question: "Нужна ли регистрация для скачивания?", answer: "Статический QR можно создать и скачать в PNG или SVG без регистрации. Аккаунт нужен для облачного архива, загрузки файлов и управления динамическими кодами." },
   { question: "Сколько динамических QR доступно бесплатно?", answer: `${COMMERCIAL.free.dynamic} динамических кода, со сменой назначения и статистикой открытий. Про добавляет расширенные лимиты; пробный период — ${COMMERCIAL.trialDays} дней без карты.` },
@@ -128,5 +125,7 @@ export const searchLandings: SearchLanding[] = [
     faqs:faq([["Этот QR нужен для входа в MAX?","Нет. Для входа используйте только процедуру внутри MAX. Здесь создаётся публичный код для перехода по ссылке."],["Можно ли закодировать закрытое приглашение?","Можно добавить действующую ссылку, но ограничения и срок действия определяет MAX. QR не открывает доступ без разрешения."],["Можно ли потом сменить MAX на другой мессенджер?","У динамического кода можно заменить назначение в кабинете. Статический QR останется со старой ссылкой."]]),
     source:{url:"https://help.max.ru/help/channels/sozdanie_kanala/kak_sozdat_publichnyi_kanal_v_max",label:"Справка MAX о публичных каналах"},
   },
+  ...qrTypeLandings,
+  ...guideLandings,
 ];
 export const getSearchLanding = (slug: string) => searchLandings.find(page => page.slug === slug);

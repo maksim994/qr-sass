@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
 import { publicSiteUrl } from "@/lib/public-url";
 
-type LandingIdentity = { slug: string; title: string; description: string; keywords: string[] };
+import { NOINDEX_ROBOTS } from "@/lib/seo-hygiene";
+
+type LandingIdentity = { slug: string; title: string; description: string; keywords: string[]; noindex?: boolean };
 
 export function landingMetadata(page: LandingIdentity): Metadata {
   const url = publicSiteUrl(`/${page.slug}`);
   const image = { url: publicSiteUrl("/opengraph-image.png"), width: 1200, height: 630, alt: page.title };
+  const robots = page.noindex ? NOINDEX_ROBOTS : { index: true, follow: true };
   return {
     title: { absolute: page.title },
     description: page.description,
     keywords: page.keywords,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots,
     openGraph: { type: "website", locale: "ru_RU", siteName: "QR-S.ru", title: page.title, description: page.description, url, images: [image] },
     twitter: { card: "summary_large_image", title: page.title, description: page.description, images: [image.url] },
   };
