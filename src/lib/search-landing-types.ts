@@ -26,4 +26,6 @@ export type SearchLanding = {
   noindex?: boolean;
   faqSectionTitle?: string;
   skipGenerator?: boolean;
+  /** Steps without web-generator guide screenshots (e.g. Bitrix admin flow). */
+  stepsTextOnly?: boolean;
 };
