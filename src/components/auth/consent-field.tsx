@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useId } from "react";
 
 type Props = {
-  kind?: "terms" | "data";
+  kind?: "terms" | "data" | "newsletter";
   checked: boolean;
   disabled?: boolean;
   onChange: (checked: boolean) => void;
@@ -22,7 +22,7 @@ export function ConsentField({ kind = "data", checked, onChange, disabled = fals
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
         disabled={disabled}
-        required
+        required={kind !== "newsletter"}
       />
       <span className="fk-choice__box" aria-hidden="true">
         <svg className="fk-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -30,7 +30,7 @@ export function ConsentField({ kind = "data", checked, onChange, disabled = fals
         </svg>
       </span>
       <span className="fk-choice__text">
-        {kind === "terms" ? (
+        {kind === "newsletter" ? "Хочу получать новости и полезные материалы по эл. почте (необязательно)" : kind === "terms" ? (
           <>Принимаю <Link href="/terms-of-service" target="_blank" className="qrs-auth-inline-link">оферту и пользовательское соглашение</Link></>
         ) : (
           <>Даю <Link href="/personal-data-consent" target="_blank" className="qrs-auth-inline-link">согласие на обработку персональных данных</Link> для регистрации и работы аккаунта</>

@@ -1,4 +1,6 @@
 "use client";
+import { DownloadDynamicUpsell, type DownloadUpsellDraft } from "@/components/qr/download-dynamic-upsell";
+import { isDownloadUpsellDismissed } from "@/lib/download-upsell";
 
 import Link from "next/link";
 import type { KeyboardEvent, ReactNode, RefObject } from "react";
@@ -233,6 +235,8 @@ export function QrWizardPreview({
   emptyPreviewTitle,
   emptyPreviewHint,
   saveDisabled = false,
+  downloadUpsell,
+  onContinueDynamic,
 }: {
   kindLabel: string;
   qrRef: RefObject<HTMLDivElement | null>;
@@ -253,7 +257,10 @@ export function QrWizardPreview({
   emptyPreviewTitle?: string;
   emptyPreviewHint?: string;
   saveDisabled?: boolean;
+  downloadUpsell?: DownloadUpsellDraft;
+  onContinueDynamic?: () => void;
 }) {
+  const [upsellVisible, setUpsellVisible] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [downloading, setDownloading] = useState<"png" | "svg" | null>(null);
 
@@ -281,6 +288,7 @@ export function QrWizardPreview({
       } else {
         return;
       }
+      if (downloadUpsell && !isDownloadUpsellDismissed()) setUpsellVisible(true);
       if (qrId) markOnboardingDownloaded({ source: "editor", format, frame: style.frameStyle !== "none" });
       else trackGoal(PRODUCT_GOALS.qr_preview_downloaded, { source: "editor", format, frame: style.frameStyle !== "none" });
     } catch {
@@ -347,6 +355,8 @@ export function QrWizardPreview({
         ) : downloadBlockedReason ? (
           <p className="qrs-preview-shortlink">{downloadBlockedReason}</p>
         ) : null}
+
+        {upsellVisible && downloadUpsell && style && <DownloadDynamicUpsell {...downloadUpsell} style={style} signedIn onClose={() => setUpsellVisible(false)} onContinueDynamic={onContinueDynamic} />}
 
         {lifetimeHint ? <div className="qrs-preview-lifetime">{lifetimeHint}</div> : null}
 

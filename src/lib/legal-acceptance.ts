@@ -2,10 +2,10 @@ import type { Prisma } from "@prisma/client";
 import { createHash } from "node:crypto";
 import { LEGAL_VERSION, legalSnapshot } from "@/lib/legal-documents";
 
-export function legalReceipt(source: "email" | "yandex", acceptedAt = new Date()) {
+export function legalReceipt(source: "email" | "yandex", acceptedAt = new Date(), newsletterOptIn = false) {
   return {
     version: LEGAL_VERSION, source, acceptedAt,
-    termsAccepted: true, dataConsent: true,
+    termsAccepted: true, dataConsent: true, newsletterOptIn,
     documents: JSON.parse(JSON.stringify(legalSnapshot())) as Prisma.InputJsonValue,
   };
 }

@@ -27,7 +27,7 @@ export function VcardForm({ payload, onChange }: Props) {
       <FormField label="Телефон">
         <input className="input" type="tel" value={String(payload.phone || "")} onChange={(e) => set("phone", e.target.value)} placeholder="+7 999 123 45 67" />
       </FormField>
-      <FormField label="Email">
+      <FormField label="Эл. почта">
         <input className="input" type="email" value={String(payload.email || "")} onChange={(e) => set("email", e.target.value)} placeholder="ivan@example.com" />
       </FormField>
       <FormField label="Сайт">

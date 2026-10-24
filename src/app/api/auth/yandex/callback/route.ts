@@ -95,7 +95,7 @@ export async function GET(request: Request) {
       const consumed = await tx.oAuthLegalIntent.deleteMany({ where: { stateHash: found.stateHash } });
       return consumed.count === 1 ? found : null;
     });
-    const receipt = intent ? { ...legalReceipt("yandex", intent.acceptedAt), documents: intent.documents as ReturnType<typeof legalReceipt>["documents"] } : undefined;
+    const receipt = intent ? { ...legalReceipt("yandex", intent.acceptedAt, intent.newsletterOptIn), documents: intent.documents as ReturnType<typeof legalReceipt>["documents"] } : undefined;
     const user = await findOrCreateYandexUser(profile, receipt, normalizeSignupSource(intent?.signupSource, request.url) ?? undefined);
     const token = await createSessionToken({ sub: user.id, email: user.email, sv: user.sessionVersion });
     await setAuthCookie(token);

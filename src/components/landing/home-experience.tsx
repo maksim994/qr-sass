@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { selectHomeQrType, staticQrLanding } from "@/lib/home-qr-selection";
+import { selectHomeQrType, staticQrLanding, qrTypeLanding } from "@/lib/home-qr-selection";
 import { useEffect, useRef, useState } from "react";
 import { PRODUCT_GOALS, trackGoal } from "@/lib/product-analytics";
 import { STATIC_QR_TYPES } from "@/lib/static-qr";
@@ -85,8 +85,14 @@ export function TypeExplorer({ types, signedIn }: { types: QrTypeInfo[]; signedI
     <div className={s.typeGrid}>{types.filter(type => type.group === activeGroup).map(type => {
       const content = <><Icon path={type.icon} /><div><h3>{type.label}</h3><p>{type.description}</p></div><span aria-hidden="true">→</span></>;
       const isStatic = (STATIC_QR_TYPES as readonly string[]).includes(type.type);
-      if (isStatic && !staticQrLanding(type.type)) return <button type="button" key={type.type} onClick={() => selectHomeQrType(type.type)}>{content}</button>;
-      return <Link key={type.type} href={staticQrLanding(type.type) ?? (signedIn ? `/dashboard/create/${type.type.toLowerCase()}` : `/register?next=${encodeURIComponent(`/dashboard/create/${type.type.toLowerCase()}`)}`)}>{content}</Link>;
+      const createPath = `/dashboard/create/${type.type.toLowerCase()}`;
+      const landingPath = qrTypeLanding(type.type);
+      return <article key={type.type} className={s.typeTile}>
+        {isStatic
+          ? <button className={s.typeTileMain} type="button" onClick={() => selectHomeQrType(type.type)}>{content}</button>
+          : <Link className={s.typeTileMain} href={signedIn ? createPath : `/register?next=${encodeURIComponent(createPath)}`}>{content}</Link>}
+        {landingPath && <a className={s.typeTileMore} href={landingPath}>Подробнее о типе «{type.label}» →</a>}
+      </article>;
     })}</div>
     {types.length === 0 && <p>Новые типы QR-кодов скоро появятся.</p>}
   </div>;

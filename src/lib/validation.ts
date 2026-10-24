@@ -7,6 +7,7 @@ import { z } from "zod";
 import { LEGAL_VERSION } from "@/lib/legal-documents";
 
 export const registrationLegalSchema = z.object({
+  newsletter: z.boolean().optional().default(false),
   termsAccepted: z.boolean({ error: MSG.TERMS_REQUIRED }).refine(v => v === true, { message: MSG.TERMS_REQUIRED }),
   consent: z.boolean({ error: MSG.DATA_CONSENT_REQUIRED }).refine(v => v === true, { message: MSG.DATA_CONSENT_REQUIRED }),
   legalVersion: z.string({ error: MSG.LEGAL_VERSION_CHANGED }).refine(v => v === LEGAL_VERSION, { message: MSG.LEGAL_VERSION_CHANGED }),

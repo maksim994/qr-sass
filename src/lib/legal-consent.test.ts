@@ -9,6 +9,17 @@ import { legalSnapshot } from "./legal-documents.ts";
 import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.2-consent.ts";
 import { legalSnapshot as analyticsEdition } from "./legal-history/2026-10-21.2-analytics.ts";
 
+test("newsletter permission is optional, defaults off and stays separate from required legal consent", () => {
+  const required = { termsAccepted: true, consent: true, legalVersion: LEGAL_VERSION };
+  assert.equal(registrationLegalSchema.parse(required).newsletter, false);
+  assert.equal(registrationLegalSchema.parse({ ...required, newsletter: true }).newsletter, true);
+  assert.equal(registrationLegalSchema.safeParse({ ...required, newsletter: "true" }).success, false);
+  for (const source of ["email", "yandex"] as const) {
+    assert.equal(legalReceipt(source).newsletterOptIn, false);
+    assert.equal(legalReceipt(source, new Date(), true).newsletterOptIn, true);
+  }
+});
+
 test("integrated legal edition combines attribution and processors without altering prior receipts", () => {
   const before = beforePdChanges();
   const current = legalSnapshot();

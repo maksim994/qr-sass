@@ -5,6 +5,8 @@ import { FramePicker } from "@/components/qr/frame-picker";
 import { FrameControls } from "@/components/qr/frame-controls";
 import type { FrameConfig } from "@/lib/qr-frame";
 import { HOME_QR_TYPE_EVENT } from "@/lib/home-qr-selection";
+import { DownloadDynamicUpsell } from "@/components/qr/download-dynamic-upsell";
+import { canOfferDynamicQr, isDownloadUpsellDismissed } from "@/lib/download-upsell";
 import { COMMERCIAL } from "@/lib/commercial-config";
 import { TRIAL_DAYS } from "@/lib/trial-policy";
 
@@ -25,7 +27,7 @@ import { MSG } from "@/lib/user-messages";
 import styles from "./home-generator.module.css";
 
 type Props = { printA6?: boolean; heading?: string | false; source?: "home" | "landing"; inputMode?: LandingInputMode; urlLabel?: string; urlPlaceholder?: string; initialFrameText?: string;  trialUsed?: boolean; enabledTypes?: string[]; initialUrl?: string; dynamicRemaining?: number | null; initialType?: StaticQrType; signedIn: boolean; enabledStaticTypes: StaticQrType[] };
-const labels: Record<StaticQrType, string> = { URL: "Ссылка", TEXT: "Текст", WIFI: "Wi-Fi", VCARD: "Визитка", EMAIL: "Email", PHONE: "Телефон", SMS: "SMS", LOCATION: "Координаты" };
+const labels: Record<StaticQrType, string> = { URL: "Ссылка", TEXT: "Текст", WIFI: "Wi-Fi", VCARD: "Визитка", EMAIL: "Эл. почта", PHONE: "Телефон", SMS: "SMS", LOCATION: "Координаты" };
 
 export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, signedIn, enabledStaticTypes, enabledTypes, trialUsed, heading = "Генератор QR-кодов онлайн — бесплатно и без регистрации", source = "home", inputMode = "url", urlLabel = "Ссылка", urlPlaceholder = "https://example.com", initialFrameText = "Сканируйте код", printA6 = false }: Props) {
   const router = useRouter(), id = useId(), busy = useRef(false);
@@ -40,7 +42,6 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
   const [error, setError] = useState("");
   const [afterDownload, setAfterDownload] = useState(false);
   const generated = useRef("");
-  const upgradeClicked = useRef(false);
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState<"png" | "svg" | "a6" | "archive" | "dynamic" | null>(null);
   const downloadArea = useRef<HTMLDivElement>(null);
@@ -95,7 +96,7 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
       else await downloadStaticQr(prepared.data, foreground, background, format, frame);
       if (generated.current !== prepared.data) { trackGoal(PRODUCT_GOALS.qr_created, {type,dynamic:false,where:source}); generated.current=prepared.data; }
       markOnboardingDownloaded({ source, frame: frame.frameStyle !== "none", format: format === "a6" ? "svg" : format, contentType: type, kind: "STATIC" }, PRODUCT_GOALS.static_qr_downloaded);
-      try { if (!sessionStorage.getItem("qrs_after_download_seen")) { sessionStorage.setItem("qrs_after_download_seen", "1"); setAfterDownload(true); } } catch { setAfterDownload(true); }
+      if (canOfferDynamicQr(type, "STATIC", dynamicRemaining) && !isDownloadUpsellDismissed()) setAfterDownload(true);
       setNotice("Код скачан. Проверьте QR камерой перед печатью.");
     } catch { setError(MSG.COULD_NOT_DOWNLOAD); }
     finally { busy.current = false; setPending(null); }
@@ -115,8 +116,9 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
     const url = landingDestination(String(rawPayload.url ?? ""), inputMode, message);
     if (!url) { setError(MSG.INVALID_PAYLOAD_URL); return; }
     trackGoal(PRODUCT_GOALS.qr_creation_started, { source, contentType: "URL", kind: "DYNAMIC" });
-    const draft = { v: 1 as const, contentType: "URL" as const, url, kind: "DYNAMIC" as const };
-    writeQrCreateDraft(draft); setPending("dynamic"); router.push(destination(createQrContinuePath(draft)));
+    const draft = { v: 1 as const, contentType: "URL" as const, url, kind: "DYNAMIC" as const, style, createdAt: Date.now() };
+    if (!writeQrCreateDraft(draft)) { setError(MSG.QR_DRAFT_STORAGE_UNAVAILABLE); return; }
+    setPending("dynamic"); router.push(destination(createQrContinuePath(draft)));
   }
 
   if (!enabledStaticTypes.length) return <div className={styles.generatorUnavailable}><Button href={destination("/dashboard/create")}>Перейти к созданию</Button></div>;
@@ -181,11 +183,9 @@ export function HomeQuickStart({ initialType, initialUrl, dynamicRemaining, sign
         {error && <p className={styles.formError} role="alert">{error}</p>}
         {!error && prepared.ok && !scan.safeToUse && <p className={styles.formError} role="alert">{MSG.SCANNABILITY_TOO_LOW}</p>}
         {notice && <p className={styles.notice} role="status">{notice}</p>}
-        {afterDownload && type === "URL" && <aside className={styles.afterDownload} aria-label="Менять ссылку после печати">
-          <strong>Код скачан. Он пойдёт в печать?</strong><p>Если ссылка поменяется, статический код придётся перепечатать. У динамического кода ссылку вы поменяете в кабинете.</p>
-          <Button type="button" onClick={() => { if (!upgradeClicked.current) { trackGoal(PRODUCT_GOALS.upgrade_prompt_click, {place:"after_download",plan:"pro"}); upgradeClicked.current = true; } continueDynamic(); }}>{dynamicRemaining === 0 && trialUsed ? "Перейти на Про и создать динамический код" : `Сделать этот код динамическим — ${dynamicRemaining === 0 ? `${TRIAL_DAYS} дней Про бесплатно` : "бесплатно"}`}</Button>
-          <Button type="button" variant="ghost" onClick={() => setAfterDownload(false)}>Нет, мне хватит обычного</Button><p>{COMMERCIAL.free.dynamic} динамических кода бесплатно. Напечатанные коды продолжают открываться и после окончания тарифа.</p>
-        </aside>}
+        {afterDownload && !dynamic && canOfferDynamicQr(type, "STATIC", dynamicRemaining) && <DownloadDynamicUpsell
+          payload={payload} style={style} dynamicRemaining={dynamicRemaining} signedIn={signedIn} onClose={() => setAfterDownload(false)}
+        />}
       </div>
       {!dynamic && <details className={styles.design}><summary>Цвета и рамка</summary><div className={styles.colorFields}>
         <label htmlFor={`${id}-fg`}>Цвет кода<Input id={`${id}-fg`} type="color" value={foreground} onChange={event => setForeground(event.target.value)} /></label>

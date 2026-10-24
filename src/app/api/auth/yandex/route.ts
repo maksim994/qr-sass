@@ -76,12 +76,12 @@ export async function POST(request: Request) {
       "/dashboard",
     );
     const state = crypto.randomUUID();
-    const receipt = legalReceipt("yandex");
+    const receipt = legalReceipt("yandex", new Date(), parsed.data.newsletter);
     const db = getDb();
     await db.oAuthLegalIntent.deleteMany({ where: { expiresAt: { lt: new Date() } } });
     await db.oAuthLegalIntent.create({ data: {
       signupSource: registrationSource((raw as Record<string, unknown>).signupSource, request),
-      stateHash: oauthStateHash(state), version: receipt.version, documents: receipt.documents,
+      stateHash: oauthStateHash(state), version: receipt.version, documents: receipt.documents, newsletterOptIn: receipt.newsletterOptIn,
       acceptedAt: receipt.acceptedAt, expiresAt: new Date(Date.now() + STATE_MAX_AGE * 1000),
     } });
     const jar = await cookies();

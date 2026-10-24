@@ -40,6 +40,7 @@ export function RegisterPageClient({ planName, features, nextPath, dynamicIntent
   const [password, setPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -52,7 +53,7 @@ export function RegisterPageClient({ planName, features, nextPath, dynamicIntent
       const response = await fetchApi("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, consent, termsAccepted, signupSource: readFirstTouch(), legalVersion: LEGAL_VERSION }),
+        body: JSON.stringify({ name, email, password, consent, termsAccepted, newsletter, signupSource: readFirstTouch(), legalVersion: LEGAL_VERSION }),
       });
       const parsed = await parseApiResponse<{ userId?: string }>(response);
       if (!parsed.ok) {
@@ -119,7 +120,7 @@ export function RegisterPageClient({ planName, features, nextPath, dynamicIntent
           />
         </Field>
 
-        <Field label="Email" htmlFor={emailId} required>
+        <Field label="Эл. почта" htmlFor={emailId} required>
           <Input
             id={emailId}
             type="email"
@@ -144,6 +145,7 @@ export function RegisterPageClient({ planName, features, nextPath, dynamicIntent
 
         <ConsentField kind="terms" checked={termsAccepted} onChange={setTermsAccepted} disabled={loading} />
         <ConsentField checked={consent} onChange={setConsent} disabled={loading} />
+      <ConsentField kind="newsletter" checked={newsletter} onChange={setNewsletter} disabled={loading} />
 
         <Button
           type="submit"

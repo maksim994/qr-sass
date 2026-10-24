@@ -32,6 +32,11 @@ Domain Prefer/Never живут в `.cursor/rules/*.mdc` — не дублиро�
 ## Scripts
 `npm run dev` · `npm run prisma:generate` · `npm run prisma:push` · `npm run build` · `npm run lint`
 
+## Git baseline
+- Новые задачи начинать после `git fetch origin` от актуальной `origin/main`; перед запуском старого PR сравнивать его merge-base с production-веткой и последним отчётом выпуска.
+- `main` синхронизирована с выпущенным production-кодом 24.10.2026. Новые изменения — отдельной веткой и PR к `main`.
+- Обновление `main` не является разрешением на deployment. Production-коммит и миграции выпускаются отдельно по `DEPLOY.md`.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

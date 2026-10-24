@@ -6,7 +6,7 @@
 import { isSafeUrl } from "@/lib/url";
 
 const PUBLIC_QR_PATH = /^\/(r|p|g|v)\/[A-Za-z0-9_-]+$/;
-const CREATE_TYPE_PATH = /^\/dashboard\/create\/[a-z0-9-]+$/;
+const CREATE_TYPE_PATH = /^\/dashboard\/create\/[a-z0-9_-]+$/;
 const POST_AUTH_MAX_URL = 2000;
 
 function parseSameOriginPath(input: string | null | undefined): URL | null {
