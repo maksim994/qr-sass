@@ -18,10 +18,11 @@ export type DownloadUpsellDraft = {
   dynamicRemaining?: number | null;
 };
 
-export function DownloadDynamicUpsell({ payload, name, style, dynamicRemaining, signedIn, onClose }: DownloadUpsellDraft & {
+export function DownloadDynamicUpsell({ payload, name, style, dynamicRemaining, signedIn, onClose, onContinueDynamic }: DownloadUpsellDraft & {
   style: QrStyle;
   signedIn: boolean;
   onClose: () => void;
+  onContinueDynamic?: () => void;
 }) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -35,6 +36,8 @@ export function DownloadDynamicUpsell({ payload, name, style, dynamicRemaining, 
     setPending(true);
     trackGoal(PRODUCT_GOALS.download_upsell_click, { contentType: "URL", source: signedIn ? "editor" : "public" });
     const path = createQrContinuePath(draft);
+    // App Router preserves editor state when only the query changes, including a prior STATIC override.
+    onContinueDynamic?.();
     router.push(signedIn ? path : `/register?next=${encodeURIComponent(path)}`);
   }
 

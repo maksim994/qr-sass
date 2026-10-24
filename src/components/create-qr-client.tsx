@@ -371,6 +371,7 @@ export function CreateQrClient({
         </div>
 
         <QrWizardPreview
+          onContinueDynamic={() => { setKindOverride("DYNAMIC"); setError(""); }}
           downloadUpsell={typeParam === "URL" && actualKindPreview === "STATIC" && planGate.dynamicRemaining !== null
             ? { name, payload: formPayload, dynamicRemaining: planGate.allowsDynamic ? planGate.dynamicRemaining : 0 } : undefined}
           id="create-preview"

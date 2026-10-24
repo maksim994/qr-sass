@@ -236,6 +236,7 @@ export function QrWizardPreview({
   emptyPreviewHint,
   saveDisabled = false,
   downloadUpsell,
+  onContinueDynamic,
 }: {
   kindLabel: string;
   qrRef: RefObject<HTMLDivElement | null>;
@@ -257,6 +258,7 @@ export function QrWizardPreview({
   emptyPreviewHint?: string;
   saveDisabled?: boolean;
   downloadUpsell?: DownloadUpsellDraft;
+  onContinueDynamic?: () => void;
 }) {
   const [upsellVisible, setUpsellVisible] = useState(false);
   const [downloadError, setDownloadError] = useState("");
@@ -354,7 +356,7 @@ export function QrWizardPreview({
           <p className="qrs-preview-shortlink">{downloadBlockedReason}</p>
         ) : null}
 
-        {upsellVisible && downloadUpsell && style && <DownloadDynamicUpsell {...downloadUpsell} style={style} signedIn onClose={() => setUpsellVisible(false)} />}
+        {upsellVisible && downloadUpsell && style && <DownloadDynamicUpsell {...downloadUpsell} style={style} signedIn onClose={() => setUpsellVisible(false)} onContinueDynamic={onContinueDynamic} />}
 
         {lifetimeHint ? <div className="qrs-preview-lifetime">{lifetimeHint}</div> : null}
 
