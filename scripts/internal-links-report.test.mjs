@@ -48,3 +48,19 @@ test("combined code, content and active related proposals stay within six new li
   for (const [target, counts] of Object.entries(totals)) assert.ok(counts.total <= budget.limit, target);
   assert.equal(new Set(budget.code.map(link => `${link.source}:${link.target}`)).size, budget.code.length);
 });
+test("article-only snapshots explicitly report missing dynamic redirect coverage", () => {
+  const result = auditRedirects({ posts: [post("a", "a", { content: '<a href="/blog/old">old</a>' })], redirects: null }, { old: "new" });
+  assert.equal(result.redirectTableIncluded, false); assert.equal(result.links.length, 1);
+});
+test("content verification rejects stale versions, overlapping changes and undeclared new links", async () => {
+  const { createHash } = await import("node:crypto");
+  const { verifyContentPlan } = await import("./internal-links-report.mjs");
+  const source = post("a", "source", { content: "<p>Original text</p>", version: 3, updatedAt: "2026-10-25" });
+  const change = { articleId: "a", slug: "source", format: "html", sourceVersion: 3, sourceUpdatedAt: "2026-10-25", sourceContentSha256: createHash("sha256").update(source.content).digest("hex"), sourceOffset: 0, before: source.content, after: '<p>Original <a href="/blog/target">text</a></p>', targets: [{ target: "/blog/target", newLinks: 1 }] };
+  const before = structuredClone(source);
+  const result = verifyContentPlan([source], { changes: [change] });
+  assert.equal(result.applied, false); assert.equal(result.articles, 1); assert.deepEqual(source, before);
+  assert.throws(() => verifyContentPlan([{ ...source, version: 4 }], { changes: [change] }), /Source changed/);
+  assert.throws(() => verifyContentPlan([source], { changes: [change, { ...change, sourceOffset: 3, before: "Original text", after: "New text" }] }), /Overlapping/);
+  assert.throws(() => verifyContentPlan([source], { changes: [{ ...change, targets: [] }] }), /Unplanned link/);
+});
