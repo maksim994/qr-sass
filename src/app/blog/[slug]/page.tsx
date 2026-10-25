@@ -233,7 +233,7 @@ export default async function BlogPostPage({ params }: Props) {
       <section style={{ paddingBottom: "var(--section-y)" }}>
         <div className="fk-container">
           <BlogPostContent body={body} />
-          {/telegram|max|instagram|vizit/i.test(post.slug) && <p style={{maxWidth:"720px",margin:"24px auto"}}>Для другой социальной сети: <Link href="/blog/qr-kod-dlya-vkontakte">как создать QR-код для ВКонтакте</Link>.</p>}
+          {/telegram|max|instagram|vizit|rutube|youtube|whatsapp/i.test(post.slug) && <p style={{maxWidth:"720px",margin:"24px auto"}}>Для другой социальной сети: <Link href="/blog/qr-kod-dlya-vkontakte">как создать QR-код для ВКонтакте</Link>.</p>}
           <div style={{ maxWidth: "720px", margin: "48px auto 0" }}>
             <ArticleUsefulBlock slug={post.slug} initialLikes={post.likes} />
           </div>

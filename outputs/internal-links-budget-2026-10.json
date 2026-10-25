@@ -1,0 +1,123 @@
+{
+  "limit": 6,
+  "counting": "New link occurrences, including template links and related proposals; existing anchor updates count zero. Deferred alternatives excluded.",
+  "code": [
+    {
+      "source": "/qr-dlya-vizitki",
+      "target": "/blog/qr-kod-dlya-vkontakte",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-dlya-telegram",
+      "target": "/blog/qr-kod-dlya-vkontakte",
+      "newLinks": 1
+    },
+    {
+      "source": "/blog/qr-kod-na-rutube",
+      "target": "/blog/qr-kod-dlya-vkontakte",
+      "newLinks": 1
+    },
+    {
+      "source": "/blog/qr-kod-na-youtube",
+      "target": "/blog/qr-kod-dlya-vkontakte",
+      "newLinks": 1
+    },
+    {
+      "source": "/blog/qr-kod-dlya-whatsapp",
+      "target": "/blog/qr-kod-dlya-vkontakte",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-menu",
+      "target": "/blog/qr-kod-dlya-otzyvov",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-for-events",
+      "target": "/blog/qr-kod-dlya-oprosa",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-dlya-otzyvov-2gis",
+      "target": "/blog/qr-kod-na-yandeks-karty",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-dlya-vizitki",
+      "target": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-po-ssylke",
+      "target": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+      "newLinks": 1
+    },
+    {
+      "source": "/qr-menu",
+      "target": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+      "newLinks": 1
+    }
+  ],
+  "totals": {
+    "/blog/qr-kod-dlya-vkontakte": {
+      "code": 5,
+      "content": 1,
+      "related": 0,
+      "total": 6
+    },
+    "/blog/qr-kod-dlya-otzyvov": {
+      "code": 1,
+      "content": 1,
+      "related": 3,
+      "total": 5
+    },
+    "/blog/qr-kod-dlya-oprosa": {
+      "code": 1,
+      "content": 2,
+      "related": 3,
+      "total": 6
+    },
+    "/blog/qr-kod-na-yandeks-karty": {
+      "code": 1,
+      "content": 1,
+      "related": 0,
+      "total": 2
+    },
+    "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica": {
+      "code": 3,
+      "content": 0,
+      "related": 0,
+      "total": 3
+    },
+    "/blog/qr-kod-s-utm-metkami": {
+      "code": 0,
+      "content": 3,
+      "related": 0,
+      "total": 3
+    },
+    "/qr-dlya-otzyvov-yandex-karty": {
+      "code": 0,
+      "content": 1,
+      "related": 0,
+      "total": 1
+    },
+    "/qr-dlya-otzyvov-2gis": {
+      "code": 0,
+      "content": 1,
+      "related": 0,
+      "total": 1
+    },
+    "/": {
+      "code": 0,
+      "content": 6,
+      "related": 0,
+      "total": 6
+    },
+    "/blog/qr-kod-s-analitikoj-i-korotkoj-ssylkoj": {
+      "code": 0,
+      "content": 0,
+      "related": 3,
+      "total": 3
+    }
+  }
+}
