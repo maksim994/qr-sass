@@ -4744,7 +4744,8 @@
           "targetUrl",
           "source",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "moderationStatus"
         ],
         "properties": {
           "id": {
@@ -4790,6 +4791,16 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "moderationStatus": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "PENDING_CHECK",
+              "ON_MODERATION",
+              "BLOCKED"
+            ],
+            "description": "QR moderation state. ON_MODERATION and BLOCKED prevent public navigation without rejecting creation."
           }
         }
       },

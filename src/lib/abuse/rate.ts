@@ -2,7 +2,6 @@ import { abuseLimiterPair, consumeRateLimit, getClientIp } from '@/lib/rate-limi
 import { RateLimiterMemory, RateLimiterRedis } from 'rate-limiter-flexible';
 import { getRedis } from '@/lib/redis';
 import { env } from '@/lib/env';
-import { apiError } from '@/lib/api-response';
 import { MSG } from '@/lib/user-messages';
 export const qrCreateRateLimiter = abuseLimiterPair('abuse_create', env.QR_CREATE_PER_HOUR);
 export const qrCreateIpRateLimiter = abuseLimiterPair('abuse_create_ip', env.QR_CREATE_PER_IP_PER_HOUR);
@@ -17,12 +16,6 @@ export class AbuseError extends Error {
   status: number;
   retryAfterMs?: number;
   constructor(message: string, status = 403, retryAfterMs?: number) { super(message); this.status = status; this.retryAfterMs = retryAfterMs; }
-}
-export function abuseErrorResponse(error: unknown): Response | null {
-  if (!(error instanceof AbuseError)) return null;
-  const res = apiError(error.message, error.status === 429 ? 'RATE_LIMITED' : 'FORBIDDEN', error.status);
-  if (error.status === 429) res.headers.set('Retry-After', String(Math.max(1, Math.ceil((error.retryAfterMs ?? 3600000) / 1000))));
-  return res;
 }
 export async function enforceQrRate(input: { request: Request; key: string; paid: boolean; qrId?: string }) {
   const tier = input.paid ? 'paid' : 'free';

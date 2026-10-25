@@ -35,7 +35,7 @@ export async function applyModeration(tx: Prisma.TransactionClient, qr: QrCode, 
   const fresh = Date.now() - +owner.createdAt < env.ABUSE_NEW_ACCOUNT_HOURS * 3600000 && !paid;
   const check = await checkForQr(urls, qr.name, batch);
   const status = moderationDecision(check, fresh, qr.moderationStatus);
-  return tx.qrCode.update({ where: { id: qr.id }, data: { moderationStatus: status, moderationReason: check.reasons.join('; ').slice(0, 2000) || null, moderationAt: new Date(), lastCheckedAt: new Date(), lastCheckVerdict: check.verdict } });
+  return tx.qrCode.update({ where: { id: qr.id }, data: { moderationStatus: status, moderationReason: qr.moderationStatus === 'ON_MODERATION' || qr.moderationStatus === 'BLOCKED' ? qr.moderationReason : check.reasons.join('; ').slice(0, 2000) || null, moderationAt: new Date(), lastCheckedAt: new Date(), lastCheckVerdict: check.verdict } });
 }
 export async function createModeratedQr(tx: Prisma.TransactionClient, args: Prisma.QrCodeUncheckedCreateInput, actor: AbuseActor, batch?: Map<string, CheckResult>) {
   // Bulk retains its existing batch limiter; every item still receives a verdict.

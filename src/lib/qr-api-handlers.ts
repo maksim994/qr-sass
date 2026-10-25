@@ -1,5 +1,5 @@
 import { createModeratedQr, requestActor, updateModeratedQr } from "@/lib/abuse/moderation";
-import { abuseErrorResponse } from "@/lib/abuse/rate";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import type { QrCode } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";

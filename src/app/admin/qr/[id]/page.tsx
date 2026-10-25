@@ -1,3 +1,5 @@
+import { ModerationControls } from "@/components/abuse/admin-controls";
+import { requireAdmin } from "@/lib/admin-auth";
 import styles from "@/components/admin/admin.module.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -28,6 +30,7 @@ function formatDateTime(date: Date) {
 }
 
 export default async function AdminQrDetailPage({ params }: Props) {
+  await requireAdmin();
   const { id } = await params;
   const db = getDb();
 
@@ -42,6 +45,8 @@ export default async function AdminQrDetailPage({ params }: Props) {
   });
 
   if (!qr) notFound();
+
+  const [abuseEvents, reports] = await Promise.all([db.qrAuditEvent.findMany({ where: { qrCodeId: id }, orderBy: { createdAt: "desc" }, take: 50 }), db.abuseReport.findMany({ where: { qrCodeId: id }, orderBy: { createdAt: "desc" }, take: 30 })]);
 
   const styleRaw = (qr.styleConfig as Record<string, unknown> | null) ?? {};
   const svgString = await renderStyledQrSvg(qr.encodedContent, styleRaw, 200);
@@ -119,6 +124,14 @@ export default async function AdminQrDetailPage({ params }: Props) {
         }
       />
 
+      <AdminCard>
+        <h2>Модерация</h2><p>{qr.moderationStatus} · {qr.moderationReason || "Причина не указана"}</p>
+        <p>Последняя проверка: {qr.lastCheckedAt ? formatDateTime(qr.lastCheckedAt) : "—"} · {qr.lastCheckVerdict || "—"}</p>
+        {qr.moderationAttention && <p>Требует внимания. Переход сохранён.</p>}
+        <ModerationControls id={id} />
+        <h3>Жалобы</h3>{reports.length ? reports.map(r => <p key={r.id}>{formatDateTime(r.createdAt)} · {r.reason} · {r.status} · {r.comment} {r.email}</p>) : <p>Жалоб нет.</p>}
+        <details><summary>История действий и ссылок ({abuseEvents.length})</summary>{abuseEvents.map(e => <div key={e.id}><p>{formatDateTime(e.createdAt)} · {e.action} · {e.actorType} · {e.actorUserId}</p><p>IP: {e.ip || "—"} · UA: {e.userAgent || "—"}</p><p>Прежние адреса: {JSON.stringify(e.oldUrls)}</p><p>Новые адреса: {JSON.stringify(e.newUrls)}</p></div>)}</details>
+      </AdminCard>
       <div className={styles.grid}>
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div

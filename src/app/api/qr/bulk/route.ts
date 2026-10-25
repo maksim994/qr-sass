@@ -1,6 +1,6 @@
 import { checkUrlBatch } from "@/lib/abuse/url-check";
 import { createModeratedQr, requestActor } from "@/lib/abuse/moderation";
-import { abuseErrorResponse } from "@/lib/abuse/rate";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import { nanoid } from "nanoid";
 import { MSG } from "@/lib/user-messages";
 import archiver from "archiver";

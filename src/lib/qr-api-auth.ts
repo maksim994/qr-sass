@@ -1,4 +1,4 @@
-import { abuseErrorResponse } from "@/lib/abuse/rate";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import { getDb } from "@/lib/db";
 import { getEntitlements } from "@/lib/entitlements";
 import { apiError } from "@/lib/api-response";

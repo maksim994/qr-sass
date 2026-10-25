@@ -7,6 +7,7 @@ import { legalSnapshot as previousLegalSnapshot } from "./legal-history/2026-10-
 import { parseCookieChoice } from "./cookie-consent.ts";
 import { legalSnapshot } from "./legal-documents.ts";
 import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.2-consent.ts";
+import { legalSnapshot as integratedEdition } from "./legal-history/2026-10-21.3.ts";
 import { legalSnapshot as analyticsEdition } from "./legal-history/2026-10-21.2-analytics.ts";
 
 test("newsletter permission is optional, defaults off and stays separate from required legal consent", () => {
@@ -22,7 +23,7 @@ test("newsletter permission is optional, defaults off and stays separate from re
 
 test("integrated legal edition combines attribution and processors without altering prior receipts", () => {
   const before = beforePdChanges();
-  const current = legalSnapshot();
+  const current = integratedEdition();
   assert.notEqual(current.version, before.version);
   assert.notEqual(current.privacyVersion, before.privacyVersion);
   assert.deepEqual(current.terms, before.terms);
@@ -47,7 +48,7 @@ test("integrated legal edition combines attribution and processors without alter
     const receipt = legalReceipt(source);
     assert.equal(receipt.termsAccepted, true);
     assert.equal(receipt.dataConsent, true);
-    assert.deepEqual(receipt.documents, current);
+    assert.deepEqual(receipt.documents, legalSnapshot());
   }
 });
 

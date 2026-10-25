@@ -25,9 +25,9 @@ export async function GET(_request: Request, context: RouteContext) {
     const qr = await db.qrCode.findFirst({
       where: {
         shortCode: code,
-        contentType: "VCARD",
       },
       select: {
+        contentType: true,
         moderationStatus: true,
         id: true,
         name: true,
@@ -42,6 +42,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
     const restricted = moderationResponse(qr?.moderationStatus, code);
     if (restricted) return restricted;
+    if (qr && qr.contentType !== "VCARD") return NextResponse.redirect(new URL(qrPublicUnavailablePath("missing"), env.APP_URL));
 
     const scanCount = qr ? await db.scanEvent.count({ where: { qrCodeId: qr.id } }) : 0;
     const token = (await cookies()).get(accessCookieFor(code))?.value;

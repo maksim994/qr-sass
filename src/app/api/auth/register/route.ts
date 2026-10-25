@@ -36,13 +36,15 @@ export async function POST(request: Request) {
     const minuteLimit = await consumeRateLimit(registerRateLimiter, ip);
     const limit = minuteLimit.success ? await consumeRateLimit(registerDailyRateLimiter, ip) : minuteLimit;
     if (!limit.success) {
-      return apiError(
+      const response = apiError(
         MSG.TOO_MANY_REGISTER_ATTEMPTS,
         "VALIDATION_ERROR",
         429,
         limit.retryAfterMs ? { retryAfterMs: limit.retryAfterMs } : undefined,
         requestId,
       );
+      response.headers.set("Retry-After", String(Math.max(1, Math.ceil((limit.retryAfterMs ?? 60000) / 1000))));
+      return response;
     }
 
     const raw = await readJsonBody(request);

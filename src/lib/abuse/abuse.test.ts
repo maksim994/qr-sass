@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { env } from '@/lib/env';
 import { extractDestinationUrls, normalizeDestinationUrl } from '@/lib/abuse/extract-urls';
-import { checkLocal, checkUrlBatch } from '@/lib/abuse/url-check';
+import { checkLocal, checkUrlBatch, combineChecks } from '@/lib/abuse/url-check';
 import { moderationDecision } from '@/lib/abuse/moderation';
 import { moderationResponse } from '@/lib/abuse/public';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
@@ -73,4 +73,22 @@ test('provider adapters: clean, malicious, partial/full outage, Google sends onl
       assert.equal(checked.get(url)!.verdict, scenario === 'malicious' ? 'malicious' : scenario === 'both_down' ? 'unknown' : 'clean');
     }
   } finally { env.YANDEX_SAFE_BROWSING_API_KEY = previous.y; env.GOOGLE_WEB_RISK_API_KEY = previous.g; env.GOOGLE_WEB_RISK_ENABLED = previous.flag; }
+});
+
+test('new legal edition changes only terms 4 and privacy 5, preserving old snapshots', async () => {
+  const { legalSnapshot } = await import('../legal-documents.ts');
+  const { legalSnapshot: oldSnapshot } = await import('../legal-history/2026-10-21.3.ts');
+  const current = legalSnapshot(), old = oldSnapshot();
+  assert.notEqual(current.version, old.version); assert.notEqual(current.privacyVersion, old.privacyVersion);
+  assert.deepEqual(current.consent, old.consent);
+  current.terms.forEach((section, i) => { if (i !== 3) assert.deepEqual(section, old.terms[i]); });
+  current.privacy.forEach((section, i) => { if (!section.title.startsWith('5.')) assert.deepEqual(section, old.privacy[i]); });
+  assert.match(JSON.stringify(current.privacy), /Google Web Risk/);
+  assert.match(JSON.stringify(current.terms), /abuse@qr-s.ru/);
+});
+
+
+test('multi-link aggregation keeps a provider threat and BLOCK over later clean links', () => {
+  const result = combineChecks([{ verdict: 'malicious', reasons: ['yandex:threat'], sources: { yandex: 'malicious', blocklist: 'BLOCK' } }, { verdict: 'clean', reasons: [], sources: { yandex: 'clean', blocklist: 'REVIEW' } }]);
+  assert.equal(result.verdict, 'malicious'); assert.equal(result.sources.yandex, 'malicious'); assert.equal(result.sources.blocklist, 'BLOCK');
 });

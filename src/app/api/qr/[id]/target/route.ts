@@ -1,5 +1,5 @@
 import { updateModeratedQr, requestActor } from "@/lib/abuse/moderation";
-import { abuseErrorResponse } from "@/lib/abuse/rate";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";

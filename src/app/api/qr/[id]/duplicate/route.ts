@@ -1,5 +1,5 @@
 import { createModeratedQr, requestActor } from "@/lib/abuse/moderation";
-import { abuseErrorResponse } from "@/lib/abuse/rate";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import { nanoid } from "nanoid";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { MSG } from "@/lib/user-messages";

@@ -1,0 +1,80 @@
+# Защита ссылок QR-S от злоупотреблений
+
+Реализация ТЗ от 25.10.2026 от `origin/main` 298bd92, ветка `feature/abuse-protection`. Релиз выполняется отдельно: draft PR не разрешает merge, миграцию или deployment. Статьи и данные блога не меняются.
+
+## Принятые решения
+
+- Яндекс Safe Browsing v4 и свои правила включены по умолчанию. Google реализован через **Web Risk Lookup**, отдельный `GOOGLE_WEB_RISK_ENABLED=false`; старый Google Safe Browsing API не вызывается.
+- Web Risk проверяет один URL на запрос. Пакеты по 500 применяются к Яндексу; квоты на HTTP-запросы каждого провайдера учитываются атомарно в PostgreSQL. Бесплатные лимиты и доступность API нужно проверить в кабинете провайдера; код не предполагает бесплатность коммерческого использования.
+- Срок открытого IP/UA — 365 дней; `ABUSE_AUDIT_IP_RETENTION_DAYS`. Действие, адреса и идентификаторы аккаунта сохраняются. В `QrAuditEvent` и `AbuseReport` намеренно нет внешних ключей с cascade. Текущего endpoint удаления аккаунта `/api/gdpr` в этой main нет (есть только `/api/gdpr/consent`); при будущем удалении аккаунта/рабочего пространства журнал не исчезнет. Проверено удалением fixture workspace и user. Доступ к IP — только server-rendered карточка QR после `requireAdmin()`.
+- `ABUSE_REQUIRE_VERIFIED_EMAIL=false`: переключатель готов, проверяется `User.emailVerifiedAt`, существующие коды не отключаются. История настоящих успешных оплат исключает тестовые платежи при определении нового неоплаченного аккаунта.
+- HTTP **451** для заблокированного кода: ограничение из-за нарушения правил, с каналом обжалования. Состояние проверки — HTTP 200. Цели нет в HTML, заголовке Location, RSC или файле. На `/p` и `/g` ответ формируется в Node middleware до стриминга RSC, поскольку page не может выставить произвольный HTTP статус. `/r`, `/v`, QR asset защищены в обработчиках; общий `evaluateQrPublicAccess` также учитывает модерацию.
+- `abuseLegacy=true` добавляется только существовавшим на миграции QR. Их фоновое совпадение с локальным BLOCK/REVIEW включает «требует внимания», сохраняет переход и попадает в сводку администратору. Совпадение с провайдером переводит в `ON_MODERATION`. Новое создание и изменения старых адресов проходят полную проверку.
+- При редактировании хранится прежний полный payload в `QrRevision.payloadSnapshot`, включая smart redirect/A/B и hosted ссылки. Откат выполняется в транзакции; возвращённые адреса снова проверяются. Пользователь не может сбросить ON_MODERATION/BLOCKED.
+- «Одобрить» сохраняет в БД исключение для точного нормализованного URL на 7 суток. Оно обходит локальные правила, но не опасный вердикт провайдера. Редактирование правил учитывается сразу, потому что локальные правила не кэшируются; кэшируются ответы провайдеров. Google malicious-кэш дополнительно ограничен `expireTime` ответа.
+- Оферта/политика: новая редакция `2026-10-25.1`, прежняя `2026-10-21.3` сохранена. Изменены только абзац раздела 4 оферты, раздел 5 политики и метаданные версии/даты. Word пересобран по актуальной оферте. **Публикация правовых текстов после согласования Максимом**. Формулировка политики отражает Web Risk и возможность персональных сведений внутри самого пользовательского URL; IP/UA/account payload провайдерам не передаются.
+
+## Где применяется единая модерация
+
+Вызовы `createModeratedQr` и `updateModeratedQr` вызывают `applyModeration` в той же транзакции, где меняется QR и пишется `QrAuditEvent`.
+
+```
+rg -n 'createModeratedQr|updateModeratedQr|applyModeration' src/app/api/qr src/lib/qr-api-handlers.ts src/lib/abuse
+```
+
+| Запрос | Действие журнала |
+| --- | --- |
+| POST /api/qr | create |
+| POST /api/qr/bulk | bulk_create, для каждого кода; один provider batch |
+| POST /api/qr/[id]/duplicate | duplicate |
+| PATCH /api/qr/[id] | update_url либо update_settings |
+| PATCH /api/qr/[id]/target | update_url |
+| PATCH /api/qr/[id]/smart-redirect | update_url |
+| PATCH /api/qr/[id]/ab-test | update_url |
+| PATCH /api/qr/[id]/settings | update_url либо update_settings |
+| DELETE /api/qr/[id] | delete (нынешнее мягкое удаление) |
+| POST/PATCH /api/v1/qr[/id] | create/update_url, actorType=api_key, apiKeyId |
+| POST /api/admin/qr/[id]/moderation | moderation_block/approve/unblock/rollback + AdminAuditLog |
+| POST /api/abuse/report, worker | moderation_reports / recheck_flag |
+
+При сохранении без изменения адресов/имени проверка репутации повторно не нужна, но действие аудируется. Статические коды без управляемой ссылки репутационную проверку не проходят. Гостевой генератор остаётся локальным.
+
+## Настройка
+
+Все параметры и значения по умолчанию — `.env.example` и `src/lib/env.ts`. Compose передаёт их приложению/воркеру; analytics-purge получает срок хранения IP и JWT, нужный env-валидации.
+
+1. Внести `YANDEX_SAFE_BROWSING_API_KEY` через secret/env-настройки production. Уже полученный ключ не публиковать в чате/репозитории.
+2. Google пока не подключать: `GOOGLE_WEB_RISK_ENABLED=false`, `GOOGLE_WEB_RISK_API_KEY` пусто.
+3. `ABUSE_CHECK_ENABLED=false` останавливает новые репутационные проверки и воркер. Лимиты, журнал и **ранее установленные** модерация/блокировки сохраняются; снять их можно адресно из админки. Это не массовая разблокировка опасных ссылок.
+4. `TRUST_PROXY=1` только за доверенным reverse proxy, который очищает и выставляет X-Forwarded-For. Иначе аудит получает `unknown`, жалобы без подтверждённого IP не участвуют в автоматическом пороге (сами жалобы сохраняются).
+5. Настроить реальную почту **abuse@qr-s.ru** у почтового провайдера/алиасом. Код приложения не создаёт почтовые ящики. Письмо о блокировке использует существующий EmailOutbox/SMTP и ключ шифрования `ADMIN_INTEGRATIONS_KEY`.
+6. Включить Telegram уведомления и действующий токен/чат в существующей админке. Жалобы и сводка воркера используют `NotificationOutbox`, без email жалобщика. При выключенном Telegram записи доступны в админке.
+7. Ручной необязательный стартовый seed: `node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/seed-abuse-rules.ts`. Не запускается автоматически; список согласовать в `/admin/abuse/rules`.
+8. Запустить сервис `abuse-recheck` вместе с Redis после миграции. Раз в день с 04:00 МСК проверяет ещё не проверенные за день записи; PENDING_CHECK — каждые 10 минут. При потере Redis lock прекращает работу; lock обновляется с проверкой владельца. Исчерпание provider quota не обновляет lastCheckedAt, остаток остаётся в БД до следующей попытки, включая перезапуск процесса.
+
+### Получение ключа Яндекса
+
+Официальная инструкция: https://yandex.ru/dev/safebrowsing/doc/en/quickstart
+
+1. Войти в https://developer.tech.yandex.ru/ под аккаунтом владельца.
+2. Подключить сервис Safe Browsing API и получить ключ. Проверить доступность и условия для своего аккаунта.
+3. Указать ключ только в `YANDEX_SAFE_BROWSING_API_KEY` окружения app и abuse-recheck, затем пересоздать эти сервисы по обычному процессу выпуска.
+4. Проверить отсутствие предупреждения local-only и `lastCheckVerdict` тестового QR. Сам ключ не печатать в логах и командах диагностики.
+
+### Google Web Risk по отдельному решению
+
+Официальные инструкции: https://cloud.google.com/web-risk/docs/setup и https://cloud.google.com/web-risk/docs/lookup-api
+
+1. В Google Cloud создать/выбрать проект и настроить необходимый платёжный аккаунт.
+2. Включить Web Risk API, проверить квоты/стоимость и установить бюджет/уведомления.
+3. Создать API key с ограничением по Web Risk API; при возможности ограничить его IP исходящего сервера.
+4. Внести его в secret `GOOGLE_WEB_RISK_API_KEY`, установить `GOOGLE_WEB_RISK_ENABLED=true` только после согласования подключения.
+5. Приложение отправляет GET uris:search с одним URL и threatTypes; credential — `X-Goog-Api-Key`, без данных пользователя/аккаунта. Полные ошибки fetch и URL запросов никогда не логируются.
+
+## Проверки
+
+- `npm test`, `npm run lint`, `npx tsc --noEmit`, `npm run build`.
+- `scripts/verify-abuse-http.ts`: реальный локальный Next/Prisma, включая API v1, 451/200/no Location/no scan, пять session update endpoints, rollback, reports, 401, audit/retention, поведение legacy, provider outage и прежние password/expiry/maxScans.
+- Для HTTP-теста только изолированная PostgreSQL БД `qr_abuse_test` на `127.0.0.1:55439`, web на 3119. Использовать локальный preload `scripts/abuse-provider-fixture.mjs` с `ABUSE_TEST_FIXTURE=1`; он жёстко отказывает при другой БД. Yandex credential для теста генерируется случайно и используется только mock, реальных ключей в тестах нет. Оба процесса получают одинаковый локальный JWT; SMTP/Telegram выключены. Test preload не входит в production entrypoint.
+- Сначала применить миграции к локальной БД, затем запускать сервер/проверку. Удалять/перезапускать производственные контейнеры для проверки нельзя.
+- Перед реальным выпуском повторить контракт `docs/QR-COMPATIBILITY.md` на восстановленной копии production; здесь использованы только синтетические фикстуры.
