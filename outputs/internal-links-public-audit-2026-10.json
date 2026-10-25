@@ -1,0 +1,95 @@
+{
+  "source": "public-rendered-html-not-database-content",
+  "capturedAt": "2026-10-25T13:57:58.356Z",
+  "pages": 72,
+  "articles": 44,
+  "non200": [],
+  "staticRedirectLinksInRenderedArticles": [],
+  "commercialGeneratorAnchors": [
+    {
+      "source": "qr-kod-so-skidkoj",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-dlya-vkontakte",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-yandeks-karty",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-dlya-oprosa",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-youtube",
+      "anchor": "сделать QR код"
+    },
+    {
+      "source": "qr-kod-dlya-sms",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-pisme",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-prezentaciyu",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-pdf",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-2gis",
+      "anchor": "сделать qr код"
+    },
+    {
+      "source": "qr-kod-na-meropriyatie",
+      "anchor": "сделать qr код"
+    }
+  ],
+  "targets": [
+    {
+      "path": "/blog/qr-kod-dlya-vkontakte",
+      "status": 200
+    },
+    {
+      "path": "/blog/qr-kod-dlya-oprosa",
+      "status": 200
+    },
+    {
+      "path": "/blog/qr-kod-dlya-otzyvov",
+      "status": 200
+    },
+    {
+      "path": "/blog/qr-kod-na-yandeks-karty",
+      "status": 200
+    },
+    {
+      "path": "/blog/qr-kod-s-analitikoj-i-korotkoj-ssylkoj",
+      "status": 200
+    },
+    {
+      "path": "/blog/qr-kod-s-utm-metkami",
+      "status": 200
+    },
+    {
+      "path": "/blog/razmer-qr-koda-dlya-pechati",
+      "status": 200
+    },
+    {
+      "path": "/blog/dinamicheskij-i-staticheskij-qr-kod-raznica",
+      "status": 200
+    },
+    {
+      "path": "/dynamic-qr",
+      "status": 200
+    }
+  ],
+  "databaseContentAudit": "pending-source-snapshot",
+  "databaseRedirectTableAudit": "pending-source-snapshot",
+  "relatedArticleIdsAudit": "pending-source-snapshot"
+}

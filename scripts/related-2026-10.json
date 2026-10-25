@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "mode": "proposal-only",
+  "note": "Deferred entries are alternatives outside the six-new-links budget. Do not apply together with the content plan.",
+  "targets": [
+    {
+      "target": "qr-kod-dlya-vkontakte",
+      "sources": [],
+      "deferredSources": [
+        "qr-kod-dlya-telegram-kanala",
+        "qr-kod-na-rutube",
+        "qr-kod-na-youtube",
+        "elektronnaya-vizitka-s-qr-kodom",
+        "qr-kod-dlya-max"
+      ]
+    },
+    {
+      "target": "qr-kod-dlya-oprosa",
+      "sources": [
+        "qr-kod-dlya-otzyvov",
+        "qr-kod-na-meropriyatie",
+        "qr-kod-na-prezentaciyu"
+      ],
+      "deferredSources": []
+    },
+    {
+      "target": "qr-kod-dlya-otzyvov",
+      "sources": [
+        "qr-kod-menu-restoran-kafe",
+        "qr-kod-na-yandeks-karty",
+        "qr-kod-na-2gis"
+      ],
+      "deferredSources": []
+    },
+    {
+      "target": "qr-kod-s-analitikoj-i-korotkoj-ssylkoj",
+      "sources": [
+        "cheklist-zapuska-qr-kampanii",
+        "qr-kod-dlya-marketinga-i-reklamy",
+        "qr-kod-s-utm-metkami"
+      ],
+      "deferredSources": []
+    }
+  ]
+}

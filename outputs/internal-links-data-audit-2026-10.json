@@ -1,0 +1,171 @@
+{
+  "related": {
+    "mode": "dry-run",
+    "redirectTableIncluded": false,
+    "diff": [
+      {
+        "id": "cmrm979aj0001s501cook1cjq",
+        "slug": "qr-kod-dlya-otzyvov",
+        "version": 5,
+        "updatedAt": "2026-10-21T05:51:49.477Z",
+        "before": [],
+        "after": [
+          "cmrqfntxh0007s501ch3lu8ud"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-dlya-oprosa"
+        ]
+      },
+      {
+        "id": "cmrrqya6s000ds501s2i4p8z7",
+        "slug": "qr-kod-na-meropriyatie",
+        "version": 4,
+        "updatedAt": "2026-10-21T16:17:55.055Z",
+        "before": [],
+        "after": [
+          "cmrqfntxh0007s501ch3lu8ud"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-dlya-oprosa"
+        ]
+      },
+      {
+        "id": "cmrx0k1v20003s5014tkiyi7v",
+        "slug": "qr-kod-na-prezentaciyu",
+        "version": 4,
+        "updatedAt": "2026-10-21T16:18:25.121Z",
+        "before": [],
+        "after": [
+          "cmrqfntxh0007s501ch3lu8ud"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-dlya-oprosa"
+        ]
+      },
+      {
+        "id": "cmrja3s4c0005s5018ra0tn8y",
+        "slug": "qr-kod-menu-restoran-kafe",
+        "version": 6,
+        "updatedAt": "2026-10-21T08:43:18.491Z",
+        "before": [],
+        "after": [
+          "cmrm979aj0001s501cook1cjq"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-dlya-otzyvov"
+        ]
+      },
+      {
+        "id": "cmrrm1l58000bs501b12aulhv",
+        "slug": "qr-kod-na-yandeks-karty",
+        "version": 6,
+        "updatedAt": "2026-10-21T16:18:35.093Z",
+        "before": [],
+        "after": [
+          "cmrm979aj0001s501cook1cjq"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-dlya-otzyvov"
+        ]
+      },
+      {
+        "id": "cmrsqlghe000hs501vwfz6ahd",
+        "slug": "qr-kod-na-2gis",
+        "version": 5,
+        "updatedAt": "2026-10-21T16:17:45.075Z",
+        "before": [],
+        "after": [
+          "cmrm979aj0001s501cook1cjq"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-dlya-otzyvov"
+        ]
+      },
+      {
+        "id": "cmrlnex4d0001s501ymn56fvi",
+        "slug": "cheklist-zapuska-qr-kampanii",
+        "version": 6,
+        "updatedAt": "2026-10-21T16:22:21.777Z",
+        "before": [],
+        "after": [
+          "cmr4ir5130005s5010t72hlgl"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-s-analitikoj-i-korotkoj-ssylkoj"
+        ]
+      },
+      {
+        "id": "cmrjd9wuy0007s501vh5scgta",
+        "slug": "qr-kod-dlya-marketinga-i-reklamy",
+        "version": 5,
+        "updatedAt": "2026-10-21T16:21:17.754Z",
+        "before": [],
+        "after": [
+          "cmr4ir5130005s5010t72hlgl"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-s-analitikoj-i-korotkoj-ssylkoj"
+        ]
+      },
+      {
+        "id": "cmrswp9rv000js501mm12g5wd",
+        "slug": "qr-kod-s-utm-metkami",
+        "version": 4,
+        "updatedAt": "2026-10-21T07:49:14.051Z",
+        "before": [],
+        "after": [
+          "cmr4ir5130005s5010t72hlgl"
+        ],
+        "beforeSlugs": [],
+        "afterSlugs": [
+          "qr-kod-s-analitikoj-i-korotkoj-ssylkoj"
+        ]
+      }
+    ],
+    "blockers": [],
+    "deferred": [
+      {
+        "source": "qr-kod-dlya-telegram-kanala",
+        "target": "qr-kod-dlya-vkontakte",
+        "reason": "outside-current-link-budget"
+      },
+      {
+        "source": "qr-kod-na-rutube",
+        "target": "qr-kod-dlya-vkontakte",
+        "reason": "outside-current-link-budget"
+      },
+      {
+        "source": "qr-kod-na-youtube",
+        "target": "qr-kod-dlya-vkontakte",
+        "reason": "outside-current-link-budget"
+      },
+      {
+        "source": "elektronnaya-vizitka-s-qr-kodom",
+        "target": "qr-kod-dlya-vkontakte",
+        "reason": "outside-current-link-budget"
+      },
+      {
+        "source": "qr-kod-dlya-max",
+        "target": "qr-kod-dlya-vkontakte",
+        "reason": "outside-current-link-budget"
+      }
+    ],
+    "applied": false
+  },
+  "redirectAudit": {
+    "mode": "report-only",
+    "redirectTableIncluded": false,
+    "articles": 45,
+    "links": [],
+    "related": [],
+    "unknownRelatedIds": []
+  }
+}

@@ -8,6 +8,7 @@ export type SeoPage = {
   cta: string;
   ctaHref: string;
   keywords: string[];
+  articles?: [string, string][];
 };
 
 const seoPages: SeoPage[] = [
@@ -77,6 +78,7 @@ const seoPages: SeoPage[] = [
   },
   {
     slug: "qr-for-events",
+    articles: [["qr-kod-dlya-oprosa", "QR-код на опрос или анкету"]],
     title: "QR-коды для мероприятий: регистрация, программа и материалы",
     description:
       "Регистрация, программа и материалы события через QR. Меняйте ссылки на месте и сравнивайте открытия по кодам.",

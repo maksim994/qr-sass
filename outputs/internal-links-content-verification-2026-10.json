@@ -1,0 +1,224 @@
+{
+  "mode": "verification-only",
+  "applied": false,
+  "proposals": 28,
+  "articles": 17,
+  "reports": [
+    {
+      "id": "cmrg6erwq0001s501lykrd5mt",
+      "slug": "elektronnaya-vizitka-s-qr-kodom",
+      "format": "markdown",
+      "version": 6,
+      "beforeSha256": "82cb85a568e9f98a0d4003eb5155f4f019344f05686b632820b2302cd8c18b36",
+      "afterSha256": "c6cc996ae6878aae00a2b1abcb43bede4b4ed0fbf6ebe01dc7dbaeb3de18fe53",
+      "fragments": 1,
+      "newLinks": {
+        "/blog/qr-kod-dlya-vkontakte": 1
+      }
+    },
+    {
+      "id": "cmrrm1l58000bs501b12aulhv",
+      "slug": "qr-kod-na-yandeks-karty",
+      "format": "markdown",
+      "version": 6,
+      "beforeSha256": "706017ee3924492e7cef5eb4af7f82a70dbdc37533bd3301a7e9ba688a54049e",
+      "afterSha256": "61ad8f11330a8cb8ba2fe88932d593b38ac0f66156c3138dd847dbc1e6e7b14e",
+      "fragments": 2,
+      "newLinks": {
+        "/blog/qr-kod-dlya-otzyvov": 0,
+        "/": 1
+      }
+    },
+    {
+      "id": "cmrsqlghe000hs501vwfz6ahd",
+      "slug": "qr-kod-na-2gis",
+      "format": "markdown",
+      "version": 5,
+      "beforeSha256": "a148bdb23731ee3530a3cad059df60c3e7a174e4c56c11375a5ed959a390d00b",
+      "afterSha256": "b39ec752e447ded41771b7ea45892e34e73008f577f3bb83e2f8882011bd8d54",
+      "fragments": 1,
+      "newLinks": {
+        "/blog/qr-kod-dlya-otzyvov": 0,
+        "/blog/generator-qr-kodov-onlajn-besplatno": 0
+      }
+    },
+    {
+      "id": "cmrofu7wf0003s501wvovasei",
+      "slug": "qr-kod-na-upakovke-tovara",
+      "format": "html",
+      "version": 4,
+      "beforeSha256": "e2af335f1a2c7bf8ffd95e3d7551fad6b227218da8f2ffda66b8fcc420430152",
+      "afterSha256": "2456d039ae6f9dab1849aa3db0395df6eacbd4d0bcacd73df445b07376920b05",
+      "fragments": 2,
+      "newLinks": {
+        "/blog/qr-kod-s-analitikoj-i-korotkoj-ssylkoj": 0,
+        "/blog/qr-kod-dlya-otzyvov": 0
+      }
+    },
+    {
+      "id": "cmrlnex4d0001s501ymn56fvi",
+      "slug": "cheklist-zapuska-qr-kampanii",
+      "format": "markdown",
+      "version": 6,
+      "beforeSha256": "294cf30d35525e17af8960ae3a457984a195119f1b08a2b41310e710c6358573",
+      "afterSha256": "e8ee17fa2fe473e6b6c4be91a0c0cf0960a97ef44d50904af56ed77ecea77fff",
+      "fragments": 3,
+      "newLinks": {
+        "/blog/qr-kod-dlya-otzyvov": 1,
+        "/blog/qr-kod-s-utm-metkami": 1,
+        "/blog/qr-kod-s-analitikoj-i-korotkoj-ssylkoj": 0
+      }
+    },
+    {
+      "id": "cmrrqya6s000ds501s2i4p8z7",
+      "slug": "qr-kod-na-meropriyatie",
+      "format": "markdown",
+      "version": 4,
+      "beforeSha256": "2b36a1e1a4a46ea29c908088b24c247a5e00e0d079d2433214afe49e10001445",
+      "afterSha256": "d0fd0b072177d7275ad2c0eeaf79ee6488dafe1b7870ebda96b09ed97df0c399",
+      "fragments": 3,
+      "newLinks": {
+        "/blog/qr-kod-dlya-oprosa": 0,
+        "/blog/qr-kod-s-utm-metkami": 1,
+        "/blog/generator-qr-kodov-onlajn-besplatno": 0
+      }
+    },
+    {
+      "id": "cmrx0k1v20003s5014tkiyi7v",
+      "slug": "qr-kod-na-prezentaciyu",
+      "format": "markdown",
+      "version": 4,
+      "beforeSha256": "b04bdcca7eb05c68a29fb06e826667f95b0091f0ab1ccf0f8e85b30bb849afd4",
+      "afterSha256": "8bd007e49cabfbf51ebcf01bf3183f7f19cffc00c48c3d29c3186f9ec77589bd",
+      "fragments": 2,
+      "newLinks": {
+        "/blog/qr-kod-dlya-oprosa": 0,
+        "/blog/generator-qr-kodov-onlajn-besplatno": 0
+      }
+    },
+    {
+      "id": "cmrm979aj0001s501cook1cjq",
+      "slug": "qr-kod-dlya-otzyvov",
+      "format": "html",
+      "version": 5,
+      "beforeSha256": "4430bf075e4c0c139e442999313b85a38ca6326f7ac2ae483f8a6a0ab0aa1137",
+      "afterSha256": "4190018185cd1c85e6bc795b4d760a1decb570b09b386a508ea044fb19ee886c",
+      "fragments": 4,
+      "newLinks": {
+        "/blog/qr-kod-dlya-oprosa": 1,
+        "/qr-dlya-otzyvov-yandex-karty": 1,
+        "/blog/qr-kod-na-yandeks-karty": 1,
+        "/qr-dlya-otzyvov-2gis": 1
+      }
+    },
+    {
+      "id": "cmrja3s4c0005s5018ra0tn8y",
+      "slug": "qr-kod-menu-restoran-kafe",
+      "format": "markdown",
+      "version": 6,
+      "beforeSha256": "2130a5ee8ed7b949c4068fba5361a44aeaf5fcb76524cef3268253932031c059",
+      "afterSha256": "d3ceec914ac9bce5e3bce46f0446dfefe524134ca5f91c4f6da4864ae09d9a1d",
+      "fragments": 1,
+      "newLinks": {
+        "/blog/qr-kod-dlya-oprosa": 1
+      }
+    },
+    {
+      "id": "cmrjd9wuy0007s501vh5scgta",
+      "slug": "qr-kod-dlya-marketinga-i-reklamy",
+      "format": "markdown",
+      "version": 5,
+      "beforeSha256": "442618e01240cd0f63c5d8c4ce8a454ae81bfbc3d76b1d4a6e99e5342542069f",
+      "afterSha256": "6b85f99d620b5d03080cd3881cb7fd8a9acc98014786121eb696f150a3bf21cc",
+      "fragments": 2,
+      "newLinks": {
+        "/blog/qr-kod-s-utm-metkami": 1,
+        "/blog/qr-kod-s-analitikoj-i-korotkoj-ssylkoj": 0
+      }
+    },
+    {
+      "id": "cmrryaxwv000fs501gg2buc72",
+      "slug": "qr-kod-so-skidkoj",
+      "format": "markdown",
+      "version": 4,
+      "beforeSha256": "189181e80556d05cfa93fa0395ddbfb316562a6de679ecf9d8f33282057f56a2",
+      "afterSha256": "455acbeb4ef7ba8c2db8ba4beeab334caede7a6d44945bbbbe0ea042121e5040",
+      "fragments": 1,
+      "newLinks": {
+        "/blog/generator-qr-kodov-onlajn-besplatno": 0
+      }
+    },
+    {
+      "id": "cmrqdhlpc0005s501kyn9c6v0",
+      "slug": "qr-kod-dlya-vkontakte",
+      "format": "markdown",
+      "version": 5,
+      "beforeSha256": "4904f27dd925ee0dd37cb952fc165c69f3b7727f591ff1404bd1f4198502d778",
+      "afterSha256": "e1a41734cd33a9adc41c2b8bc2958e832e2a36cce118d576d4e336d8ee242c6b",
+      "fragments": 1,
+      "newLinks": {
+        "/": 1
+      }
+    },
+    {
+      "id": "cmrqfntxh0007s501ch3lu8ud",
+      "slug": "qr-kod-dlya-oprosa",
+      "format": "markdown",
+      "version": 6,
+      "beforeSha256": "06ca80916a526d2754447e23df8bceca39c80097bde97fed7e169ba8a0fa9fbc",
+      "afterSha256": "ceaa519926be1b8d736b1d09a8ac8a7db010bb1d3264477ca4e4c2cf3a6aacb4",
+      "fragments": 1,
+      "newLinks": {
+        "/": 1
+      }
+    },
+    {
+      "id": "cmrtjrxfx000ls501v4vdwvt8",
+      "slug": "qr-kod-na-youtube",
+      "format": "markdown",
+      "version": 4,
+      "beforeSha256": "8edb49c9da1835c267b0dc8cf50030a9a71dd7eeb94ea107d24cb62b23c858c6",
+      "afterSha256": "fc38c5bdbf5c4fe499c5e93f3e241421d3ab9f4d5d79e531ed1ed2e0d9d288b6",
+      "fragments": 1,
+      "newLinks": {
+        "/": 1
+      }
+    },
+    {
+      "id": "cmrxohbcs0005s501hfi76n6m",
+      "slug": "qr-kod-dlya-sms",
+      "format": "markdown",
+      "version": 4,
+      "beforeSha256": "80edfb2285f30254ebe0a17398581adf61e0439d78d0c8a9726702806850c569",
+      "afterSha256": "c06de00d70c7366cd679ed6c85f99fc6d041350dff51a53a6e38657e1e2933af",
+      "fragments": 1,
+      "newLinks": {
+        "/": 1
+      }
+    },
+    {
+      "id": "cmrw7fec30001s501d49e31z6",
+      "slug": "qr-kod-na-pisme",
+      "format": "markdown",
+      "version": 5,
+      "beforeSha256": "c9655a531146df587fe419f8b9be78cb5a1d746c528c1df0fcc557cef6e85acb",
+      "afterSha256": "6f99e3a32865822e7eceb8900f932e8c5adc472f0ce436aed3925c83e486f9f4",
+      "fragments": 1,
+      "newLinks": {
+        "/blog/generator-qr-kodov-onlajn-besplatno": 0
+      }
+    },
+    {
+      "id": "cmrr9sbpa0009s501qanzby7r",
+      "slug": "qr-kod-na-pdf",
+      "format": "markdown",
+      "version": 4,
+      "beforeSha256": "e6023b6bdd0b1716fffeb7fb65b7871b23174d1e376ab6fdbe5ff1cf28247b69",
+      "afterSha256": "bd67b5a3c9fcf666de426582151b02907d91f85e967822324b232c3b7233569c",
+      "fragments": 1,
+      "newLinks": {
+        "/": 1
+      }
+    }
+  ]
+}
