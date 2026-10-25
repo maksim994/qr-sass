@@ -1,3 +1,5 @@
+import { moderationRestricted } from "@/lib/abuse/public";
+import { ModerationNotice } from "@/components/abuse/moderation-notice";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -27,10 +29,11 @@ export default async function GdprGatePage({ params, searchParams }: Props) {
   const db = getDb();
   const qr = await db.qrCode.findFirst({
     where: { shortCode: slug, kind: "DYNAMIC" },
-    select: { id: true, currentTargetUrl: true, payload: true, isArchived: true },
+    select: { moderationStatus: true, id: true, currentTargetUrl: true, payload: true, isArchived: true },
   });
 
   if (!qr) redirect(qrUnavailablePath("missing"));
+  if (moderationRestricted(qr.moderationStatus)) return <ModerationNotice status={qr.moderationStatus} code={slug} />;
   if (qr.isArchived) redirect(qrUnavailablePath("archived"));
 
   const payload = (qr.payload as Record<string, unknown>) ?? {};

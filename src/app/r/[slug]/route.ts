@@ -1,3 +1,4 @@
+import { moderationResponse } from "@/lib/abuse/public";
 import { NextResponse, after } from "next/server";
 import { cookies } from "next/headers";
 import { trackScan } from "@/lib/analytics";
@@ -53,6 +54,7 @@ export async function GET(request: Request, context: RouteContext) {
         kind: "DYNAMIC",
       },
       select: {
+        moderationStatus: true,
         id: true,
         currentTargetUrl: true,
         payload: true,
@@ -75,6 +77,9 @@ export async function GET(request: Request, context: RouteContext) {
       });
       return NextResponse.redirect(new URL(qrUnavailablePath("missing"), env.APP_URL));
     }
+
+    const restricted = moderationResponse(qr?.moderationStatus, slug);
+    if (restricted) return restricted;
 
     const scanCount = qr.maxScans === null ? 0 : await db.scanEvent.count({ where: { qrCodeId: qr.id } });
     const cookieStore = await cookies();
@@ -201,7 +206,7 @@ export async function GET(request: Request, context: RouteContext) {
       });
     }
 
-    return NextResponse.redirect(targetUrl);
+    return NextResponse.redirect(targetUrl, 302);
   } catch (error) {
     logger.error({
       area: "api",

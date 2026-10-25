@@ -1,3 +1,4 @@
+import { abuseErrorResponse } from "@/lib/abuse/rate";
 import { getDb } from "@/lib/db";
 import { getEntitlements } from "@/lib/entitlements";
 import { apiError } from "@/lib/api-response";
@@ -57,7 +58,8 @@ export async function withQrApi(request: Request, scope: QrApiScope | undefined,
     response.headers.set("X-RateLimit-Limit", String(auth.actor.key.rateLimit));
     response.headers.set("X-RateLimit-Remaining", String(auth.actor.remaining));
     return qrApiPrivate(response);
-  } catch {
+  } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return qrApiPrivate(abuseResponse);
     // Never log request headers, credential material, or customer payloads.
     logger.error({ area: "api", message: "QR API request failed", code: "INTERNAL_ERROR", status: 500 });
     return qrApiPrivate(apiError(MSG.QR_API_FAILED, "INTERNAL_ERROR", 500));

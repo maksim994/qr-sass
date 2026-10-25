@@ -50,6 +50,7 @@ export default async function ContactsPage() {
         <h2 id="contact-title">Связаться</h2>
         <dl className={styles.details}>
           <div><dt>Email</dt><dd><a href={`mailto:${seller.email}`}>{seller.email}</a></dd></div>
+          <div><dt>Жалобы на ссылки</dt><dd><a href="mailto:abuse@qr-s.ru">abuse@qr-s.ru</a> · <Link href="/report">Пожаловаться</Link></dd></div>
           <div><dt>Телефон</dt><dd><a href={phoneHref}>{seller.phone}</a></dd></div>
           <div><dt>Telegram</dt><dd><a href="https://t.me/m_mvmolkov" target="_blank" rel="noopener noreferrer">@m_mvmolkov<span className="sr-only"> — откроется в новой вкладке</span></a></dd></div>
         </dl>

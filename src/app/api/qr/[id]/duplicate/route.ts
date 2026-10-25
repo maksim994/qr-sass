@@ -1,3 +1,5 @@
+import { createModeratedQr, requestActor } from "@/lib/abuse/moderation";
+import { abuseErrorResponse } from "@/lib/abuse/rate";
 import { nanoid } from "nanoid";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { MSG } from "@/lib/user-messages";
@@ -64,8 +66,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const copyName = `${source.name} (копия)`.slice(0, 120);
 
-    const created = await createQrWithinQuota({ workspaceId: source.workspaceId, planId: entitlements.planId, plan: entitlements.plan, needsDynamic: needsDynamic }, tx => tx.qrCode.create({
-      data: {
+    const created = await createQrWithinQuota({ workspaceId: source.workspaceId, planId: entitlements.planId, plan: entitlements.plan, needsDynamic: needsDynamic }, tx => createModeratedQr(tx, {
         workspaceId: source.workspaceId,
         projectId: source.projectId,
         createdById: user.id,
@@ -88,8 +89,7 @@ export async function POST(request: Request, context: RouteContext) {
             encodedContent,
           },
         },
-      },
-    }));
+      }, requestActor(request, user, "duplicate")));
 
     logger.info({
       area: "api",
@@ -108,8 +108,9 @@ export async function POST(request: Request, context: RouteContext) {
       source: "duplicate",
       oncePerQr: true,
     });
-    return apiSuccess({ qrId: created.id, shortCode: created.shortCode }, 200, requestId);
+    return apiSuccess({ qrId: created.id, shortCode: created.shortCode, moderationStatus: created.moderationStatus }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code }, requestId);
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });

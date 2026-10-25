@@ -1,3 +1,5 @@
+import { updateModeratedQr, requestActor } from "@/lib/abuse/moderation";
+import { abuseErrorResponse } from "@/lib/abuse/rate";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
 import { MSG } from "@/lib/user-messages";
 import { apiError, apiSuccess, getRequestId, readJsonBody } from "@/lib/api-response";
@@ -56,6 +58,7 @@ export async function GET(request: Request, context: RouteContext) {
     const visible = entitlements.allowsAnalytics ? qr : { ...qr, scanEvents: [] };
     return apiSuccess({ qr: toPublicQr(visible) }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);
@@ -221,28 +224,13 @@ export async function PATCH(request: Request, context: RouteContext) {
       return apiSuccess({ updated: false }, 200, requestId);
     }
 
-    await db.qrCode.update({
-      where: { id },
-      data: updateData,
-    });
+    const moderatedQr = await updateModeratedQr(id, updateData, requestActor(request, user));
 
-    if (payloadChanged && qr.kind === "DYNAMIC") {
-      await db.qrRevision.create({
-        data: {
-          qrCodeId: id,
-          changedById: user.id,
-          destinationUrl:
-            typeof nextPayload.url === "string"
-              ? nextPayload.url
-              : qr.currentTargetUrl,
-          encodedContent: qr.encodedContent,
-        },
-      });
-    }
 
     logger.info({ area: "api", route, requestId, message: "QR updated", status: 200, details: { qrId: id } });
-    return apiSuccess({ updated: true }, 200, requestId);
+    return apiSuccess({ updated: true, moderationStatus: moderatedQr.moderationStatus }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);
@@ -275,14 +263,12 @@ export async function DELETE(request: Request, context: RouteContext) {
     const isMember = user.memberships.some((m) => m.workspaceId === qr.workspaceId);
     if (!isMember) return unauthorized();
 
-    await db.qrCode.update({
-      where: { id },
-      data: { isArchived: true },
-    });
+    await updateModeratedQr(id, { isArchived: true }, requestActor(request, user, "delete"));
 
     logger.info({ area: "api", route, requestId, message: "QR archived", status: 200, details: { qrId: id } });
     return apiSuccess({ deleted: true }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);

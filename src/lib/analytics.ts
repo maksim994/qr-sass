@@ -50,7 +50,7 @@ export function parseBrowserFamily(ua: string): string | null {
   return "Other";
 }
 
-function hashClientIp(ip: string): string | undefined {
+export function hashClientIp(ip: string): string | undefined {
   const secret = process.env.ANALYTICS_HASH_SECRET || process.env.JWT_SECRET;
   if (!secret) return undefined;
   return crypto.createHmac("sha256", secret).update(ip).digest("hex");

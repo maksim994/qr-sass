@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { moderationRestricted } from "@/lib/abuse/public";
+import { ModerationNotice } from "@/components/abuse/moderation-notice";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getDb } from "@/lib/db";
@@ -41,6 +44,8 @@ export default async function HostedPage({ params, searchParams }: Props) {
 
   if (!qr) redirect(qrUnavailablePath("missing"));
 
+  if (moderationRestricted(qr.moderationStatus)) return <ModerationNotice status={qr.moderationStatus} code={code} />;
+
   const payload = (qr.payload as Record<string, unknown>) ?? {};
   const cookieStore = await cookies();
   const scanCount = await db.scanEvent.count({ where: { qrCodeId: qr.id } });
@@ -79,7 +84,7 @@ export default async function HostedPage({ params, searchParams }: Props) {
   await trackScan(qr.id).catch(() => {});
   const payloadForPage = await hostedLandingPayload(qr, payload, undefined, viewGrant);
 
-  switch (qr.contentType) {
+  const landing = (() => { switch (qr.contentType) {
     case "PDF":
       return <PdfLanding payload={payloadForPage} />;
     case "IMAGE":
@@ -100,5 +105,6 @@ export default async function HostedPage({ params, searchParams }: Props) {
       return <SocialLinksLanding payload={payload} />;
     default:
       notFound();
-  }
+  } })();
+  return <>{landing}<footer className="fk-container"><Link href={`/report/${encodeURIComponent(code)}`}>Пожаловаться</Link></footer></>;
 }

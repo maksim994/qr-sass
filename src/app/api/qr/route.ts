@@ -1,3 +1,5 @@
+import { createModeratedQr, requestActor } from "@/lib/abuse/moderation";
+import { abuseErrorResponse } from "@/lib/abuse/rate";
 import bcrypt from "bcryptjs";
 import { MSG } from "@/lib/user-messages";
 import { nanoid } from "nanoid";
@@ -61,6 +63,7 @@ export async function GET(request: Request) {
 
     return apiSuccess({ items: qrs.map(toPublicQr) }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);
@@ -204,8 +207,7 @@ export async function POST(request: Request) {
         ? await bcrypt.hash(data.password, 10)
         : undefined;
 
-    const qr = await createQrWithinQuota({ workspaceId: data.workspaceId, planId: entitlements.planId, plan: entitlements.plan, needsDynamic: isDynamic || usesVcardDownload }, tx => tx.qrCode.create({
-      data: {
+    const qr = await createQrWithinQuota({ workspaceId: data.workspaceId, planId: entitlements.planId, plan: entitlements.plan, needsDynamic: isDynamic || usesVcardDownload }, tx => createModeratedQr(tx, {
         workspaceId: data.workspaceId,
         projectId: data.projectId,
         createdById: user.id,
@@ -227,8 +229,7 @@ export async function POST(request: Request) {
             encodedContent: isHosted || usesVcardDownload ? qrData : encodedContent,
           },
         },
-      },
-    }));
+      }, requestActor(request, user, "create")));
 
     logger.info({
       area: "api",
@@ -247,8 +248,9 @@ export async function POST(request: Request) {
       isTest: isPrivateOrLocalIp(getClientIp(request)),
       oncePerQr: true,
     });
-    return apiSuccess({ score, qrId: qr.id, shortCode: qr.shortCode }, 200, requestId);
+    return apiSuccess({ score, qrId: qr.id, shortCode: qr.shortCode, moderationStatus: qr.moderationStatus }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code }, requestId);
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });

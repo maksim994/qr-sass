@@ -1,3 +1,5 @@
+import { updateModeratedQr, requestActor } from "@/lib/abuse/moderation";
+import { abuseErrorResponse } from "@/lib/abuse/rate";
 import bcrypt from "bcryptjs";
 import { MSG } from "@/lib/user-messages";
 import { getApiUser, unauthorized } from "@/lib/api-auth";
@@ -104,10 +106,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const updateData: Record<string, unknown> = { ...data };
     if (payloadUpdate) updateData.payload = payloadUpdate;
-    await db.qrCode.update({
-      where: { id },
-      data: updateData,
-    });
+    const moderatedQr = await updateModeratedQr(id, updateData, requestActor(request, user));
 
     logger.info({
       area: "api",
@@ -117,8 +116,9 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: 200,
       details: { id },
     });
-    return apiSuccess({ updated: true }, 200, requestId);
+    return apiSuccess({ updated: true, moderationStatus: moderatedQr.moderationStatus }, 200, requestId);
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof ConfigError) {
       logger.error({ area: "api", route, requestId, message: error.message, code: error.code, status: 500 });
       return apiError(error.message, "CONFIG_ERROR", 500, undefined, requestId);

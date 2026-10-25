@@ -1,3 +1,4 @@
+import { moderationResponse } from "@/lib/abuse/public";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getDb } from "@/lib/db";
@@ -27,6 +28,7 @@ export async function GET(_request: Request, context: RouteContext) {
         contentType: "VCARD",
       },
       select: {
+        moderationStatus: true,
         id: true,
         name: true,
         payload: true,
@@ -37,6 +39,9 @@ export async function GET(_request: Request, context: RouteContext) {
         shortCode: true,
       },
     });
+
+    const restricted = moderationResponse(qr?.moderationStatus, code);
+    if (restricted) return restricted;
 
     const scanCount = qr ? await db.scanEvent.count({ where: { qrCodeId: qr.id } }) : 0;
     const token = (await cookies()).get(accessCookieFor(code))?.value;
