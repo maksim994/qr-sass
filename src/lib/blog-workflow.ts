@@ -7,6 +7,8 @@ import { renderArticleBody } from "@/lib/blog-render";
 import { readBlogFaq } from "@/lib/blog-faq";
 import { MSG } from "@/lib/user-messages";
 import { assertActiveBlogToken } from "@/lib/blog-api-tokens";
+import { assertArticlePublicationRate } from "@/lib/blog-api-publication";
+import { logger } from "@/lib/logger";
 import { assertArticleRouteAvailable } from "@/lib/editorial-redirects";
 import { RedirectError } from "@/lib/editorial-redirect-input";
 import { replaceArticleImage, type ArticleImageChange, type ArticleImageReplacement } from "@/lib/blog-image-content";
@@ -24,21 +26,33 @@ export async function saveArticle(input: BlogEditorInput, actor: BlogActor, id?:
 export async function saveArticleApi(input: BlogEditorInput, actor: BlogActor, tokenId: string, id?: string, version?: number) {
   return persistArticle(input, actor, id, { tokenId, version });
 }
+export async function publishArticleApi(id: string, version: number) {
+  const result = await persistArticle(
+    { status: "published", comment: `Публикация через API · проверена версия ${version}` },
+    { actorId: null, actorName: "api", source: "api" }, id, { publication: true, version },
+  );
+  logger.info({ area: "api", route: "/api/v1/articles/{id}/publish", message: "Article published", details: {
+    actor: "api", id: result.post.id, version: result.version, reviewedVersion: version, publishedAt: result.post.publishedAt,
+  } });
+  return result;
+}
 export async function saveArticleImageAlt(id:string,version:number,url:string,alt:string,actor:BlogActor,tokenId:string,comment?:string) {
   return saveArticleImage(id,version,{url,alt},actor,tokenId,{comment});
 }
 export async function saveArticleImage(id: string, version: number, change: ArticleImageChange, actor: BlogActor, tokenId: string, options: { comment?: string; minorEdit?: boolean } = {}) {
   return persistArticle({ comment: options.comment ?? ("remove" in change ? "Удалено изображение через API" : change.newUrl ? "Заменено изображение через API" : "Изменён alt изображения"), minorEdit: options.minorEdit }, actor, id, { tokenId, version, imageChange: change });
 }
-async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId: string; version?: number; imageChange?: ArticleImageChange }) {
+async function persistArticle(input: BlogEditorInput, actor: BlogActor, id?: string, api?: { tokenId?: string; version?: number; imageChange?: ArticleImageChange; publication?: boolean }) {
   return getDb().$transaction(async tx => {
-    if (api) await assertActiveBlogToken(tx, api.tokenId);
+    if (api?.tokenId) await assertActiveBlogToken(tx, api.tokenId);
     const before = id ? await tx.blogPost.findUnique({ where: { id } }) : null;
     if (id && !before) throw new BlogEditorError(MSG.POST_NOT_FOUND, 404);
     if (before && api) {
       const latest = await tx.blogRevision.findFirst({ where: { postId: id }, orderBy: { number: "desc" }, select: { number: true } });
       if (api.version !== (latest?.number ?? 0)) throw new BlogEditorError(MSG.BLOG_SAVE_CONFLICT, 409);
     }
+    if (api?.publication && before?.publishedAt) throw new BlogEditorError(MSG.BLOG_API_ALREADY_PUBLISHED, 409);
+    if (api?.publication) await assertArticlePublicationRate(tx);
     if (before && api?.imageChange) {
       const change = { ...api.imageChange };
       if (!("remove" in change) && change.newUrl && change.newUrl !== change.url) {

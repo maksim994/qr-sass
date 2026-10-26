@@ -1,4 +1,5 @@
 import { extractLegacyFaq, readBlogFaq } from "@/lib/blog-faq";
+import { faqAnswerText } from "@/lib/blog-faq-inline";
 import { blogMediaUrl } from "@/lib/blog-media-url";
 import { rewriteBlogMediaJsonLd } from "@/lib/blog-media-html";
 
@@ -157,7 +158,7 @@ export function buildArticleJsonLd(params: DefaultArticleJsonLdParams & { faq: u
   const faq = fieldFaq.length ? fieldFaq : extractLegacyFaq(params.structuredData);
   if (faq.length) graph.push({
     "@type": "FAQPage", "@id": `${params.articleUrl}#faq`,
-    mainEntity: faq.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })),
+    mainEntity: faq.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: faqAnswerText(item.answer) } })),
   });
   const custom = withoutOwnedTypes(parseStructuredDataForPage(params.structuredData)) as Record<string, unknown> | undefined;
   if (custom) {

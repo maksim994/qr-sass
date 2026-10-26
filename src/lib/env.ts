@@ -4,6 +4,7 @@ const isProd = process.env.NODE_ENV === "production";
 const DEV_JWT_FALLBACK = "local-development-jwt-secret";
 
 const envSchema = z.object({
+  QRS_ARTICLES_PUBLISH_TOKEN: z.string().optional(),
   YANDEX_SAFE_BROWSING_API_KEY: z.string().optional(),
   GOOGLE_WEB_RISK_API_KEY: z.string().optional(),
   GOOGLE_WEB_RISK_ENABLED: z.enum(["true", "false"]).default("false").transform(v => v === "true"),
