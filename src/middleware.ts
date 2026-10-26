@@ -49,8 +49,8 @@ export async function middleware(request: NextRequest) {
   // here to return 451 before React streams any destination or metadata.
   const publicQr = /^\/(?:p|g)\/([^/]+)$/.exec(request.nextUrl.pathname);
   if (publicQr && ["GET", "HEAD"].includes(request.method)) {
-    const qr = await getDb().qrCode.findUnique({ where: { shortCode: decodeURIComponent(publicQr[1]) }, select: { moderationStatus: true } });
-    const restricted = moderationResponse(qr?.moderationStatus, publicQr[1]);
+    const qr = await getDb().qrCode.findUnique({ where: { shortCode: decodeURIComponent(publicQr[1]) }, select: { moderationStatus: true, holdUntilCheck: true } });
+    const restricted = moderationResponse(qr?.moderationStatus, publicQr[1], qr?.holdUntilCheck);
     if (restricted) return restricted;
   }
   const requestHeaders = new Headers(request.headers);

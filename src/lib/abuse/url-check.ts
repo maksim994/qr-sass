@@ -96,9 +96,9 @@ export async function checkUrlBatch(input: string[], options: { rules?: AbuseRul
         const data = await response.json();
         if (!data || typeof data !== 'object' || Array.isArray(data) || (data.matches !== undefined && !Array.isArray(data.matches)) || data.error) throw new Error('invalid_response');
         if (source === 'google' && data.threat !== undefined && (!data.threat || !Array.isArray(data.threat.threatTypes) || !data.threat.threatTypes.every((v: unknown) => typeof v === 'string'))) throw new Error('invalid_response');
-        if (source === 'yandex' && data.matches?.some((m: { threat?: { url?: unknown } }) => typeof m?.threat?.url !== 'string')) throw new Error('invalid_response');
+        if (source === 'yandex' && batch.length > 1 && data.matches?.some((m: { threat?: { url?: unknown } }) => typeof m?.threat?.url !== 'string')) throw new Error('invalid_response');
         for (const url of batch) {
-          const threat = source === 'google' ? Boolean(data.threat?.threatTypes?.length) : (data.matches ?? []).some((m: { threat?: { url?: string } }) => normalizeDestinationUrl(m.threat?.url ?? '') === url);
+          const threat = source === 'google' ? Boolean(data.threat?.threatTypes?.length) : (batch.length === 1 ? Boolean(data.matches?.length) : (data.matches ?? []).some((m: { threat?: { url?: string } }) => normalizeDestinationUrl(m.threat?.url ?? '') === url));
           const value: ProviderResult = { source, verdict: threat ? 'malicious' : 'clean', expiresAt: source === 'google' && threat ? Date.parse(data.threat.expireTime) : undefined };
           apply(url, value); await cache(`abuse:check:${source}:${urlHash(url)}`, value);
         }

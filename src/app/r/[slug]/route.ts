@@ -54,7 +54,7 @@ export async function GET(request: Request, context: RouteContext) {
         kind: "DYNAMIC",
       },
       select: {
-        moderationStatus: true,
+        moderationStatus: true, holdUntilCheck: true,
         id: true,
         currentTargetUrl: true,
         payload: true,
@@ -78,7 +78,7 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.redirect(new URL(qrUnavailablePath("missing"), env.APP_URL));
     }
 
-    const restricted = moderationResponse(qr?.moderationStatus, slug);
+    const restricted = moderationResponse(qr?.moderationStatus, slug, qr?.holdUntilCheck);
     if (restricted) return restricted;
 
     const scanCount = qr.maxScans === null ? 0 : await db.scanEvent.count({ where: { qrCodeId: qr.id } });

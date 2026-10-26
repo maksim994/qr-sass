@@ -5,6 +5,7 @@ import { verifyQrViewGrant } from "@/lib/qr-view-grant";
 
 export type QrPublicRecord = {
   moderationStatus?: string;
+  holdUntilCheck?: boolean;
   id: string;
   shortCode?: string | null;
   isArchived: boolean;
@@ -39,7 +40,7 @@ export async function evaluateQrPublicAccess(input: {
 }): Promise<QrPublicDecision> {
   const qr = input.qr;
   if (!qr) return { ok: false, reason: "missing" };
-  if (moderationRestricted(qr.moderationStatus)) return { ok: false, reason: qr.moderationStatus === "BLOCKED" ? "blocked" : "moderation" };
+  if (moderationRestricted(qr.moderationStatus, qr.holdUntilCheck)) return { ok: false, reason: qr.moderationStatus === "BLOCKED" ? "blocked" : "moderation" };
   if (qr.isArchived) return { ok: false, reason: "archived" };
   const now = input.now ?? new Date();
   if (qr.expireAt && now > qr.expireAt) return { ok: false, reason: "expired" };

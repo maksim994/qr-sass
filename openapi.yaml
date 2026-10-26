@@ -4745,7 +4745,8 @@
           "source",
           "createdAt",
           "updatedAt",
-          "moderationStatus"
+          "moderationStatus",
+          "holdUntilCheck"
         ],
         "properties": {
           "id": {
@@ -4800,7 +4801,11 @@
               "ON_MODERATION",
               "BLOCKED"
             ],
-            "description": "QR moderation state. ON_MODERATION and BLOCKED prevent public navigation without rejecting creation."
+            "description": "QR moderation state. ON_MODERATION and BLOCKED prevent navigation; PENDING_CHECK is held only when holdUntilCheck=true."
+          },
+          "holdUntilCheck": {
+            "type": "boolean",
+            "description": "PENDING_CHECK with holdUntilCheck=true pauses navigation until a clean automatic recheck. Existing accounts may have PENDING_CHECK with holdUntilCheck=false."
           }
         }
       },

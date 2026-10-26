@@ -30,16 +30,15 @@ test('local domain boundaries, decoded stopwords, allowlist and shorteners', () 
 test('moderation table and sticky manual review/block', () => {
   for (const [verdict, expected] of [['clean', 'OK'], ['suspicious', 'ON_MODERATION'], ['malicious', 'ON_MODERATION'], ['unknown', 'PENDING_CHECK']] as const) {
     const result = { verdict, reasons: [], sources: {} };
-    assert.equal(moderationDecision(result, false), expected);
-    assert.equal(moderationDecision(result, true), verdict === 'unknown' ? 'ON_MODERATION' : expected);
-    assert.equal(moderationDecision(result, false, 'ON_MODERATION'), 'ON_MODERATION');
-    assert.equal(moderationDecision(result, false, 'BLOCKED'), 'BLOCKED');
+    assert.equal(moderationDecision(result), expected);
+    assert.equal(moderationDecision(result, 'ON_MODERATION'), 'ON_MODERATION');
+    assert.equal(moderationDecision(result, 'BLOCKED'), 'BLOCKED');
   }
 });
 test('public gates contain no target, no Location, correct statuses and noindex', async () => {
   assert.equal(moderationResponse('OK', 'x'), null); assert.equal(moderationResponse('PENDING_CHECK', 'x'), null);
-  for (const status of ['ON_MODERATION', 'BLOCKED']) {
-    const response = moderationResponse(status, 'a\"><script>')!;
+  for (const status of ['ON_MODERATION', 'BLOCKED', 'PENDING_CHECK']) {
+    const response = moderationResponse(status, 'a\"><script>', true)!;
     assert.equal(response.status, status === 'BLOCKED' ? 451 : 200); assert.equal(response.headers.get('Location'), null);
     assert.match(response.headers.get('X-Robots-Tag')!, /noindex/); assert.doesNotMatch(await response.text(), /<script>/);
   }
@@ -91,4 +90,19 @@ test('new legal edition changes only terms 4 and privacy 5, preserving old snaps
 test('multi-link aggregation keeps a provider threat and BLOCK over later clean links', () => {
   const result = combineChecks([{ verdict: 'malicious', reasons: ['yandex:threat'], sources: { yandex: 'malicious', blocklist: 'BLOCK' } }, { verdict: 'clean', reasons: [], sources: { yandex: 'clean', blocklist: 'REVIEW' } }]);
   assert.equal(result.verdict, 'malicious'); assert.equal(result.sources.yandex, 'malicious'); assert.equal(result.sources.blocklist, 'BLOCK');
+});
+
+test('singleton Yandex matches are threats even with a different canonical URL or no URL', async () => {
+  const saved = { yandex: env.YANDEX_SAFE_BROWSING_API_KEY, google: env.GOOGLE_WEB_RISK_ENABLED };
+  env.YANDEX_SAFE_BROWSING_API_KEY = randomUUID(); env.GOOGLE_WEB_RISK_ENABLED = false;
+  try {
+    for (const match of [{ threat: { url: 'http://canonical.example/other-path' } }, { threatType: 'MALWARE' }]) {
+      const results = await checkUrlBatch(['https://submitted.example/path'], { rules: [], ignoreCache: true, skipQuota: true, fetcher: async () => Response.json({ matches: [match] }) });
+      assert.equal(results.get('https://submitted.example/path')?.verdict, 'malicious');
+      assert.equal(results.get('https://submitted.example/path')?.sources.yandex, 'malicious');
+    }
+    const multi = await checkUrlBatch(['https://first.example/', 'https://second.example/'], { rules: [], ignoreCache: true, skipQuota: true, fetcher: async () => Response.json({ matches: [{ threat: { url: 'https://first.example/' } }] }) });
+    assert.equal(multi.get('https://first.example/')?.verdict, 'malicious');
+    assert.equal(multi.get('https://second.example/')?.verdict, 'clean');
+  } finally { env.YANDEX_SAFE_BROWSING_API_KEY = saved.yandex; env.GOOGLE_WEB_RISK_ENABLED = saved.google; }
 });

@@ -28,7 +28,7 @@ export async function GET(_request: Request, context: RouteContext) {
       },
       select: {
         contentType: true,
-        moderationStatus: true,
+        moderationStatus: true, holdUntilCheck: true,
         id: true,
         name: true,
         payload: true,
@@ -40,7 +40,7 @@ export async function GET(_request: Request, context: RouteContext) {
       },
     });
 
-    const restricted = moderationResponse(qr?.moderationStatus, code);
+    const restricted = moderationResponse(qr?.moderationStatus, code, qr?.holdUntilCheck);
     if (restricted) return restricted;
     if (qr && qr.contentType !== "VCARD") return NextResponse.redirect(new URL(qrPublicUnavailablePath("missing"), env.APP_URL));
 

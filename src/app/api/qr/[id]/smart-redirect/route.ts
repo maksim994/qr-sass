@@ -76,7 +76,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       status: 200,
       details: { id },
     });
-    return apiSuccess({ updated: true, moderationStatus: moderatedQr.moderationStatus }, 200, requestId);
+    return apiSuccess({ updated: true, moderationStatus: moderatedQr.moderationStatus, holdUntilCheck: moderatedQr.holdUntilCheck }, 200, requestId);
   } catch (error) {
     const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof ConfigError) {

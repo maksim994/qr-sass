@@ -44,7 +44,7 @@ export default async function HostedPage({ params, searchParams }: Props) {
 
   if (!qr) redirect(qrUnavailablePath("missing"));
 
-  if (moderationRestricted(qr.moderationStatus)) return <ModerationNotice status={qr.moderationStatus} code={code} />;
+  if (moderationRestricted(qr.moderationStatus, qr.holdUntilCheck)) return <ModerationNotice status={qr.moderationStatus} code={code} />;
 
   const payload = (qr.payload as Record<string, unknown>) ?? {};
   const cookieStore = await cookies();

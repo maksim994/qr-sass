@@ -10,7 +10,7 @@ const sql = text => execFileSync('docker', psql, { input: text, stdio: ['pipe', 
 try {
   const root = new URL('../prisma/migrations/', import.meta.url);
   for (const migration of readdirSync(root).sort()) {
-    if (!/^\d/.test(migration) || migration.includes('abuse_protection')) continue;
+    if (!/^\d/.test(migration) || migration >= '20261025190000_abuse_protection') continue;
     sql(readFileSync(new URL(`${migration}/migration.sql`, root)));
   }
   sql(`INSERT INTO "User" (id,email,"passwordHash","updatedAt") VALUES ('fixture-user','migration@example.test','unusable',now());
@@ -23,5 +23,17 @@ try {
   sql(migration); sql(migration);
   assert.equal(sql(query), before);
   assert.match(sql('SELECT "moderationStatus"::text, "abuseLegacy" FROM "QrCode";'), /OK\s*\|\s*t/);
+  const holdMigration = readFileSync(new URL('20261026090000_abuse_pending_hold/migration.sql', root));
+  sql(`UPDATE "QrCode" SET "moderationStatus" = 'ON_MODERATION', "lastCheckVerdict" = 'unknown';`);
+  sql(holdMigration); sql(holdMigration);
+  assert.match(sql('SELECT "moderationStatus"::text, "holdUntilCheck" FROM "QrCode";'), /PENDING_CHECK\s*\|\s*t/);
+  sql(`UPDATE "QrCode" SET "moderationStatus" = 'ON_MODERATION', "holdUntilCheck" = false, "moderationReason" = 'reports_threshold';`);
+  sql(holdMigration);
+  assert.match(sql('SELECT "moderationStatus"::text, "holdUntilCheck" FROM "QrCode";'), /ON_MODERATION\s*\|\s*f/);
+  sql(`UPDATE "QrCode" SET "moderationReason" = NULL;
+    INSERT INTO "QrAuditEvent" (id,"qrCodeId","workspaceId","actorType",action) VALUES ('manual-fixture','fixture-qr','fixture-ws','admin','moderation_block');`);
+  sql(holdMigration);
+  assert.match(sql('SELECT "moderationStatus"::text, "holdUntilCheck" FROM "QrCode";'), /ON_MODERATION\s*\|\s*f/);
+  console.log('PASS unknown-hold migration recovers automatic holds and preserves report/manual moderation');
   console.log('PASS additive migration preserves printed-code contract, existing OK/legacy defaults, repeated application');
 } finally { execFileSync('docker', ['exec', container, 'dropdb', '-U', 'postgres', database]); }

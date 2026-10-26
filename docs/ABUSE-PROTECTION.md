@@ -4,6 +4,10 @@
 
 ## Принятые решения
 
+- Для нового неоплаченного аккаунта `unknown` означает `PENDING_CHECK + holdUntilCheck=true`: переход на паузе, воркер перепроверяет каждые 10 минут и после `clean` сам снимает паузу. `ON_MODERATION` используется для угроз/подозрений и жалоб, автоматически не снимается.
+- Cookie-согласие имеет отдельную `COOKIE_CONSENT_VERSION=2026-10-21.3`, независимо от версии оферты; сохранённые выборы и opt-in атрибуция остаются валидными.
+- Порог жалоб для `abuseLegacy=true` и workspace с действующим тарифом Про/Бизнес (включая friends) только выставляет `moderationAttention` и уведомляет админа, сохраняя переход. Фоновая чистая проверка не стирает такой флаг. Для новых бесплатных кодов сохраняется `ON_MODERATION`.
+- Яндекс для запроса из одного URL считает любое `matches` угрозой, включая отличающийся канонический URL; для пакета сохраняется сопоставление по URL.
 - Яндекс Safe Browsing v4 и свои правила включены по умолчанию. Google реализован через **Web Risk Lookup**, отдельный `GOOGLE_WEB_RISK_ENABLED=false`; старый Google Safe Browsing API не вызывается.
 - Web Risk проверяет один URL на запрос. Пакеты по 500 применяются к Яндексу; квоты на HTTP-запросы каждого провайдера учитываются атомарно в PostgreSQL. Бесплатные лимиты и доступность API нужно проверить в кабинете провайдера; код не предполагает бесплатность коммерческого использования.
 - Срок открытого IP/UA — 365 дней; `ABUSE_AUDIT_IP_RETENTION_DAYS`. Действие, адреса и идентификаторы аккаунта сохраняются. В `QrAuditEvent` и `AbuseReport` намеренно нет внешних ключей с cascade. Текущего endpoint удаления аккаунта `/api/gdpr` в этой main нет (есть только `/api/gdpr/consent`); при будущем удалении аккаунта/рабочего пространства журнал не исчезнет. Проверено удалением fixture workspace и user. Доступ к IP — только server-rendered карточка QR после `requireAdmin()`.
@@ -16,10 +20,10 @@
 
 ## Где применяется единая модерация
 
-Вызовы `createModeratedQr` и `updateModeratedQr` вызывают `applyModeration` в той же транзакции, где меняется QR и пишется `QrAuditEvent`.
+Создание использует `prepareQrCreation`: внешняя проверка завершается до `createQrWithinQuota` и блокировки workspace. `updateModeratedQr` и откат админа также готовят результат до транзакции. `applyModeration` внутри транзакции применяет только готовый результат; сетевых вызовов в ней нет. После блокировки строки сверяется снимок QR, для API v1 повторно проверяются workspace и `isArchived=false`. Конфликт возвращает 409, архивный код — 404.
 
 ```
-rg -n 'createModeratedQr|updateModeratedQr|applyModeration' src/app/api/qr src/lib/qr-api-handlers.ts src/lib/abuse
+rg -n 'prepareQrCreation|createModeratedQr|updateModeratedQr|applyModeration' src/app/api/qr src/lib/qr-api-handlers.ts src/lib/abuse
 ```
 
 | Запрос | Действие журнала |

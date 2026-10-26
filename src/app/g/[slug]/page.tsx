@@ -29,11 +29,11 @@ export default async function GdprGatePage({ params, searchParams }: Props) {
   const db = getDb();
   const qr = await db.qrCode.findFirst({
     where: { shortCode: slug, kind: "DYNAMIC" },
-    select: { moderationStatus: true, id: true, currentTargetUrl: true, payload: true, isArchived: true },
+    select: { moderationStatus: true, holdUntilCheck: true, id: true, currentTargetUrl: true, payload: true, isArchived: true },
   });
 
   if (!qr) redirect(qrUnavailablePath("missing"));
-  if (moderationRestricted(qr.moderationStatus)) return <ModerationNotice status={qr.moderationStatus} code={slug} />;
+  if (moderationRestricted(qr.moderationStatus, qr.holdUntilCheck)) return <ModerationNotice status={qr.moderationStatus} code={slug} />;
   if (qr.isArchived) redirect(qrUnavailablePath("archived"));
 
   const payload = (qr.payload as Record<string, unknown>) ?? {};

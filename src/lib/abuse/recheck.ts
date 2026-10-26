@@ -1,15 +1,20 @@
 import { randomUUID } from 'node:crypto';
-import type { QrCode } from '@prisma/client';
+import type { QrCode, Prisma } from '@prisma/client';
 import { getDb } from '@/lib/db';
 import { getRedis } from '@/lib/redis';
 import { env } from '@/lib/env';
 import { auditQr, qrUrls } from '@/lib/abuse/moderation';
 import { checkUrlBatch, checkForQr, type CheckResult } from '@/lib/abuse/url-check';
 import { notifyAbuse } from '@/lib/abuse/reports';
-export function recheckDecision(qr: Pick<QrCode, 'abuseLegacy'>, result: CheckResult) {
+export function recheckDecision(qr: Pick<QrCode, 'abuseLegacy' | 'holdUntilCheck'>, result: CheckResult) {
   const threat = result.sources.google === 'malicious' || result.sources.yandex === 'malicious';
   const localBlock = result.sources.blocklist === 'BLOCK';
-  return { review: threat || !qr.abuseLegacy && localBlock, attention: !threat && (result.verdict === 'suspicious' || result.verdict === 'malicious') };
+  return { review: threat || !qr.abuseLegacy && localBlock || qr.holdUntilCheck && ['suspicious', 'malicious'].includes(result.verdict), attention: !threat && (result.verdict === 'suspicious' || result.verdict === 'malicious') };
+}
+export function recheckWhere(full: boolean, now: Date): Prisma.QrCodeWhereInput {
+  const dayStart = new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(now)}T00:00:00+03:00`);
+  const pending: Prisma.QrCodeWhereInput = { moderationStatus: 'PENDING_CHECK', OR: [{ lastCheckedAt: null }, { lastCheckedAt: { lte: new Date(+now - 600000) } }] };
+  return { isArchived: false, OR: [pending, ...(full ? [{ moderationStatus: 'OK' as const, OR: [{ lastCheckedAt: null }, { lastCheckedAt: { lt: dayStart } }] }] : [])] };
 }
 /** Provider quota exhaustion leaves lastCheckedAt unchanged, so the next run resumes. */
 export async function recheckCodes(qrs: QrCode[], batch: Map<string, CheckResult>) {
@@ -24,12 +29,16 @@ export async function recheckCodes(qrs: QrCode[], batch: Map<string, CheckResult
       const qr = await tx.qrCode.findUnique({ where: { id: snapshot.id } });
       // Never overwrite a concurrent edit or a manual moderation decision.
       if (!qr || +qr.updatedAt !== +snapshot.updatedAt || !['OK', 'PENDING_CHECK'].includes(qr.moderationStatus)) return;
+      const keepReportAttention = qr.moderationAttention && qr.moderationReason === 'reports_threshold';
+      const release = qr.holdUntilCheck && result.verdict === 'clean' && !result.deferred;
       const updated = await tx.qrCode.update({ where: { id: qr.id }, data: {
         lastCheckedAt: result.deferred ? undefined : new Date(), lastCheckVerdict: result.verdict,
-        moderationAttention: decision.attention, moderationReason: decision.attention || decision.review ? result.reasons.join('; ').slice(0, 2000) : undefined,
+        holdUntilCheck: decision.review || release ? false : qr.holdUntilCheck,
+        moderationAttention: decision.attention || keepReportAttention, moderationReason: keepReportAttention && !decision.review ? qr.moderationReason : decision.attention || decision.review ? result.reasons.join('; ').slice(0, 2000) : undefined,
         moderationStatus: decision.review ? 'ON_MODERATION' : result.verdict === 'unknown' || result.deferred ? qr.moderationStatus : 'OK',
         moderationAt: decision.review || decision.attention ? new Date() : undefined,
       } });
+      if (release) await auditQr(tx, updated, { actorType: 'system' }, 'recheck_release', qr);
       if (decision.review || decision.attention && !qr.moderationAttention) {
         await auditQr(tx, updated, { actorType: 'system' }, 'recheck_flag', qr);
         if (decision.review) flagged++; else attention++;
@@ -48,11 +57,10 @@ export async function runAbuseRecheck(full = false, now = new Date()) {
   const renew = setInterval(() => { void redis.eval("if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('expire',KEYS[1],120) else return 0 end", 1, lock, token).then(v => { if (v !== 1) lockLost = true; }).catch(() => { lockLost = true; }); }, 30000);
   try {
     const db = getDb(); let cursor: string | undefined, flagged = 0, attention = 0, deferred = false;
-    const dayStart = new Date(`${new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Moscow' }).format(now)}T00:00:00+03:00`);
     const seen = new Map<string, CheckResult>();
     for (;;) {
       if (lockLost) throw new Error('Abuse worker lost lock');
-      const qrs = await db.qrCode.findMany({ where: { isArchived: false, moderationStatus: { in: full ? ['OK', 'PENDING_CHECK'] : ['PENDING_CHECK'] }, ...(full ? { OR: [{ lastCheckedAt: null }, { lastCheckedAt: { lt: dayStart } }] } : { OR: [{ lastCheckedAt: null }, { lastCheckedAt: { lte: new Date(+now - 600000) } }] }) }, orderBy: { id: 'asc' }, take: 200, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) });
+      const qrs = await db.qrCode.findMany({ where: recheckWhere(full, now), orderBy: { id: 'asc' }, take: 200, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) });
       if (!qrs.length) break;
       cursor = qrs.at(-1)!.id;
       const urls = [...new Set(qrs.flatMap(qrUrls))].filter(url => !seen.has(url));

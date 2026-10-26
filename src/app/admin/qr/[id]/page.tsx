@@ -125,7 +125,7 @@ export default async function AdminQrDetailPage({ params }: Props) {
       />
 
       <AdminCard>
-        <h2>Модерация</h2><p>{qr.moderationStatus} · {qr.moderationReason || "Причина не указана"}</p>
+        <h2>Модерация</h2>{qr.holdUntilCheck && <p>Переход на паузе до автоматической проверки.</p>}<p>{qr.moderationStatus} · {qr.moderationReason || "Причина не указана"}</p>
         <p>Последняя проверка: {qr.lastCheckedAt ? formatDateTime(qr.lastCheckedAt) : "—"} · {qr.lastCheckVerdict || "—"}</p>
         {qr.moderationAttention && <p>Требует внимания. Переход сохранён.</p>}
         <ModerationControls id={id} />

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ANALYTICS_POLICY_VERSION } from "@/lib/analytics-policy";
-import { LEGAL_VERSION } from "@/lib/legal-documents";
+import { COOKIE_CONSENT_VERSION } from "@/lib/cookie-consent-version";
 
 const ids = {
   clientId: z.string().regex(/^\d{1,30}$/),
@@ -8,7 +8,7 @@ const ids = {
 };
 export const metrikaAttributionSchema = z.union([
   z.object({ ...ids, policyVersion: z.literal(ANALYTICS_POLICY_VERSION), collectionMode: z.literal("opt-out") }),
-  z.object({ ...ids, consentVersion: z.literal(LEGAL_VERSION) }).transform(value => ({ clientId: value.clientId, counterId: value.counterId, policyVersion: `opt-in:${value.consentVersion}`, collectionMode: "opt-in" as const })),
+  z.object({ ...ids, consentVersion: z.literal(COOKIE_CONSENT_VERSION) }).transform(value => ({ clientId: value.clientId, counterId: value.counterId, policyVersion: `opt-in:${value.consentVersion}`, collectionMode: "opt-in" as const })),
 ]);
 export type MetrikaAttribution = z.infer<typeof metrikaAttributionSchema>;
 

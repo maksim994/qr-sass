@@ -1,3 +1,4 @@
+import { COOKIE_CONSENT_VERSION } from "./cookie-consent-version.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { registerSchema, registrationLegalSchema } from "./validation.ts";
@@ -88,7 +89,7 @@ test("acceptance evidence includes the complete versioned text and original acce
 
 test("optional analytics permission expires and rejects old, malformed and future consent", () => {
   const now = Date.parse("2026-09-20T10:00:00Z");
-  const value = { choice: "accepted", version: LEGAL_VERSION, at: now - 1000 };
+  const value = { choice: "accepted", version: COOKIE_CONSENT_VERSION, at: now - 1000 };
   assert.equal(parseCookieChoice(JSON.stringify(value), now), "accepted");
   assert.equal(parseCookieChoice(JSON.stringify({ ...value, choice: "declined" }), now), "declined");
   for (const raw of [null, "accepted", "{", JSON.stringify({ ...value, version: "old" }), JSON.stringify({ ...value, at: now + 1 }), JSON.stringify({ ...value, at: now - 180 * 86400000 }), JSON.stringify({ ...value, choice: true })]) {

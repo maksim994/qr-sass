@@ -1,3 +1,4 @@
+import { env } from '../src/lib/env.ts';
 import assert from 'node:assert/strict';
 import { randomUUID, randomInt } from 'node:crypto';
 import { SignJWT } from 'jose';
@@ -5,12 +6,13 @@ import bcrypt from 'bcryptjs';
 import { getDb } from '../src/lib/db.ts';
 import { defaultQrStyle } from '../src/lib/qr-style-config.ts';
 import { generateQrApiKey } from '../src/lib/qr-api-input.ts';
+import { checkUrlBatch } from '../src/lib/abuse/url-check.ts';
 import { recheckCodes } from '../src/lib/abuse/recheck.ts';
 import { purgeExpiredAbuseIp } from '../src/lib/analytics-retention.ts';
 const database = new URL(process.env.DATABASE_URL ?? 'http://invalid');
 if (!['127.0.0.1', 'localhost'].includes(database.hostname) || database.port !== '55439' || database.pathname !== '/qr_abuse_test') throw new Error('Requires isolated qr_abuse_test database on localhost:55439');
 const db = getDb(), run = randomUUID(), base = 'http://localhost:3119';
-let checks = 0;
+let checks = 0; const extraWorkspaceIds: string[] = [];
 const passed = (text: string) => { checks++; console.log(`PASS ${text}`); };
 const user = await db.user.create({ data: { email: `abuse-${run}@example.test`, passwordHash: 'unusable-fixture-password', emailVerifiedAt: new Date(), isAdmin: true, createdAt: new Date('2025-01-01') } });
 const ws = await db.workspace.create({ data: { name: 'Abuse fixture', slug: `abuse-${run}`, plan: 'PRO', accessMode: 'friends', memberships: { create: { userId: user.id, role: 'OWNER' } } } });
@@ -20,8 +22,8 @@ const call = (path: string, body: unknown, method = 'POST', ip?: string) => fetc
 const reportSubnet = randomInt(1, 254);
 const reportIp = (n: number) => `198.18.${reportSubnet}.${n}`;
 const bad = 'http://malware.testing.google.test/testing/malware/';
-async function create(payload: Record<string, unknown> = { url: 'https://example.com/clean' }, type = 'URL') {
-  const response = await call('/api/qr', { workspaceId: ws.id, kind: 'DYNAMIC', contentType: type, name: `fixture-${type}`, payload, style: { ...defaultQrStyle, quietZoneModules: 4 } });
+async function create(payload: Record<string, unknown> = { url: 'https://example.com/clean' }, type = 'URL', workspaceId = ws.id) {
+  const response = await call('/api/qr', { workspaceId, kind: 'DYNAMIC', contentType: type, name: `fixture-${type}`, payload, style: { ...defaultQrStyle, quietZoneModules: 4 } });
   assert.equal(response.status, 200, await response.clone().text());
   const data = (await response.json()).data;
   return db.qrCode.findUniqueOrThrow({ where: { id: data.qrId } });
@@ -46,6 +48,12 @@ try {
   const apiQr = (await createdApi.json()).data; const changedApi = await fetch(base + `/api/v1/qr/${apiQr.id}`, { method: 'PATCH', headers: apiHeaders, body: JSON.stringify({ targetUrl: bad }) }); assert.equal(changedApi.status, 200); assert.equal((await changedApi.json()).data.moderationStatus, 'ON_MODERATION');
   assert.ok(await db.qrAuditEvent.findFirst({ where: { qrCodeId: apiQr.id, actorType: 'api_key', apiKeyId: key.id, action: 'update_url' } }));
   passed('Bearer v1 create/update use shared moderation and identify API key in audit');
+  const archivedApi = await create({ url: 'https://example.com/archived-api' });
+  await db.qrCode.update({ where: { id: archivedApi.id }, data: { isArchived: true } });
+  const archivedResponse = await fetch(base + `/api/v1/qr/${archivedApi.id}`, { method: 'PATCH', headers: apiHeaders, body: JSON.stringify({ targetUrl: 'https://example.com/forbidden-edit' }) });
+  assert.equal(archivedResponse.status, 404);
+  assert.equal((await db.qrCode.findUniqueOrThrow({ where: { id: archivedApi.id } })).currentTargetUrl, archivedApi.currentTargetUrl);
+  passed('PATCH v1 rejects archived QR without changing its target');
   const rollback = await create(); await call(`/api/qr/${rollback.id}/target`, { targetUrl: bad }, 'PATCH');
   const rolled = await call(`/api/admin/qr/${rollback.id}/moderation`, { action: 'rollback' }); assert.equal(rolled.status, 200, await rolled.clone().text());
   assert.equal((await db.qrCode.findUniqueOrThrow({ where: { id: rollback.id } })).currentTargetUrl, rollback.currentTargetUrl);
@@ -55,8 +63,19 @@ try {
   assert.equal(await db.emailOutbox.count({ where: { workspaceId: ws.id, kind: 'abuse_blocked' } }), 1);
   passed('admin rollback restores safe target; block gives 451 everywhere, rejects owner edits, queues one email');
   const complained = await create();
-  for (let n = 1; n <= 3; n++) assert.equal((await call('/api/abuse/report', { code: complained.shortCode, reason: 'phishing' }, 'POST', reportIp(n))).status, 200);
-  assert.equal((await db.qrCode.findUniqueOrThrow({ where: { id: complained.id } })).moderationStatus, 'ON_MODERATION');
+  const freeWs = await db.workspace.create({ data: { name: 'Free reports fixture', slug: `free-reports-${run}`, memberships: { create: { userId: user.id, role: 'OWNER' } } } });
+  extraWorkspaceIds.push(freeWs.id);
+  const freeReportQr = await create({ url: 'https://example.com/free-reports' }, 'URL', freeWs.id);
+  const legacyReportQr = await create({ url: 'https://example.com/legacy-reports' }, 'URL', freeWs.id);
+  await db.qrCode.update({ where: { id: legacyReportQr.id }, data: { abuseLegacy: true } });
+  for (const qr of [complained, freeReportQr, legacyReportQr]) {
+    for (let n = 1; n <= 3; n++) assert.equal((await call('/api/abuse/report', { code: qr.shortCode, reason: 'phishing' }, 'POST', reportIp(n))).status, 200);
+    const after = await db.qrCode.findUniqueOrThrow({ where: { id: qr.id } });
+    assert.equal(after.moderationStatus, qr.id === freeReportQr.id ? 'ON_MODERATION' : 'OK');
+    assert.equal(after.moderationAttention, qr.id !== freeReportQr.id);
+  }
+  await recheckCodes([await db.qrCode.findUniqueOrThrow({ where: { id: complained.id } })], new Map([['https://example.com/clean', { verdict: 'clean', reasons: [], sources: { yandex: 'clean' } }]]));
+  assert.equal((await db.qrCode.findUniqueOrThrow({ where: { id: complained.id } })).moderationAttention, true);
   for (let n = 0; n < 5; n++) assert.equal((await call('/api/abuse/report', { code: clean.shortCode, reason: 'other' }, 'POST', reportIp(20))).status, 200);
   const limited = await call('/api/abuse/report', { code: clean.shortCode, reason: 'other' }, 'POST', reportIp(20)); assert.equal(limited.status, 429); assert.ok(limited.headers.get('Retry-After'));
   const hashes = await db.abuseReport.findMany({ where: { qrCodeId: complained.id } }); assert.ok(hashes.every(r => r.ipHash?.length === 64));
@@ -75,9 +94,24 @@ try {
   assert.equal((await fetch(`${base}/r/${pending.shortCode}`, { redirect: 'manual' })).status, 302);
   passed('configured provider outage fails open for an established account');
   await db.user.update({ where: { id: user.id }, data: { createdAt: new Date() } });
-  const fresh = await create({ url: 'https://outage.example/new-account' }); assert.equal(fresh.moderationStatus, 'ON_MODERATION');
+  const fresh = await create({ url: 'https://outage.example/new-account' }); assert.equal(fresh.moderationStatus, 'PENDING_CHECK'); assert.equal(fresh.holdUntilCheck, true);
+  for (const prefix of ['r', 'p', 'v', 'g']) {
+    const heldResponse = await fetch(`${base}/${prefix}/${fresh.shortCode}`, { redirect: 'manual' });
+    assert.equal(heldResponse.status, 200); assert.equal(heldResponse.headers.get('Location'), null); assert.doesNotMatch(await heldResponse.text(), /outage\.example/);
+  }
+  assert.equal(await db.scanEvent.count({ where: { qrCodeId: fresh.id } }), 0);
+  const originalKey = env.YANDEX_SAFE_BROWSING_API_KEY; env.YANDEX_SAFE_BROWSING_API_KEY = randomUUID();
+  let recoveryCalls = 0;
+  const recovered = await checkUrlBatch(['https://outage.example/new-account'], { rules: [], ignoreCache: true, skipQuota: true, fetcher: async () => { recoveryCalls++; return Response.json({}); } });
+  env.YANDEX_SAFE_BROWSING_API_KEY = originalKey; assert.equal(recoveryCalls, 1);
+  await recheckCodes([fresh], recovered);
+  const released = await db.qrCode.findUniqueOrThrow({ where: { id: fresh.id } });
+  assert.equal(released.moderationStatus, 'OK'); assert.equal(released.holdUntilCheck, false);
+  const restoredRedirect = await fetch(`${base}/r/${fresh.shortCode}`, { redirect: 'manual' });
+  assert.equal(restoredRedirect.status, 302); assert.equal(restoredRedirect.headers.get('Location'), 'https://outage.example/new-account');
+  assert.equal(await db.qrAuditEvent.count({ where: { qrCodeId: fresh.id, action: 'moderation_approve' } }), 0);
   await db.user.update({ where: { id: user.id }, data: { createdAt: new Date('2025-01-01') } });
-  passed('unknown verdict on a fresh unpaid account requires moderation');
+  passed('provider outage pauses a fresh unpaid code; worker clean releases it without admin approval');
   const list = await create({ links: [{ title: 'Safe', url: 'https://example.com/list' }, { title: 'Unsafe', url: bad }] }, 'LINK_LIST');
   assert.equal(list.moderationStatus, 'ON_MODERATION');
   assert.equal((await call(`/api/admin/qr/${list.id}/moderation`, { action: 'approve' })).status, 200);
@@ -96,11 +130,13 @@ try {
   passed('create/update/delete audit and PII-only retention cleanup');
   console.log(`Abuse HTTP fixture passed: ${checks} groups`);
 } finally {
+  await db.workspace.deleteMany({ where: { id: { in: extraWorkspaceIds } } });
   await db.workspace.delete({ where: { id: ws.id } }); await db.user.delete({ where: { id: user.id } });
   // Verify evidence outlives cascading account/workspace cleanup.
   const evidence = await db.qrAuditEvent.count({ where: { workspaceId: ws.id } }); assert.ok(evidence > 0);
   await db.abuseReport.deleteMany({ where: { shortCode: { in: (await db.qrAuditEvent.findMany({ where: { workspaceId: ws.id }, select: { shortCode: true } })).flatMap(r => r.shortCode ? [r.shortCode] : []) } } });
   await db.qrAuditEvent.deleteMany({ where: { workspaceId: ws.id } });
   await db.emailOutbox.deleteMany({ where: { workspaceId: ws.id } });
+  await db.qrAuditEvent.deleteMany({ where: { workspaceId: { in: extraWorkspaceIds } } });
   await db.$disconnect();
 }

@@ -316,6 +316,7 @@ model AbuseProviderQuota {
 }
 model QrCode {
   moderationStatus QrModerationStatus @default(OK)
+  holdUntilCheck Boolean @default(false)
   moderationReason String?
   moderationAt DateTime?
   lastCheckedAt DateTime?

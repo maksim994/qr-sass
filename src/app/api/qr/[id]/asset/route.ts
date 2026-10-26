@@ -20,7 +20,7 @@ export async function GET(request: Request, context: RouteContext) {
   const qr = await db.qrCode.findUnique({ where: { id } });
   if (!qr) return apiError(MSG.NOT_FOUND, "NOT_FOUND", 404, undefined, requestId);
 
-  const restricted = moderationResponse(qr.moderationStatus, qr.shortCode ?? "");
+  const restricted = moderationResponse(qr.moderationStatus, qr.shortCode ?? "", qr.holdUntilCheck);
   if (restricted) return restricted;
   const user = await getApiUser().catch(() => null);
   const member = user?.memberships.some((item) => item.workspaceId === qr.workspaceId);

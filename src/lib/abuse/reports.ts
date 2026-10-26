@@ -1,3 +1,4 @@
+import { getEntitlements } from '@/lib/entitlements';
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
 import { getDb } from '@/lib/db';
@@ -21,15 +22,18 @@ export async function submitAbuseReport(request: Request, input: z.infer<typeof 
   if (!limit.success) throw new AbuseError(MSG.TOO_MANY_REQUESTS, 429, limit.retryAfterMs);
   if (input.website) return; // Honeypot: indistinguishable success without database write.
   const ipHash = ip === 'unknown' ? undefined : hashClientIp(ip);
+  const qr = await getDb().qrCode.findUnique({ where: { shortCode: input.code } });
+  if (!qr) throw new AbuseError(MSG.NOT_FOUND, 404);
+  const entitlements = await getEntitlements(qr.workspaceId);
   return getDb().$transaction(async tx => {
-    const qr = await tx.qrCode.findUnique({ where: { shortCode: input.code } });
-    if (!qr) throw new AbuseError(MSG.NOT_FOUND, 404);
     await tx.$queryRaw`SELECT id FROM "QrCode" WHERE id = ${qr.id} FOR UPDATE`;
     const report = await tx.abuseReport.create({ data: { shortCode: input.code, qrCodeId: qr.id, reason: input.reason, comment: input.comment, email: input.email || null, ipHash } });
     const distinct = await tx.abuseReport.findMany({ where: { qrCodeId: qr.id, createdAt: { gte: new Date(Date.now() - 86400000) }, ipHash: { not: null }, status: { in: ['NEW', 'IN_REVIEW'] } }, distinct: ['ipHash'], select: { ipHash: true } });
     const current = await tx.qrCode.findUniqueOrThrow({ where: { id: qr.id } });
-    if (distinct.length >= env.ABUSE_REPORTS_THRESHOLD && !['BLOCKED', 'ON_MODERATION'].includes(current.moderationStatus)) {
-      const updated = await tx.qrCode.update({ where: { id: qr.id }, data: { moderationStatus: 'ON_MODERATION', moderationReason: 'reports_threshold', moderationAt: new Date() } });
+    if (distinct.length >= env.ABUSE_REPORTS_THRESHOLD && !['BLOCKED', 'ON_MODERATION'].includes(current.moderationStatus) && !(current.moderationAttention && current.moderationReason === 'reports_threshold')) {
+      const attentionOnly = current.abuseLegacy || entitlements.planId !== 'FREE';
+      const updated = await tx.qrCode.update({ where: { id: qr.id }, data: { moderationStatus: attentionOnly ? current.moderationStatus : 'ON_MODERATION', holdUntilCheck: attentionOnly ? current.holdUntilCheck : false, moderationAttention: attentionOnly, moderationReason: 'reports_threshold', moderationAt: new Date() } });
+      if (attentionOnly) await notifyAbuse(tx, `attention:${report.id}`, `Порог жалоб: ${input.code}. Требует внимания; переход сохранён.`);
       await auditQr(tx, updated, { actorType: 'system' }, 'moderation_reports', current);
     }
     await notifyAbuse(tx, report.id, `Жалоба: ${input.code}. Причина: ${reportReasons[input.reason]}`);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { LEGAL_VERSION } from "./legal-documents.ts";
+import { COOKIE_CONSENT_VERSION } from "./cookie-consent-version.ts";
 import { PRODUCT_GOALS, trackGoal } from "./product-analytics.ts";
 import { downloadQrFile } from "./download-qr-file.ts";
 
@@ -9,7 +9,7 @@ test("goals require current consent and a ready counter; payments cannot be forg
   const calls: unknown[][] = [];
   let choice = "declined";
   const fake = { location: { pathname: "/" }, __qrsYmId: "106988416", ym: (...args: unknown[]) => calls.push(args), localStorage: {
-    getItem: () => JSON.stringify({ choice, version: LEGAL_VERSION, at: Date.now() }),
+    getItem: () => JSON.stringify({ choice, version: COOKIE_CONSENT_VERSION, at: Date.now() }),
   } };
   Object.defineProperty(globalThis, "window", { value: fake, configurable: true });
   try {
