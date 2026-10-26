@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   return <LegalArticleLayout contents={legalContents(TERMS_SECTIONS)} session={await getSession()} eyebrow="Правовая информация" title="Публичная оферта и пользовательское соглашение"
     updatedLabel={`Редакция ${LEGAL_VERSION} от ${LEGAL_DATE_LABEL}`}>
-    <p><a href="/documents/oferta-qr-s-2026-10-25.docx" download className="underline underline-offset-4">Скачать публичную оферту в Word</a></p>
+    <p><a href="/documents/oferta-qr-s-2026-10-26.docx" download className="underline underline-offset-4">Скачать публичную оферту в Word</a></p>
     <LegalDocument sections={TERMS_SECTIONS} />
     <p><Link href="/privacy-policy">Политика конфиденциальности</Link> · <Link href="/personal-data-consent">Согласие на обработку данных</Link> · <Link href="/qr-lifetime">Срок жизни QR</Link></p>
   </LegalArticleLayout>;

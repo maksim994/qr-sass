@@ -67,6 +67,8 @@ rg -n 'prepareQrCreation|createModeratedQr|updateModeratedQr|applyModeration' sr
 
 ### Google Web Risk по отдельному решению
 
+**Не включать до выполнения правовых условий:** перед включением требуется уведомление Роскомнадзора (РКН) о трансграничной передаче персональных данных и публикация новой редакции политики конфиденциальности с описанием такой передачи. До этого `GOOGLE_WEB_RISK_ENABLED=false`; код интеграции сохраняется, ссылки проверяются только через Яндекс Safe Browsing и собственные правила.
+
 Официальные инструкции: https://cloud.google.com/web-risk/docs/setup и https://cloud.google.com/web-risk/docs/lookup-api
 
 1. В Google Cloud создать/выбрать проект и настроить необходимый платёжный аккаунт.

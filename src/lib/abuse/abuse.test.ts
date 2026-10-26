@@ -74,8 +74,8 @@ test('provider adapters: clean, malicious, partial/full outage, Google sends onl
   } finally { env.YANDEX_SAFE_BROWSING_API_KEY = previous.y; env.GOOGLE_WEB_RISK_API_KEY = previous.g; env.GOOGLE_WEB_RISK_ENABLED = previous.flag; }
 });
 
-test('new legal edition changes only terms 4 and privacy 5, preserving old snapshots', async () => {
-  const { legalSnapshot } = await import('../legal-documents.ts');
+test('released abuse legal edition changes only terms 4 and privacy 5, preserving old snapshots', async () => {
+  const { legalSnapshot } = await import('../legal-history/2026-10-25.1.ts');
   const { legalSnapshot: oldSnapshot } = await import('../legal-history/2026-10-21.3.ts');
   const current = legalSnapshot(), old = oldSnapshot();
   assert.notEqual(current.version, old.version); assert.notEqual(current.privacyVersion, old.privacyVersion);
