@@ -1,8 +1,11 @@
+import { moderationRestricted } from "@/lib/abuse/public";
 import { qrUnavailablePath } from "@/lib/qr-lifetime-policy";
 import { qrAccessCookieName, verifyQrAccessToken } from "@/lib/qr-access-token";
 import { verifyQrViewGrant } from "@/lib/qr-view-grant";
 
 export type QrPublicRecord = {
+  moderationStatus?: string;
+  holdUntilCheck?: boolean;
   id: string;
   shortCode?: string | null;
   isArchived: boolean;
@@ -11,13 +14,14 @@ export type QrPublicRecord = {
   passwordHash: string | null;
 };
 
-export type QrPublicFailureReason = "missing" | "archived" | "expired" | "limit" | "password";
+export type QrPublicFailureReason = "missing" | "archived" | "expired" | "limit" | "password" | "moderation" | "blocked";
 
 export type QrPublicDecision =
   | { ok: true }
   | { ok: false; reason: QrPublicFailureReason };
 
 export function qrPublicUnavailablePath(reason: QrPublicFailureReason): string {
+  if (reason === "moderation" || reason === "blocked") return `/unavailable?reason=${reason}`;
   if (reason === "archived") return qrUnavailablePath("archived");
   if (reason === "expired" || reason === "limit") return "/expired";
   return qrUnavailablePath("missing");
@@ -36,6 +40,7 @@ export async function evaluateQrPublicAccess(input: {
 }): Promise<QrPublicDecision> {
   const qr = input.qr;
   if (!qr) return { ok: false, reason: "missing" };
+  if (moderationRestricted(qr.moderationStatus, qr.holdUntilCheck)) return { ok: false, reason: qr.moderationStatus === "BLOCKED" ? "blocked" : "moderation" };
   if (qr.isArchived) return { ok: false, reason: "archived" };
   const now = input.now ?? new Date();
   if (qr.expireAt && now > qr.expireAt) return { ok: false, reason: "expired" };

@@ -1,3 +1,4 @@
+import { COOKIE_CONSENT_VERSION } from "./cookie-consent-version.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { registerSchema, registrationLegalSchema } from "./validation.ts";
@@ -7,6 +8,7 @@ import { legalSnapshot as previousLegalSnapshot } from "./legal-history/2026-10-
 import { parseCookieChoice } from "./cookie-consent.ts";
 import { legalSnapshot } from "./legal-documents.ts";
 import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.2-consent.ts";
+import { legalSnapshot as integratedEdition } from "./legal-history/2026-10-21.3.ts";
 import { legalSnapshot as analyticsEdition } from "./legal-history/2026-10-21.2-analytics.ts";
 
 test("newsletter permission is optional, defaults off and stays separate from required legal consent", () => {
@@ -22,7 +24,7 @@ test("newsletter permission is optional, defaults off and stays separate from re
 
 test("integrated legal edition combines attribution and processors without altering prior receipts", () => {
   const before = beforePdChanges();
-  const current = legalSnapshot();
+  const current = integratedEdition();
   assert.notEqual(current.version, before.version);
   assert.notEqual(current.privacyVersion, before.privacyVersion);
   assert.deepEqual(current.terms, before.terms);
@@ -47,7 +49,7 @@ test("integrated legal edition combines attribution and processors without alter
     const receipt = legalReceipt(source);
     assert.equal(receipt.termsAccepted, true);
     assert.equal(receipt.dataConsent, true);
-    assert.deepEqual(receipt.documents, current);
+    assert.deepEqual(receipt.documents, legalSnapshot());
   }
 });
 
@@ -87,7 +89,7 @@ test("acceptance evidence includes the complete versioned text and original acce
 
 test("optional analytics permission expires and rejects old, malformed and future consent", () => {
   const now = Date.parse("2026-09-20T10:00:00Z");
-  const value = { choice: "accepted", version: LEGAL_VERSION, at: now - 1000 };
+  const value = { choice: "accepted", version: COOKIE_CONSENT_VERSION, at: now - 1000 };
   assert.equal(parseCookieChoice(JSON.stringify(value), now), "accepted");
   assert.equal(parseCookieChoice(JSON.stringify({ ...value, choice: "declined" }), now), "declined");
   for (const raw of [null, "accepted", "{", JSON.stringify({ ...value, version: "old" }), JSON.stringify({ ...value, at: now + 1 }), JSON.stringify({ ...value, at: now - 180 * 86400000 }), JSON.stringify({ ...value, choice: true })]) {

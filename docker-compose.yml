@@ -60,6 +60,25 @@ services:
       - METRIKA_OAUTH_TOKEN=${METRIKA_OAUTH_TOKEN:-}
       - TRUST_PROXY=${TRUST_PROXY:-1}
       - ANALYTICS_RETENTION_DAYS=${ANALYTICS_RETENTION_DAYS:-90}
+      - YANDEX_SAFE_BROWSING_API_KEY=${YANDEX_SAFE_BROWSING_API_KEY:-}
+      - GOOGLE_WEB_RISK_API_KEY=${GOOGLE_WEB_RISK_API_KEY:-}
+      - GOOGLE_WEB_RISK_ENABLED=${GOOGLE_WEB_RISK_ENABLED:-false}
+      - ABUSE_CHECK_ENABLED=${ABUSE_CHECK_ENABLED:-true}
+      - ABUSE_CHECK_TIMEOUT_MS=${ABUSE_CHECK_TIMEOUT_MS:-3000}
+      - ABUSE_REPORTS_THRESHOLD=${ABUSE_REPORTS_THRESHOLD:-3}
+      - ABUSE_RECHECK_HOUR=${ABUSE_RECHECK_HOUR:-4}
+      - ABUSE_RECHECK_BATCH_DELAY_MS=${ABUSE_RECHECK_BATCH_DELAY_MS:-1000}
+      - ABUSE_SB_DAILY_QUOTA=${ABUSE_SB_DAILY_QUOTA:-9000}
+      - ABUSE_AUDIT_IP_RETENTION_DAYS=${ABUSE_AUDIT_IP_RETENTION_DAYS:-365}
+      - ABUSE_REQUIRE_VERIFIED_EMAIL=${ABUSE_REQUIRE_VERIFIED_EMAIL:-false}
+      - ABUSE_NEW_ACCOUNT_HOURS=${ABUSE_NEW_ACCOUNT_HOURS:-24}
+      - QR_CREATE_PER_HOUR=${QR_CREATE_PER_HOUR:-30}
+      - QR_CREATE_PER_IP_PER_HOUR=${QR_CREATE_PER_IP_PER_HOUR:-60}
+      - QR_URL_CHANGE_PER_HOUR=${QR_URL_CHANGE_PER_HOUR:-10}
+      - QR_URL_CHANGE_USER_PER_HOUR=${QR_URL_CHANGE_USER_PER_HOUR:-60}
+      - ABUSE_REPORTS_PER_IP_PER_HOUR=${ABUSE_REPORTS_PER_IP_PER_HOUR:-5}
+      - REGISTER_PER_IP_PER_DAY=${REGISTER_PER_IP_PER_DAY:-10}
+
     depends_on:
       init-db:
         condition: service_completed_successfully
@@ -155,6 +174,8 @@ services:
         "scripts/purge-analytics-loop.ts",
       ]
     environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - ABUSE_AUDIT_IP_RETENTION_DAYS=${ABUSE_AUDIT_IP_RETENTION_DAYS:-365}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
       - ANALYTICS_RETENTION_DAYS=${ANALYTICS_RETENTION_DAYS:-90}
     depends_on:
@@ -162,6 +183,45 @@ services:
         condition: service_healthy
       init-db:
         condition: service_completed_successfully
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  abuse-recheck:
+    build:
+      context: .
+      target: runner
+    entrypoint: ["node", "--experimental-strip-types", "--import", "./scripts/register-src-alias.mjs", "scripts/abuse-recheck-worker.ts"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - APP_URL=${APP_URL}
+      - YANDEX_SAFE_BROWSING_API_KEY=${YANDEX_SAFE_BROWSING_API_KEY:-}
+      - GOOGLE_WEB_RISK_API_KEY=${GOOGLE_WEB_RISK_API_KEY:-}
+      - GOOGLE_WEB_RISK_ENABLED=${GOOGLE_WEB_RISK_ENABLED:-false}
+      - ABUSE_CHECK_ENABLED=${ABUSE_CHECK_ENABLED:-true}
+      - ABUSE_CHECK_TIMEOUT_MS=${ABUSE_CHECK_TIMEOUT_MS:-3000}
+      - ABUSE_REPORTS_THRESHOLD=${ABUSE_REPORTS_THRESHOLD:-3}
+      - ABUSE_RECHECK_HOUR=${ABUSE_RECHECK_HOUR:-4}
+      - ABUSE_RECHECK_BATCH_DELAY_MS=${ABUSE_RECHECK_BATCH_DELAY_MS:-1000}
+      - ABUSE_SB_DAILY_QUOTA=${ABUSE_SB_DAILY_QUOTA:-9000}
+      - ABUSE_AUDIT_IP_RETENTION_DAYS=${ABUSE_AUDIT_IP_RETENTION_DAYS:-365}
+      - ABUSE_REQUIRE_VERIFIED_EMAIL=${ABUSE_REQUIRE_VERIFIED_EMAIL:-false}
+      - ABUSE_NEW_ACCOUNT_HOURS=${ABUSE_NEW_ACCOUNT_HOURS:-24}
+      - QR_CREATE_PER_HOUR=${QR_CREATE_PER_HOUR:-30}
+      - QR_CREATE_PER_IP_PER_HOUR=${QR_CREATE_PER_IP_PER_HOUR:-60}
+      - QR_URL_CHANGE_PER_HOUR=${QR_URL_CHANGE_PER_HOUR:-10}
+      - QR_URL_CHANGE_USER_PER_HOUR=${QR_URL_CHANGE_USER_PER_HOUR:-60}
+      - ABUSE_REPORTS_PER_IP_PER_HOUR=${ABUSE_REPORTS_PER_IP_PER_HOUR:-5}
+      - REGISTER_PER_IP_PER_DAY=${REGISTER_PER_IP_PER_DAY:-10}
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     healthcheck:
       disable: true
     restart: unless-stopped

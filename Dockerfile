@@ -43,6 +43,22 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 # Node workers import env.ts directly; Next bundles zod into web chunks only.
 COPY --from=builder /app/node_modules/zod ./node_modules/zod
 COPY --from=builder /app/node_modules/nodemailer ./node_modules/nodemailer
+# Raw TypeScript workers execute these imports outside Next's bundled server chunks.
+COPY --from=builder /app/node_modules/rate-limiter-flexible ./node_modules/rate-limiter-flexible
+COPY --from=builder /app/node_modules/ioredis ./node_modules/ioredis
+COPY --from=builder /app/node_modules/@ioredis/commands ./node_modules/@ioredis/commands
+COPY --from=builder /app/node_modules/cluster-key-slot ./node_modules/cluster-key-slot
+COPY --from=builder /app/node_modules/debug ./node_modules/debug
+COPY --from=builder /app/node_modules/denque ./node_modules/denque
+COPY --from=builder /app/node_modules/redis-errors ./node_modules/redis-errors
+COPY --from=builder /app/node_modules/redis-parser ./node_modules/redis-parser
+COPY --from=builder /app/node_modules/standard-as-callback ./node_modules/standard-as-callback
+COPY --from=builder /app/node_modules/ms ./node_modules/ms
+
+# Build-time smoke test of raw worker imports; disabled mode must not contact services.
+RUN ABUSE_CHECK_ENABLED=false JWT_SECRET="build-time-jwt-secret-do-not-use-in-runtime" \
+    DATABASE_URL="postgresql://build:build@localhost:5432/build" \
+    node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/abuse-recheck-worker.ts --once
 
 USER nextjs
 EXPOSE 3000

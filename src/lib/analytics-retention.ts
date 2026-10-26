@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { getDb } from "@/lib/db";
 
 const DEFAULT_DAYS = 90;
@@ -12,6 +13,7 @@ export async function purgeExpiredAnalyticsFields(now = new Date()) {
   const days = analyticsRetentionDays();
   const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
   const db = getDb();
+  await purgeExpiredAbuseIp(now);
   const result = await db.scanEvent.updateMany({
     where: {
       scannedAt: { lt: cutoff },
@@ -32,4 +34,9 @@ export async function purgeExpiredAnalyticsFields(now = new Date()) {
     },
   });
   return { cutoff, days, updated: result.count, purgedAt: now };
+}
+
+export async function purgeExpiredAbuseIp(now = new Date(), db = getDb()) {
+  const cutoff = new Date(+now - env.ABUSE_AUDIT_IP_RETENTION_DAYS * 86400000);
+  return db.qrAuditEvent.updateMany({ where: { createdAt: { lt: cutoff }, OR: [{ ip: { not: null } }, { userAgent: { not: null } }] }, data: { ip: null, userAgent: null } });
 }

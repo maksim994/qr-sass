@@ -1,3 +1,4 @@
+import { COOKIE_CONSENT_VERSION } from "./cookie-consent-version.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { JSDOM } from "jsdom";
@@ -31,7 +32,7 @@ test("refusal survives old policy and expiry; retired storage is ignored", () =>
     assert.equal(window.localStorage.getItem("cookie_consent"), null);
     saveCookieChoice("declined");
     assert.match(document.cookie, /qrs_analytics_disabled=1/);
-    window.localStorage.setItem("qrs_cookie_choice", JSON.stringify({choice:"accepted",version:LEGAL_VERSION,at:Date.now()}));
+    window.localStorage.setItem("qrs_cookie_choice", JSON.stringify({choice:"accepted",version:COOKIE_CONSENT_VERSION,at:Date.now()}));
     assert.equal(readCookieChoice(), "declined", "server-visible refusal wins over stale local state");
     saveCookieChoice("accepted");
     assert.doesNotMatch(document.cookie, /qrs_analytics_disabled=1/);

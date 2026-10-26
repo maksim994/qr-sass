@@ -4744,7 +4744,9 @@
           "targetUrl",
           "source",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "moderationStatus",
+          "holdUntilCheck"
         ],
         "properties": {
           "id": {
@@ -4790,6 +4792,20 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "moderationStatus": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "PENDING_CHECK",
+              "ON_MODERATION",
+              "BLOCKED"
+            ],
+            "description": "QR moderation state. ON_MODERATION and BLOCKED prevent navigation; PENDING_CHECK is held only when holdUntilCheck=true."
+          },
+          "holdUntilCheck": {
+            "type": "boolean",
+            "description": "PENDING_CHECK with holdUntilCheck=true pauses navigation until a clean automatic recheck. Existing accounts may have PENDING_CHECK with holdUntilCheck=false."
           }
         }
       },

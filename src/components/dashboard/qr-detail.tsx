@@ -43,6 +43,7 @@ export function QrDetail({canEditDestination=true,dynamicAvailable=true,now,qr,s
   const payload=(qr.payload as Record<string,unknown>|null)??{};
   const hasChart=dailyCounts.some(row=>row.count>0);
   return <div className={styles.detail}>
+    {(qr.moderationStatus === "ON_MODERATION" || qr.moderationStatus === "BLOCKED" || qr.holdUntilCheck) && <p role="status" className={styles.panel}>{qr.moderationStatus === "BLOCKED" ? "Код заблокирован за нарушение правил. Напишите на abuse@qr-s.ru для пересмотра." : "Ссылка на проверке, обычно до 24 часов"}</p>}
     <QrWizardBackLink href="/dashboard/library" label="К библиотеке QR"/>
     <header className={styles.header}><QrTypeIcon contentType={qr.contentType} variant="blue"/><div><h1>{qr.name}</h1><p>{contentTypeLabels[qr.contentType]||qr.contentType} · {qr.kind==='DYNAMIC'?'Динамический':'Статический'} · Создан {date(qr.createdAt)}</p></div></header>
     <section className={`${styles.panel} ${styles.overview}`} aria-label="QR-код и основные действия">
