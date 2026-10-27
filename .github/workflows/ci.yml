@@ -56,6 +56,9 @@ jobs:
       - name: Start isolated Next server with provider fixture
         run: |
           export ABUSE_TEST_FIXTURE=1
+          export QRS_ARTICLES_PUBLISH_TOKEN="$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64url'))")"
+          echo "::add-mask::$QRS_ARTICLES_PUBLISH_TOKEN"
+          printf 'QRS_ARTICLES_PUBLISH_TOKEN=%s\n' "$QRS_ARTICLES_PUBLISH_TOKEN" >> "$GITHUB_ENV"
           export YANDEX_SAFE_BROWSING_API_KEY="$(node -e "process.stdout.write(require('crypto').randomUUID())")"
           export ADMIN_INTEGRATIONS_KEY="$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")"
           NODE_OPTIONS="--import $PWD/scripts/abuse-provider-fixture.mjs" npm run dev -- --port 3119 > /tmp/abuse-next.log 2>&1 &
@@ -66,6 +69,12 @@ jobs:
           cat /tmp/abuse-next.log
           exit 1
       - run: node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-abuse-http.ts
+      - name: Verify article publication and FAQ on the existing server
+        run: node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-article-publication.mjs
+        env:
+          ARTICLE_PUBLISH_ISOLATED_TEST: '1'
+          ARTICLE_PUBLISH_TEST_ORIGIN: http://localhost:3119
+          ARTICLE_PUBLISH_TEST_LOG: /tmp/abuse-next.log
       - name: Check worker lock and quota recovery
         run: |
           export ABUSE_TEST_FIXTURE=1
