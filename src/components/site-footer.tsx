@@ -6,6 +6,7 @@ import { Logo } from "@/components/logo";
 import { getSeoPages } from "@/lib/seo-content";
 import { landingDetails } from "@/lib/landing-details";
 import { LEGAL_OPERATOR } from "@/lib/legal-documents";
+import { BITRIX_LANDING_SLUG } from "@/lib/bitrix-module-landing";
 
 type Props = {
   session: { sub: string } | null;
@@ -50,6 +51,7 @@ export async function SiteFooter({ session, children }: Props) {
                 { label: "Сканер QR-кода", href: "/skaner-qr-koda" },
                 { label: "QR с логотипом", href: "/qr-s-logotipom" },
                 { label: "Тарифы", href: "/pricing" },
+                { label: "Модуль для 1С-Битрикс", href: `/${BITRIX_LANDING_SLUG}` },
                 { label: "Вопросы и ответы", href: "/#faq" },
                 { label: "Блог", href: "/blog" },
                 { label: "Контакты и реквизиты", href: "/contacts" },
