@@ -55,7 +55,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
         description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
         url: canonical,
       },
-    }, currentPage > 1);
+    }, { preserveRobots: currentPage > 1 });
   }
 
   const category = await getBlogCategoryBySlug(categorySlug);

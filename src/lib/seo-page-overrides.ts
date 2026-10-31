@@ -97,12 +97,12 @@ export async function getSeoPageHeading(path: string, fallback: string): Promise
 export async function applySeoOverridesToMetadata(
   path: string,
   defaults: Metadata,
-  forceNoindex = false,
+  options: { preserveRobots?: boolean } = {},
 ): Promise<Metadata> {
   const override = await getSeoOverrideSnapshot(path);
   const title = override?.metaTitle?.trim();
   const description = override?.metaDescription?.trim();
-  const robots = forceNoindex ? NOINDEX_ROBOTS
+  const robots = options.preserveRobots ? defaults.robots
     : override?.noindex == null ? defaults.robots
       : override.noindex ? NOINDEX_ROBOTS : { index: true, follow: true };
   return {

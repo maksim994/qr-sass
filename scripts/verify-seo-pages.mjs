@@ -15,6 +15,7 @@ assert.equal(await db.seoPageOverride.count(), 0, "Requires a clean synthetic SE
 assert.equal(await db.seoPageOverrideRevision.count(), 0);
 const run = randomUUID();
 const users = [];
+const blogSlugs = [];
 let passed = 0;
 function check(label) { console.log(`PASS ${label}`); passed++; }
 const blank = { metaTitle: null, metaDescription: null, heading: null, noindex: null };
@@ -102,6 +103,22 @@ try {
     check(`metadata, H1, robots, sitemap and clearing work for ${path}`);
   }
 
+  // Page 2 is noindex, follow regardless of the root /blog override.
+  // Synthetic published posts ensure pagination is a real 200 response.
+  const posts = Array.from({ length: 10 }, (_, index) => {
+    const slug = `seo-pagination-${run}-${index}`;
+    blogSlugs.push(slug);
+    return { slug, title: `Pagination fixture ${index}`, content: "<p>Local SEO fixture</p>", publishedAt: new Date(), createdById: users[0] };
+  });
+  await db.blogPost.createMany({ data: posts });
+  const blogVersion = await db.seoPageOverride.findUniqueOrThrow({ where: { path: "/blog" } });
+  assert.equal((await save("/blog", admin, blogVersion.updatedAt.toISOString(), { ...blank, noindex: false })).status, 200);
+  const paginated = await page("/blog?page=2");
+  assert.match(paginated.robots, /noindex/);
+  assert.match(paginated.robots, /(?:^|,\s*)follow(?:,|$)/);
+  assert.doesNotMatch(paginated.robots, /nofollow/);
+  check("blog pagination preserves noindex, follow when the root page is set to index");
+
   const path = "/qr-dlya-max";
   const current = await db.seoPageOverride.findUniqueOrThrow({ where: { path } });
   const expected = current.updatedAt.toISOString();
@@ -139,6 +156,7 @@ try {
   // Only paths and users created in this explicitly isolated synthetic run.
   await db.seoPageOverrideRevision.deleteMany({ where: { path: { in: [...touchedPaths] } } });
   await db.seoPageOverride.deleteMany({ where: { path: { in: [...touchedPaths] } } });
+  await db.blogPost.deleteMany({ where: { slug: { in: blogSlugs } } });
   await db.user.deleteMany({ where: { id: { in: users } } });
   await db.$disconnect();
 }
