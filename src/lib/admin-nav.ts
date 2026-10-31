@@ -1,6 +1,7 @@
 export const adminNavItems: Array<{ label: string; href: string; icon: string | string[] }> = [
  { label: "Защита и жалобы", href: "/admin/abuse", icon: "M12 3l8 4v5c0 5-8 9-8 9s-8-4-8-9V7z" },
  {label:"Редиректы",href:"/admin/blog/redirects",icon:"M4 7h12l-3-3m3 3-3 3M20 17H8l3 3m-3-3 3-3"},
+ { label: "SEO-страницы", href: "/admin/seo-pages", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z" },
  { label: "Бизнес и триалы", href: "/admin/business", icon: "M4 20V10M10 20V4M16 20v-8M22 20V7" },
  { label: "Уведомления", href: "/admin/notifications", icon: "M6 17V9a6 6 0 0112 0v8M4 17h16M10 21h4" },
   { label: "Платежи", href: "/admin/payments", icon: "M3 6h18v12H3zM3 10h18M7 14h3" },

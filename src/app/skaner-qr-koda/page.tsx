@@ -1,3 +1,4 @@
+import { applySeoOverridesToMetadata, getSeoPageHeading } from "@/lib/seo-page-overrides";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
@@ -18,12 +19,17 @@ function faqAnswer(answer: string) {
   const index = answer.indexOf(label);
   return index < 0 ? answer : <>{answer.slice(0,index)}<Link href="/blog/qr-kod-ne-skaniiruetsya-ispravit">{label}</Link>{answer.slice(index+label.length)}</>;
 }
-export const metadata: Metadata = {
+const defaultMetadata: Metadata = {
   title, description, alternates: { canonical: publicSiteUrl("/skaner-qr-koda") },
   openGraph: { title, description, type: "website", url: publicSiteUrl("/skaner-qr-koda") },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  return applySeoOverridesToMetadata("/skaner-qr-koda", defaultMetadata);
+}
+
 export default async function QrScannerPage() {
+  const seoHeading = await getSeoPageHeading("/skaner-qr-koda", "Сканер QR-кода онлайн");
   const session = await getSession();
   const data = { "@context": "https://schema.org", "@graph": [
     { "@type": "WebApplication", name: "Сканер QR-кода QR-S", url: publicSiteUrl("/skaner-qr-koda"), applicationCategory: "UtilitiesApplication", operatingSystem: "Web", browserRequirements: "JavaScript; HTTPS and camera permission for live scanning", offers: { "@type": "Offer", price: "0", priceCurrency: "RUB" } },
@@ -31,7 +37,7 @@ export default async function QrScannerPage() {
   ] };
   return <div className="qrs-public"><SiteHeader session={session}/><main className={`fk-container ${s.page}`}>
     <PublicBreadcrumb current="Сканер QR-кода"/>
-    <PublicPageHeading title="Сканер QR-кода онлайн"><p>Наведи камеру, загрузи фото или вставь скриншот: код распознается прямо в браузере.</p></PublicPageHeading>
+    <PublicPageHeading title={seoHeading}><p>Наведи камеру, загрузи фото или вставь скриншот: код распознается прямо в браузере.</p></PublicPageHeading>
     <QrScanner/>
     <div className={s.reading}>
       <section><h2>Как отсканировать QR-код онлайн</h2><ol className={s.steps}><li><h3>Выбери способ.</h3><p>Во вкладке «Камера» нажми кнопку запуска и выбери камеру, если их несколько. Во вкладке «Фото или скриншот» загрузи файл, перетащи его в рамку или вставь из буфера через Ctrl+V (на Mac ⌘V).</p></li><li><h3>Дождись результата.</h3><p>Сканер покажет, что внутри: ссылку, текст, данные Wi-Fi или контакт.</p></li><li><h3>Реши, что делать дальше.</h3><p>Содержимое можно скопировать. Ссылка откроется только после того, как ты нажмёшь «Открыть».</p></li></ol></section>

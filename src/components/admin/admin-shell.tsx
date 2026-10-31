@@ -112,6 +112,7 @@ export function AdminShell({ children, user }: Props) {
             label: "Контент и настройки",
             paths: [
               "/admin/blog", "/admin/blog/redirects",
+              "/admin/seo-pages",
               "/admin/qr-types",
               "/admin/plans",
               "/admin/site-settings",

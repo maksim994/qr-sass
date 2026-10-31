@@ -810,6 +810,30 @@ model AdvertisingConversionReceipt {
   createdAt DateTime @default(now())
 }
 
+// Admin-editable SEO overrides for public marketing URLs; empty fields fall back to code defaults.
+model SeoPageOverride {
+  path              String   @id
+  metaTitle         String?
+  metaDescription   String?
+  heading           String?
+  noindex           Boolean?
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+}
+
+model SeoPageOverrideRevision {
+  id        String   @id @default(cuid())
+  path      String
+  number    Int
+  snapshot  Json
+  actorId   String?
+  actorName String
+  createdAt DateTime @default(now())
+
+  @@unique([path, number])
+  @@index([path, createdAt])
+}
+
 // Public QR API credentials are isolated from legacy qre_ and editorial tokens.
 model QrApiKey {
   id              String    @id @default(cuid())

@@ -1,3 +1,5 @@
+import { pricingSeoDefaults } from "@/lib/seo-page-registry";
+import { applySeoOverridesToMetadata, getSeoPageHeading } from "@/lib/seo-page-overrides";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
@@ -13,11 +15,12 @@ import s from "./pricing.module.css";
 export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const pro = await getPlan("PRO");
-  const title = `Тарифы QR-S: динамические QR-коды от ${rubles(pro.priceRub)} в месяц`;
-  return { title, description: `Статические QR и ${COMMERCIAL.free.dynamic} динамических бесплатно. Про — ${rubles(pro.priceRub)} в месяц, ${COMMERCIAL.trialDays} дней без карты. Сравните тарифы и возможности.`, alternates: { canonical: publicSiteUrl("/pricing") }, openGraph: { type: "website", title, url: publicSiteUrl("/pricing"), images: [publicSiteUrl("/opengraph-image.png")] } };
+  const { title, description } = pricingSeoDefaults(pro.priceRub);
+  return applySeoOverridesToMetadata("/pricing", { title, description, alternates: { canonical: publicSiteUrl("/pricing") }, openGraph: { type: "website", title, url: publicSiteUrl("/pricing"), images: [publicSiteUrl("/opengraph-image.png")] } });
 }
 export default async function PricingPage() {
   const [session, free, pro, business] = await Promise.all([getSession(), getPlan("FREE"), getPlan("PRO"), getPlan("BUSINESS")]);
+  const seoHeading = await getSeoPageHeading("/pricing", pricingSeoDefaults(pro.priceRub).heading);
   const plans = [free, pro, business];
   const faqs = [
     ["Что будет с кодами после окончания тарифа?", PRINTED_QR_COPY],
@@ -40,7 +43,7 @@ export default async function PricingPage() {
     ["Поддержка", "По электронной почте", "По электронной почте", "По электронной почте"],
   ];
   return <div className="qrs-public"><SiteHeader session={session} /><main className={`fk-container ${s.page}`}><PricingPageGoal /><PublicBreadcrumb current="Тарифы" />
-    <PublicPageHeading title={`Тарифы QR-S: бесплатно, Про за ${rubles(pro.priceRub)} и Бизнес`}><p>Начните с бесплатных кодов. Про — {COMMERCIAL.trialDays} дней, без карты и автосписаний.</p></PublicPageHeading>
+    <PublicPageHeading title={seoHeading}><p>Начните с бесплатных кодов. Про — {COMMERCIAL.trialDays} дней, без карты и автосписаний.</p></PublicPageHeading>
     <div className={s.plans}>{plans.map(plan => <section key={plan.id} className={`${s.plan} ${plan.id === "PRO" ? s.featured : ""}`}><div className={s.planHeading}><h2>{plan.name}</h2>{plan.id === "PRO" && <span>{COMMERCIAL.trialDays} дней без карты</span>}</div><p className={s.price}>{rubles(plan.priceRub)}<small> / месяц</small></p><p>{plan.description}</p><ul>{plan.limitLabels.map(label => <li key={label}><span aria-hidden="true">✓</span><span>{label}</span></li>)}</ul><Button href={session ? `/dashboard/billing?plan=${plan.id.toLowerCase()}` : `/register?plan=${plan.id.toLowerCase()}`} variant={plan.id === "PRO" ? "primary" : "secondary"}>{plan.id === "FREE" ? "Начать бесплатно" : plan.id === "PRO" ? `Попробовать Про ${COMMERCIAL.trialDays} дней` : "Выбрать Бизнес"}</Button></section>)}</div>
     <section className={s.comparison} aria-labelledby="comparison-title"><h2 id="comparison-title">Сравнение возможностей</h2><div className={s.tableWrap} role="region" aria-label="Сравнение тарифов — таблица с горизонтальной прокруткой" tabIndex={0}><table><thead><tr><th scope="col">Возможности</th>{plans.map(p => <th scope="col" key={p.id}>{p.name}</th>)}</tr></thead><tbody>{rows.map(([label, ...values]) => <tr key={label}><th scope="row">{label}</th>{values.map((v, i) => <td key={i}>{v}</td>)}</tr>)}</tbody></table></div>
     <p className={s.note}>PDF и EPS содержат растровое изображение. SVG — векторный формат.</p></section>

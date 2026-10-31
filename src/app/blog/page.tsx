@@ -1,3 +1,4 @@
+import { applySeoOverridesToMetadata, getSeoPageHeading } from "@/lib/seo-page-overrides";
 import { blogMediaImageSrc } from "@/lib/blog-media-url";
 import { BLOG_REDIRECTS } from "@/lib/blog-redirects";
 import { cache } from "react";
@@ -44,7 +45,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const canonical = publicSiteUrl(indexing.canonicalPath);
 
   if (!categorySlug) {
-    return {
+    return applySeoOverridesToMetadata("/blog", {
       title: "Блог — qr-s.ru",
       description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
       alternates: { canonical },
@@ -54,7 +55,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
         description: "Полезные статьи о QR-кодах, динамических ссылках и маркетинге для бизнеса.",
         url: canonical,
       },
-    };
+    }, { preserveRobots: currentPage > 1 });
   }
 
   const category = await getBlogCategoryBySlug(categorySlug);
@@ -142,7 +143,7 @@ export default async function BlogListPage({ searchParams }: Props) {
                 textWrap: "balance",
               }}
             >
-              {activeCategory ? activeCategory.name : "Статьи о QR-кодах"}
+              {activeCategory ? activeCategory.name : await getSeoPageHeading("/blog", "Статьи о QR-кодах")}
             </h1>
             <p style={{ marginTop: "16px", maxWidth: "52ch", font: "var(--fw-regular) clamp(1rem, 2vw, 1.15rem)/1.6 var(--font-sans)", color: "var(--text-muted)" }}>
               Как выбрать тип кода, сменить ссылку после печати и смотреть открытия по дням. Без географии и выдуманных обещаний.
