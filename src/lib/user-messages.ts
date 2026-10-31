@@ -1,6 +1,12 @@
 import { COMMERCIAL } from "@/lib/commercial-config";
 /** Пользовательские сообщения об ошибках и уведомлениях (только RU). */
 export const MSG = {
+  ABUSE_BLOCKED_EDIT: "Код заблокирован. Для пересмотра напишите на abuse@qr-s.ru.",
+  ABUSE_VERIFY_EMAIL: "Подтвердите email, чтобы создавать динамические коды",
+  ABUSE_REVIEW: "Ссылка на проверке, обычно до 24 часов",
+  ABUSE_REPORT_SENT: "Жалоба принята. Мы проверим ссылку.",
+  ABUSE_NO_REVISION: "Предыдущая версия ссылки не найдена",
+  ABUSE_CONFLICT: "Код изменён другим запросом. Повторите действие.",
   QR_API_SCOPE: "У ключа нет разрешения на эту операцию.",
   QR_API_RATE: "Лимит запросов исчерпан. Повторите запрос позже.",
   QR_API_FAILED: "Не удалось выполнить запрос к QR API. Повторите попытку позже.",
@@ -50,6 +56,10 @@ export const MSG = {
   BLOG_REDIRECT_NOT_FOUND: "Редирект не найден.",
   BLOG_REDIRECT_FAILED: "Не удалось сохранить редирект. Повторите попытку.",
   BLOG_API_FORBIDDEN: "API-ключ не разрешает публикацию, расписание или удаление статьи.",
+  BLOG_API_PUBLISH_FORBIDDEN: "Публикация через API выключена или указан неверный ключ публикации.",
+  BLOG_API_PUBLISH_INPUT: "Для публикации передайте только целую неотрицательную version.",
+  BLOG_API_PUBLISH_LIMIT: "Лимит — 10 публикаций через API за час. Повторите запрос после Retry-After.",
+  BLOG_API_ALREADY_PUBLISHED: "Статья уже опубликована.",
   BLOG_API_INPUT: "Проверьте поля запроса: PATCH требует целую version, Meta Title до 500, Meta Description до 2000 символов, JSON-LD — корректный JSON.",
   BLOG_API_TOKEN_INVALID: "Укажите действующий API-ключ статей в Authorization: Bearer. Административная сессия и QR-ключи не подходят.",
   BLOG_API_LIMIT: "Лимит ключа — 60 запросов в минуту. Повторите запрос после Retry-After.",

@@ -1,4 +1,5 @@
-import crypto from "node:crypto";
+import { hashClientIp } from "@/lib/client-ip-hash";
+export { hashClientIp } from "@/lib/client-ip-hash";
 import { headers } from "next/headers";
 import { getDb } from "@/lib/db";
 import { clientIpFromHeaders } from "@/lib/client-ip";
@@ -50,11 +51,6 @@ export function parseBrowserFamily(ua: string): string | null {
   return "Other";
 }
 
-function hashClientIp(ip: string): string | undefined {
-  const secret = process.env.ANALYTICS_HASH_SECRET || process.env.JWT_SECRET;
-  if (!secret) return undefined;
-  return crypto.createHmac("sha256", secret).update(ip).digest("hex");
-}
 
 export async function trackScan(
   qrCodeId: string,

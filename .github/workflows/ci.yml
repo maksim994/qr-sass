@@ -3,7 +3,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main, master]
+    branches: [main, master, qr-robokassa-integration]
 
 jobs:
   check:
@@ -20,3 +20,66 @@ jobs:
       - run: npm test
       - run: npm run lint
       - run: npx tsc --noEmit
+
+  abuse-http:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local-abuse-fixture
+          POSTGRES_DB: qr_abuse_test
+        ports: ['55439:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['56389:6379']
+    env:
+      DATABASE_URL: postgresql://postgres:local-abuse-fixture@127.0.0.1:55439/qr_abuse_test
+      JWT_SECRET: local-abuse-fixture-jwt-over-32-characters
+      APP_URL: http://localhost:3119
+      TRUST_PROXY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - name: Start isolated Next server with provider fixture
+        run: |
+          export ABUSE_TEST_FIXTURE=1
+          export QRS_ARTICLES_PUBLISH_TOKEN="$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64url'))")"
+          echo "::add-mask::$QRS_ARTICLES_PUBLISH_TOKEN"
+          printf 'QRS_ARTICLES_PUBLISH_TOKEN=%s\n' "$QRS_ARTICLES_PUBLISH_TOKEN" >> "$GITHUB_ENV"
+          export YANDEX_SAFE_BROWSING_API_KEY="$(node -e "process.stdout.write(require('crypto').randomUUID())")"
+          export ADMIN_INTEGRATIONS_KEY="$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")"
+          NODE_OPTIONS="--import $PWD/scripts/abuse-provider-fixture.mjs" npm run dev -- --port 3119 > /tmp/abuse-next.log 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://localhost:3119/api/health > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/abuse-next.log
+          exit 1
+      - run: node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-abuse-http.ts
+      - name: Verify article publication and FAQ on the existing server
+        run: node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-article-publication.mjs
+        env:
+          ARTICLE_PUBLISH_ISOLATED_TEST: '1'
+          ARTICLE_PUBLISH_TEST_ORIGIN: http://localhost:3119
+          ARTICLE_PUBLISH_TEST_LOG: /tmp/abuse-next.log
+      - name: Check worker lock and quota recovery
+        run: |
+          export ABUSE_TEST_FIXTURE=1
+          export REDIS_URL=redis://127.0.0.1:56389
+          export YANDEX_SAFE_BROWSING_API_KEY="$(node -e "process.stdout.write(require('crypto').randomUUID())")"
+          node --experimental-strip-types --import ./scripts/register-src-alias.mjs --import ./scripts/abuse-provider-fixture.mjs scripts/verify-abuse-worker.ts
+      - if: failure()
+        run: cat /tmp/abuse-next.log

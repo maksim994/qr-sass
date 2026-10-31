@@ -1,3 +1,6 @@
+import { checkUrlBatch } from "@/lib/abuse/url-check";
+import { prepareQrCreation, requestActor } from "@/lib/abuse/moderation";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import { nanoid } from "nanoid";
 import { MSG } from "@/lib/user-messages";
 import archiver from "archiver";
@@ -29,6 +32,7 @@ export async function POST(request: Request) {
     try {
       formData = await formDataWithinLimit(request, MAX_BULK_BYTES);
     } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
       if (error instanceof BodyTooLargeError || (error instanceof Error && "status" in error && (error as { status: number }).status === 413)) {
         return apiError("Файл слишком большой. Максимум 1 МБ.", "VALIDATION_ERROR", 413, undefined, requestId);
       }
@@ -94,6 +98,16 @@ export async function POST(request: Request) {
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const styleConfig = defaultStyle;
     type Record = { id: string; shortCode: string; name: string; encodedContent: string };
+    const abuseBatch = await checkUrlBatch(items.map(item => item.url));
+    const createItems = await Promise.all(items.map(item => {
+      const shortCode = nanoid(8), qrData = `${appUrl}/r/${shortCode}`;
+      return prepareQrCreation({
+        workspaceId, projectId: projectId || null, createdById: user.id,
+        kind: "DYNAMIC", contentType: "URL", name: item.name, shortCode,
+        encodedContent: qrData, currentTargetUrl: item.url, payload: { url: item.url }, styleConfig: styleConfig as object,
+        revisions: { create: { changedById: user.id, destinationUrl: item.url, encodedContent: qrData } },
+      }, requestActor(request, user, "bulk_create"), abuseBatch);
+    }));
     const qrRecords = await db.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM "Workspace" WHERE id = ${workspaceId} FOR UPDATE`;
       const previous = await tx.qrBulkBatch.findUnique({ where: { workspaceId_key: { workspaceId, key } } });
@@ -104,15 +118,9 @@ export async function POST(request: Request) {
       const quota = await assertCanCreateQrCodes({ workspaceId, planId: entitlements.planId, plan, count: items.length, needsDynamic: true, db: tx });
       if (!quota.ok) throw new QrQuotaError(quota);
       const records: Record[] = [];
-      for (const item of items) {
-        const shortCode = nanoid(8), qrData = `${appUrl}/r/${shortCode}`;
-        const qr = await tx.qrCode.create({ data: {
-          workspaceId, projectId: projectId || null, createdById: user.id,
-          kind: "DYNAMIC", contentType: "URL", name: item.name, shortCode,
-          encodedContent: qrData, currentTargetUrl: item.url, payload: { url: item.url }, styleConfig: styleConfig as object,
-          revisions: { create: { changedById: user.id, destinationUrl: item.url, encodedContent: qrData } },
-        } });
-        records.push({ id: qr.id, shortCode, name: qr.name, encodedContent: qrData });
+      for (const createQr of createItems) {
+        const qr = await createQr(tx);
+        records.push({ id: qr.id, shortCode: qr.shortCode!, name: qr.name, encodedContent: qr.encodedContent });
       }
       await tx.qrBulkBatch.create({ data: { workspaceId, key, digest, records } });
       return records;
@@ -147,6 +155,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
     if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code }, requestId);
     if ((error as { bulkConflict?: boolean }).bulkConflict) return apiError(MSG.BULK_KEY_CONFLICT, "CONFLICT", 409, undefined, requestId);
     if (error instanceof ConfigError) {

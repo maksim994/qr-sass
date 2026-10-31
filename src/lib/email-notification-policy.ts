@@ -13,6 +13,7 @@ export const EMAIL_KIND_LABELS: Record<string, string> = {
   owner_alert: "Сигнал владельцу",
   owner_digest: "Ежедневная сводка",
   test: "Тест доставки",
+  abuse_blocked: "Блокировка QR-кода",
 };
 export function canEmail(address: string) {
   return (

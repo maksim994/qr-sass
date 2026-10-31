@@ -1,7 +1,7 @@
 import { RateLimiterMemory, RateLimiterRedis } from "rate-limiter-flexible";
-import { getRedis } from "./redis";
+import { getRedis } from "@/lib/redis";
 
-export { getClientIp } from "./client-ip";
+export { getClientIp } from "@/lib/client-ip";
 
 type RateLimiter = RateLimiterMemory | RateLimiterRedis;
 
@@ -49,4 +49,9 @@ export async function consumeRateLimit(
       : undefined;
     return { success: false, retryAfterMs };
   }
+}
+
+/** Free/paid counters have independent capacities, retaining the same window. */
+export function abuseLimiterPair(prefix: string, points: number) {
+  return { free: createLimiter(prefix, points, 3600), paid: createLimiter(`${prefix}_paid`, points * 5, 3600) };
 }

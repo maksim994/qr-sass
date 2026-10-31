@@ -4,6 +4,25 @@ const isProd = process.env.NODE_ENV === "production";
 const DEV_JWT_FALLBACK = "local-development-jwt-secret";
 
 const envSchema = z.object({
+  QRS_ARTICLES_PUBLISH_TOKEN: z.string().optional(),
+  YANDEX_SAFE_BROWSING_API_KEY: z.string().optional(),
+  GOOGLE_WEB_RISK_API_KEY: z.string().optional(),
+  GOOGLE_WEB_RISK_ENABLED: z.enum(["true", "false"]).default("false").transform(v => v === "true"),
+  ABUSE_CHECK_ENABLED: z.enum(["true", "false"]).default("true").transform(v => v === "true"),
+  ABUSE_REQUIRE_VERIFIED_EMAIL: z.enum(["true", "false"]).default("false").transform(v => v === "true"),
+  ABUSE_CHECK_TIMEOUT_MS: z.coerce.number().int().min(1).default(3000),
+  ABUSE_REPORTS_THRESHOLD: z.coerce.number().int().min(1).default(3),
+  ABUSE_RECHECK_HOUR: z.coerce.number().int().min(0).max(23).default(4),
+  ABUSE_RECHECK_BATCH_DELAY_MS: z.coerce.number().int().min(1).default(1000),
+  ABUSE_SB_DAILY_QUOTA: z.coerce.number().int().min(1).default(9000),
+  ABUSE_AUDIT_IP_RETENTION_DAYS: z.coerce.number().int().min(1).default(365),
+  ABUSE_NEW_ACCOUNT_HOURS: z.coerce.number().int().min(1).default(24),
+  QR_CREATE_PER_HOUR: z.coerce.number().int().min(1).default(30),
+  QR_CREATE_PER_IP_PER_HOUR: z.coerce.number().int().min(1).default(60),
+  QR_URL_CHANGE_PER_HOUR: z.coerce.number().int().min(1).default(10),
+  QR_URL_CHANGE_USER_PER_HOUR: z.coerce.number().int().min(1).default(60),
+  ABUSE_REPORTS_PER_IP_PER_HOUR: z.coerce.number().int().min(1).default(5),
+  REGISTER_PER_IP_PER_DAY: z.coerce.number().int().min(1).default(10),
   DATABASE_URL: z.string().min(1).default("postgresql://postgres:postgres@localhost:5432/qr_saas?schema=public"),
   JWT_SECRET: isProd
     ? z
@@ -40,6 +59,7 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
+  ...process.env,
   DATABASE_URL: process.env.DATABASE_URL,
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_PREVIOUS_SECRET: process.env.JWT_PREVIOUS_SECRET || undefined,

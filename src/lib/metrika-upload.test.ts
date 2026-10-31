@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseMetrikaAttribution, paymentConversionCsv } from "./metrika-attribution.ts";
-import { LEGAL_VERSION } from "./legal-documents.ts";
+import { COOKIE_CONSENT_VERSION } from "./cookie-consent-version.ts";
 import { uploadMetrikaConversion } from "./metrika-upload.ts";
 
 test("attribution rejects foreign counters, malformed IDs and stale consent", () => {
-  const valid = { clientId: "1234567890123456789", counterId: "106988416", consentVersion: LEGAL_VERSION };
-  assert.deepEqual(parseMetrikaAttribution(valid, "106988416"), { clientId: valid.clientId, counterId: valid.counterId, policyVersion: `opt-in:${LEGAL_VERSION}`, collectionMode: "opt-in" });
+  const valid = { clientId: "1234567890123456789", counterId: "106988416", consentVersion: COOKIE_CONSENT_VERSION };
+  assert.deepEqual(parseMetrikaAttribution(valid, "106988416"), { clientId: valid.clientId, counterId: valid.counterId, policyVersion: `opt-in:${COOKIE_CONSENT_VERSION}`, collectionMode: "opt-in" });
   for (const input of [null, { ...valid, clientId: "1\n2" }, { ...valid, counterId: "999" }, { ...valid, consentVersion: "old" }]) assert.equal(parseMetrikaAttribution(input, "106988416"), null);
 });
 
