@@ -239,7 +239,91 @@ model UploadedFile {
   @@index([workspaceId])
 }
 
+enum QrModerationStatus {
+  OK
+  PENDING_CHECK
+  ON_MODERATION
+  BLOCKED
+}
+enum AbuseRuleKind {
+  DOMAIN
+  STOPWORD
+  SHORTENER
+  ALLOW_DOMAIN
+}
+enum AbuseRuleAction {
+  BLOCK
+  REVIEW
+}
+enum AbuseReportStatus {
+  NEW
+  IN_REVIEW
+  RESOLVED_BLOCKED
+  RESOLVED_OK
+  SPAM
+}
+model AbuseRule {
+  id String @id @default(cuid())
+  kind AbuseRuleKind
+  value String
+  action AbuseRuleAction @default(REVIEW)
+  note String?
+  createdBy String
+  createdAt DateTime @default(now())
+  @@unique([kind, value])
+}
+model AbuseReport {
+  id String @id @default(cuid())
+  qrCodeId String?
+  shortCode String
+  reason String
+  comment String?
+  email String?
+  ipHash String?
+  createdAt DateTime @default(now())
+  status AbuseReportStatus @default(NEW)
+  resolvedBy String?
+  resolvedAt DateTime?
+  @@index([status, createdAt])
+  @@index([qrCodeId])
+}
+// Intentionally no foreign keys: account/workspace deletion must not erase evidence.
+model QrAuditEvent {
+  id String @id @default(cuid())
+  qrCodeId String?
+  shortCode String?
+  workspaceId String
+  actorUserId String?
+  actorType String
+  apiKeyId String?
+  action String
+  oldUrls Json?
+  newUrls Json?
+  ip String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  @@index([qrCodeId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([createdAt])
+}
+model AbuseUrlApproval {
+  urlHash String @id
+  expiresAt DateTime
+}
+model AbuseProviderQuota {
+  key String @id
+  count Int @default(0)
+}
 model QrCode {
+  moderationStatus QrModerationStatus @default(OK)
+  holdUntilCheck Boolean @default(false)
+  moderationReason String?
+  moderationAt DateTime?
+  lastCheckedAt DateTime?
+  lastCheckVerdict String?
+  moderationAttention Boolean @default(false)
+  abuseLegacy Boolean @default(false)
+  @@index([moderationStatus])
   creationSource   String?
   id               String        @id @default(cuid())
   workspaceId      String
@@ -271,6 +355,7 @@ model QrCode {
 }
 
 model QrRevision {
+  payloadSnapshot Json?
   id             String   @id @default(cuid())
   qrCodeId       String
   destinationUrl String?

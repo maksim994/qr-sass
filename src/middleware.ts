@@ -1,3 +1,4 @@
+import { moderationResponse } from "@/lib/abuse/public";
 import { NextResponse } from "next/server";
 import { MSG } from "@/lib/user-messages";
 import type { NextRequest } from "next/server";
@@ -43,6 +44,14 @@ export async function middleware(request: NextRequest) {
         return redirect;
       }
     } catch { /* Keep existing routes available if the optional redirect lookup fails. */ }
+  }
+  // RSC pages cannot set an arbitrary HTTP status. Guard hosted/consent pages
+  // here to return 451 before React streams any destination or metadata.
+  const publicQr = /^\/(?:p|g)\/([^/]+)$/.exec(request.nextUrl.pathname);
+  if (publicQr && ["GET", "HEAD"].includes(request.method)) {
+    const qr = await getDb().qrCode.findUnique({ where: { shortCode: decodeURIComponent(publicQr[1]) }, select: { moderationStatus: true, holdUntilCheck: true } });
+    const restricted = moderationResponse(qr?.moderationStatus, publicQr[1], qr?.holdUntilCheck);
+    if (restricted) return restricted;
   }
   const requestHeaders = new Headers(request.headers);
   const privateSurface = ["/verify-email", "/reset-password", "/dashboard/api-keys"].includes(request.nextUrl.pathname) || request.nextUrl.pathname.startsWith("/preview/") || request.nextUrl.pathname === "/admin/blog/tokens";

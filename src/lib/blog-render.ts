@@ -4,6 +4,7 @@ import taskLists from "markdown-it-task-lists";
 import sanitizeHtml from "sanitize-html";
 import DOMPurify from "isomorphic-dompurify";
 import { readBlogFaq, type BlogFaq } from "@/lib/blog-faq";
+import { renderFaqAnswer } from "@/lib/blog-faq-inline";
 import { rewriteBlogMediaHtml } from "@/lib/blog-media-html";
 
 export type ArticleBody = { html: string; items: { id: string; text: string }[] };
@@ -94,7 +95,7 @@ export function articleHeadingSlug(text: string): string {
 
 function faqHtml(faq: BlogFaq): string {
   if (!faq.length) return "";
-  return `<h2 id="faq">Частые вопросы</h2>${faq.map((item) => `<h3>${escape(item.question)}</h3><p>${escape(item.answer).replace(/\n/g, "<br>")}</p>`).join("")}`;
+  return `<h2 id="faq">Частые вопросы</h2>${faq.map((item) => `<h3>${escape(item.question)}</h3><p>${renderFaqAnswer(item.answer)}</p>`).join("")}`;
 }
 
 function placeFaq(html: string, faq: BlogFaq): string {

@@ -16,7 +16,7 @@ test("publishing requires both the reviewed pending revision and its live base",
   assert.throws(() => assertPendingUnchanged({updatedAt:new Date(date.getTime()+1)},pending), /уже изменены/);
 });
 test("OpenAPI exposes pending CRUD and link preview, without a publication method", () => {
-  assert.equal(spec.info.version, "1.4.0");
+  assert.equal(spec.info.version, "1.5.0");
   assert.deepEqual(Object.keys(spec.paths["/api/v1/articles/{id}/revision"]).sort(),["delete","get","parameters","put"]);
   assert.ok(spec.paths["/api/v1/articles/{id}/revision/preview"].post);
   assert.equal("slug" in spec.components.schemas.ArticleRevisionInput.properties, false);

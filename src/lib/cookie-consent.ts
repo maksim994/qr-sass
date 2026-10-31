@@ -1,4 +1,4 @@
-import { LEGAL_VERSION } from "@/lib/legal-documents";
+import { COOKIE_CONSENT_VERSION } from "@/lib/cookie-consent-version";
 import { ANALYTICS_OPTOUT_COOKIE, COOKIE_NOTICE_VERSION, isSiteAnalyticsSurface } from "@/lib/analytics-policy";
 export const COOKIE_CHOICE_KEY = "qrs_cookie_choice";
 export const COOKIE_NOTICE_KEY = "qrs_cookie_notice";
@@ -15,7 +15,7 @@ export function parseCookieChoice(raw: string | null, now = Date.now()): CookieC
     const value = JSON.parse(raw ?? "null");
     // A clear refusal survives policy revisions and expiry. Only the user may re-enable.
     if (value?.choice === "declined") return "declined";
-    if (!value || value.version !== LEGAL_VERSION || !Number.isFinite(value.at) || value.at > now || now - value.at >= MAX_AGE) return "none";
+    if (!value || value.version !== COOKIE_CONSENT_VERSION || !Number.isFinite(value.at) || value.at > now || now - value.at >= MAX_AGE) return "none";
     return value.choice === "accepted" ? "accepted" : "none";
   } catch { return "none"; }
 }
@@ -69,7 +69,7 @@ export function isAdvertisingEnabled(choice: CookieChoice = readAdvertisingChoic
   return (choice === "none" || choice === "accepted") && (typeof window === "undefined" || isSiteAnalyticsSurface(window.location.pathname));
 }
 export function saveCookiePreferences(analytics: boolean, advertising: boolean) {
-  memory = JSON.stringify({ schema: 2, choice: analytics ? "accepted" : "declined", advertising, version: LEGAL_VERSION, at: Date.now() });
+  memory = JSON.stringify({ schema: 2, choice: analytics ? "accepted" : "declined", advertising, version: COOKIE_CONSENT_VERSION, at: Date.now() });
   syncAnalyticsOptOut(!analytics);
   try { document.cookie = `${ADVERTISING_OPTOUT_COOKIE}=${advertising ? "" : "1"}; Max-Age=${advertising ? 0 : 31536000}; Path=/; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`; } catch { /* Local storage still saves the selection. */ }
   try { window.localStorage.setItem(COOKIE_CHOICE_KEY, memory); writeFailed = false; } catch { writeFailed = true; }

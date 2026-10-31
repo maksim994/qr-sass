@@ -1,0 +1,24 @@
+.form { --color-primary-on: var(--neutral-0); display: grid; gap: 20px; max-width: 42rem; }
+.field { display: grid; gap: 8px; font-weight: var(--fw-medium); }
+.field textarea { min-height: 112px; resize: vertical; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.notice { padding: 16px; border: 1px solid var(--border-default); border-radius: 12px; background: var(--surface-subtle); }
+.notice p + p { margin-top: 8px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 16px; margin: 24px 0; }
+.tabs a { padding: 8px 0; text-underline-offset: 6px; }
+.tabs [aria-current=page] { font-weight: var(--fw-bold); }
+.section { margin-top: 28px; }
+.section h2 { font-size: 1.25rem; margin-bottom: 16px; }
+.list { display: grid; gap: 20px; list-style: none; padding: 0; }
+.row { padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); overflow-wrap: anywhere; }
+.row p { margin: 8px 0; }
+.honey { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.check { display: flex; align-items: flex-start; gap: 10px; }
+.check input { margin-top: 5px; }
+.wrap { max-width: 48rem; margin: 48px auto; padding: 0 16px; }
+.wrap h1 { font-size: clamp(1.7rem, 4vw, 2.25rem); line-height: 1.2; margin-bottom: 16px; }
+.wrap > p { margin-bottom: 28px; }
+.error { color: var(--color-danger); }
+@media (max-width: 560px) { .actions > button { flex: 1 1 auto; } .wrap { margin-top: 28px; } }
+
+.wrap a { text-decoration: underline; text-underline-offset: 3px; }

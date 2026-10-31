@@ -19,7 +19,7 @@ export function privateApi<T extends Response>(response: T): T {
 export function blogApiError(error: unknown) {
   if (error instanceof RedirectError) return privateApi(apiError(error.message, error.status === 409 ? "CONFLICT" : error.status === 403 ? "FORBIDDEN" : error.status === 404 ? "NOT_FOUND" : "VALIDATION_ERROR", error.status));
   if (error instanceof BlogApiAuthError) {
-    const response = apiError(error.message, error.status === 429 ? "RATE_LIMITED" : error.status === 404 ? "NOT_FOUND" : "UNAUTHORIZED", error.status);
+    const response = apiError(error.message, error.status === 429 ? "RATE_LIMITED" : error.status === 403 ? "FORBIDDEN" : error.status === 404 ? "NOT_FOUND" : "UNAUTHORIZED", error.status);
     if (error.status === 401) response.headers.set("WWW-Authenticate", 'Bearer realm="articles"');
     if (error.retryAfter) response.headers.set("Retry-After", String(error.retryAfter));
     return privateApi(response);

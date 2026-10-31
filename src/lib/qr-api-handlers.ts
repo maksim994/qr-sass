@@ -1,3 +1,5 @@
+import { prepareQrCreation, requestActor, updateModeratedQr } from "@/lib/abuse/moderation";
+import { abuseErrorResponse } from "@/lib/abuse/http";
 import type { QrCode } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { apiError, apiSuccess, readJsonBody } from "@/lib/api-response";
@@ -18,7 +20,7 @@ function notFound() { return apiError(MSG.NOT_FOUND, "NOT_FOUND", 404); }
 function dto(qr: QrCode) {
   // Deliberate allowlist: no payloads, password hashes, visitor data or internal tenant IDs.
   return { id: qr.id, name: qr.name, kind: qr.kind, contentType: qr.contentType, shortCode: qr.shortCode,
-    targetUrl: qr.currentTargetUrl, source: qr.creationSource, createdAt: qr.createdAt, updatedAt: qr.updatedAt,
+    moderationStatus: qr.moderationStatus, holdUntilCheck: qr.holdUntilCheck, targetUrl: qr.currentTargetUrl, source: qr.creationSource, createdAt: qr.createdAt, updatedAt: qr.updatedAt,
     shortUrl: qr.shortCode && qr.kind === "DYNAMIC" && qr.contentType === "URL" ? qr.encodedContent : null };
 }
 function ownedQr(actor: QrApiActor, id: string) {
@@ -43,15 +45,17 @@ export async function qrApiCreate(request: Request) {
     const shortCode = nanoid(8);
     const encodedContent = publicSiteUrl(`/r/${shortCode}`);
     try {
-      const qr = await createQrWithinQuota({ workspaceId: actor.workspaceId, planId: actor.entitlements.planId,
-        plan: actor.entitlements.plan, needsDynamic: true }, tx => tx.qrCode.create({ data: {
+      const createQr = await prepareQrCreation({
         workspaceId: actor.workspaceId, createdById: actor.userId, kind: "DYNAMIC", contentType: "URL",
         name, currentTargetUrl: targetUrl, payload: { url: targetUrl }, shortCode, encodedContent,
         styleConfig: { ...defaultQrStyle, quietZoneModules: 4, errorCorrectionLevel: "H" }, creationSource: source,
         revisions: { create: { changedById: actor.userId, destinationUrl: targetUrl, encodedContent: targetUrl } },
-      } }));
+      }, requestActor(request, actor, "create"));
+      const qr = await createQrWithinQuota({ workspaceId: actor.workspaceId, planId: actor.entitlements.planId,
+        plan: actor.entitlements.plan, needsDynamic: true }, createQr);
       return apiSuccess(dto(qr), 201);
     } catch (error) {
+    const abuseResponse = abuseErrorResponse(error); if (abuseResponse) return abuseResponse;
       if (error instanceof QrQuotaError) return apiError(error.message, "FORBIDDEN", 403, { code: error.quota.code });
       throw error;
     }
@@ -71,11 +75,11 @@ export async function qrApiUpdate(request: Request, id: string) {
     if (!qr) return notFound();
     if (qr.kind !== "DYNAMIC" || qr.contentType !== "URL") return invalid();
     if (!await canEditManagedQr(qr)) return apiError(MSG.PLAN_QR_EDIT_LIMIT, "FORBIDDEN", 403);
-    const updated = await getDb().qrCode.update({ where: { id: qr.id, workspaceId: actor.workspaceId, isArchived: false }, data: {
+    const updated = await updateModeratedQr(qr.id, {
       currentTargetUrl: parsed.data.targetUrl,
       payload: { ...(qr.payload as Record<string, unknown> ?? {}), url: parsed.data.targetUrl },
       revisions: { create: { changedById: actor.userId, destinationUrl: parsed.data.targetUrl, encodedContent: qr.encodedContent } },
-    } });
+    }, requestActor(request, actor), { workspaceId: actor.workspaceId, requireActive: true });
     return apiSuccess(dto(updated));
   });
 }

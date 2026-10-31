@@ -49,7 +49,7 @@ const fields = {
       required: ["question", "answer"],
       properties: {
         question: { type: "string", minLength: 1, maxLength: 500 },
-        answer: { type: "string", minLength: 1, maxLength: 10000 },
+        answer: { type: "string", minLength: 1, maxLength: 10000, description: "Inline Markdown: ссылки, жирный и курсив; без заголовков, изображений и HTML. Ссылки только /... (не //...) и https://. Внешние: rel=noopener nofollow, target=_blank. FAQPage содержит чистый текст." },
       },
     },
   },
@@ -70,7 +70,7 @@ const version = {
   type: "integer",
   minimum: 0,
   description:
-    "Последний номер редакционной версии. 0 до первого сохранения истории. PATCH требует точное совпадение; конфликт — 409.",
+    "Последний номер редакционной версии. 0 до первого сохранения истории. PATCH и POST publish требуют точное совпадение; конфликт — 409.",
 };
 const summary = {
   type: "object",
@@ -138,7 +138,7 @@ const spec = {
     title: "QR-S Article API",
     version: "1.0.0",
     description:
-      "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Сохранение статьи создаёт версию с автором API: <имя ключа>. Черновик изменений хранится отдельно, история меняется только при публикации администратором. Отозванные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
+      "Редакционные ключи управляются в /admin/blog/tokens. Только Bearer, 60 запросов/минуту, без публикации/удаления/расписания. Отдельный POST publish требует QRS_ARTICLES_PUBLISH_TOKEN и точную version, лимит 10 публикаций за скользящий час. Пустая переменная выключает публикацию. Сохранение статьи создаёт версию с автором API: <имя ключа>; публикация — с автором api. Черновик изменений хранится отдельно и публикуется только администратором. Отозванные редакционные ключи возвращают 401. Ответы с данными private,no-store. Публичная схема не содержит данных или секретов.",
     license: { name: "Proprietary", identifier: "LicenseRef-Proprietary" },
   },
   servers: [{ url: "https://qr-s.ru" }],
@@ -538,6 +538,28 @@ spec.paths["/api/v1/articles/{id}/revision/preview"] = {
   post:operation("previewArticlePendingRevision", "Создать секретную ссылку на черновик изменений", {
     description:"Возвращает абсолютный url и относительный path. Показывает последнее сохранение черновика, без авторизации по ссылке, noindex/nofollow и private,no-store. Новая ссылка отзывает предыдущую ссылку этого черновика. Ссылки на живую сохранённую статью независимы. После отмены/публикации черновика ссылка возвращает 404.",
     responses:{...errors,200:response("Секретная ссылка",success({type:"object",required:["url","path"],properties:{url:{type:"string",format:"uri"},path:{type:"string"}}}))},
+  }),
+};
+spec.info.version = "1.5.0";
+spec.components.securitySchemes.ArticlePublishBearer = {
+  type: "http", scheme: "bearer",
+  description: "Только QRS_ARTICLES_PUBLISH_TOKEN из окружения сервера. Редакционные, QR-ключи и cookie не подходят. Пустая переменная и неверный ключ — 403. Ключ подходит только для POST publish.",
+};
+spec.components.schemas.ArticlePublish = {
+  type: "object", additionalProperties: false, required: ["version"], properties: { version },
+};
+spec.paths["/api/v1/articles/{id}/publish"] = {
+  parameters: revisionParams,
+  post: operation("publishArticle", "Опубликовать сохранённую статью отдельным ключом", {
+    security: [{ ArticlePublishBearer: [] }],
+    description: "Публикует текущую сохранённую статью, без применения отдельного черновика изменений. Точная version проверяется в транзакции; устаревшая версия или уже опубликованная статья — 409. Используется тот же механизм сохранения, что в админке: первая дата публикации, новая версия и событие publish с автором api. Обновляются страница, список блога, sitemap и кеш; отправляется IndexNow, если настроен. До 10 успешных публикаций за скользящий час на весь API, независимо от IP, процесса и ротации токена. Ошибки не расходуют квоту.",
+    requestBody: { required: true, content: { "application/json": { schema: ref("ArticlePublish") } } },
+    responses: {
+      ...Object.fromEntries(Object.entries(errors).filter(([code]) => code !== "401")),
+      403: response("Публикация выключена или неверный ключ публикации", ref("Error")),
+      429: { ...errors[429], description: "10 успешных API-публикаций за скользящий час" },
+      200: response("Опубликованная статья с новой version", success(ref("Article"))),
+    },
   }),
 };
 writeFileSync("openapi.yaml", JSON.stringify(spec, null, 2) + "\n");

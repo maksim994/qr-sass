@@ -1,3 +1,4 @@
+import { moderationResponse } from "@/lib/abuse/public";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getDb } from "@/lib/db";
@@ -24,9 +25,10 @@ export async function GET(_request: Request, context: RouteContext) {
     const qr = await db.qrCode.findFirst({
       where: {
         shortCode: code,
-        contentType: "VCARD",
       },
       select: {
+        contentType: true,
+        moderationStatus: true, holdUntilCheck: true,
         id: true,
         name: true,
         payload: true,
@@ -37,6 +39,10 @@ export async function GET(_request: Request, context: RouteContext) {
         shortCode: true,
       },
     });
+
+    const restricted = moderationResponse(qr?.moderationStatus, code, qr?.holdUntilCheck);
+    if (restricted) return restricted;
+    if (qr && qr.contentType !== "VCARD") return NextResponse.redirect(new URL(qrPublicUnavailablePath("missing"), env.APP_URL));
 
     const scanCount = qr ? await db.scanEvent.count({ where: { qrCodeId: qr.id } }) : 0;
     const token = (await cookies()).get(accessCookieFor(code))?.value;

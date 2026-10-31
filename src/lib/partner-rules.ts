@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LEGAL_VERSION } from "@/lib/legal-documents";
+import { COOKIE_CONSENT_VERSION } from "@/lib/cookie-consent-version";
 import { ANALYTICS_POLICY_VERSION } from "@/lib/analytics-policy";
 
 export const PARTNER_COOKIE = "qrs_partner_visit";
@@ -28,5 +28,5 @@ export function summarizePartnerPayments(payments: PartnerPayment[]) {
 
 export const partnerVisitSchema = z.union([
   z.object({ code: partnerCodeSchema, analyticsEnabled: z.literal(true), policyVersion: z.literal(ANALYTICS_POLICY_VERSION) }),
-  z.object({ code: partnerCodeSchema, consent: z.literal(true), consentVersion: z.literal(LEGAL_VERSION) }).transform(value => ({ code: value.code, analyticsEnabled: true as const, policyVersion: `opt-in:${value.consentVersion}` })),
+  z.object({ code: partnerCodeSchema, consent: z.literal(true), consentVersion: z.literal(COOKIE_CONSENT_VERSION) }).transform(value => ({ code: value.code, analyticsEnabled: true as const, policyVersion: `opt-in:${value.consentVersion}` })),
 ]);

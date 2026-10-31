@@ -16,6 +16,7 @@ type Props = {
 export default async function UnavailablePage({ searchParams }: Props) {
   const params = await searchParams;
   const reason = Array.isArray(params.reason) ? params.reason[0] : params.reason;
+  if (reason === "moderation" || reason === "blocked") return <UtilityPage variant="warning" title={reason === "blocked" ? "Ссылка заблокирована за нарушение правил сервиса" : "Ссылка временно на проверке. Попробуйте открыть позже"}><Button href="/report">Пожаловаться</Button><a href="mailto:abuse@qr-s.ru">abuse@qr-s.ru</a></UtilityPage>;
   const archived = reason === "archived";
 
   return (

@@ -1,4 +1,5 @@
 export const adminNavItems: Array<{ label: string; href: string; icon: string | string[] }> = [
+ { label: "Защита и жалобы", href: "/admin/abuse", icon: "M12 3l8 4v5c0 5-8 9-8 9s-8-4-8-9V7z" },
  {label:"Редиректы",href:"/admin/blog/redirects",icon:"M4 7h12l-3-3m3 3-3 3M20 17H8l3 3m-3-3 3-3"},
  { label: "Бизнес и триалы", href: "/admin/business", icon: "M4 20V10M10 20V4M16 20v-8M22 20V7" },
  { label: "Уведомления", href: "/admin/notifications", icon: "M6 17V9a6 6 0 0112 0v8M4 17h16M10 21h4" },
