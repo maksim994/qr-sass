@@ -1,3 +1,4 @@
+import { seoPageIndexing } from "@/lib/seo-page-overrides";
 import type { MetadataRoute } from "next";
 import { getDb } from "@/lib/db";
 import { publicOrigin } from "@/lib/public-url";
@@ -10,8 +11,10 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = publicOrigin();
 
-  const staticEntries: MetadataRoute.Sitemap = buildIndexableStaticPaths()
-    .filter((path) => !isDeniedSitemapPath(path))
+  const indexing = await seoPageIndexing();
+  const staticPaths = new Set([...buildIndexableStaticPaths(), ...indexing.keys()]);
+  const staticEntries: MetadataRoute.Sitemap = [...staticPaths]
+    .filter((path) => !isDeniedSitemapPath(path) && indexing.get(path) !== true)
     .map((path) => ({
       url: path === "/" ? base : `${base}${path}`,
       lastModified: new Date("2026-10-19T00:00:00Z"),

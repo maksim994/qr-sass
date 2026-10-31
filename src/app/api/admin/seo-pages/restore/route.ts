@@ -12,7 +12,7 @@ const restoreSchema = z
   .object({
     path: z.string().min(1).max(200),
     revisionId: z.string().min(1),
-    expectedUpdatedAt: z.string().datetime({ offset: true }).nullable().optional(),
+    expectedUpdatedAt: z.string().datetime({ offset: true }).nullable(),
   })
   .strict();
 

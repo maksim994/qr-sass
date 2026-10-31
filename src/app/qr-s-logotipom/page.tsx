@@ -1,3 +1,4 @@
+import { applySeoOverridesToMetadata, getSeoPageHeading } from "@/lib/seo-page-overrides";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
@@ -13,7 +14,11 @@ import s from "./logo-page.module.css";
 export const dynamic = "force-dynamic";
 const title = "QR-код с логотипом онлайн: PNG и SVG без регистрации";
 const description = "Сделай QR-код с логотипом онлайн: загрузи PNG, JPEG или WebP, скачай PNG или SVG 1200×1200 без регистрации. Логотип обрабатывается в браузере, на сервер не уходит.";
-export const metadata: Metadata = { title, description, alternates:{canonical:publicSiteUrl("/qr-s-logotipom")}, openGraph:{title,description,type:"website",url:publicSiteUrl("/qr-s-logotipom")} };
+const defaultMetadata: Metadata = { title, description, alternates:{canonical:publicSiteUrl("/qr-s-logotipom")}, openGraph:{title,description,type:"website",url:publicSiteUrl("/qr-s-logotipom")} };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applySeoOverridesToMetadata("/qr-s-logotipom", defaultMetadata);
+}
 const faqs = [
   ["Нужна ли регистрация, чтобы сделать QR-код с логотипом?", "Нет. Загрузи логотип и скачай код в PNG или SVG без входа в аккаунт."],
   ["Какие форматы логотипа подходят?", "PNG, JPEG и WebP до 5 МБ. Удобнее всего PNG с прозрачным фоном."],
@@ -23,13 +28,14 @@ const faqs = [
 ] as const;
 
 export default async function LogoQrPage() {
+  const seoHeading = await getSeoPageHeading("/qr-s-logotipom", "QR-код с логотипом");
   const [session,disabled] = await Promise.all([getSession(),getDisabledQrTypes()]);
   const schema = {"@context":"https://schema.org","@graph":[
     {"@type":"SoftwareApplication",name:"Генератор QR-кода с логотипом QR-S",url:publicSiteUrl("/qr-s-logotipom"),applicationCategory:"UtilitiesApplication",operatingSystem:"Web",offers:{"@type":"Offer",price:"0",priceCurrency:"RUB"}},
     {"@type":"FAQPage",mainEntity:faqs.map(([name,text])=>({"@type":"Question",name,acceptedAnswer:{"@type":"Answer",text}}))},
   ]};
   return <div className="qrs-public"><SiteHeader session={session} createHref="#create-qr"/><main className={`fk-container ${s.page}`}>
-    <PublicBreadcrumb current="QR с логотипом"/><PublicPageHeading title="QR-код с логотипом"><p>Вставь ссылку, добавь свой логотип и скачай код в PNG или SVG без регистрации.</p></PublicPageHeading>
+    <PublicBreadcrumb current="QR с логотипом"/><PublicPageHeading title={seoHeading}><p>Вставь ссылку, добавь свой логотип и скачай код в PNG или SVG без регистрации.</p></PublicPageHeading>
     <LogoQrGenerator enabled={!disabled.includes("URL")}/>
     <div className={s.reading}>
       <section><h2>Как сделать QR-код с логотипом</h2><ol><li>Вставь ссылку, которая должна открываться по коду.</li><li>Загрузи логотип в PNG, JPEG или WebP, файл до 5 МБ. Он обрабатывается прямо в браузере и на сервер не отправляется.</li><li>Проверь превью и скачай код в PNG или SVG размером 1200×1200. Регистрация не нужна.</li></ol><p>Код на этой странице статический: ссылка зашита в сам рисунок, и поменять её после печати не получится. Если адрес может измениться, используй <Link href="/dynamic-qr">динамический код</Link> в личном кабинете. Там ссылку можно править в любой момент. Два динамических кода доступны бесплатно, дальше тариф Про за 299 ₽ в месяц.</p></section>

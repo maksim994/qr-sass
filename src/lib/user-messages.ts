@@ -251,6 +251,7 @@ export const MSG = {
   INVALID_DISABLED_QR_TYPES: "Некорректный список отключённых типов QR-кодов.",
   SEO_PAGE_INPUT_INVALID: "Проверьте поля SEO-страницы: путь и длины title, description и H1.",
   SEO_PAGE_NOT_FOUND: "Страница не найдена в каталоге SEO или версия для отката отсутствует.",
+  SEO_PAGE_SAVED: "SEO-настройки сохранены.",
   SEO_PAGE_CONFLICT: "Страницу уже изменил другой администратор. Обновите список и повторите сохранение.",
   SEO_PAGE_PATH_REQUIRED: "Укажите URL страницы.",
   PLAN_DYNAMIC_REQUIRED:

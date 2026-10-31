@@ -1,10 +1,13 @@
+import { applySeoOverridesToMetadata, getSeoPageHeading } from "@/lib/seo-page-overrides";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
 import { publicSiteUrl } from "@/lib/public-url";
 
-export const metadata: Metadata = {
+export const dynamic = "force-dynamic";
+
+const defaultMetadata: Metadata = {
   title: "История изменений",
   description: "Последние обновления qr-s.ru: динамические QR, честные тарифы и исправления публичных текстов.",
   alternates: { canonical: publicSiteUrl("/changelog") },
@@ -14,6 +17,10 @@ export const metadata: Metadata = {
     url: publicSiteUrl("/changelog"),
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  return applySeoOverridesToMetadata("/changelog", defaultMetadata);
+}
 
 const changelog: {
   date: string;
@@ -117,6 +124,7 @@ const typeBadgeClass = {
 };
 
 export default async function ChangelogPage() {
+  const seoHeading = await getSeoPageHeading("/changelog", "История изменений");
   const session = await getSession();
   const db = getDb();
   const isAdmin = session
@@ -128,7 +136,7 @@ export default async function ChangelogPage() {
       session={session}
       isAdmin={isAdmin}
       eyebrow="Changelog"
-      title="История изменений"
+      title={seoHeading}
       updatedLabel="Здесь мы публикуем все важные обновления — новые функции, улучшения и исправления."
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "48px" }}>

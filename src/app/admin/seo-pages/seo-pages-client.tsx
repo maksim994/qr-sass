@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi, parseApiResponse } from "@/lib/client-api";
 import { adminDate } from "@/lib/admin-list";
-import { seoLengthWarnings } from "@/lib/seo-page-overrides";
+import { seoLengthWarnings } from "@/lib/seo-page-fields";
 import { MSG } from "@/lib/user-messages";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import adminStyles from "@/components/admin/admin.module.css";
@@ -127,6 +127,9 @@ function SeoPageEditor({
   const busyRef = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
+  const [historyBusy, setHistoryBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(row.updatedAt);
   const [metaTitle, setMetaTitle] = useState(row.override?.metaTitle ?? "");
   const [metaDescription, setMetaDescription] = useState(row.override?.metaDescription ?? "");
@@ -157,12 +160,22 @@ function SeoPageEditor({
   }, [metaTitle, metaDescription, heading, noindexMode, row]);
 
   async function loadHistory() {
-    if (historyLoaded) return;
-    const response = await fetchApi(`/api/admin/seo-pages/history?path=${encodeURIComponent(row.path)}`);
-    const parsed = await parseApiResponse<{ revisions: Revision[] }>(response);
-    if (parsed.ok && parsed.data) {
+    if (historyLoaded || historyBusy) return;
+    setHistoryBusy(true);
+    setError(null);
+    try {
+      const response = await fetchApi(`/api/admin/seo-pages/history?path=${encodeURIComponent(row.path)}`);
+      const parsed = await parseApiResponse<{ revisions: Revision[] }>(response);
+      if (!parsed.ok || !parsed.data) {
+        setError(parsed.error || MSG.INVALID_PAYLOAD);
+        return;
+      }
       setRevisions(parsed.data.revisions);
       setHistoryLoaded(true);
+    } catch {
+      setError(MSG.AUTH_NETWORK_ERROR);
+    } finally {
+      setHistoryBusy(false);
     }
   }
 
@@ -171,6 +184,8 @@ function SeoPageEditor({
     busyRef.current = true;
     setBusy(true);
     setError(null);
+    setSaved(false);
+    setConflict(false);
     try {
       const response = await fetchApi("/api/admin/seo-pages", {
         method: "PATCH",
@@ -185,12 +200,17 @@ function SeoPageEditor({
         }),
       });
       const parsed = await parseApiResponse<{ updatedAt: string }>(response);
-      if (!parsed.ok || !parsed.data) throw new Error(parsed.error || MSG.INVALID_PAYLOAD);
+      if (!parsed.ok || !parsed.data) {
+        setConflict(parsed.code === "CONFLICT");
+        setError(parsed.error || MSG.INVALID_PAYLOAD);
+        return;
+      }
+      setSaved(true);
       setUpdatedAt(parsed.data.updatedAt);
       setHistoryLoaded(false);
       onSaved();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : MSG.INVALID_PAYLOAD);
+    } catch {
+      setError(MSG.AUTH_NETWORK_ERROR);
     } finally {
       busyRef.current = false;
       setBusy(false);
@@ -202,6 +222,8 @@ function SeoPageEditor({
     busyRef.current = true;
     setBusy(true);
     setError(null);
+    setSaved(false);
+    setConflict(false);
     try {
       const response = await fetchApi("/api/admin/seo-pages/restore", {
         method: "POST",
@@ -209,12 +231,24 @@ function SeoPageEditor({
         body: JSON.stringify({ path: row.path, revisionId, expectedUpdatedAt: updatedAt }),
       });
       const parsed = await parseApiResponse<{ updatedAt: string }>(response);
-      if (!parsed.ok || !parsed.data) throw new Error(parsed.error || MSG.INVALID_PAYLOAD);
+      if (!parsed.ok || !parsed.data) {
+        setConflict(parsed.code === "CONFLICT");
+        setError(parsed.error || MSG.INVALID_PAYLOAD);
+        return;
+      }
+      setSaved(true);
       setUpdatedAt(parsed.data.updatedAt);
+      const snapshot = revisions.find(revision => revision.id === revisionId)?.snapshot;
+      if (snapshot) {
+        setMetaTitle(snapshot.metaTitle ?? "");
+        setMetaDescription(snapshot.metaDescription ?? "");
+        setHeading(snapshot.heading ?? "");
+        setNoindexMode(snapshot.noindex == null ? "default" : snapshot.noindex ? "yes" : "no");
+      }
       setHistoryLoaded(false);
       onSaved();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : MSG.INVALID_PAYLOAD);
+    } catch {
+      setError(MSG.AUTH_NETWORK_ERROR);
     } finally {
       busyRef.current = false;
       setBusy(false);
@@ -225,7 +259,7 @@ function SeoPageEditor({
     <aside className={styles.editor} aria-label={`Редактор ${row.path}`}>
       <div className={styles.editorHead}>
         <h2>{row.path}</h2>
-        <Button type="button" variant="secondary" size="sm" onClick={onClose}>
+        <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={busy}>
           Закрыть
         </Button>
       </div>
@@ -237,8 +271,10 @@ function SeoPageEditor({
           {error}
         </Alert>
       ) : null}
+      {conflict ? <Button type="button" variant="secondary" onClick={onSaved}>Загрузить актуальную версию</Button> : null}
+      {saved ? <p role="status">{MSG.SEO_PAGE_SAVED}</p> : null}
       <Field label="Title (override)">
-        <Input value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} disabled={busy} />
+        <Input maxLength={500} value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} disabled={busy} />
       </Field>
       {preview.warnings.title ? <p className={styles.warn}>{preview.warnings.title}</p> : null}
       <Field label="Description (override)">
@@ -247,12 +283,13 @@ function SeoPageEditor({
           value={metaDescription}
           onChange={(e) => setMetaDescription(e.target.value)}
           rows={4}
+          maxLength={1000}
           disabled={busy}
         />
       </Field>
       {preview.warnings.description ? <p className={styles.warn}>{preview.warnings.description}</p> : null}
       <Field label="H1 (override)">
-        <Input value={heading} onChange={(e) => setHeading(e.target.value)} disabled={busy} />
+        <Input maxLength={500} value={heading} onChange={(e) => setHeading(e.target.value)} disabled={busy} />
       </Field>
       <Field label="Noindex">
         <Select
@@ -284,8 +321,8 @@ function SeoPageEditor({
         <Button type="button" onClick={save} disabled={busy}>
           {busy ? "Сохраняем…" : "Сохранить"}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => void loadHistory()} disabled={busy}>
-          История
+        <Button type="button" variant="secondary" onClick={() => void loadHistory()} disabled={busy || historyBusy}>
+          {historyBusy ? "Загружаем историю…" : "История"}
         </Button>
       </div>
       {historyLoaded ? (

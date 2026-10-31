@@ -1,3 +1,4 @@
+import { applySeoOverridesToMetadata, getSeoPageHeading } from "@/lib/seo-page-overrides";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
@@ -5,13 +6,20 @@ import { LegalArticleLayout } from "@/components/legal/legal-article-layout";
 import { QR_LIFETIME, QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
 import { publicSiteUrl } from "@/lib/public-url";
 
-export const metadata: Metadata = {
+export const dynamic = "force-dynamic";
+
+const defaultMetadata: Metadata = {
   title: `${QR_LIFETIME.title} — qr-s.ru`,
   description: "Напечатанные QR продолжают открываться после окончания тарифа. Два динамических кода бесплатно: меняйте ссылку в кабинете без перепечатки.",
   alternates: { canonical: publicSiteUrl(QR_LIFETIME_PATH) },
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  return applySeoOverridesToMetadata("/qr-lifetime", defaultMetadata);
+}
+
 export default async function QrLifetimePage() {
+  const seoHeading = await getSeoPageHeading("/qr-lifetime", QR_LIFETIME.title);
   const session = await getSession();
 
   return (
@@ -19,7 +27,7 @@ export default async function QrLifetimePage() {
       contents={[{ id: "printed", title: "Что происходит после печати" }, { id: "dynamic", title: "Динамический QR" }, { id: "static", title: "Статический QR" }, { id: "billing", title: "Тариф и пробный период" }, { id: "account", title: "Удаление аккаунта" }]}
       session={session}
       eyebrow="Правила сервиса"
-      title={QR_LIFETIME.title}
+      title={seoHeading}
       updatedLabel={`Последнее обновление: ${new Date(QR_LIFETIME.updated).toLocaleDateString("ru-RU")}`}
     >
       <h2 id="printed">Что происходит после печати</h2>

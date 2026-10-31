@@ -1,70 +1,26 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { getDb } from "@/lib/db";
 import { landingMetadata } from "@/lib/landing-seo";
 import { NOINDEX_ROBOTS } from "@/lib/seo-hygiene";
+import { mergeSeoFields, type SeoOverrideSnapshot, type ResolvedSeoFields } from "@/lib/seo-page-fields";
 import { publicSiteUrl } from "@/lib/public-url";
-import { getSeoPageCatalogEntry, type SeoPageCatalogEntry } from "@/lib/seo-page-registry";
+import { getSeoPageCatalog, getSeoPageCatalogEntry, type SeoPageCatalogEntry } from "@/lib/seo-page-registry";
 import type { SearchLanding } from "@/lib/search-landing-types";
 
-export type SeoOverrideSnapshot = {
-  metaTitle: string | null;
-  metaDescription: string | null;
-  heading: string | null;
-  noindex: boolean | null;
-};
+export type { SeoOverrideSnapshot, ResolvedSeoFields } from "@/lib/seo-page-fields";
 
-export type ResolvedSeoFields = {
-  title: string;
-  description: string;
-  heading: string;
-  noindex: boolean;
-};
-
-type OverrideRow = {
-  path: string;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  heading: string | null;
-  noindex: boolean | null;
-  updatedAt: Date;
-};
-
-const CACHE_TTL_MS = 60_000;
-let cache: { loadedAt: number; map: Map<string, OverrideRow> } | null = null;
-
-export function invalidateSeoPageOverrideCache(): void {
-  cache = null;
-}
-
-function trimOrNull(value: string | null | undefined): string | null {
-  if (value == null) return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
-}
-
-async function loadOverrideMap(): Promise<Map<string, OverrideRow>> {
-  if (cache && Date.now() - cache.loadedAt < CACHE_TTL_MS) return cache.map;
+// Memoized only within a render request: edits are visible on the next request,
+// including in another worker. A process-local TTL cannot be invalidated reliably.
+const loadOverrideMap = cache(async () => {
   try {
     const rows = await getDb().seoPageOverride.findMany();
-    const map = new Map(rows.map((row) => [row.path, row]));
-    cache = { loadedAt: Date.now(), map };
-    return map;
+    return new Map(rows.map(row => [row.path, row]));
   } catch {
+    // Public pages keep their code defaults while the additive migration is pending.
     return new Map();
   }
-}
-
-export function mergeSeoFields(
-  defaults: Pick<SeoPageCatalogEntry, "title" | "description" | "heading" | "noindex">,
-  override: SeoOverrideSnapshot | null | undefined,
-): ResolvedSeoFields {
-  return {
-    title: trimOrNull(override?.metaTitle) ?? defaults.title,
-    description: trimOrNull(override?.metaDescription) ?? defaults.description,
-    heading: trimOrNull(override?.heading) ?? defaults.heading ?? defaults.title,
-    noindex: override?.noindex ?? defaults.noindex,
-  };
-}
+});
 
 export async function getSeoOverrideSnapshot(path: string): Promise<SeoOverrideSnapshot | null> {
   const map = await loadOverrideMap();
@@ -133,20 +89,35 @@ export async function buildPathMetadata(
   };
 }
 
-export function snapshotIsEmpty(snapshot: SeoOverrideSnapshot): boolean {
-  return (
-    !trimOrNull(snapshot.metaTitle) &&
-    !trimOrNull(snapshot.metaDescription) &&
-    !trimOrNull(snapshot.heading) &&
-    snapshot.noindex === null
-  );
+export async function getSeoPageHeading(path: string, fallback: string): Promise<string> {
+  return (await getSeoOverrideSnapshot(path))?.heading?.trim() || fallback;
 }
 
-export function seoLengthWarnings(title: string, description: string): { title?: string; description?: string } {
-  const warnings: { title?: string; description?: string } = {};
-  if (title.length > 60) warnings.title = `Title длиннее 60 символов (${title.length}).`;
-  if (description.length > 160) warnings.description = `Description длиннее 160 символов (${description.length}).`;
-  return warnings;
+/** Preserve each route's canonical, OG and query indexing policy. */
+export async function applySeoOverridesToMetadata(
+  path: string,
+  defaults: Metadata,
+  forceNoindex = false,
+): Promise<Metadata> {
+  const override = await getSeoOverrideSnapshot(path);
+  const title = override?.metaTitle?.trim();
+  const description = override?.metaDescription?.trim();
+  const robots = forceNoindex ? NOINDEX_ROBOTS
+    : override?.noindex == null ? defaults.robots
+      : override.noindex ? NOINDEX_ROBOTS : { index: true, follow: true };
+  return {
+    ...defaults,
+    ...(title ? { title: { absolute: title } } : {}),
+    ...(description ? { description } : {}),
+    ...(robots ? { robots } : {}),
+    ...(title || description ? {
+      openGraph: { ...defaults.openGraph, ...(title ? { title } : {}), ...(description ? { description } : {}) },
+      twitter: { ...defaults.twitter, ...(title ? { title } : {}), ...(description ? { description } : {}) },
+    } : {}),
+  };
 }
 
-export { NOINDEX_ROBOTS };
+export async function seoPageIndexing(): Promise<Map<string, boolean>> {
+  const overrides = await loadOverrideMap();
+  return new Map(getSeoPageCatalog().map(entry => [entry.path, overrides.get(entry.path)?.noindex ?? entry.noindex]));
+}

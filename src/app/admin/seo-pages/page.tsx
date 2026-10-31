@@ -10,7 +10,7 @@ export default async function AdminSeoPagesPage() {
     <div>
       <AdminPageHeader
         title="SEO-страницы"
-        description="Мета-теги публичных URL без деплоя. Пустые поля берут значения из кода. После сохранения кэш сбрасывается автоматически."
+        description="Мета-теги публичных URL без деплоя. Пустые поля берут значения из кода. Изменения применяются при следующем открытии страницы."
       />
       <SeoPagesAdmin rows={rows} />
     </div>

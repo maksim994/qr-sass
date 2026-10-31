@@ -16,13 +16,18 @@ const patchSchema = z
     metaDescription: z.string().max(1000).nullable().optional(),
     heading: z.string().max(500).nullable().optional(),
     noindex: z.boolean().nullable().optional(),
-    expectedUpdatedAt: z.string().datetime({ offset: true }).nullable().optional(),
+    expectedUpdatedAt: z.string().datetime({ offset: true }).nullable(),
   })
   .strict();
 
-export async function GET() {
+export async function GET(req: Request) {
+  const requestId = getRequestId(req);
+  const admin = await getAdminOrNull();
+  if (!admin) return apiError(MSG.UNAUTHORIZED, "UNAUTHORIZED", 401, undefined, requestId);
   const rows = await listSeoPageAdminRows();
-  return apiSuccess({ rows });
+  const response = apiSuccess({ rows }, 200, requestId);
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
 }
 
 export async function PATCH(req: Request) {

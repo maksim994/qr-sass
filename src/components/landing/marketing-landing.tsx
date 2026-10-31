@@ -74,7 +74,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
           </figure>
         </section>
         <section className={`${s.container} ${s.benefits}`} aria-labelledby="benefits-title">
-          <h2 id="benefits-title">{page.heading}</h2>
+          <h2 id="benefits-title">{display.heading}</h2>
           <ul>{page.bullets.map(bullet => <li key={bullet}><span aria-hidden="true">→</span>{bullet}</li>)}</ul>
         </section>
         {scenario && <section id="create" className={`${s.container} ${s.create}`} aria-labelledby="create-title">

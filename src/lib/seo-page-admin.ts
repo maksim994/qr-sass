@@ -1,16 +1,16 @@
-import { Prisma } from "@prisma/client";
+import { getPlan } from "@/lib/plans";
+import type { Prisma } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import {
   getSeoPageCatalog,
   getSeoPageCatalogEntry,
   type SeoPageCatalogEntry,
+  pricingSeoDefaults,
 } from "@/lib/seo-page-registry";
 import {
-  invalidateSeoPageOverrideCache,
   mergeSeoFields,
-  snapshotIsEmpty,
   type SeoOverrideSnapshot,
-} from "@/lib/seo-page-overrides";
+} from "@/lib/seo-page-fields";
 import { sitemapPathname } from "@/lib/seo-hygiene";
 
 type Actor = { actorId: string; actorName: string };
@@ -45,12 +45,17 @@ function rowToSnapshot(row: {
 
 export async function listSeoPageAdminRows(): Promise<SeoPageAdminRow[]> {
   const db = getDb();
-  const [catalog, overrides] = await Promise.all([
+  const [catalog, overrides, pro] = await Promise.all([
     Promise.resolve(getSeoPageCatalog()),
     db.seoPageOverride.findMany(),
+    getPlan("PRO"),
   ]);
   const byPath = new Map(overrides.map((row) => [row.path, row]));
-  return catalog.map((entry) => {
+  const pricing = pricingSeoDefaults(pro.priceRub);
+  return catalog.map((catalogEntry) => {
+    const entry = catalogEntry.path === "/pricing"
+      ? { ...catalogEntry, ...pricing, title: `${pricing.title} | qr-s.ru` }
+      : catalogEntry;
     const overrideRow = byPath.get(entry.path);
     const override = overrideRow ? rowToSnapshot(overrideRow) : null;
     return {
@@ -103,7 +108,7 @@ export async function saveSeoPageOverride(
   path: string,
   input: SeoOverrideSnapshot,
   actor: Actor,
-  expectedUpdatedAt?: string | null,
+  expectedUpdatedAt: string | null,
 ): Promise<{ updatedAt: string }> {
   const normalized = sitemapPathname(path);
   if (!getSeoPageCatalogEntry(normalized)) throw new SeoPageNotFoundError();
@@ -116,52 +121,50 @@ export async function saveSeoPageOverride(
   };
 
   const db = getDb();
-  const result = await db.$transaction(async (tx) => {
-    const current = await tx.seoPageOverride.findUnique({ where: { path: normalized } });
-    if (expectedUpdatedAt) {
-      const expected = new Date(expectedUpdatedAt).getTime();
-      const actual = current?.updatedAt.getTime() ?? 0;
-      if (!current || expected !== actual) throw new SeoPageConflictError();
-    }
+  let updatedAt: Date;
+  try {
+    updatedAt = await db.$transaction(async (tx) => {
+      // Keep empty rows versioned too: clearing fields must not erase the version.
+      // Conditional UPDATE takes the row lock before revision numbering, so concurrent
+      // edits and restores cannot both claim the same version.
+      const nextUpdatedAt = new Date(Math.max(Date.now(), expectedUpdatedAt ? Date.parse(expectedUpdatedAt) + 1 : 0));
+      if (expectedUpdatedAt === null) {
+        await tx.seoPageOverride.create({ data: { path: normalized, ...snapshot, updatedAt: nextUpdatedAt } });
+      } else {
+        const claimed = await tx.seoPageOverride.updateMany({
+          where: { path: normalized, updatedAt: new Date(expectedUpdatedAt) },
+          data: { ...snapshot, updatedAt: nextUpdatedAt },
+        });
+        if (claimed.count !== 1) throw new SeoPageConflictError();
+      }
 
-    let row = current;
-    if (snapshotIsEmpty(snapshot)) {
-      if (current) await tx.seoPageOverride.delete({ where: { path: normalized } });
-      row = null;
-    } else if (current) {
-      row = await tx.seoPageOverride.update({
-        where: { path: normalized },
-        data: snapshot,
+      const number = await nextRevisionNumber(tx, normalized);
+      await tx.seoPageOverrideRevision.create({
+        data: {
+          path: normalized,
+          number,
+          snapshot,
+          actorId: actor.actorId,
+          actorName: actor.actorName,
+        },
       });
-    } else {
-      row = await tx.seoPageOverride.create({
-        data: { path: normalized, ...snapshot },
-      });
-    }
 
-    const number = await nextRevisionNumber(tx, normalized);
-    await tx.seoPageOverrideRevision.create({
-      data: {
-        path: normalized,
-        number,
-        snapshot,
-        actorId: actor.actorId,
-        actorName: actor.actorName,
-      },
+      return nextUpdatedAt;
     });
-
-    return row;
-  });
-
-  invalidateSeoPageOverrideCache();
-  return { updatedAt: result?.updatedAt.toISOString() ?? new Date().toISOString() };
+  } catch (error) {
+    // Two first-time editors may race to create the same path. Rollback leaves
+    // the winner and its history untouched; report the loser as a normal conflict.
+    if (error && typeof error === "object" && "code" in error && error.code === "P2002") throw new SeoPageConflictError();
+    throw error;
+  }
+  return { updatedAt: updatedAt.toISOString() };
 }
 
 export async function restoreSeoPageRevision(
   path: string,
   revisionId: string,
   actor: Actor,
-  expectedUpdatedAt?: string | null,
+  expectedUpdatedAt: string | null,
 ): Promise<{ updatedAt: string }> {
   const normalized = sitemapPathname(path);
   const revision = await getDb().seoPageOverrideRevision.findUnique({ where: { id: revisionId } });
