@@ -11,6 +11,7 @@ import { getDb } from "@/lib/db";
 import { getSeoPages, type SeoPage } from "@/lib/seo-content";
 import { landingDetails } from "@/lib/landing-details";
 import { landingStructuredData } from "@/lib/landing-seo";
+import { resolveSeoFieldsForPath } from "@/lib/seo-page-overrides";
 import { jsonForHtmlScript } from "@/lib/html-script";
 import { publicSiteUrl } from "@/lib/public-url";
 import { QR_LIFETIME_PATH } from "@/lib/qr-lifetime-policy";
@@ -22,7 +23,17 @@ import s from "./marketing-landing.module.css";
  * The first viewport pairs a large task-specific heading and CTA with a printable QR and its destination.
  */
 export async function MarketingLanding({ page, scenario }: { page: SeoPage; scenario?: ScenarioLanding }) {
-  const [session,pro] = await Promise.all([getSession(),getPlan("PRO")]);
+  const [session, pro, resolved] = await Promise.all([
+    getSession(),
+    getPlan("PRO"),
+    resolveSeoFieldsForPath(`/${page.slug}`, {
+      title: page.title,
+      description: page.description,
+      heading: page.heading,
+      noindex: false,
+    }),
+  ]);
+  const display = { ...page, title: resolved.title, description: resolved.description, heading: resolved.heading };
   const detail = landingDetails[page.slug];
   let isAdmin = false;
   if (session?.sub) {
@@ -44,8 +55,8 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
         </nav>
         <section className={`${s.container} ${s.hero}`} aria-labelledby="landing-title">
           <div className={s.heroCopy}>
-            <h1 id="landing-title">{page.heading}</h1>
-            <p>{scenario?.lead ?? page.description}</p>
+            <h1 id="landing-title">{display.heading}</h1>
+            <p>{scenario?.lead ?? display.description}</p>
             <div className={s.actions}>
               <Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">→</span></Button>
               <a href="#how-it-works" className={s.textLink}>Как это работает <span aria-hidden="true">↓</span></a>
@@ -81,7 +92,7 @@ export async function MarketingLanding({ page, scenario }: { page: SeoPage; scen
         <section className={`${s.container} ${s.faq}`} aria-labelledby="faq-title"><div><h2 id="faq-title">Вопросы<br />перед стартом.</h2><p>О возможностях и ограничениях<br />без мелкого шрифта.</p></div><div>{detail.faqs.map(faq => <details key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}</div></section>
         <nav className={`${s.container} ${s.related}`} aria-label="Другие сценарии QR"><h2>Ещё задачи для вашего QR.</h2><div>{page.articles?.map(([slug, label]) => <Link href={`/blog/${slug}`} key={slug}>{label}<span aria-hidden="true">→</span></Link>)}{getSeoPages().filter(item => item.slug !== page.slug).map(item => <Link href={`/${item.slug}`} key={item.slug}>{landingDetails[item.slug].label}<span aria-hidden="true">→</span></Link>)}</div></nav>
         <section className={`${s.container} ${s.closing}`} aria-labelledby="closing-title"><div><h2 id="closing-title">Теперь — ваш QR.</h2><p>Выберите содержимое, настройте оформление и проверьте перед печатью.</p></div><Button href={actionHref} size="lg">{page.cta}<span aria-hidden="true">→</span></Button></section>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForHtmlScript(landingStructuredData(page, detail.label, detail.faqs)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForHtmlScript(landingStructuredData({ ...display, keywords: page.keywords }, detail.label, detail.faqs)) }} />
       </main>
       <SiteFooter session={session} />
     </div>

@@ -1,0 +1,107 @@
+.layout {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+    align-items: start;
+  }
+}
+
+.filter {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.pathButton {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pathLabel {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.selectedRow {
+  background: var(--color-primary-subtle);
+}
+
+.editor {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.editorHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.editorHead h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.defaults,
+.hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.warn {
+  margin: -6px 0 0;
+  color: var(--color-warning, #b45309);
+  font-size: 13px;
+}
+
+.preview {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.preview h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.history li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}

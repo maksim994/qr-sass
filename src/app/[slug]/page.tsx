@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getSeoPage, getSeoPages } from "@/lib/seo-content";
 import { isScenarioLandingSlug } from "@/lib/scenario-landings";
 import { landingMetadata } from "@/lib/landing-seo";
+import { resolveSeoFieldsForPath } from "@/lib/seo-page-overrides";
 import { MarketingLanding } from "@/components/landing/marketing-landing";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +18,38 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const path = `/${slug}`;
   const searchPage = getSearchLanding(slug);
-  if (searchPage) return landingMetadata({ ...searchPage, keywords: [], noindex: searchPage.noindex });
+  if (searchPage) {
+    const resolved = await resolveSeoFieldsForPath(path, {
+      title: searchPage.title,
+      description: searchPage.description,
+      heading: searchPage.heading,
+      noindex: Boolean(searchPage.noindex),
+    });
+    return landingMetadata({
+      slug,
+      title: resolved.title,
+      description: resolved.description,
+      keywords: [],
+      noindex: resolved.noindex,
+    });
+  }
   const page = getSeoPage(slug);
   if (!page || isScenarioLandingSlug(slug)) notFound();
-  return landingMetadata(page);
+  const resolved = await resolveSeoFieldsForPath(path, {
+    title: page.title,
+    description: page.description,
+    heading: page.heading,
+    noindex: false,
+  });
+  return landingMetadata({
+    slug,
+    title: resolved.title,
+    description: resolved.description,
+    keywords: page.keywords,
+    noindex: resolved.noindex,
+  });
 }
 
 export default async function SeoLandingPage({ params }: PageProps) {

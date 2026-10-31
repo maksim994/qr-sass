@@ -35,4 +35,5 @@
 .links h2{margin-bottom:20px}
 .links>a{display:flex;justify-content:space-between;gap:16px;padding-block:16px;border-bottom:1px solid var(--border-subtle);font-size:16px;line-height:1.5;color:var(--text-link)}
 .page a:focus-visible,.page summary:focus-visible{outline:3px solid var(--border-focus);outline-offset:4px}
+.examplePlaceholder{margin-top:20px;min-height:220px;border:2px dashed var(--border-default);border-radius:16px;display:grid;place-items:center;padding:24px;background:var(--surface-subtle);color:var(--text-muted);font-size:15px;text-align:center}
 @media(max-width:800px){.breadcrumb{font-size:12px;padding-block:16px}.intro{padding:12px 0 24px}.intro h1{font-size:30px}.intro p{font-size:15px}.hosted{display:block}.hosted a{margin-top:16px}.how,.textSection,.choice,.faq,.links{margin-top:48px}.how li>div,.how figure{display:block;width:100%;padding:0}.how figure{margin-top:20px}.how ol{gap:32px;padding-left:20px}.how li{padding-left:4px}.how p,.textSection p,.choice p{font-size:15px}.choice>div,.faq{grid-template-columns:1fr;gap:24px}.links>a{font-size:15px}}

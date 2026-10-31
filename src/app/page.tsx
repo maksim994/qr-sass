@@ -20,24 +20,23 @@ import { HomeQuickStart } from "@/components/landing/home-quick-start";
 import { HomeHero, IndustryShowcase, TypeExplorer, DynamicDemo, DesignPlayground, AnalyticsDemo, HomeFooterExperience } from "@/components/landing/home-experience";
 import { HomeQrPreview } from "@/components/landing/home-qr-preview";
 import { publicSiteUrl } from "@/lib/public-url";
+import { buildPathMetadata } from "@/lib/seo-page-overrides";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
 import { STATIC_QR_TYPES } from "@/lib/static-qr";
 import { PricingGoal } from "@/components/landing/pricing-goal";
 import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
-const baseUrl = publicSiteUrl();
-export const metadata: Metadata = {
-  title: { absolute: "Генератор QR-кодов онлайн бесплатно — создать QR-код | QR-S" },
-  description: "Создать QR-код онлайн бесплатно и без регистрации: ссылка, Wi-Fi, контакты и текст. Скачайте PNG или SVG. Два динамических QR-кода бесплатно после регистрации.",
-  keywords: ["генератор qr кодов", "создать qr код", "динамический qr код", "qr код онлайн"],
-  alternates: { canonical: baseUrl },
-  openGraph: { type: "website",
+const homeKeywords = ["генератор qr кодов", "создать qr код", "динамический qr код", "qr код онлайн"];
+export async function generateMetadata(): Promise<Metadata> {
+  return buildPathMetadata("/", {
     title: "Генератор QR-кодов онлайн бесплатно — создать QR-код | QR-S",
-    description: "Создайте QR-код для ссылки, Wi-Fi или контактов бесплатно и без регистрации. Скачайте PNG или SVG. Два динамических кода бесплатно после регистрации.",
-    url: baseUrl,
-  },
-};
+    description:
+      "Создать QR-код онлайн бесплатно и без регистрации: ссылка, Wi-Fi, контакты и текст. Скачайте PNG или SVG. Два динамических QR-кода бесплатно после регистрации.",
+    keywords: homeKeywords,
+  });
+}
+const baseUrl = publicSiteUrl();
 
 const faqs = [
   { question: "Можно создать QR-код бесплатно?", answer: "Да. Статические QR можно создавать и скачивать в PNG и SVG без регистрации и без ограничения количества. Аккаунт нужен только для необязательного облачного архива; его объём зависит от тарифа." },

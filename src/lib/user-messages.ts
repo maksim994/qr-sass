@@ -239,6 +239,10 @@ export const MSG = {
   QR_TYPE_DISABLED: "Создание QR-кодов этого типа временно отключено.",
   QR_KIND_NOT_SUPPORTED: "Для этого типа QR доступен только статический режим.",
   INVALID_DISABLED_QR_TYPES: "Некорректный список отключённых типов QR-кодов.",
+  SEO_PAGE_INPUT_INVALID: "Проверьте поля SEO-страницы: путь и длины title, description и H1.",
+  SEO_PAGE_NOT_FOUND: "Страница не найдена в каталоге SEO или версия для отката отсутствует.",
+  SEO_PAGE_CONFLICT: "Страницу уже изменил другой администратор. Обновите список и повторите сохранение.",
+  SEO_PAGE_PATH_REQUIRED: "Укажите URL страницы.",
   PLAN_DYNAMIC_REQUIRED:
     `Бесплатные динамические коды (${COMMERCIAL.free.dynamic}) уже использованы. Чтобы создать ещё, попробуйте Про ${COMMERCIAL.trialDays} дней без карты.`,
   QR_LIMIT_REACHED: (limit: number, remaining: number, requested: number) =>
