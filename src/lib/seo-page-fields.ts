@@ -39,4 +39,3 @@ export function seoLengthWarnings(title: string, description: string): { title?:
   if (description.length > 160) warnings.description = `Description длиннее 160 символов (${description.length}).`;
   return warnings;
 }
-
