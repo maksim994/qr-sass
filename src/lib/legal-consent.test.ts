@@ -11,9 +11,10 @@ import { legalSnapshot as beforePdChanges } from "./legal-history/2026-10-21.2-c
 import { legalSnapshot as integratedEdition } from "./legal-history/2026-10-21.3.ts";
 import { legalSnapshot as analyticsEdition } from "./legal-history/2026-10-21.2-analytics.ts";
 import { legalSnapshot as abuseEdition } from "./legal-history/2026-10-25.1.ts";
+import { legalSnapshot as safeBrowsingEdition } from "./legal-history/2026-10-26.1.ts";
 
 test("Yandex-only edition preserves past receipts and existing cookie choices", () => {
-  const current = legalSnapshot(), previous = abuseEdition();
+  const current = safeBrowsingEdition(), previous = abuseEdition();
   assert.equal(current.version, "2026-10-26.1");
   assert.equal(current.privacyVersion, "2026-10-26.1");
   assert.equal(previous.version, "2026-10-25.1");
@@ -32,6 +33,25 @@ test("Yandex-only edition preserves past receipts and existing cookie choices", 
   assert.equal(COOKIE_CONSENT_VERSION, "2026-10-21.3");
   const now = Date.parse("2026-10-26T09:00:00Z");
   assert.equal(parseCookieChoice(JSON.stringify({ choice: "accepted", version: "2026-10-21.3", at: now - 86400000 }), now), "accepted");
+});
+
+test("link content responsibility edition adds section 5 and renumbers later terms", () => {
+  const current = legalSnapshot(), previous = safeBrowsingEdition();
+  assert.equal(current.version, "2026-11-01.1");
+  assert.equal(current.privacyVersion, previous.privacyVersion);
+  assert.deepEqual(current.consent, previous.consent);
+  assert.deepEqual(current.privacy, previous.privacy);
+  assert.deepEqual(current.terms.slice(0, 4), previous.terms.slice(0, 4));
+  assert.equal(current.terms[4]?.title, "5. Ответственность за содержимое ссылок");
+  assert.match(JSON.stringify(current.terms[4]), /экстремистские/);
+  assert.match(JSON.stringify(current.terms[4]), /без предварительного уведомления и без объяснения причин/);
+  for (let i = 5; i < current.terms.length; i++) {
+    const prev = previous.terms[i - 1];
+    const expectedTitle = prev?.title.replace(/^(\d+)\./, (_, n) => `${Number(n) + 1}.`);
+    assert.equal(current.terms[i]?.title, expectedTitle);
+    assert.deepEqual(current.terms[i]?.paragraphs, prev?.paragraphs);
+    assert.deepEqual(current.terms[i]?.id, prev?.id);
+  }
 });
 
 test("newsletter permission is optional, defaults off and stays separate from required legal consent", () => {
