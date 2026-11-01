@@ -45,13 +45,23 @@ function decode(value) {
 }
 function documentFields(html) {
   const meta = (name) => decode(html.match(new RegExp(`<meta name="${name}" content="([^"]*)"`))?.[1] || "");
-  return { title: decode(html.match(/<title>([\s\S]*?)<\/title>/)?.[1] || ""), description: meta("description"), robots: meta("robots"), heading: decode((html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] || "").replace(/<[^>]*>/g, "")) };
+  return { title: decode(html.match(/<title>([\s\S]*?)<\/title>/)?.[1] || ""), description: meta("description"), robots: meta("robots"), heading: decode((html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] || "").replace(/<[^>]*>/g, "")),
+    canonical: decode(html.match(/<link rel="canonical" href="([^"]*)"/)?.[1] || ""),
+    ogUrl: decode(html.match(/<meta property="og:url" content="([^"]*)"/)?.[1] || ""),
+  };
 }
 async function page(path) {
   const response = await fetch(origin + path, { headers: { "User-Agent": "Googlebot" } });
   const html = await response.text();
   assert.equal(response.status, 200, `${path}: ${html.slice(0, 500)}`);
-  return documentFields(html);
+  const fields = documentFields(html);
+  for (const value of [fields.canonical, fields.ogUrl]) {
+    const url = new URL(value);
+    assert.doesNotMatch(url.pathname, /\/\//, `${path}: doubled separator in canonical/og:url`);
+    assert.equal(url.origin, new URL(origin).origin);
+    assert.equal(url.pathname, new URL(path, origin).pathname);
+  }
+  return fields;
 }
 
 try {
@@ -102,6 +112,21 @@ try {
     assert.deepEqual(restoredDefaults, defaults, `${path}: clearing restores the actual code defaults`);
     check(`metadata, H1, robots, sitemap and clearing work for ${path}`);
   }
+
+  for (const slug of ["qr-kod-dlya-wifi-gostyam", "qr-kod-na-instagram"]) {
+    assert.equal(await db.blogPost.findUnique({ where: { slug } }), null, "Requires an unused synthetic article slug");
+    await db.blogPost.create({ data: { slug, title: `SEO fixture ${slug}`, content: "<p>Local fixture</p>", publishedAt: new Date(), contentUpdatedAt: new Date("2026-10-25"), createdById: users[0] } });
+    blogSlugs.push(slug);
+    const article = await page(`/blog/${slug}`);
+    if (slug === "qr-kod-na-instagram") assert.match(article.robots, /noindex/);
+    else assert.doesNotMatch(article.robots, /noindex/);
+  }
+  const sitemapXml = await (await fetch(origin + "/sitemap.xml")).text();
+  const sitemapUrls = [...sitemapXml.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => new URL(decode(match[1])));
+  for (const url of sitemapUrls) assert.doesNotMatch(url.pathname, /\/\//);
+  assert.ok(sitemapUrls.some(url => url.pathname === "/blog/qr-kod-dlya-wifi-gostyam"));
+  assert.ok(!sitemapUrls.some(url => url.pathname === "/blog/qr-kod-na-instagram"));
+  check("blog canonical/OG URLs are normalized; temporary Instagram noindex is absent from sitemap");
 
   // Page 2 is noindex, follow regardless of the root /blog override.
   // Synthetic published posts ensure pagination is a real 200 response.

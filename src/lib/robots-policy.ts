@@ -1,3 +1,5 @@
+import { publicSiteUrl } from "@/lib/public-url";
+
 /** Keep configured rules, but never blanket-block public files under /api/. */
 export function applyPublicRobotsPolicy(content: string): string {
   const sitemaps: string[] = [];
@@ -32,5 +34,6 @@ export function applyPublicRobotsPolicy(content: string): string {
     if (!line.trim()) return false;
     const key = line.trim(); if (seen.has(key)) return false; seen.add(key); return true;
   }).join("\n").trim();
-  return `${result}\n\n${[...new Set(sitemaps)].join("\n")}\n`;
+  const ownSitemap = `Sitemap: ${publicSiteUrl("/sitemap.xml")}`;
+  return `${result}\n\n${[...new Set([...sitemaps, ownSitemap])].join("\n")}\n`;
 }

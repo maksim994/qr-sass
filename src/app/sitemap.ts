@@ -1,42 +1,25 @@
-import { seoPageIndexing } from "@/lib/seo-page-overrides";
+import { seoPageSitemapState } from "@/lib/seo-page-overrides";
 import type { MetadataRoute } from "next";
 import { getDb } from "@/lib/db";
-import { publicOrigin } from "@/lib/public-url";
-import { buildIndexableStaticPaths, isDeniedSitemapPath } from "@/lib/seo-hygiene";
+import { buildSitemapEntries } from "@/lib/sitemap-entries";
 import { renderArticleBody } from "@/lib/blog-render";
 import { blogImageUrls } from "@/lib/blog-media-html";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = publicOrigin();
-
-  const indexing = await seoPageIndexing();
-  const staticPaths = new Set([...buildIndexableStaticPaths(), ...indexing.keys()]);
-  const staticEntries: MetadataRoute.Sitemap = [...staticPaths]
-    .filter((path) => !isDeniedSitemapPath(path) && indexing.get(path) !== true)
-    .map((path) => ({
-      url: path === "/" ? base : `${base}${path}`,
-      lastModified: new Date("2026-10-19T00:00:00Z"),
-    }));
-
-  let blogEntries: MetadataRoute.Sitemap = [];
-  try {
-    const db = getDb();
-    const blogPosts = await db.blogPost.findMany({
+  const db = getDb();
+  // Let DB failures return 5xx for a retry, rather than publishing a successful
+  // but incomplete sitemap that silently drops every blog article.
+  const [pages, blogPosts] = await Promise.all([
+    seoPageSitemapState(),
+    db.blogPost.findMany({
       where: { publishedAt: { not: null } },
-      select: { slug: true, updatedAt: true, contentUpdatedAt: true, content: true, format: true, faq: true, coverImageUrl: true },
-    });
-    blogEntries = blogPosts
-      .filter((post) => post.slug && !isDeniedSitemapPath(`/blog/${post.slug}`))
-      .map((post) => ({
-        url: `${base}/blog/${post.slug}`,
-        lastModified: post.contentUpdatedAt ?? post.updatedAt,
-        images: blogImageUrls(renderArticleBody(post.content, post.format === "markdown" ? "markdown" : "html", post.faq).html, post.coverImageUrl),
-      }));
-  } catch {
-    blogEntries = [];
-  }
-
-  return [...staticEntries, ...blogEntries].filter((entry) => !isDeniedSitemapPath(entry.url));
+      select: { slug: true, publishedAt: true, updatedAt: true, contentUpdatedAt: true, content: true, format: true, faq: true, coverImageUrl: true },
+    }),
+  ]);
+  return buildSitemapEntries(pages, blogPosts.map(post => ({
+    ...post,
+    images: blogImageUrls(renderArticleBody(post.content, post.format === "markdown" ? "markdown" : "html", post.faq).html, post.coverImageUrl),
+  })));
 }

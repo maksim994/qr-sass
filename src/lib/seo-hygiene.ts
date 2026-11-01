@@ -108,6 +108,12 @@ export function pathNeedsNoindexHeader(pathname: string): boolean {
 
 export const NOINDEX_ROBOTS = { index: false, follow: false } as const;
 
+// Temporary editorial hold requested by the owner. Keep the article available,
+// with a self-canonical and crawlable links; exclude it from discovery in sitemap.
+export function blogPostIndexing(slug: string): { index: boolean; follow: true } {
+  return { index: slug !== "qr-kod-na-instagram", follow: true };
+}
+
 export function blogListIndexing(page: number, categorySlug?: string | null): {
   canonicalPath: "/blog";
   robots: { index: boolean; follow: boolean };

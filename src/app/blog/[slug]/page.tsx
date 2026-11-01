@@ -13,6 +13,7 @@ import { RelatedPosts } from "@/components/blog/related-posts";
 import { ArticleShare } from "@/components/blog/article-share";
 import { buildArticleJsonLd, serializeArticleJsonLd } from "@/lib/blog-structured-data";
 import { publicSiteUrl } from "@/lib/public-url";
+import { blogPostIndexing } from "@/lib/seo-hygiene";
 import { blogImageSrcset, type ImageVariant } from "@/lib/blog-image-markup";
 import { renderArticleBody } from "@/lib/blog-render";
 import { sanitizeBlogFields } from "@/lib/blog-sanitize";
@@ -61,6 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: seoTitle,
     description: seoDescription,
     alternates: { canonical: url },
+    robots: blogPostIndexing(raw.slug),
     openGraph: {
       title: seoTitle,
       description: seoDescription,
