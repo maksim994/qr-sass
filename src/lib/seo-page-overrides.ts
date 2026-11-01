@@ -12,11 +12,12 @@ export type { SeoOverrideSnapshot, ResolvedSeoFields } from "@/lib/seo-page-fiel
 
 // Memoized only within a render request: edits are visible on the next request,
 // including in another worker. A process-local TTL cannot be invalidated reliably.
-const loadOverrideMap = cache(async () => {
+const loadOverrideMap = cache(async (strict = false) => {
   try {
     const rows = await getDb().seoPageOverride.findMany();
     return new Map(rows.map(row => [row.path, row]));
-  } catch {
+  } catch (error) {
+    if (strict) throw error;
     // Public pages keep their code defaults while the additive migration is pending.
     return new Map();
   }
@@ -93,7 +94,7 @@ export async function getSeoPageHeading(path: string, fallback: string): Promise
   return (await getSeoOverrideSnapshot(path))?.heading?.trim() || fallback;
 }
 
-/** Preserve each route's canonical, OG and query indexing policy. */
+/** Normalize canonical/OG identity while preserving each route's query indexing policy. */
 export async function applySeoOverridesToMetadata(
   path: string,
   defaults: Metadata,
@@ -102,22 +103,28 @@ export async function applySeoOverridesToMetadata(
   const override = await getSeoOverrideSnapshot(path);
   const title = override?.metaTitle?.trim();
   const description = override?.metaDescription?.trim();
+  const url = publicSiteUrl(path === "/" ? "" : path);
   const robots = options.preserveRobots ? defaults.robots
     : override?.noindex == null ? defaults.robots
       : override.noindex ? NOINDEX_ROBOTS : { index: true, follow: true };
   return {
     ...defaults,
+    alternates: { ...defaults.alternates, canonical: url },
+    openGraph: { ...defaults.openGraph, url, ...(title ? { title } : {}), ...(description ? { description } : {}) },
     ...(title ? { title: { absolute: title } } : {}),
     ...(description ? { description } : {}),
     ...(robots ? { robots } : {}),
     ...(title || description ? {
-      openGraph: { ...defaults.openGraph, ...(title ? { title } : {}), ...(description ? { description } : {}) },
       twitter: { ...defaults.twitter, ...(title ? { title } : {}), ...(description ? { description } : {}) },
     } : {}),
   };
 }
 
-export async function seoPageIndexing(): Promise<Map<string, boolean>> {
-  const overrides = await loadOverrideMap();
-  return new Map(getSeoPageCatalog().map(entry => [entry.path, overrides.get(entry.path)?.noindex ?? entry.noindex]));
+export async function seoPageSitemapState() {
+  const overrides = await loadOverrideMap(true);
+  return getSeoPageCatalog().map(entry => ({
+    path: entry.path,
+    noindex: overrides.get(entry.path)?.noindex ?? entry.noindex,
+    updatedAt: overrides.get(entry.path)?.updatedAt ?? null,
+  }));
 }

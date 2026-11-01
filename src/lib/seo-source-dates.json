@@ -1,0 +1,138 @@
+{
+  "/": {
+    "fingerprint": "060dff08d5d9e229033171d7f8a4001485986d19725d523ceedbce269346c26e",
+    "lastModified": "2026-11-01T15:48:31.423Z"
+  },
+  "/blog": {
+    "fingerprint": "14ec852a7373e0c8171339ab7ef732c390c044fa90b2d87ca2e5ffd1c51ed4cb",
+    "lastModified": "2026-11-01T15:48:31.448Z"
+  },
+  "/bulk-qr-generator": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.478Z"
+  },
+  "/changelog": {
+    "fingerprint": "18656fc09e355013e2c7d96235c3c080222e441bfbdd24144f14bb3ed26179ab",
+    "lastModified": "2026-11-01T15:48:31.504Z"
+  },
+  "/contacts": {
+    "fingerprint": "294ee872b921c8070e6d9eb48c7910dbc8add36986d4fa1cf57d3b94d967078c",
+    "lastModified": "2026-11-01T15:48:31.525Z"
+  },
+  "/dynamic-qr": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.549Z"
+  },
+  "/kak-izmenit-ssylku-v-qr-posle-pechati": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.573Z"
+  },
+  "/personal-data-consent": {
+    "fingerprint": "886d2df9cb7b211930408e761b0e422de412a97a9fe7a09dee2c62bfcc22b37e",
+    "lastModified": "2026-11-01T15:48:31.592Z"
+  },
+  "/pricing": {
+    "fingerprint": "3f13e426affbb74acf195e5f3f8bc8d65e933e5182147ad5a548909370d5b5ca",
+    "lastModified": "2026-11-01T15:48:31.611Z"
+  },
+  "/privacy-policy": {
+    "fingerprint": "e27bc994341f0a399ab6691e398eb4950c0f2cf696029d698aa369f9d2e81a51",
+    "lastModified": "2026-11-01T15:48:31.633Z"
+  },
+  "/qr-code-analytics": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.662Z"
+  },
+  "/qr-dlya-max": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.690Z"
+  },
+  "/qr-dlya-otzyvov-2gis": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.744Z"
+  },
+  "/qr-dlya-otzyvov-yandex-karty": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.783Z"
+  },
+  "/qr-dlya-telegram": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.823Z"
+  },
+  "/qr-dlya-vizitki": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.855Z"
+  },
+  "/qr-dlya-whatsapp": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.883Z"
+  },
+  "/qr-for-agencies": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.913Z"
+  },
+  "/qr-for-events": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:31.942Z"
+  },
+  "/qr-for-packaging": {
+    "fingerprint": "43595d7efeeab57865872193725779994cb625b672a22bdd821b0f3151db39ff",
+    "lastModified": "2026-11-01T15:48:31.965Z"
+  },
+  "/qr-kod-dlya-1c-bitrix": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.003Z"
+  },
+  "/qr-kod-email": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.032Z"
+  },
+  "/qr-kod-geolokacii": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.061Z"
+  },
+  "/qr-kod-s-tekstom": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.090Z"
+  },
+  "/qr-kod-sms": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.116Z"
+  },
+  "/qr-kod-telefona": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.142Z"
+  },
+  "/qr-lifetime": {
+    "fingerprint": "eb97042dec0db190b3840ef8d4a53d21e0663a8a7b021436a19bd45e5a17a258",
+    "lastModified": "2026-11-01T15:48:32.164Z"
+  },
+  "/qr-menu": {
+    "fingerprint": "f283842943fa1088e0ddaef6152780c48a6e15cfbb361055764dbffbe4d884e2",
+    "lastModified": "2026-11-01T15:48:32.186Z"
+  },
+  "/qr-na-pdf": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.211Z"
+  },
+  "/qr-po-ssylke": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.235Z"
+  },
+  "/qr-s-logotipom": {
+    "fingerprint": "b3dbdcb392011722a31df8273a3d92969460f019171a7e63417b10f434eeb5ef",
+    "lastModified": "2026-11-01T15:48:32.258Z"
+  },
+  "/qr-wifi": {
+    "fingerprint": "b361001c2ed21b88d374cef314c64d31fe957ac129b56810f0fedc5447dd141c",
+    "lastModified": "2026-11-01T15:48:32.283Z"
+  },
+  "/skaner-qr-koda": {
+    "fingerprint": "f9361dea1fbccb3fe510eada6162a63a3afac49c03b489b710f86c1b4ebfdb7d",
+    "lastModified": "2026-11-01T15:48:32.305Z"
+  },
+  "/terms-of-service": {
+    "fingerprint": "731801e539426426ade285ee0984b5bb54c16c39559bd49deba11e888d486936",
+    "lastModified": "2026-11-01T15:48:32.325Z"
+  }
+}
