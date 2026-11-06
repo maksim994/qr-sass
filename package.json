@@ -22,7 +22,10 @@
     "email:digest": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/email-digest.ts",
     "notifications:worker": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/notification-worker.ts",
     "analytics:deliver": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/metrika-worker.ts",
-    "abuse:worker": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/abuse-recheck-worker.ts"
+    "abuse:worker": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/abuse-recheck-worker.ts",
+    "media:backup": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/media-backup.ts",
+    "media:migrate-blog": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/migrate-blog-media.ts",
+    "media:import-s3": "node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/import-s3-media.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.995.0",

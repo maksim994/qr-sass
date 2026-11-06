@@ -1,9 +1,12 @@
 import { z } from "zod";
+import { mediaEnvSchema, mediaBackupEnvSchema } from "@/lib/media-config";
 
 const isProd = process.env.NODE_ENV === "production";
 const DEV_JWT_FALLBACK = "local-development-jwt-secret";
 
 const envSchema = z.object({
+  ...mediaEnvSchema.shape,
+  ...mediaBackupEnvSchema.shape,
   QRS_ARTICLES_PUBLISH_TOKEN: z.string().optional(),
   YANDEX_SAFE_BROWSING_API_KEY: z.string().optional(),
   GOOGLE_WEB_RISK_API_KEY: z.string().optional(),

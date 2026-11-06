@@ -3,6 +3,16 @@
 # При обновлении приложения тома НЕ удаляются — данные сохраняются.
 
 services:
+  media-init:
+    build:
+      context: .
+      target: media-tools
+    user: "0:0"
+    entrypoint: ["node", "scripts/init-media.mjs"]
+    volumes:
+      - ${MEDIA_HOST_PATH:-/data/media}:/data/media
+    restart: "no"
+
   init-db:
     build:
       context: .
@@ -30,14 +40,16 @@ services:
       - YANDEX_CLIENT_ID=${YANDEX_CLIENT_ID:-}
       - YANDEX_CLIENT_SECRET=${YANDEX_CLIENT_SECRET:-}
       - YANDEX_REDIRECT_URI=${YANDEX_REDIRECT_URI:-}
-      - S3_ENDPOINT=${S3_ENDPOINT}
-      - S3_REGION=${S3_REGION}
-      - S3_BUCKET=${S3_BUCKET}
-      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
-      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
-      - S3_PUBLIC_URL=${S3_PUBLIC_URL}
+      - S3_ENDPOINT=${S3_ENDPOINT:-}
+      - S3_REGION=${S3_REGION:-ru1}
+      - S3_BUCKET=${S3_BUCKET:-}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}
+      - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
       - S3_PUBLIC_OMIT_BUCKET=${S3_PUBLIC_OMIT_BUCKET:-true}
       - S3_PREFIX=${S3_PREFIX:-qr}
+      - MEDIA_STORAGE=${MEDIA_STORAGE:-local}
+      - MEDIA_ROOT=/data/media
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
       - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID:-}
@@ -80,7 +92,11 @@ services:
       - ABUSE_REPORTS_PER_IP_PER_HOUR=${ABUSE_REPORTS_PER_IP_PER_HOUR:-5}
       - REGISTER_PER_IP_PER_DAY=${REGISTER_PER_IP_PER_DAY:-10}
 
+    volumes:
+      - ${MEDIA_HOST_PATH:-/data/media}:/data/media
     depends_on:
+      media-init:
+        condition: service_completed_successfully
       init-db:
         condition: service_completed_successfully
       postgres:
@@ -100,6 +116,60 @@ services:
       retries: 5
       start_period: 40s
     restart: unless-stopped
+
+  media-backup:
+    build:
+      context: .
+      target: media-tools
+    entrypoint: ["node", "--experimental-strip-types", "--import", "./scripts/register-src-alias.mjs", "scripts/media-backup.ts", "--loop"]
+    environment:
+      - MEDIA_ROOT=/data/media
+      - MEDIA_BACKUP_S3_ENDPOINT=${MEDIA_BACKUP_S3_ENDPOINT:-}
+      - MEDIA_BACKUP_S3_BUCKET=${MEDIA_BACKUP_S3_BUCKET:-}
+      - MEDIA_BACKUP_S3_ACCESS_KEY=${MEDIA_BACKUP_S3_ACCESS_KEY:-}
+      - MEDIA_BACKUP_S3_SECRET_KEY=${MEDIA_BACKUP_S3_SECRET_KEY:-}
+      - MEDIA_BACKUP_S3_REGION=${MEDIA_BACKUP_S3_REGION:-us-east-1}
+      - S3_ENDPOINT=${S3_ENDPOINT:-}
+    volumes:
+      - ${MEDIA_HOST_PATH:-/data/media}:/data/media:ro
+    depends_on:
+      media-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "scripts/media-backup-health.mjs"]
+      interval: 5m
+      timeout: 5s
+      retries: 2
+      start_period: 30m
+    restart: unless-stopped
+
+  media-tools:
+    profiles: ["tools"]
+    build:
+      context: .
+      target: media-tools
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/qr_saas?schema=public
+      - APP_URL=${APP_URL}
+      - MEDIA_ROOT=/data/media
+      - S3_ENDPOINT=${S3_ENDPOINT:-}
+      - S3_REGION=${S3_REGION:-ru1}
+      - S3_BUCKET=${S3_BUCKET:-}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID:-}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY:-}
+      - S3_PUBLIC_URL=${S3_PUBLIC_URL:-}
+      - S3_PUBLIC_OMIT_BUCKET=${S3_PUBLIC_OMIT_BUCKET:-true}
+      - S3_PREFIX=${S3_PREFIX:-qr}
+    volumes:
+      - ${MEDIA_HOST_PATH:-/data/media}:/data/media
+      - ${MEDIA_COPIES_PATH:-./media-copies}:/copies:ro
+    depends_on:
+      media-init:
+        condition: service_completed_successfully
+      init-db:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
 
   notification-worker:
     build:

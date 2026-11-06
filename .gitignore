@@ -19,6 +19,9 @@
 
 # production
 /build
+/media-copies/
+/media-reports/
+/data/media/
 
 # misc
 .DS_Store
