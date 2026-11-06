@@ -22,6 +22,18 @@ ENV REDIS_URL="redis://localhost:6379"
 RUN npx prisma generate
 RUN npm run build
 
+# Offline migration/backup tools need raw imports, including Prisma, JSDOM and AWS.
+FROM deps AS media-tools
+WORKDIR /app
+COPY prisma ./prisma
+RUN npx prisma generate
+COPY src ./src
+COPY scripts ./scripts
+ENV NODE_ENV=production
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+USER nextjs
+CMD ["node", "--experimental-strip-types", "--import", "./scripts/register-src-alias.mjs", "scripts/media-backup.ts"]
+
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production

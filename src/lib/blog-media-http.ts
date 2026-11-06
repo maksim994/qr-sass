@@ -4,7 +4,7 @@ export type BlogMediaObject = { body?: Buffer; contentType: string; length: numb
 type Loader = (key: string, head: boolean) => Promise<BlogMediaObject | null>;
 
 /** Bounded process cache avoids S3 reads for hot images; browser/proxy caches use immutable URLs. */
-export function createBlogMediaHandler(load: Loader, maxBytes = 64 * 1024 * 1024, maxEntries = 128) {
+export function createBlogMediaHandler(load: Loader, maxBytes = 64 * 1024 * 1024, maxEntries = 128, keyForParts: (parts: readonly string[]) => string | null = blogMediaKey) {
   const cache = new Map<string, BlogMediaObject>();
   const pending = new Map<string, Promise<BlogMediaObject | null>>();
   let bytes = 0;
@@ -33,7 +33,7 @@ export function createBlogMediaHandler(load: Loader, maxBytes = 64 * 1024 * 1024
     return work;
   }
   async function handle(req: Request, parts: readonly string[]) {
-    const key = blogMediaKey(parts);
+    const key = keyForParts(parts);
     if (!key) return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
     try {
       const file = await object(key, req.method === "HEAD");

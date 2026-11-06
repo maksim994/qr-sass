@@ -28,6 +28,40 @@ jobs:
           APP_URL: https://qr-s.ru
           NEXT_TELEMETRY_DISABLED: '1'
 
+  media-migration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local-media-fixture
+          POSTGRES_DB: qr_media_test
+        ports: ['55447:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:local-media-fixture@127.0.0.1:55447/qr_media_test
+      MEDIA_MIGRATION_ISOLATED_TEST: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - run: node --experimental-strip-types --import ./scripts/register-src-alias.mjs scripts/verify-local-media.mjs
+      - run: node scripts/verify-media-backup.mjs
+      - name: Build offline media tools and check disabled backup
+        run: |
+          docker build --target media-tools -t qr-media-tools:test .
+          docker run --rm qr-media-tools:test
+
   abuse-http:
     runs-on: ubuntu-latest
     services:
